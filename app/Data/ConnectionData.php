@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use Illuminate\Support\Str;
+
 final readonly class ConnectionData
 {
     public function __construct(
@@ -13,6 +15,6 @@ final readonly class ConnectionData
 
     public function connectionName(): string
     {
-        return uniqid('dyn_', true) . $this->name;
+        return 'dyn_' . Str::random() . '_' . $this->name;
     }
 }
