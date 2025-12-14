@@ -15,16 +15,15 @@ use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class DisableForeignKeyConstraintsOnSchema implements ShouldQueue, ShouldBeEncrypted
+class DisableForeignKeyConstraintsOnSchema implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, Queueable, InteractsWithQueue;
+    use Batchable, InteractsWithQueue, Queueable;
 
     public int $tries = 2;
 
     public function __construct(
         public readonly ConnectionData $connectionData,
-    ) {
-    }
+    ) {}
 
     public function handle(DatabaseManager $databaseManager): void
     {
@@ -46,6 +45,7 @@ class DisableForeignKeyConstraintsOnSchema implements ShouldQueue, ShouldBeEncry
 
     /**
      * Get the middleware the job should pass through.
+     *
      * @return list<class-string>
      */
     public function middleware(): array

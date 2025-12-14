@@ -16,11 +16,12 @@ use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use stdClass;
 use Throwable;
 
-class TransferRecordsForOneTable implements ShouldQueue, ShouldBeEncrypted
+class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, Queueable, InteractsWithQueue;
+    use Batchable, InteractsWithQueue, Queueable;
 
     public int $tries = 2;
 
@@ -29,8 +30,7 @@ class TransferRecordsForOneTable implements ShouldQueue, ShouldBeEncrypted
         public readonly ConnectionData $targetConnectionData,
         public readonly string $tableName,
         public readonly int $chunkSize,
-    ) {
-    }
+    ) {}
 
     public function handle(DatabaseManager $databaseManager): void
     {
@@ -44,6 +44,7 @@ class TransferRecordsForOneTable implements ShouldQueue, ShouldBeEncrypted
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
             $this->fail($exception);
+
             return;
         }
 
@@ -57,11 +58,12 @@ class TransferRecordsForOneTable implements ShouldQueue, ShouldBeEncrypted
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->targetConnectionData->name}: {$exception->getMessage()}");
             $this->fail($exception);
+
             return;
         }
 
-        if (!$sourceConnection->getSchemaBuilder()->hasTable($this->tableName)
-            || !$targetConnection->getSchemaBuilder()->hasTable($this->tableName)
+        if (! $sourceConnection->getSchemaBuilder()->hasTable($this->tableName)
+            || ! $targetConnection->getSchemaBuilder()->hasTable($this->tableName)
         ) {
             $exception = new RuntimeException("Table {$this->tableName} does not exist in source or target database.");
             $this->fail($exception);
@@ -77,34 +79,34 @@ class TransferRecordsForOneTable implements ShouldQueue, ShouldBeEncrypted
         }
 
         $table->chunk(
-                $this->chunkSize,
-                /**
-                 * @param Collection<int, \stdClass> $records
-                 * @param int $page
-                 */
-                function (Collection $records, int $page) use ($targetConnection) {
-                    Log::info("Transferring {$records->count()} records from {$this->tableName} table.");
-                    $targetConnection->table($this->tableName)
-                        ->insert(
-                            $records->map(function (\stdClass $record, int $index) {
-                                $record = get_object_vars($record);
+            $this->chunkSize,
+            /**
+             * @param  Collection<int, stdClass>  $records
+             */
+            function (Collection $records, int $page) use ($targetConnection): void {
+                Log::info("Transferring {$records->count()} records from {$this->tableName} table.");
+                $targetConnection->table($this->tableName)
+                    ->insert(
+                        $records->map(function (stdClass $record, int $index): array {
+                            $record = get_object_vars($record);
 
-                                // mutation
-                                if ($this->tableName === 'users') {
-                                    $record['name'] = value(fn() => fake()->name);
-                                    $record['email'] = value(fn() => fake()->email);
-                                    $record['password'] = value(fn() => '********');
-                                }
+                            // mutation
+                            if ($this->tableName === 'users') {
+                                $record['name'] = value(fn () => fake()->name());
+                                $record['email'] = value(fn () => fake()->email());
+                                $record['password'] = value(fn (): string => '********');
+                            }
 
-                                return $record;
-                            })->values()->toArray()
-                        );
-                }
-            );
+                            return $record;
+                        })->values()->all()
+                    );
+            }
+        );
     }
 
     /**
      * Get the middleware the job should pass through.
+     *
      * @return list<class-string>
      */
     public function middleware(): array
@@ -113,7 +115,6 @@ class TransferRecordsForOneTable implements ShouldQueue, ShouldBeEncrypted
     }
 
     /**
-     * @param \Illuminate\Database\Connection $sourceConnection
      * @return array|mixed|null
      */
     private function getOrderColumns(Connection $sourceConnection): mixed

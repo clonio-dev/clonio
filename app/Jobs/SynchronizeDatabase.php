@@ -17,14 +17,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class SynchronizeDatabase implements ShouldQueue, ShouldBeEncrypted
+class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, Queueable, InteractsWithQueue;
+    use Batchable, InteractsWithQueue, Queueable;
 
     public int $tries = 2;
 
     /**
-     * @param \Illuminate\Support\Collection<ConnectionData> $targetConnectionsData
+     * @param  Collection<ConnectionData>  $targetConnectionsData
      */
     public function __construct(
         public readonly SynchronizationOptionsData $options,
@@ -52,13 +52,14 @@ class SynchronizeDatabase implements ShouldQueue, ShouldBeEncrypted
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
             $this->fail($exception);
+
             return;
         }
 
         // try to connect to target connections
         Log::debug('Try to connect to target connections');
         $this->targetConnectionsData->each(
-            function (ConnectionData $targetConnectionData) use ($databaseManager) {
+            function (ConnectionData $targetConnectionData) use ($databaseManager): void {
                 try {
                     $databaseManager->connectUsing(
                         name: $targetConnectionData->connectionName(),
@@ -68,6 +69,7 @@ class SynchronizeDatabase implements ShouldQueue, ShouldBeEncrypted
                 } catch (Throwable $exception) {
                     Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
                     $this->fail($exception);
+
                     return;
                 }
 
@@ -92,7 +94,7 @@ class SynchronizeDatabase implements ShouldQueue, ShouldBeEncrypted
                 ]);
 
                 if ($this->options->disableForeignKeyConstraints) {
-//                    $this->batch()->add(new EnableForeignKeyConstraintsOnSchema($targetConnectionData));
+                    //                    $this->batch()->add(new EnableForeignKeyConstraintsOnSchema($targetConnectionData));
                 }
             }
         );
@@ -100,6 +102,7 @@ class SynchronizeDatabase implements ShouldQueue, ShouldBeEncrypted
 
     /**
      * Get the middleware the job should pass through.
+     *
      * @return list<class-string>
      */
     public function middleware(): array

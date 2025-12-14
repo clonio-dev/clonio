@@ -20,9 +20,9 @@ use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Throwable;
 
-class CloneSchemaAndPrepareForData implements ShouldQueue, ShouldBeEncrypted
+class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, Queueable, InteractsWithQueue;
+    use Batchable, InteractsWithQueue, Queueable;
 
     public int $tries = 2;
 
@@ -32,8 +32,7 @@ class CloneSchemaAndPrepareForData implements ShouldQueue, ShouldBeEncrypted
         public readonly SynchronizeTableSchemaEnum $synchronizeTableSchemaEnum,
         public readonly bool $keepUnknownTablesOnTarget,
         public readonly ?string $migrationTableName,
-    ) {
-    }
+    ) {}
 
     public function handle(DatabaseManager $databaseManager): void
     {
@@ -49,6 +48,7 @@ class CloneSchemaAndPrepareForData implements ShouldQueue, ShouldBeEncrypted
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
             $this->fail($exception);
+
             return;
         }
 
@@ -64,6 +64,7 @@ class CloneSchemaAndPrepareForData implements ShouldQueue, ShouldBeEncrypted
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->targetConnectionData->name}: {$exception->getMessage()}");
             $this->fail($exception);
+
             return;
         }
 
@@ -79,6 +80,7 @@ class CloneSchemaAndPrepareForData implements ShouldQueue, ShouldBeEncrypted
 
     /**
      * Get the middleware the job should pass through.
+     *
      * @return list<class-string>
      */
     public function middleware(): array
@@ -133,7 +135,7 @@ class CloneSchemaAndPrepareForData implements ShouldQueue, ShouldBeEncrypted
         $tmpfile = tempnam(sys_get_temp_dir(), 'schema-');
         $sourceState->dump($sourceConnection, $tmpfile);
 
-        if (!is_readable($tmpfile)) {
+        if (! is_readable($tmpfile)) {
             @unlink($tmpfile);
             throw new RuntimeException("Failed to create temporary file {$tmpfile}.");
         }

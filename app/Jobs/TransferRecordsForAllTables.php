@@ -16,9 +16,9 @@ use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class TransferRecordsForAllTables implements ShouldQueue, ShouldBeEncrypted
+class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, Queueable, InteractsWithQueue;
+    use Batchable, InteractsWithQueue, Queueable;
 
     public int $tries = 2;
 
@@ -27,8 +27,7 @@ class TransferRecordsForAllTables implements ShouldQueue, ShouldBeEncrypted
         public readonly ConnectionData $targetConnectionData,
         public readonly int $chunkSize,
         public ?string $migrationTableName,
-    ) {
-    }
+    ) {}
 
     public function handle(DatabaseManager $databaseManager): void
     {
@@ -42,6 +41,7 @@ class TransferRecordsForAllTables implements ShouldQueue, ShouldBeEncrypted
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
             $this->fail($exception);
+
             return;
         }
 
@@ -49,6 +49,7 @@ class TransferRecordsForAllTables implements ShouldQueue, ShouldBeEncrypted
         foreach ($tableNames as $tableName) {
             if ($this->migrationTableName !== null && $tableName === $this->migrationTableName) {
                 Log::info("Migration table {$tableName} will not be transferred again. Skipping.");
+
                 continue;
             }
 
@@ -70,6 +71,7 @@ class TransferRecordsForAllTables implements ShouldQueue, ShouldBeEncrypted
 
     /**
      * Get the middleware the job should pass through.
+     *
      * @return list<class-string>
      */
     public function middleware(): array
