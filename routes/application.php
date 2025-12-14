@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('queue', function () {
+    Route::get('queue', function (): Illuminate\Routing\Redirector|Illuminate\Http\RedirectResponse {
 
         $synchronizationConfigData = new SynchronizationOptionsData(
             migrationTableName: 'migrations',
@@ -36,19 +36,16 @@ Route::middleware('auth')->group(function (): void {
                 collect([$connectionDataTarget])),
         ])
             ->name('Synchronize database ' . $connectionDataSource->name)
-            ->before(function (Batch $batch) {
+            ->before(function (Batch $batch): void {
                 // store the batch status or notify
             })
-            ->then(function (Batch $batch) {
+            ->then(function (Batch $batch): void {
                 // store the batch status or notify
-//                $batch;
             })
             ->dispatch();
 
-        return redirect()->route('dashboard', ['batch' => $batch->id]);
+        return to_route('dashboard', ['batch' => $batch->id]);
     });
 
-    Route::get('/batch/{batchId}', function (string $batchId) {
-        return Bus::findBatch($batchId);
-    });
+    Route::get('/batch/{batchId}', fn (string $batchId) => Bus::findBatch($batchId));
 });
