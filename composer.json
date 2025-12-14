@@ -1,15 +1,15 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/vue-starter-kit",
+    "name": "clonio-dev/clonio",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "The clonio application",
     "keywords": [
         "laravel",
         "framework"
     ],
-    "license": "MIT",
+    "license": "proprietary",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "inertiajs/inertia-laravel": "^2.0.14",
         "laravel/fortify": "^1.32.1",
         "laravel/framework": "^12.42",
@@ -88,7 +88,8 @@
         "lint": [
             "rector",
             "pint --parallel",
-            "npm run lint"
+            "npm run lint",
+            "npm run format"
         ],
         "test:type-coverage": "pest --type-coverage --min=100",
         "test:lint": [
