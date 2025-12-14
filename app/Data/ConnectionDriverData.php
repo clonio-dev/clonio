@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-interface ConnectionDriverData {
+interface ConnectionDriverData
+{
     /**
      * @return array{driver: string, database: string, ...<string, mixed>}
      */

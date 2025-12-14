@@ -12,6 +12,5 @@ final readonly class SynchronizationOptionsData
         public bool $keepUnknownTablesOnTarget = true,
         public ?string $migrationTableName = null,
         public int $chunkSize = 1000,
-    ) {
-    }
+    ) {}
 }

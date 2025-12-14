@@ -9,8 +9,7 @@ final readonly class ConnectionData
     public function __construct(
         public string $name,
         public ConnectionDriverData $driver,
-    ) {
-    }
+    ) {}
 
     public function connectionName(): string
     {
