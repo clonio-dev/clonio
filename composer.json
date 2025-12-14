@@ -94,7 +94,7 @@
         "test:lint": [
             "pint --parallel --test",
             "rector --dry-run",
-            "npm run test:lint"
+            "npm run format:check"
         ],
         "test:unit": "pest --parallel --coverage --exactly=100.0",
         "test:types": "phpstan",
