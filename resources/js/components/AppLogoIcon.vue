@@ -21,15 +21,18 @@ defineProps<Props>();
     >
         <defs>
             <linearGradient id="a" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0" stop-color="#6EE7B7"/>
-                <stop offset="1" stop-color="#3B82F6"/>
+                <stop offset="0" stop-color="#6EE7B7" />
+                <stop offset="1" stop-color="#3B82F6" />
             </linearGradient>
         </defs>
 
         <g transform="matrix(.43 0 0 .43 -38.1 -60.17)">
-            <path fill="url(#a)" d="M160 250a96 96 0 1 1 192 0v170q0 70-96 20t-96-140Z"/>
-            <ellipse cx="215" cy="260" fill="currentColor" rx="18" ry="28"/>
-            <ellipse cx="297" cy="260" fill="currentColor" rx="18" ry="28"/>
+            <path
+                fill="url(#a)"
+                d="M160 250a96 96 0 1 1 192 0v170q0 70-96 20t-96-140Z"
+            />
+            <ellipse cx="215" cy="260" fill="currentColor" rx="18" ry="28" />
+            <ellipse cx="297" cy="260" fill="currentColor" rx="18" ry="28" />
         </g>
     </svg>
 </template>
