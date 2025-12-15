@@ -6,11 +6,11 @@ namespace App\Jobs;
 
 use App\Data\ConnectionData;
 use App\Data\SynchronizationOptionsData;
+use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\DatabaseManager;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Collection;
@@ -35,20 +35,16 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
     }
 
     public function handle(
-        DatabaseManager $databaseManager,
+        DatabaseInformationRetrievalService $dbInformationRetrievalService,
     ): void {
         Log::debug('Synchronizing database');
 
         // try to connect to source connection
         Log::debug('Try to connect to source connection');
         try {
-            $sourceConnection = $databaseManager->connectUsing(
-                name: $this->sourceConnectionData->connectionName(),
-                config: $this->sourceConnectionData->driver->toArray(),
-                force: true,
-            );
+            $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
 
-            $sourceSchema = $sourceConnection->getSchemaBuilder();
+            $sourceConnection->getSchemaBuilder();
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
             $this->fail($exception);
@@ -59,15 +55,11 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
         // try to connect to target connections
         Log::debug('Try to connect to target connections');
         $this->targetConnectionsData->each(
-            function (ConnectionData $targetConnectionData) use ($databaseManager): void {
+            function (ConnectionData $targetConnectionData) use ($dbInformationRetrievalService): void {
                 try {
-                    $databaseManager->connectUsing(
-                        name: $targetConnectionData->connectionName(),
-                        config: $targetConnectionData->driver->toArray(),
-                        force: true,
-                    );
+                    $dbInformationRetrievalService->getConnection($targetConnectionData);
                 } catch (Throwable $exception) {
-                    Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
+                    Log::error("Failed to connect to database {$targetConnectionData->name}: {$exception->getMessage()}");
                     $this->fail($exception);
 
                     return;

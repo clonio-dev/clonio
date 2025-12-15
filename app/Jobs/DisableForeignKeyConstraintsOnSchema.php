@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Data\ConnectionData;
+use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\DatabaseManager;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Facades\Log;
@@ -25,20 +25,17 @@ class DisableForeignKeyConstraintsOnSchema implements ShouldBeEncrypted, ShouldQ
         public readonly ConnectionData $connectionData,
     ) {}
 
-    public function handle(DatabaseManager $databaseManager): void
-    {
+    public function handle(
+        DatabaseInformationRetrievalService $dbInformationRetrievalService,
+    ): void {
         try {
-            $connection = $databaseManager->connectUsing(
-                name: $this->connectionData->connectionName(),
-                config: $this->connectionData->driver->toArray(),
-                force: true,
-            );
+            Log::debug('Disabling foreign key constraints on target schema ' . $this->connectionData->name);
 
-            Log::debug('Disabling foreign key constraints on target schema ' . $connection->getName());
-
-            $connection->getSchemaBuilder()->disableForeignKeyConstraints();
+            $dbInformationRetrievalService
+                ->getSchema($this->connectionData)
+                ->disableForeignKeyConstraints();
         } catch (Throwable $exception) {
-            Log::error('Failed to disable foreign key constraints on target schema ' . $connection->getName());
+            Log::error('Failed to disable foreign key constraints on target schema ' . $this->connectionData->name);
             $this->fail($exception);
         }
     }

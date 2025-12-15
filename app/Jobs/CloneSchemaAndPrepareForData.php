@@ -6,12 +6,12 @@ namespace App\Jobs;
 
 use App\Data\ConnectionData;
 use App\Data\SynchronizeTableSchemaEnum;
+use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Connection;
-use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Database\Schema\SchemaState;
 use Illuminate\Queue\InteractsWithQueue;
@@ -34,17 +34,14 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
         public readonly ?string $migrationTableName,
     ) {}
 
-    public function handle(DatabaseManager $databaseManager): void
-    {
+    public function handle(
+        DatabaseInformationRetrievalService $dbInformationRetrievalService,
+    ): void {
         try {
             /** @var Connection $sourceConnection */
-            $sourceConnection = $databaseManager->connectUsing(
-                name: $this->sourceConnectionData->connectionName(),
-                config: $this->sourceConnectionData->driver->toArray(),
-                force: true,
-            );
+            $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
 
-            $sourceSchema = $sourceConnection->getSchemaBuilder();
+            $sourceSchema = $dbInformationRetrievalService->getSchema($this->sourceConnectionData);
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
             $this->fail($exception);
@@ -54,13 +51,9 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
 
         try {
             /** @var Connection $targetConnection */
-            $targetConnection = $databaseManager->connectUsing(
-                name: $this->targetConnectionData->connectionName(),
-                config: $this->targetConnectionData->driver->toArray(),
-                force: true,
-            );
+            $targetConnection = $dbInformationRetrievalService->getConnection($this->targetConnectionData);
 
-            $targetSchema = $targetConnection->getSchemaBuilder();
+            $targetSchema = $dbInformationRetrievalService->getSchema($this->targetConnectionData);
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->targetConnectionData->name}: {$exception->getMessage()}");
             $this->fail($exception);

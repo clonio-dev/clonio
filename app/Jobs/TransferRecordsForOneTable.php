@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Data\ConnectionData;
+use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Connection;
-use Illuminate\Database\DatabaseManager;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Collection;
@@ -32,17 +32,16 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         public readonly int $chunkSize,
     ) {}
 
-    public function handle(DatabaseManager $databaseManager): void
-    {
+    public function handle(
+        DatabaseInformationRetrievalService $dbInformationRetrievalService,
+    ): void {
         try {
-            /** @var Connection $sourceConnection */
-            $sourceConnection = $databaseManager->connectUsing(
-                name: $this->sourceConnectionData->connectionName(),
-                config: $this->sourceConnectionData->driver->toArray(),
-                force: true,
-            );
+            $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
+
+            $sourceTable = $dbInformationRetrievalService
+                ->withConnectionForTable($this->sourceConnectionData, $this->tableName);
         } catch (Throwable $exception) {
-            Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
+            Log::error($exception->getMessage());
             $this->fail($exception);
 
             return;
@@ -50,11 +49,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
         try {
             /** @var Connection $targetConnection */
-            $targetConnection = $databaseManager->connectUsing(
-                name: $this->targetConnectionData->connectionName(),
-                config: $this->targetConnectionData->driver->toArray(),
-                force: true,
-            );
+            $targetConnection = $dbInformationRetrievalService->getConnection($this->targetConnectionData);
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->targetConnectionData->name}: {$exception->getMessage()}");
             $this->fail($exception);
@@ -70,15 +65,15 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
             throw $exception;
         }
 
-        $table = $sourceConnection->table($this->tableName);
+        $query = $sourceTable->query();
 
-        $orderColumns = $this->getOrderColumns($sourceConnection);
+        $orderColumns = $sourceTable->orderColumns();
         Log::debug("Order columns for table {$this->tableName}: " . implode(', ', $orderColumns));
         foreach ($orderColumns as $column) {
-            $table->orderBy($column);
+            $query->orderBy($column);
         }
 
-        $table->chunk(
+        $query->chunk(
             $this->chunkSize,
             /**
              * @param  Collection<int, stdClass>  $records
@@ -112,19 +107,5 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
     public function middleware(): array
     {
         return [new SkipIfBatchCancelled];
-    }
-
-    /**
-     * @return array|mixed|null
-     */
-    private function getOrderColumns(Connection $sourceConnection): mixed
-    {
-        $indexes = $sourceConnection->getSchemaBuilder()->getIndexes($this->tableName);
-        $orderColumns = collect($indexes)->firstWhere('primary', true)['columns'] ?? [];
-        if (count($orderColumns) > 0) {
-            return $orderColumns;
-        }
-
-        return [$sourceConnection->getSchemaBuilder()->getColumnListing($this->tableName)[0]];
     }
 }
