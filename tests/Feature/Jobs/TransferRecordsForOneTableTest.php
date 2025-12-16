@@ -8,7 +8,6 @@ use App\Jobs\TransferRecordsForOneTable;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 it('returns correct middleware', function (): void {
     $job = new TransferRecordsForOneTable(
