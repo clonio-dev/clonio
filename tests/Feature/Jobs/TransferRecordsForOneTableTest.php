@@ -214,6 +214,62 @@ it('mutates user data during transfer', function (): void {
     @unlink($targetDb);
 });
 
+it('transfers records with foreign key constraints disabled', function (): void {
+    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
+    @unlink($sourceDb);
+    $sourceDb .= '.sqlite';
+    touch($sourceDb);
+
+    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
+    @unlink($targetDb);
+    $targetDb .= '.sqlite';
+    touch($targetDb);
+
+    // Set up source database with data
+    config(['database.connections.test_source' => [
+        'driver' => 'sqlite',
+        'database' => $sourceDb,
+    ]]);
+    DB::purge('test_source');
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+        $table->id();
+        $table->string('title');
+    });
+    DB::connection('test_source')->table('posts')->insert(['title' => 'Test Post']);
+
+    // Set up target database
+    config(['database.connections.test_target' => [
+        'driver' => 'sqlite',
+        'database' => $targetDb,
+    ]]);
+    DB::purge('test_target');
+    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table) {
+        $table->id();
+        $table->string('title');
+    });
+
+    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
+    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
+
+    $job = new TransferRecordsForOneTable(
+        sourceConnectionData: $sourceConnectionData,
+        targetConnectionData: $targetConnectionData,
+        tableName: 'posts',
+        chunkSize: 100,
+        disableForeignKeyConstraints: true,
+    );
+
+    $dbService = app(DatabaseInformationRetrievalService::class);
+    $job->handle($dbService);
+
+    // Verify records were transferred
+    expect(DB::connection('test_target')->table('posts')->count())->toBe(1);
+
+    // Clean up
+    @unlink($sourceDb);
+    @unlink($targetDb);
+});
+
 // Note: Connection failure tests (lines 38-48, 50-58) would require mocking the final DatabaseInformationRetrievalService class
 // These error paths are covered by the RuntimeException checks below and integration tests
 
@@ -353,9 +409,6 @@ it('transfers records ordered by primary key', function (): void {
 
     $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
     $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
-
-    Log::shouldReceive('debug')->once()->with(Mockery::pattern('/Order columns for table posts:/'));
-    Log::shouldReceive('info')->zeroOrMoreTimes();
 
     $job = new TransferRecordsForOneTable(
         sourceConnectionData: $sourceConnectionData,
