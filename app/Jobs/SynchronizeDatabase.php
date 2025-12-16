@@ -80,9 +80,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
                     new TransferRecordsForAllTables(
                         sourceConnectionData: $this->sourceConnectionData,
                         targetConnectionData: $targetConnectionData,
-                        chunkSize: $this->options->chunkSize,
-                        migrationTableName: $this->options->migrationTableName,
-                        disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
+                        options: $this->options,
                     ),
                 ]);
             }

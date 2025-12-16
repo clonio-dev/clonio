@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Data\ConnectionData;
+use App\Data\SynchronizationOptionsData;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -24,9 +25,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
         public readonly ConnectionData $targetConnectionData,
-        public readonly int $chunkSize,
-        public ?string $migrationTableName,
-        public bool $disableForeignKeyConstraints = false,
+        public readonly SynchronizationOptionsData $options,
     ) {}
 
     public function handle(
@@ -42,7 +41,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
         }
 
         foreach ($tableNames as $tableName) {
-            if ($this->migrationTableName !== null && $tableName === $this->migrationTableName) {
+            if ($this->options->migrationTableName !== null && $tableName === $this->options->migrationTableName) {
                 Log::info("Migration table {$tableName} will not be transferred again. Skipping.");
 
                 continue;
@@ -61,8 +60,9 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
                         sourceConnectionData: $this->sourceConnectionData,
                         targetConnectionData: $this->targetConnectionData,
                         tableName: $tableName,
-                        chunkSize: $this->chunkSize,
-                        disableForeignKeyConstraints: $this->disableForeignKeyConstraints,
+                        chunkSize: $this->options->chunkSize,
+                        disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
+                        tableAnonymizationOptions: $this->options->getAnonymizationOptionsForTable($tableName),
                     )
                 );
             }

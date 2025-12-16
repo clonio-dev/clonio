@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Data\ConnectionData;
+use App\Data\TableAnonymizationOptionsData;
+use App\Services\AnonymizationService;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -31,10 +33,12 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         public readonly string $tableName,
         public readonly int $chunkSize,
         public readonly bool $disableForeignKeyConstraints = false,
+        public readonly ?TableAnonymizationOptionsData $tableAnonymizationOptions = null,
     ) {}
 
     public function handle(
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
+        AnonymizationService $anonymizationService,
     ): void {
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
@@ -85,22 +89,15 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
             /**
              * @param  Collection<int, stdClass>  $records
              */
-            function (Collection $records, int $page) use ($targetConnection): void {
+            function (Collection $records, int $page) use ($targetConnection, $anonymizationService): void {
                 Log::info("Transferring {$records->count()} records from {$this->tableName} table.");
                 $targetConnection->table($this->tableName)
                     ->insert(
-                        $records->map(function (object $record, int $index): array {
+                        $records->map(function (object $record, int $index) use ($anonymizationService): array {
                             assert($record instanceof stdClass);
                             $record = get_object_vars($record);
 
-                            // mutation
-                            if ($this->tableName === 'users') {
-                                $record['name'] = value(fn () => fake()->name());
-                                $record['email'] = value(fn () => fake()->email());
-                                $record['password'] = value(fn (): string => '********');
-                            }
-
-                            return $record;
+                            return $anonymizationService->anonymizeRecord($record, $this->tableAnonymizationOptions);
                         })->values()->all()
                     );
             }
