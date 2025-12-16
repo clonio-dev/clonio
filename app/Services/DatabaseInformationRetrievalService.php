@@ -9,8 +9,6 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\Collection;
-use RuntimeException;
-use Throwable;
 
 final readonly class DatabaseInformationRetrievalService
 {
