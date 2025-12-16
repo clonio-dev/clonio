@@ -70,7 +70,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
     /**
      * Get the middleware the job should pass through.
      *
-     * @return list<class-string>
+     * @return list<object>
      */
     public function middleware(): array
     {

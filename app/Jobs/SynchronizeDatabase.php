@@ -24,7 +24,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
     public int $tries = 2;
 
     /**
-     * @param  Collection<ConnectionData>  $targetConnectionsData
+     * @param  Collection<int, ConnectionData>  $targetConnectionsData
      */
     public function __construct(
         public readonly SynchronizationOptionsData $options,
@@ -89,7 +89,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
     /**
      * Get the middleware the job should pass through.
      *
-     * @return list<class-string>
+     * @return list<object>
      */
     public function middleware(): array
     {
