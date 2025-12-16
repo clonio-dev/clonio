@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('queue', function (): Illuminate\Routing\Redirector|Illuminate\Http\RedirectResponse {
+    Route::get('queue', function (): Illuminate\Http\RedirectResponse {
 
         $synchronizationConfigData = new SynchronizationOptionsData(
             migrationTableName: 'migrations',
