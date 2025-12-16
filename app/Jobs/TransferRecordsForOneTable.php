@@ -58,6 +58,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
             return;
         }
 
+        assert($sourceConnection instanceof Connection);
         if (! $sourceConnection->getSchemaBuilder()->hasTable($this->tableName)
             || ! $targetConnection->getSchemaBuilder()->hasTable($this->tableName)
         ) {
@@ -88,7 +89,8 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                 Log::info("Transferring {$records->count()} records from {$this->tableName} table.");
                 $targetConnection->table($this->tableName)
                     ->insert(
-                        $records->map(function (stdClass $record, int $index): array {
+                        $records->map(function (object $record, int $index): array {
+                            assert($record instanceof stdClass);
                             $record = get_object_vars($record);
 
                             // mutation

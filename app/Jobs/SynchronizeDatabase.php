@@ -44,6 +44,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
 
+            assert($sourceConnection instanceof \Illuminate\Database\Connection);
             $sourceConnection->getSchemaBuilder();
         } catch (Throwable $exception) {
             Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
@@ -65,7 +66,9 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
                     return;
                 }
 
-                $this->batch()->add([
+                $batch = $this->batch();
+                assert($batch !== null);
+                $batch->add([
                     new CloneSchemaAndPrepareForData(
                         sourceConnectionData: $this->sourceConnectionData,
                         targetConnectionData: $targetConnectionData,

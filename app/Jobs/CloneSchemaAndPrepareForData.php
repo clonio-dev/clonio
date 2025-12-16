@@ -85,7 +85,7 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
     /**
      * Get the middleware the job should pass through.
      *
-     * @return list<class-string>
+     * @return list<object>
      */
     public function middleware(): array
     {
@@ -131,6 +131,7 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
             return;
         }
 
+        assert(method_exists($sourceConnection, 'getSchemaState'));
         /** @var SchemaState $sourceState */
         $sourceState = $sourceConnection->getSchemaState();
         if ($this->migrationTableName !== null) {
@@ -145,7 +146,7 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
         }
 
         $schemaDump = file_get_contents($tmpfile);
-        if (mb_strlen($schemaDump) === 0) {
+        if ($schemaDump === false || mb_strlen($schemaDump) === 0) {
             @unlink($tmpfile);
             throw new RuntimeException("Temporary file {$tmpfile} is empty.");
         }
@@ -155,6 +156,7 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
             $targetSchema->dropIfExists($tableName);
         }
 
+        assert(method_exists($targetConnection, 'getSchemaState'));
         /** @var SchemaState $targetState */
         $targetState = $targetConnection->getSchemaState();
         $targetState->load($tmpfile);

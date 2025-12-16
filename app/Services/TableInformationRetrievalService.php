@@ -31,14 +31,20 @@ final readonly class TableInformationRetrievalService
      */
     public function orderColumns(): array
     {
+        assert($this->connection instanceof Connection);
+
         $allIndexes = $this->connection->getSchemaBuilder()->getIndexes($this->tableName);
-        $orderColumns = collect($allIndexes)
-            ->firstWhere('primary', true)['columns'] ?? [];
+        $primaryIndex = collect($allIndexes)->firstWhere('primary', true);
+
+        /** @var list<string> $orderColumns */
+        $orderColumns = is_array($primaryIndex) ? $primaryIndex['columns'] : [];
 
         if (count($orderColumns) > 0) {
             return $orderColumns;
         }
 
-        return [$this->connection->getSchemaBuilder()->getColumnListing($this->tableName)[0]];
+        $columns = $this->connection->getSchemaBuilder()->getColumnListing($this->tableName);
+
+        return [$columns[0]];
     }
 }

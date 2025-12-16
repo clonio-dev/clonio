@@ -54,7 +54,9 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
             Log::info("Transferring {$recordCount} records from {$tableName} table.");
 
             if ($recordCount > 0) {
-                $this->batch()->add(
+                $batch = $this->batch();
+                assert($batch !== null);
+                $batch->add(
                     new TransferRecordsForOneTable(
                         sourceConnectionData: $this->sourceConnectionData,
                         targetConnectionData: $this->targetConnectionData,

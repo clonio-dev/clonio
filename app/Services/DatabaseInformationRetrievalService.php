@@ -27,13 +27,18 @@ final readonly class DatabaseInformationRetrievalService
             $this->connections->put($connectionData->connectionName(), $this->establishConnection($connectionData));
         }
 
-        return $this->connections->get($connectionData->connectionName());
+        /** @var ConnectionInterface $connection */
+        $connection = $this->connections->get($connectionData->connectionName());
+
+        return $connection;
     }
 
     public function getSchema(ConnectionData $connectionData): Builder
     {
-        return $this->getConnection($connectionData)
-            ->getSchemaBuilder();
+        $connection = $this->getConnection($connectionData);
+        assert($connection instanceof \Illuminate\Database\Connection);
+
+        return $connection->getSchemaBuilder();
     }
 
     /**
