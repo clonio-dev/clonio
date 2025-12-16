@@ -39,8 +39,17 @@ Route::middleware('auth')->group(function (): void {
             ->before(function (Batch $batch): void {
                 // store the batch status or notify
             })
+            ->progress(function (Batch $batch): void {
+                // dispatch progress events
+            })
             ->then(function (Batch $batch): void {
                 // store the batch status or notify
+            })
+            ->catch(function (Batch $batch, Throwable $exception): void {
+                // store the failed state
+            })
+            ->finally(function (Batch $batch): void {
+                // cleanup, even on error
             })
             ->dispatch();
 
