@@ -43,7 +43,7 @@ it('synchronizes database with single target', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
 
@@ -69,23 +69,19 @@ it('synchronizes database with single target', function (): void {
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify CloneSchemaAndPrepareForData was queued
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, function ($job) use ($options) {
-        return $job->synchronizeTableSchemaEnum === $options->synchronizeTableSchema
-            && $job->keepUnknownTablesOnTarget === $options->keepUnknownTablesOnTarget
-            && $job->migrationTableName === $options->migrationTableName
-            && $job->disableForeignKeyConstraints === $options->disableForeignKeyConstraints;
-    });
+    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn ($job): bool => $job->synchronizeTableSchemaEnum === $options->synchronizeTableSchema
+        && $job->keepUnknownTablesOnTarget === $options->keepUnknownTablesOnTarget
+        && $job->migrationTableName === $options->migrationTableName
+        && $job->disableForeignKeyConstraints === $options->disableForeignKeyConstraints);
 
     // Verify TransferRecordsForAllTables was queued
-    Queue::assertPushed(TransferRecordsForAllTables::class, function ($job) use ($options) {
-        return $job->chunkSize === $options->chunkSize
-            && $job->migrationTableName === $options->migrationTableName
-            && $job->disableForeignKeyConstraints === $options->disableForeignKeyConstraints;
-    });
+    Queue::assertPushed(TransferRecordsForAllTables::class, fn ($job): bool => $job->chunkSize === $options->chunkSize
+        && $job->migrationTableName === $options->migrationTableName
+        && $job->disableForeignKeyConstraints === $options->disableForeignKeyConstraints);
 
     // Clean up
     @unlink($sourceDb);
@@ -103,7 +99,7 @@ it('synchronizes database with multiple targets', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
 
@@ -129,7 +125,7 @@ it('synchronizes database with multiple targets', function (): void {
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify jobs were queued for all 3 targets (2 jobs per target)
@@ -152,7 +148,7 @@ it('passes synchronization options to child jobs', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
     });
 
@@ -178,23 +174,19 @@ it('passes synchronization options to child jobs', function (): void {
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify all options were passed correctly to CloneSchemaAndPrepareForData
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, function ($job) {
-        return $job->synchronizeTableSchemaEnum === SynchronizeTableSchemaEnum::TRUNCATE
-            && $job->keepUnknownTablesOnTarget === true
-            && $job->migrationTableName === 'custom_migrations'
-            && $job->disableForeignKeyConstraints === false;
-    });
+    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn ($job): bool => $job->synchronizeTableSchemaEnum === SynchronizeTableSchemaEnum::TRUNCATE
+        && $job->keepUnknownTablesOnTarget === true
+        && $job->migrationTableName === 'custom_migrations'
+        && $job->disableForeignKeyConstraints === false);
 
     // Verify all options were passed correctly to TransferRecordsForAllTables
-    Queue::assertPushed(TransferRecordsForAllTables::class, function ($job) {
-        return $job->chunkSize === 250
-            && $job->migrationTableName === 'custom_migrations'
-            && $job->disableForeignKeyConstraints === false;
-    });
+    Queue::assertPushed(TransferRecordsForAllTables::class, fn ($job): bool => $job->chunkSize === 250
+        && $job->migrationTableName === 'custom_migrations'
+        && $job->disableForeignKeyConstraints === false);
 
     // Clean up
     @unlink($sourceDb);
@@ -212,7 +204,7 @@ it('uses default synchronization options when not specified', function (): void 
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
 
@@ -232,22 +224,18 @@ it('uses default synchronization options when not specified', function (): void 
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify default options
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, function ($job) {
-        return $job->synchronizeTableSchemaEnum === SynchronizeTableSchemaEnum::DROP_CREATE
-            && $job->keepUnknownTablesOnTarget === true
-            && $job->migrationTableName === null
-            && $job->disableForeignKeyConstraints === true;
-    });
+    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn ($job): bool => $job->synchronizeTableSchemaEnum === SynchronizeTableSchemaEnum::DROP_CREATE
+        && $job->keepUnknownTablesOnTarget === true
+        && $job->migrationTableName === null
+        && $job->disableForeignKeyConstraints === true);
 
-    Queue::assertPushed(TransferRecordsForAllTables::class, function ($job) {
-        return $job->chunkSize === 1000
-            && $job->migrationTableName === null
-            && $job->disableForeignKeyConstraints === true;
-    });
+    Queue::assertPushed(TransferRecordsForAllTables::class, fn ($job): bool => $job->chunkSize === 1000
+        && $job->migrationTableName === null
+        && $job->disableForeignKeyConstraints === true);
 
     // Clean up
     @unlink($sourceDb);
@@ -265,7 +253,7 @@ it('connects to source and validates schema builder', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
 
@@ -283,7 +271,7 @@ it('connects to source and validates schema builder', function (): void {
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify schema builder was accessed (connection established)
