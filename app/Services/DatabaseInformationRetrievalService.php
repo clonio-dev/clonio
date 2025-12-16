@@ -47,11 +47,6 @@ final readonly class DatabaseInformationRetrievalService
             ->getTableListing(schemaQualified: $schemaQualified);
     }
 
-    public function hasTable(ConnectionData $connectionData, string $tableName): bool
-    {
-        return $this->getSchema($connectionData)->hasTable($tableName);
-    }
-
     public function withConnectionForTable(ConnectionData $connectionData, string $tableName): TableInformationRetrievalService
     {
         return new TableInformationRetrievalService($this->getConnection($connectionData), $tableName);
