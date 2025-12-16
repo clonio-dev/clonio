@@ -40,14 +40,14 @@ it('transfers records from all tables', function (): void {
     ]]);
     DB::purge('test_source');
 
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
     DB::connection('test_source')->table('users')->insert(['name' => 'John']);
     DB::connection('test_source')->table('users')->insert(['name' => 'Jane']);
 
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
@@ -68,7 +68,7 @@ it('transfers records from all tables', function (): void {
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify TransferRecordsForOneTable jobs were queued for both tables
@@ -91,13 +91,13 @@ it('skips migration table when specified', function (): void {
     ]]);
     DB::purge('test_source');
 
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
     DB::connection('test_source')->table('users')->insert(['name' => 'John']);
 
-    DB::connection('test_source')->getSchemaBuilder()->create('migrations', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('migrations', function ($table): void {
         $table->id();
         $table->string('migration');
     });
@@ -118,7 +118,7 @@ it('skips migration table when specified', function (): void {
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify only users table job was queued (migrations skipped)
@@ -141,13 +141,13 @@ it('skips tables with no records', function (): void {
     ]]);
     DB::purge('test_source');
 
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
     DB::connection('test_source')->table('users')->insert(['name' => 'John']);
 
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
@@ -168,7 +168,7 @@ it('skips tables with no records', function (): void {
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify only users table job was queued (posts skipped because empty)
@@ -191,7 +191,7 @@ it('passes foreign key constraints flag to child jobs', function (): void {
     ]]);
     DB::purge('test_source');
 
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
@@ -213,13 +213,11 @@ it('passes foreign key constraints flag to child jobs', function (): void {
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify the child job has disableForeignKeyConstraints set to true
-    Queue::assertPushed(TransferRecordsForOneTable::class, function ($job) {
-        return $job->disableForeignKeyConstraints === true;
-    });
+    Queue::assertPushed(TransferRecordsForOneTable::class, fn ($job): bool => $job->disableForeignKeyConstraints === true);
 
     // Clean up
     @unlink($sourceDb);
@@ -238,7 +236,7 @@ it('passes chunk size to child jobs', function (): void {
     ]]);
     DB::purge('test_source');
 
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
@@ -259,13 +257,11 @@ it('passes chunk size to child jobs', function (): void {
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify the child job has correct chunk size
-    Queue::assertPushed(TransferRecordsForOneTable::class, function ($job) {
-        return $job->chunkSize === 250;
-    });
+    Queue::assertPushed(TransferRecordsForOneTable::class, fn ($job): bool => $job->chunkSize === 250);
 
     // Clean up
     @unlink($sourceDb);
@@ -284,26 +280,26 @@ it('handles multiple tables with mixed empty and non-empty', function (): void {
     ]]);
     DB::purge('test_source');
 
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
     DB::connection('test_source')->table('users')->insert(['name' => 'John']);
     DB::connection('test_source')->table('users')->insert(['name' => 'Jane']);
 
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
     // posts is empty
 
-    DB::connection('test_source')->getSchemaBuilder()->create('comments', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('comments', function ($table): void {
         $table->id();
         $table->text('content');
     });
     DB::connection('test_source')->table('comments')->insert(['content' => 'Nice!']);
 
-    DB::connection('test_source')->getSchemaBuilder()->create('tags', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('tags', function ($table): void {
         $table->id();
         $table->string('name');
     });
@@ -324,7 +320,7 @@ it('handles multiple tables with mixed empty and non-empty', function (): void {
     );
     $job->withBatchId($batch->id);
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify only non-empty tables (users and comments) got jobs
