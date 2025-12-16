@@ -47,7 +47,7 @@ it('keeps unknown tables on target when configured', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
 
@@ -57,10 +57,10 @@ it('keeps unknown tables on target when configured', function (): void {
         'database' => $targetDb,
     ]]);
     DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
-    DB::connection('test_target')->getSchemaBuilder()->create('old_table', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('old_table', function ($table): void {
         $table->id();
     });
 
@@ -75,7 +75,7 @@ it('keeps unknown tables on target when configured', function (): void {
         migrationTableName: null,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify old_table still exists
@@ -103,7 +103,7 @@ it('drops unknown tables on target when configured', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
 
@@ -113,10 +113,10 @@ it('drops unknown tables on target when configured', function (): void {
         'database' => $targetDb,
     ]]);
     DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
-    DB::connection('test_target')->getSchemaBuilder()->create('old_table', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('old_table', function ($table): void {
         $table->id();
     });
 
@@ -134,7 +134,7 @@ it('drops unknown tables on target when configured', function (): void {
         migrationTableName: null,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify old_table was dropped
@@ -162,7 +162,7 @@ it('truncates tables when using TRUNCATE mode', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
@@ -173,7 +173,7 @@ it('truncates tables when using TRUNCATE mode', function (): void {
         'database' => $targetDb,
     ]]);
     DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
@@ -191,7 +191,7 @@ it('truncates tables when using TRUNCATE mode', function (): void {
         migrationTableName: null,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify data was deleted
@@ -219,11 +219,11 @@ it('clones schema using DROP_CREATE with migration table', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('email');
     });
-    DB::connection('test_source')->getSchemaBuilder()->create('custom_migrations', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('custom_migrations', function ($table): void {
         $table->id();
     });
 
@@ -245,7 +245,7 @@ it('clones schema using DROP_CREATE with migration table', function (): void {
         migrationTableName: 'custom_migrations',
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify schema was cloned
@@ -273,7 +273,7 @@ it('clones schema using DROP_CREATE without migration table', function (): void 
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
@@ -296,7 +296,7 @@ it('clones schema using DROP_CREATE without migration table', function (): void 
         migrationTableName: null,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify schema was cloned
