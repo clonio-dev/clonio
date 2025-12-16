@@ -307,5 +307,120 @@ it('clones schema using DROP_CREATE without migration table', function (): void 
     @unlink($targetDb);
 });
 
-// Note: Exception tests for temp file failures would require mocking the final DatabaseInformationRetrievalService class
-// These error paths are covered by the RuntimeException checks in the code
+it('disables and enables foreign key constraints when configured', function (): void {
+    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
+    @unlink($sourceDb);
+    $sourceDb .= '.sqlite';
+    touch($sourceDb);
+
+    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
+    @unlink($targetDb);
+    $targetDb .= '.sqlite';
+    touch($targetDb);
+
+    // Set up source database
+    config(['database.connections.test_source' => [
+        'driver' => 'sqlite',
+        'database' => $sourceDb,
+    ]]);
+    DB::purge('test_source');
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
+        $table->id();
+        $table->string('name');
+    });
+
+    // Set up target database
+    config(['database.connections.test_target' => [
+        'driver' => 'sqlite',
+        'database' => $targetDb,
+    ]]);
+    DB::purge('test_target');
+    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table): void {
+        $table->id();
+        $table->string('name');
+    });
+
+    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
+    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
+
+    Log::shouldReceive('debug')->once()->with('Disabling foreign key constraints on target database.');
+    Log::shouldReceive('debug')->once()->with('Enabling foreign key constraints on target database.');
+
+    $job = new CloneSchemaAndPrepareForData(
+        sourceConnectionData: $sourceConnectionData,
+        targetConnectionData: $targetConnectionData,
+        synchronizeTableSchemaEnum: SynchronizeTableSchemaEnum::TRUNCATE,
+        keepUnknownTablesOnTarget: true,
+        migrationTableName: null,
+        disableForeignKeyConstraints: true,
+    );
+
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
+    $job->handle($dbService);
+
+    // Verify data was truncated (confirms job ran successfully)
+    expect(DB::connection('test_target')->table('users')->count())->toBe(0);
+
+    // Clean up
+    @unlink($sourceDb);
+    @unlink($targetDb);
+});
+
+it('handles DROP_CREATE mode with foreign key constraints disabled', function (): void {
+    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
+    @unlink($sourceDb);
+    $sourceDb .= '.sqlite';
+    touch($sourceDb);
+
+    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
+    @unlink($targetDb);
+    $targetDb .= '.sqlite';
+    touch($targetDb);
+
+    // Set up source database
+    config(['database.connections.test_source' => [
+        'driver' => 'sqlite',
+        'database' => $sourceDb,
+    ]]);
+    DB::purge('test_source');
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
+        $table->id();
+        $table->string('title');
+    });
+
+    // Set up target database
+    config(['database.connections.test_target' => [
+        'driver' => 'sqlite',
+        'database' => $targetDb,
+    ]]);
+    DB::purge('test_target');
+
+    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
+    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
+
+    Log::shouldReceive('debug')->once()->with('Disabling foreign key constraints on target database.');
+    Log::shouldReceive('debug')->once()->with('Enabling foreign key constraints on target database.');
+
+    $job = new CloneSchemaAndPrepareForData(
+        sourceConnectionData: $sourceConnectionData,
+        targetConnectionData: $targetConnectionData,
+        synchronizeTableSchemaEnum: SynchronizeTableSchemaEnum::DROP_CREATE,
+        keepUnknownTablesOnTarget: true,
+        migrationTableName: null,
+        disableForeignKeyConstraints: true,
+    );
+
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
+    $job->handle($dbService);
+
+    // Verify schema was cloned
+    expect(DB::connection('test_target')->getSchemaBuilder()->hasTable('posts'))->toBeTrue();
+
+    // Clean up
+    @unlink($sourceDb);
+    @unlink($targetDb);
+});
+
+// Note: Connection failure tests (lines 46-50, 58-62) would require mocking the final DatabaseInformationRetrievalService class
+// Note: Exception tests for temp file failures (lines 143-144, 149-150) would require mocking SchemaState or filesystem
+// These error paths are covered by the RuntimeException checks in the code and integration tests
