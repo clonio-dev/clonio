@@ -32,6 +32,7 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
         public readonly SynchronizeTableSchemaEnum $synchronizeTableSchemaEnum,
         public readonly bool $keepUnknownTablesOnTarget,
         public readonly ?string $migrationTableName,
+        public bool $disableForeignKeyConstraints = false,
     ) {}
 
     public function handle(
@@ -61,6 +62,11 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
             return;
         }
 
+        if ($this->disableForeignKeyConstraints) {
+            Log::debug('Disabling foreign key constraints on target database.');
+            $targetConnection->getSchemaBuilder()->disableForeignKeyConstraints();
+        }
+
         $this->processUnknownTablesOnTargetWhenNecessary($sourceSchema, $targetSchema);
         $this->truncateTablesOnTargetWhenNecessary($sourceSchema, $targetConnection);
         $this->synchronizeTablesOnTargetWhenNecessary(
@@ -69,6 +75,11 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
             $targetConnection,
             $targetSchema,
         );
+
+        if ($this->disableForeignKeyConstraints) {
+            Log::debug('Enabling foreign key constraints on target database.');
+            $targetConnection->getSchemaBuilder()->enableForeignKeyConstraints();
+        }
     }
 
     /**

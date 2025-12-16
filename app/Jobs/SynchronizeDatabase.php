@@ -65,10 +65,6 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
                     return;
                 }
 
-                if ($this->options->disableForeignKeyConstraints) {
-                    $this->batch()->add(new DisableForeignKeyConstraintsOnSchema($targetConnectionData));
-                }
-
                 $this->batch()->add([
                     new CloneSchemaAndPrepareForData(
                         sourceConnectionData: $this->sourceConnectionData,
@@ -76,18 +72,16 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
                         synchronizeTableSchemaEnum: $this->options->synchronizeTableSchema,
                         keepUnknownTablesOnTarget: $this->options->keepUnknownTablesOnTarget,
                         migrationTableName: $this->options->migrationTableName,
+                        disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
                     ),
                     new TransferRecordsForAllTables(
                         sourceConnectionData: $this->sourceConnectionData,
                         targetConnectionData: $targetConnectionData,
                         chunkSize: $this->options->chunkSize,
                         migrationTableName: $this->options->migrationTableName,
+                        disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
                     ),
                 ]);
-
-                if ($this->options->disableForeignKeyConstraints) {
-                    //                    $this->batch()->add(new EnableForeignKeyConstraintsOnSchema($targetConnectionData));
-                }
             }
         );
     }

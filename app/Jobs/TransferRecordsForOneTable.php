@@ -30,6 +30,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         public readonly ConnectionData $targetConnectionData,
         public readonly string $tableName,
         public readonly int $chunkSize,
+        public readonly bool $disableForeignKeyConstraints = false,
     ) {}
 
     public function handle(
@@ -65,6 +66,11 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
             throw $exception;
         }
 
+        if ($this->disableForeignKeyConstraints) {
+            Log::debug('Disabling foreign key constraints on target database.');
+            $targetConnection->getSchemaBuilder()->disableForeignKeyConstraints();
+        }
+
         $query = $sourceTable->query();
 
         $orderColumns = $sourceTable->orderColumns();
@@ -97,6 +103,11 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     );
             }
         );
+
+        if ($this->disableForeignKeyConstraints) {
+            Log::debug('Enabling foreign key constraints on target database.');
+            $targetConnection->getSchemaBuilder()->enableForeignKeyConstraints();
+        }
     }
 
     /**

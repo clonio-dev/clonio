@@ -26,6 +26,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
         public readonly ConnectionData $targetConnectionData,
         public readonly int $chunkSize,
         public ?string $migrationTableName,
+        public bool $disableForeignKeyConstraints = false,
     ) {}
 
     public function handle(
@@ -59,6 +60,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
                         targetConnectionData: $this->targetConnectionData,
                         tableName: $tableName,
                         chunkSize: $this->chunkSize,
+                        disableForeignKeyConstraints: $this->disableForeignKeyConstraints,
                     )
                 );
             }
