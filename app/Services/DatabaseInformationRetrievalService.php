@@ -52,19 +52,12 @@ final readonly class DatabaseInformationRetrievalService
         return new TableInformationRetrievalService($this->getConnection($connectionData), $tableName);
     }
 
-    /**
-     * @throws RuntimeException
-     */
     private function establishConnection(ConnectionData $connectionData): ConnectionInterface
     {
-        try {
-            return $this->databaseManager->connectUsing(
-                name: $connectionData->connectionName(),
-                config: $connectionData->driver->toArray(),
-                force: true,
-            );
-        } catch (Throwable $exception) {
-            throw new RuntimeException("Failed to connect to database {$connectionData->name}: {$exception->getMessage()}", $exception->getCode(), $exception);
-        }
+        return $this->databaseManager->connectUsing(
+            name: $connectionData->connectionName(),
+            config: $connectionData->driver->toArray(),
+            force: true,
+        );
     }
 }
