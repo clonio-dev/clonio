@@ -17,7 +17,7 @@ it('returns record count for a table', function (): void {
     ]]);
     DB::purge('test_db');
 
-    DB::connection('test_db')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_db')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
@@ -48,7 +48,7 @@ it('returns query builder for a table', function (): void {
     ]]);
     DB::purge('test_db');
 
-    DB::connection('test_db')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_db')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
@@ -77,7 +77,7 @@ it('returns primary key columns as order columns when primary key exists', funct
     DB::purge('test_db');
 
     // Create table with primary key
-    DB::connection('test_db')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_db')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
