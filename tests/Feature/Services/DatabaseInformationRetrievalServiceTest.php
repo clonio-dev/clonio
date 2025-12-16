@@ -21,7 +21,7 @@ it('establishes a connection successfully', function (): void {
     DB::purge('test_db');
 
     $connectionData = new ConnectionData('test_db', new SqliteDriverData($db));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     $connection = $service->getConnection($connectionData);
 
@@ -43,7 +43,7 @@ it('caches connections and reuses them', function (): void {
     DB::purge('test_db');
 
     $connectionData = new ConnectionData('test_db', new SqliteDriverData($db));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     $connection1 = $service->getConnection($connectionData);
     $connection2 = $service->getConnection($connectionData);
@@ -56,7 +56,7 @@ it('caches connections and reuses them', function (): void {
 
 it('establishes connection even with invalid path but fails on actual use', function (): void {
     $connectionData = new ConnectionData('invalid_db', new SqliteDriverData('/invalid/path/to/database.sqlite'));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     // Connection is established lazily, so this won't fail
     $connection = $service->getConnection($connectionData);
@@ -71,7 +71,7 @@ it('returns schema builder for non-existent database but fails on use', function
     $nonExistentDb = '/tmp/definitely_does_not_exist_' . uniqid() . '.sqlite';
 
     $connectionData = new ConnectionData('nonexistent_db', new SqliteDriverData($nonExistentDb));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     // getSchema returns a builder, but using it will fail
     $schema = $service->getSchema($connectionData);
@@ -95,7 +95,7 @@ it('returns schema builder for a connection', function (): void {
     DB::purge('test_db');
 
     $connectionData = new ConnectionData('test_db', new SqliteDriverData($db));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     $schema = $service->getSchema($connectionData);
 
@@ -116,20 +116,20 @@ it('returns table names from database', function (): void {
     ]]);
     DB::purge('test_db');
 
-    DB::connection('test_db')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_db')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
 
-    DB::connection('test_db')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_db')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
     });
 
-    DB::connection('test_db')->getSchemaBuilder()->create('comments', function ($table) {
+    DB::connection('test_db')->getSchemaBuilder()->create('comments', function ($table): void {
         $table->id();
     });
 
     $connectionData = new ConnectionData('test_db', new SqliteDriverData($db));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     $tableNames = $service->getTableNames($connectionData);
 
@@ -153,12 +153,12 @@ it('returns schema qualified table names when requested', function (): void {
     ]]);
     DB::purge('test_db');
 
-    DB::connection('test_db')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_db')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
 
     $connectionData = new ConnectionData('test_db', new SqliteDriverData($db));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     $tableNames = $service->getTableNames($connectionData, schemaQualified: true);
 
@@ -181,7 +181,7 @@ it('returns TableInformationRetrievalService for a specific table', function ():
     ]]);
     DB::purge('test_db');
 
-    DB::connection('test_db')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_db')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
     });
@@ -190,7 +190,7 @@ it('returns TableInformationRetrievalService for a specific table', function ():
     DB::connection('test_db')->table('users')->insert(['name' => 'Jane']);
 
     $connectionData = new ConnectionData('test_db', new SqliteDriverData($db));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     $tableService = $service->withConnectionForTable($connectionData, 'users');
 
@@ -223,18 +223,18 @@ it('handles multiple different connections', function (): void {
     ]]);
     DB::purge('test_db2');
 
-    DB::connection('test_db1')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_db1')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
     });
 
-    DB::connection('test_db2')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_db2')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
     });
 
     $connectionData1 = new ConnectionData('test_db1', new SqliteDriverData($db1));
     $connectionData2 = new ConnectionData('test_db2', new SqliteDriverData($db2));
 
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     $connection1 = $service->getConnection($connectionData1);
     $connection2 = $service->getConnection($connectionData2);
@@ -257,7 +257,7 @@ it('handles multiple different connections', function (): void {
 
 it('returns schema builder for empty path but fails on use', function (): void {
     $connectionData = new ConnectionData('invalid', new SqliteDriverData(''));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     // Schema builder is returned
     $schema = $service->getSchema($connectionData);
@@ -270,7 +270,7 @@ it('returns schema builder for empty path but fails on use', function (): void {
 
 it('returns schema builder for invalid path but fails on use', function (): void {
     $connectionData = new ConnectionData('invalid_schema', new SqliteDriverData('/invalid/path.sqlite'));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     $schema = $service->getSchema($connectionData);
     expect($schema)->toBeInstanceOf(Illuminate\Database\Schema\Builder::class);
@@ -282,7 +282,7 @@ it('returns schema builder for invalid path but fails on use', function (): void
 
 it('fails when getting table names from invalid database', function (): void {
     $connectionData = new ConnectionData('invalid_tables', new SqliteDriverData('/invalid/path.sqlite'));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     expect(fn () => $service->getTableNames($connectionData))
         ->toThrow(Exception::class);
@@ -290,7 +290,7 @@ it('fails when getting table names from invalid database', function (): void {
 
 it('fails when creating table service for invalid database', function (): void {
     $connectionData = new ConnectionData('invalid_table_service', new SqliteDriverData('/invalid/path.sqlite'));
-    $service = app(DatabaseInformationRetrievalService::class);
+    $service = resolve(DatabaseInformationRetrievalService::class);
 
     // Connection is established, but withConnectionForTable itself won't fail
     // It will only fail when the TableInformationRetrievalService is actually used
