@@ -41,7 +41,7 @@ it('transfers records from source to target table', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
         $table->text('content');
@@ -58,7 +58,7 @@ it('transfers records from source to target table', function (): void {
         'database' => $targetDb,
     ]]);
     DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
         $table->text('content');
@@ -74,7 +74,7 @@ it('transfers records from source to target table', function (): void {
         chunkSize: 100,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify records were transferred
@@ -104,7 +104,7 @@ it('transfers records in chunks', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
@@ -120,7 +120,7 @@ it('transfers records in chunks', function (): void {
         'database' => $targetDb,
     ]]);
     DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
@@ -135,7 +135,7 @@ it('transfers records in chunks', function (): void {
         chunkSize: 2,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify all records were transferred despite chunking
@@ -163,7 +163,7 @@ it('mutates user data during transfer', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
         $table->string('email');
@@ -181,7 +181,7 @@ it('mutates user data during transfer', function (): void {
         'database' => $targetDb,
     ]]);
     DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table): void {
         $table->id();
         $table->string('name');
         $table->string('email');
@@ -198,7 +198,7 @@ it('mutates user data during transfer', function (): void {
         chunkSize: 100,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     $targetUser = DB::connection('test_target')->table('users')->first();
@@ -230,7 +230,7 @@ it('transfers records with foreign key constraints disabled', function (): void 
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
@@ -242,7 +242,7 @@ it('transfers records with foreign key constraints disabled', function (): void 
         'database' => $targetDb,
     ]]);
     DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
@@ -258,7 +258,7 @@ it('transfers records with foreign key constraints disabled', function (): void 
         disableForeignKeyConstraints: true,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify records were transferred
@@ -296,7 +296,7 @@ it('fails when table does not exist in source database', function (): void {
         'database' => $targetDb,
     ]]);
     DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
     });
 
@@ -310,7 +310,7 @@ it('fails when table does not exist in source database', function (): void {
         chunkSize: 100,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
 
     expect(fn () => $job->handle($dbService))
         ->toThrow(RuntimeException::class, 'Table posts does not exist in source or target database.');
@@ -337,7 +337,7 @@ it('fails when table does not exist in target database', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
     });
 
@@ -358,7 +358,7 @@ it('fails when table does not exist in target database', function (): void {
         chunkSize: 100,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
 
     expect(fn () => $job->handle($dbService))
         ->toThrow(RuntimeException::class, 'Table posts does not exist in source or target database.');
@@ -385,7 +385,7 @@ it('transfers records ordered by primary key', function (): void {
         'database' => $sourceDb,
     ]]);
     DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
@@ -401,7 +401,7 @@ it('transfers records ordered by primary key', function (): void {
         'database' => $targetDb,
     ]]);
     DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table) {
+    DB::connection('test_target')->getSchemaBuilder()->create('posts', function ($table): void {
         $table->id();
         $table->string('title');
     });
@@ -416,7 +416,7 @@ it('transfers records ordered by primary key', function (): void {
         chunkSize: 100,
     );
 
-    $dbService = app(DatabaseInformationRetrievalService::class);
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
     // Verify records were transferred in order by ID
