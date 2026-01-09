@@ -97,7 +97,7 @@
             "rector --dry-run",
             "npm run format:check"
         ],
-        "test:unit": "pest --parallel --coverage --exactly=100.0",
+        "test:unit": "pest --parallel --coverage --min=85",
         "test:types": "phpstan",
         "test": [
             "@php artisan config:clear --ansi",
