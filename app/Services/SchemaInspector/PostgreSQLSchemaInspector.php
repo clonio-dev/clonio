@@ -8,6 +8,7 @@ use App\Data\ColumnSchema;
 use App\Data\ConstraintSchema;
 use App\Data\ForeignKeySchema;
 use App\Data\IndexSchema;
+use App\Data\TableMetricsData;
 use App\Data\TableSchema;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
@@ -27,7 +28,8 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
             indexes: $this->getIndexes($connection, $tableName),
             foreignKeys: $this->getForeignKeys($connection, $tableName),
             constraints: $this->getConstraints($connection, $tableName),
-            metadata: $this->getTableMetadata($connection, $tableName)
+            metadata: $this->getTableMetadata($connection, $tableName),
+            metricsData: $this->getTableMetrics($connection, $tableName),
         );
     }
 
@@ -109,6 +111,25 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
                 ]
             );
         });
+    }
+
+    protected function getTableMetrics(Connection $connection, string $tableName): TableMetricsData
+    {
+        $rowCount = $connection->selectOne("
+            SELECT reltuples::bigint AS row_count
+            FROM pg_class
+            WHERE relname = ?
+        ", [$tableName])->row_count ?? 0;
+
+        // Data Size (nur Table Data, ohne Indexes)
+        $dataSize = $connection->selectOne("
+            SELECT pg_relation_size(?)::bigint AS data_size
+        ", [$tableName])->data_size ?? 0;
+
+        return new TableMetricsData(
+            rowsCount: (int) $rowCount,
+            dataSizeInBytes: (int) $dataSize,
+        );
     }
 
     protected function getIndexes(Connection $connection, string $tableName): Collection

@@ -6,6 +6,7 @@ namespace App\Services\SchemaInspector;
 
 use App\Contracts\SchemaInspectorInterface;
 use App\Data\DatabaseSchema;
+use App\Data\TableMetricsData;
 use App\Data\TableSchema;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
@@ -28,6 +29,8 @@ abstract class AbstractSchemaInspector implements SchemaInspectorInterface
      * @return Collection<int, \App\Data\ColumnSchema>
      */
     abstract protected function getColumns(Connection $connection, string $tableName): Collection;
+
+    abstract protected function getTableMetrics(Connection $connection, string $tableName): TableMetricsData;
 
     /**
      * @return Collection<int, \App\Data\IndexSchema>

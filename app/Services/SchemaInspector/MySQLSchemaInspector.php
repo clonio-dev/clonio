@@ -8,6 +8,7 @@ use App\Data\ColumnSchema;
 use App\Data\ConstraintSchema;
 use App\Data\ForeignKeySchema;
 use App\Data\IndexSchema;
+use App\Data\TableMetricsData;
 use App\Data\TableSchema;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
@@ -22,7 +23,8 @@ class MySQLSchemaInspector extends AbstractSchemaInspector
             indexes: $this->getIndexes($connection, $tableName),
             foreignKeys: $this->getForeignKeys($connection, $tableName),
             constraints: $this->getConstraints($connection, $tableName),
-            metadata: $this->getTableMetadata($connection, $tableName)
+            metadata: $this->getTableMetadata($connection, $tableName),
+            metricsData: $this->getTableMetrics($connection, $tableName),
         );
     }
 
@@ -136,6 +138,30 @@ class MySQLSchemaInspector extends AbstractSchemaInspector
                 ]
             );
         });
+    }
+
+    protected function getTableMetrics(Connection $connection, string $tableName): TableMetricsData
+    {
+        $result = $connection->selectOne("
+            SELECT
+                TABLE_ROWS as row_count,
+                DATA_LENGTH as data_size
+            FROM INFORMATION_SCHEMA.TABLES
+            WHERE TABLE_SCHEMA = ?
+            AND TABLE_NAME = ?
+        ", [$connection->getDatabaseName(), $tableName]);
+
+        if (!$result) {
+            return new TableMetricsData(rowsCount: 0, dataSizeInBytes: 0);
+        }
+
+        $rowCount = $result->row_count ?? 0;
+        $dataSize = $result->data_size ?? 0;
+
+        return new TableMetricsData(
+            rowsCount: (int) $rowCount,
+            dataSizeInBytes: $dataSize
+        );
     }
 
     protected function getIndexes(Connection $connection, string $tableName): Collection

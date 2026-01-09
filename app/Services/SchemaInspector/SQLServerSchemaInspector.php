@@ -8,6 +8,7 @@ use App\Data\ColumnSchema;
 use App\Data\ConstraintSchema;
 use App\Data\ForeignKeySchema;
 use App\Data\IndexSchema;
+use App\Data\TableMetricsData;
 use App\Data\TableSchema;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
@@ -27,7 +28,8 @@ class SQLServerSchemaInspector extends AbstractSchemaInspector
             indexes: $this->getIndexes($connection, $tableName),
             foreignKeys: $this->getForeignKeys($connection, $tableName),
             constraints: $this->getConstraints($connection, $tableName),
-            metadata: $this->getTableMetadata($connection, $tableName)
+            metadata: $this->getTableMetadata($connection, $tableName),
+            metricsData: $this->getTableMetrics($connection, $tableName),
         );
     }
 
@@ -101,6 +103,27 @@ class SQLServerSchemaInspector extends AbstractSchemaInspector
                 ]
             );
         });
+    }
+
+    protected function getTableMetrics(Connection $connection, string $tableName): TableMetricsData
+    {
+        $rowCount = $connection->selectOne("
+            SELECT SUM(rows) AS row_count
+            FROM sys.partitions
+            WHERE object_id = OBJECT_ID(?)
+            AND index_id IN (0, 1) -- Heap or Clustered Index
+        ", [$tableName])->row_count ?? 0;
+
+        $dataSize = $connection->selectOne("
+            SELECT SUM(reserved_page_count) * 8192 AS data_size
+            FROM sys.dm_db_partition_stats
+            WHERE object_id = OBJECT_ID(?)
+        ", [$tableName])->data_size ?? 0;
+
+        return new TableMetricsData(
+            rowsCount: (int) $rowCount,
+            dataSizeInBytes: (int) $dataSize,
+        );
     }
 
     protected function getIndexes(Connection $connection, string $tableName): Collection

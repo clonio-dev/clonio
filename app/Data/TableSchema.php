@@ -28,7 +28,8 @@ final readonly class TableSchema
         public Collection $indexes,
         public Collection $foreignKeys,
         public Collection $constraints,
-        public array $metadata = []
+        public array $metadata = [],
+        public ?TableMetricsData $metricsData,
     ) {}
 
     /**

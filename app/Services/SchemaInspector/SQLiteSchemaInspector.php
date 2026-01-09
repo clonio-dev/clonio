@@ -8,6 +8,7 @@ use App\Data\ColumnSchema;
 use App\Data\ConstraintSchema;
 use App\Data\ForeignKeySchema;
 use App\Data\IndexSchema;
+use App\Data\TableMetricsData;
 use App\Data\TableSchema;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
@@ -27,7 +28,8 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
             indexes: $this->getIndexes($connection, $tableName),
             foreignKeys: $this->getForeignKeys($connection, $tableName),
             constraints: $this->getConstraints($connection, $tableName),
-            metadata: []
+            metadata: [],
+            metricsData: $this->getTableMetrics($connection, $tableName),
         );
     }
 
@@ -96,6 +98,62 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
                 ]
             );
         });
+    }
+
+    protected function getTableMetrics(Connection $connection, string $tableName): TableMetricsData
+    {
+        // Row Count (echte Zählung, da SQLite keine Statistiken hat)
+        $rowCount = $connection->selectOne("
+            SELECT COUNT(*) as row_count
+            FROM {$tableName}
+        ")->row_count ?? 0;
+
+        // Data Size: SQLite hat keine direkte Table-Size-Query
+        // Wir schätzen basierend auf:
+        // 1. Page Size
+        // 2. Anzahl Seiten, die die Tabelle belegt
+
+        try {
+            // Page Size (standardmäßig 4096 Bytes)
+            $pageSize = $connection->selectOne("PRAGMA page_size")->page_size ?? 4096;
+
+            // Anzahl Seiten für diese Tabelle
+            // Hinweis: SQLite speichert Tabellen nicht isoliert
+            // Wir nutzen eine grobe Schätzung basierend auf Row-Count
+
+            // Alternative: Gesamte DB-Größe abfragen
+            $dbPath = $connection->getDatabaseName();
+
+            if (file_exists($dbPath)) {
+                // Gesamte DB-Größe
+                $totalDbSize = filesize($dbPath);
+
+                // Anzahl aller Rows in allen Tabellen
+                $totalRows = $connection->selectOne("
+                    SELECT SUM(cnt) as total_rows
+                    FROM (
+                        SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table'
+                    )
+                ")->total_rows ?? 1;
+
+                // Geschätzte Größe dieser Tabelle (proportional)
+                $dataSize = $rowCount > 0
+                    ? (int) (($rowCount / max($totalRows, 1)) * $totalDbSize)
+                    : 0;
+            } else {
+                // Fallback: Grobe Schätzung (durchschnittlich 500 Bytes/Row)
+                $dataSize = $rowCount * 500;
+            }
+
+        } catch (\Exception) {
+            // Fallback bei Fehler: Grobe Schätzung
+            $dataSize = $rowCount * 500; // 500 Bytes durchschnittlich pro Row
+        }
+
+        return new TableMetricsData(
+            rowsCount: (int) $rowCount,
+            dataSizeInBytes: (int) $dataSize,
+        );
     }
 
     protected function getIndexes(Connection $connection, string $tableName): Collection
