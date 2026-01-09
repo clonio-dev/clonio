@@ -94,7 +94,6 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                 $targetConnection->table($this->tableName)
                     ->insert(
                         $records->map(function (object $record, int $index) use ($anonymizationService): array {
-                            assert($record instanceof stdClass);
                             $record = get_object_vars($record);
 
                             return $anonymizationService->anonymizeRecord($record, $this->tableAnonymizationOptions);

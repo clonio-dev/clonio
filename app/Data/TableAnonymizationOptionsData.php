@@ -17,7 +17,7 @@ final readonly class TableAnonymizationOptionsData
     ) {}
 
     /**
-     * @return array<string, ColumnMutationData>
+     * @return array<ColumnMutationData>
      */
     public function getColumnMutationsMap(): array
     {

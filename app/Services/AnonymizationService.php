@@ -48,8 +48,8 @@ final readonly class AnonymizationService
 
     private function applyFakeStrategy(ColumnMutationData $mutationData): mixed
     {
-        $fakeMethod = $mutationData->options['method'] ?? 'word';
-        $fakeArguments = $mutationData->options['arguments'] ?? [];
+        $fakeMethod = $mutationData->options->fakerMethod;
+        $fakeArguments = $mutationData->options->fakerMethodArguments;
 
         return fake()->{$fakeMethod}(...$fakeArguments);
     }
@@ -60,10 +60,11 @@ final readonly class AnonymizationService
             return '';
         }
 
+        /** @phpstan-ignore cast.string */
         $valueStr = (string) $value;
-        $visibleChars = $mutationData->options['visible_chars'] ?? 2;
-        $maskChar = $mutationData->options['mask_char'] ?? '*';
-        $preserveFormat = $mutationData->options['preserve_format'] ?? false;
+        $visibleChars = $mutationData->options->visibleChars;
+        $maskChar = $mutationData->options->maskChar;
+        $preserveFormat = $mutationData->options->preserveFormat;
 
         if ($preserveFormat && str_contains($valueStr, '@')) {
             return $this->maskEmail($valueStr, $visibleChars, $maskChar);
@@ -101,14 +102,16 @@ final readonly class AnonymizationService
             return '';
         }
 
-        $algorithm = $mutationData->options['algorithm'] ?? 'sha256';
-        $salt = $mutationData->options['salt'] ?? '';
+        /** @phpstan-ignore cast.string */
+        $value = (string) $value;
+        $algorithm = $mutationData->options->algorithm;
+        $salt = $mutationData->options->salt;
 
         return hash($algorithm, $salt . $value);
     }
 
     private function applyStaticStrategy(ColumnMutationData $mutationData): mixed
     {
-        return $mutationData->options['value'] ?? null;
+        return $mutationData->options->value;
     }
 }

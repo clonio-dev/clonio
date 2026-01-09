@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Data\ColumnMutationData;
+use App\Data\ColumnMutationDataOptions;
 use App\Data\ColumnMutationStrategyEnum;
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
@@ -209,7 +210,7 @@ it('mutates user data during transfer', function (): void {
             columnMutations: collect([
                 new ColumnMutationData(columnName: 'name', strategy: ColumnMutationStrategyEnum::FAKE),
                 new ColumnMutationData(columnName: 'email', strategy: ColumnMutationStrategyEnum::FAKE),
-                new ColumnMutationData(columnName: 'password', strategy: ColumnMutationStrategyEnum::MASK, options: ['visible_chars' => 0]),
+                new ColumnMutationData(columnName: 'password', strategy: ColumnMutationStrategyEnum::MASK, options: new ColumnMutationDataOptions(visibleChars: 0)),
             ]),
         )
     );

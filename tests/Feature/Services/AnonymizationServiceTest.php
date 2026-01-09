@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Data\ColumnMutationData;
+use App\Data\ColumnMutationDataOptions;
 use App\Data\ColumnMutationStrategyEnum;
 use App\Data\TableAnonymizationOptionsData;
 use App\Services\AnonymizationService;
@@ -23,8 +24,8 @@ it('applies fake strategy to generate fake data', function (): void {
     $tableOptions = new TableAnonymizationOptionsData(
         tableName: 'users',
         columnMutations: collect([
-            new ColumnMutationData('name', ColumnMutationStrategyEnum::FAKE, ['method' => 'name']),
-            new ColumnMutationData('email', ColumnMutationStrategyEnum::FAKE, ['method' => 'email']),
+            new ColumnMutationData('name', ColumnMutationStrategyEnum::FAKE, new ColumnMutationDataOptions(fakerMethod: 'name')),
+            new ColumnMutationData('email', ColumnMutationStrategyEnum::FAKE, new ColumnMutationDataOptions(fakerMethod: 'email')),
         ])
     );
 
@@ -41,10 +42,7 @@ it('applies fake strategy with arguments', function (): void {
     $tableOptions = new TableAnonymizationOptionsData(
         tableName: 'posts',
         columnMutations: collect([
-            new ColumnMutationData('description', ColumnMutationStrategyEnum::FAKE, [
-                'method' => 'sentence',
-                'arguments' => [5],
-            ]),
+            new ColumnMutationData('description', ColumnMutationStrategyEnum::FAKE, new ColumnMutationDataOptions(fakerMethod: 'sentence', fakerMethodArguments: [5])),
         ])
     );
 
@@ -61,7 +59,7 @@ it('applies mask strategy to mask data', function (): void {
     $tableOptions = new TableAnonymizationOptionsData(
         tableName: 'users',
         columnMutations: collect([
-            new ColumnMutationData('name', ColumnMutationStrategyEnum::MASK, ['visible_chars' => 2]),
+            new ColumnMutationData('name', ColumnMutationStrategyEnum::MASK, new ColumnMutationDataOptions(visibleChars: 2)),
         ])
     );
 
@@ -77,10 +75,7 @@ it('applies mask strategy with custom mask character', function (): void {
     $tableOptions = new TableAnonymizationOptionsData(
         tableName: 'users',
         columnMutations: collect([
-            new ColumnMutationData('name', ColumnMutationStrategyEnum::MASK, [
-                'visible_chars' => 3,
-                'mask_char' => '#',
-            ]),
+            new ColumnMutationData('name', ColumnMutationStrategyEnum::MASK, new ColumnMutationDataOptions(visibleChars: 3, maskChar: '#')),
         ])
     );
 
@@ -96,10 +91,7 @@ it('applies mask strategy to email preserving format', function (): void {
     $tableOptions = new TableAnonymizationOptionsData(
         tableName: 'users',
         columnMutations: collect([
-            new ColumnMutationData('email', ColumnMutationStrategyEnum::MASK, [
-                'visible_chars' => 2,
-                'preserve_format' => true,
-            ]),
+            new ColumnMutationData('email', ColumnMutationStrategyEnum::MASK, new ColumnMutationDataOptions(visibleChars: 2, preserveFormat: true)),
         ])
     );
 
@@ -148,7 +140,7 @@ it('applies hash strategy with custom algorithm', function (): void {
     $tableOptions = new TableAnonymizationOptionsData(
         tableName: 'users',
         columnMutations: collect([
-            new ColumnMutationData('password', ColumnMutationStrategyEnum::HASH, ['algorithm' => 'md5']),
+            new ColumnMutationData('password', ColumnMutationStrategyEnum::HASH, new ColumnMutationDataOptions(algorithm: 'md5')),
         ])
     );
 
@@ -165,7 +157,7 @@ it('applies hash strategy with salt', function (): void {
     $tableOptions = new TableAnonymizationOptionsData(
         tableName: 'users',
         columnMutations: collect([
-            new ColumnMutationData('password', ColumnMutationStrategyEnum::HASH, ['salt' => 'mysalt']),
+            new ColumnMutationData('password', ColumnMutationStrategyEnum::HASH, new ColumnMutationDataOptions(salt: 'mysalt')),
         ])
     );
 
@@ -213,7 +205,7 @@ it('applies static strategy to set fixed value', function (): void {
     $tableOptions = new TableAnonymizationOptionsData(
         tableName: 'users',
         columnMutations: collect([
-            new ColumnMutationData('password', ColumnMutationStrategyEnum::STATIC, ['value' => '********']),
+            new ColumnMutationData('password', ColumnMutationStrategyEnum::STATIC, new ColumnMutationDataOptions(value: '********')),
         ])
     );
 
@@ -234,12 +226,9 @@ it('applies multiple mutations to same record', function (): void {
     $tableOptions = new TableAnonymizationOptionsData(
         tableName: 'users',
         columnMutations: collect([
-            new ColumnMutationData('name', ColumnMutationStrategyEnum::FAKE, ['method' => 'name']),
-            new ColumnMutationData('email', ColumnMutationStrategyEnum::MASK, [
-                'visible_chars' => 2,
-                'preserve_format' => true,
-            ]),
-            new ColumnMutationData('password', ColumnMutationStrategyEnum::STATIC, ['value' => '********']),
+            new ColumnMutationData('name', ColumnMutationStrategyEnum::FAKE, new ColumnMutationDataOptions(fakerMethod: 'name')),
+            new ColumnMutationData('email', ColumnMutationStrategyEnum::MASK, new ColumnMutationDataOptions(visibleChars: 2, preserveFormat: true)),
+            new ColumnMutationData('password', ColumnMutationStrategyEnum::STATIC, new ColumnMutationDataOptions(value: '********')),
             new ColumnMutationData('notes', ColumnMutationStrategyEnum::NULL),
         ])
     );
@@ -260,8 +249,8 @@ it('ignores columns not present in record', function (): void {
     $tableOptions = new TableAnonymizationOptionsData(
         tableName: 'users',
         columnMutations: collect([
-            new ColumnMutationData('name', ColumnMutationStrategyEnum::FAKE, ['method' => 'name']),
-            new ColumnMutationData('email', ColumnMutationStrategyEnum::FAKE, ['method' => 'email']),
+            new ColumnMutationData('name', ColumnMutationStrategyEnum::FAKE, new ColumnMutationDataOptions(fakerMethod: 'name')),
+            new ColumnMutationData('email', ColumnMutationStrategyEnum::FAKE, new ColumnMutationDataOptions(fakerMethod: 'email')),
             new ColumnMutationData('phone', ColumnMutationStrategyEnum::NULL),
         ])
     );
