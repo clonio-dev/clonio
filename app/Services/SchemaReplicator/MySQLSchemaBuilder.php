@@ -26,22 +26,22 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
 
         // Add primary key
         $primaryKey = $table->getPrimaryKey();
-        if ($primaryKey) {
-            $columnList = implode(', ', array_map(fn($c) => "`{$c}`", $primaryKey->columns));
+        if ($primaryKey instanceof IndexSchema) {
+            $columnList = implode(', ', array_map(fn (string $c): string => "`{$c}`", $primaryKey->columns));
             $columns[] = "PRIMARY KEY ({$columnList})";
         }
 
         // Add unique indexes
         foreach ($table->indexes as $index) {
             if ($index->type === 'unique') {
-                $columnList = implode(', ', array_map(fn($c) => "`{$c}`", $index->columns));
+                $columnList = implode(', ', array_map(fn (string $c): string => "`{$c}`", $index->columns));
                 $columns[] = "UNIQUE KEY `{$index->name}` ({$columnList})";
             }
         }
 
         $sql = "CREATE TABLE `{$table->name}` (\n";
-        $sql .= "  " . implode(",\n  ", $columns) . "\n";
-        $sql .= ")";
+        $sql .= '  ' . implode(",\n  ", $columns) . "\n";
+        $sql .= ')';
 
         // Add table metadata
         if (isset($table->metadata['engine'])) {
@@ -59,7 +59,7 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildCreateIndex(string $tableName, IndexSchema $index): string
     {
-        $columnList = implode(', ', array_map(fn($c) => "`{$c}`", $index->columns));
+        $columnList = implode(', ', array_map(fn (string $c): string => "`{$c}`", $index->columns));
 
         $type = match ($index->type) {
             'unique' => 'UNIQUE INDEX',
@@ -73,8 +73,8 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildAddForeignKey(string $tableName, ForeignKeySchema $fk): string
     {
-        $columns = implode(', ', array_map(fn($c) => "`{$c}`", $fk->columns));
-        $refColumns = implode(', ', array_map(fn($c) => "`{$c}`", $fk->referencedColumns));
+        $columns = implode(', ', array_map(fn (string $c): string => "`{$c}`", $fk->columns));
+        $refColumns = implode(', ', array_map(fn (string $c): string => "`{$c}`", $fk->referencedColumns));
 
         return "ALTER TABLE `{$tableName}` " .
             "ADD CONSTRAINT `{$fk->name}` " .
@@ -98,20 +98,20 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
     {
         $def = "`{$column->name}` " . $this->buildDataType($column);
 
-        if (!$column->nullable) {
-            $def .= " NOT NULL";
+        if (! $column->nullable) {
+            $def .= ' NOT NULL';
         }
 
         if ($column->autoIncrement) {
-            $def .= " AUTO_INCREMENT";
+            $def .= ' AUTO_INCREMENT';
         }
 
         if ($column->default !== null) {
-            $def .= " DEFAULT " . $this->formatDefaultValue($column->default);
+            $def .= ' DEFAULT ' . $this->formatDefaultValue($column->default);
         }
 
         if ($column->comment) {
-            $def .= " COMMENT " . $this->quote($column->comment);
+            $def .= ' COMMENT ' . $this->quote($column->comment);
         }
 
         return $def;
@@ -119,7 +119,7 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildDataType(ColumnSchema $column): string
     {
-        $type = strtoupper($column->type);
+        $type = mb_strtoupper($column->type);
 
         if ($column->length !== null) {
             if ($column->scale !== null) {
@@ -130,7 +130,7 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
         }
 
         if ($column->unsigned) {
-            $type .= " UNSIGNED";
+            $type .= ' UNSIGNED';
         }
 
         return $type;
@@ -144,6 +144,7 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
         if (is_numeric($value)) {
             return (string) $value;
         }
+
         return $value;
     }
 

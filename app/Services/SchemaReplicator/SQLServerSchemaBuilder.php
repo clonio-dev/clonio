@@ -20,21 +20,20 @@ class SQLServerSchemaBuilder implements SchemaBuilderInterface
         }
 
         $primaryKey = $table->getPrimaryKey();
-        if ($primaryKey) {
-            $columnList = implode(', ', array_map(fn($c) => "[{$c}]", $primaryKey->columns));
+        if ($primaryKey instanceof IndexSchema) {
+            $columnList = implode(', ', array_map(fn (string $c): string => "[{$c}]", $primaryKey->columns));
             $columns[] = "PRIMARY KEY ({$columnList})";
         }
 
         $sql = "CREATE TABLE [{$table->name}] (\n";
-        $sql .= "  " . implode(",\n  ", $columns) . "\n";
-        $sql .= ")";
+        $sql .= '  ' . implode(",\n  ", $columns) . "\n";
 
-        return $sql;
+        return $sql . ')';
     }
 
     public function buildCreateIndex(string $tableName, IndexSchema $index): string
     {
-        $columnList = implode(', ', array_map(fn($c) => "[{$c}]", $index->columns));
+        $columnList = implode(', ', array_map(fn (string $c): string => "[{$c}]", $index->columns));
 
         if ($index->type === 'unique') {
             return "CREATE UNIQUE INDEX [{$index->name}] ON [{$tableName}] ({$columnList})";
@@ -45,8 +44,8 @@ class SQLServerSchemaBuilder implements SchemaBuilderInterface
 
     public function buildAddForeignKey(string $tableName, ForeignKeySchema $fk): string
     {
-        $columns = implode(', ', array_map(fn($c) => "[{$c}]", $fk->columns));
-        $refColumns = implode(', ', array_map(fn($c) => "[{$c}]", $fk->referencedColumns));
+        $columns = implode(', ', array_map(fn (string $c): string => "[{$c}]", $fk->columns));
+        $refColumns = implode(', ', array_map(fn (string $c): string => "[{$c}]", $fk->referencedColumns));
 
         // Map to SQL Server action names
         $onUpdate = str_replace(' ', '_', $fk->onUpdate);
@@ -75,15 +74,15 @@ class SQLServerSchemaBuilder implements SchemaBuilderInterface
         $def = "[{$column->name}] " . $this->buildDataType($column);
 
         if ($column->autoIncrement) {
-            $def .= " IDENTITY(1,1)";
+            $def .= ' IDENTITY(1,1)';
         }
 
-        if (!$column->nullable) {
-            $def .= " NOT NULL";
+        if (! $column->nullable) {
+            $def .= ' NOT NULL';
         }
 
-        if ($column->default !== null && !$column->autoIncrement) {
-            $def .= " DEFAULT " . $this->formatDefaultValue($column->default);
+        if ($column->default !== null && ! $column->autoIncrement) {
+            $def .= ' DEFAULT ' . $this->formatDefaultValue($column->default);
         }
 
         return $def;
@@ -91,7 +90,7 @@ class SQLServerSchemaBuilder implements SchemaBuilderInterface
 
     public function buildDataType(ColumnSchema $column): string
     {
-        $type = strtoupper($column->type);
+        $type = mb_strtoupper($column->type);
 
         // Map some common types
         $typeMap = [
@@ -118,7 +117,7 @@ class SQLServerSchemaBuilder implements SchemaBuilderInterface
 
         $type = $typeMap[$type] ?? $type;
 
-        if ($column->length !== null && !str_contains($type, 'MAX')) {
+        if ($column->length !== null && ! str_contains($type, 'MAX')) {
             if ($column->scale !== null) {
                 $type .= "({$column->length},{$column->scale})";
             } else {
@@ -137,6 +136,7 @@ class SQLServerSchemaBuilder implements SchemaBuilderInterface
         if (is_numeric($value)) {
             return (string) $value;
         }
+
         return $value;
     }
 

@@ -9,8 +9,7 @@ final readonly class TableMetricsData
     public function __construct(
         public int $rowsCount,
         public int $dataSizeInBytes,
-    )
-    { }
+    ) {}
 
     public function dataSizeInMB(): float
     {

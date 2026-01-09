@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Data\DatabaseSchema;
 use App\Data\TableSchema;
 use App\Services\SchemaInspector\SchemaInspectorFactory;
 use App\Services\SchemaReplicator\MySQLSchemaBuilder;
@@ -39,7 +38,7 @@ class SchemaReplicator
             $this->replicateTable($source, $target, $sourceTable);
         }
 
-        Log::info("Schema replication completed", [
+        Log::info('Schema replication completed', [
             'source_db' => $sourceSchema->databaseName,
             'target_db' => $targetSchema->databaseName,
             'tables_replicated' => $sourceSchema->getTableCount(),
@@ -66,7 +65,7 @@ class SchemaReplicator
             $this->createTable($target, $table);
         }
 
-        Log::info("Table replicated", [
+        Log::info('Table replicated', [
             'table' => $table->name,
             'columns' => $table->getColumnNames()->count(),
         ]);
@@ -91,14 +90,14 @@ class SchemaReplicator
 
         // Find missing tables (in source but not in target)
         foreach ($sourceSchema->tables as $sourceTable) {
-            if (!$targetSchema->hasTable($sourceTable->name)) {
+            if (! $targetSchema->hasTable($sourceTable->name)) {
                 $diff['missing_tables'][] = $sourceTable->name;
             } else {
                 // Compare table structure
                 $targetTable = $targetSchema->getTable($sourceTable->name);
                 $tableDiff = $this->getTableDiff($sourceTable, $targetTable);
 
-                if (!empty($tableDiff)) {
+                if ($tableDiff !== []) {
                     $diff['table_diffs'][$sourceTable->name] = $tableDiff;
                 }
             }
@@ -106,7 +105,7 @@ class SchemaReplicator
 
         // Find extra tables (in target but not in source)
         foreach ($targetSchema->tables as $targetTable) {
-            if (!$sourceSchema->hasTable($targetTable->name)) {
+            if (! $sourceSchema->hasTable($targetTable->name)) {
                 $diff['extra_tables'][] = $targetTable->name;
             }
         }
@@ -127,7 +126,7 @@ class SchemaReplicator
 
         // Find missing columns
         foreach ($source->columns as $sourceColumn) {
-            if (!$target->hasColumn($sourceColumn->name)) {
+            if (! $target->hasColumn($sourceColumn->name)) {
                 $diff['missing_columns'][] = $sourceColumn->name;
             } else {
                 // Compare column properties
@@ -144,7 +143,7 @@ class SchemaReplicator
 
         // Find extra columns
         foreach ($target->columns as $targetColumn) {
-            if (!$source->hasColumn($targetColumn->name)) {
+            if (! $source->hasColumn($targetColumn->name)) {
                 $diff['extra_columns'][] = $targetColumn->name;
             }
         }

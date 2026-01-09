@@ -20,21 +20,20 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
         }
 
         $primaryKey = $table->getPrimaryKey();
-        if ($primaryKey) {
-            $columnList = implode(', ', array_map(fn($c) => "\"{$c}\"", $primaryKey->columns));
+        if ($primaryKey instanceof IndexSchema) {
+            $columnList = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $primaryKey->columns));
             $columns[] = "PRIMARY KEY ({$columnList})";
         }
 
         $sql = "CREATE TABLE \"{$table->name}\" (\n";
-        $sql .= "  " . implode(",\n  ", $columns) . "\n";
-        $sql .= ")";
+        $sql .= '  ' . implode(",\n  ", $columns) . "\n";
 
-        return $sql;
+        return $sql . ')';
     }
 
     public function buildCreateIndex(string $tableName, IndexSchema $index): string
     {
-        $columnList = implode(', ', array_map(fn($c) => "\"{$c}\"", $index->columns));
+        $columnList = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $index->columns));
 
         if ($index->type === 'unique') {
             return "CREATE UNIQUE INDEX \"{$index->name}\" ON \"{$tableName}\" ({$columnList})";
@@ -45,8 +44,8 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildAddForeignKey(string $tableName, ForeignKeySchema $fk): string
     {
-        $columns = implode(', ', array_map(fn($c) => "\"{$c}\"", $fk->columns));
-        $refColumns = implode(', ', array_map(fn($c) => "\"{$c}\"", $fk->referencedColumns));
+        $columns = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $fk->columns));
+        $refColumns = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $fk->referencedColumns));
 
         return "ALTER TABLE \"{$tableName}\" " .
             "ADD CONSTRAINT \"{$fk->name}\" " .
@@ -85,12 +84,12 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
     {
         $def = "\"{$column->name}\" " . $this->buildDataType($column);
 
-        if (!$column->nullable) {
-            $def .= " NOT NULL";
+        if (! $column->nullable) {
+            $def .= ' NOT NULL';
         }
 
         if ($column->default !== null) {
-            $def .= " DEFAULT " . $this->formatDefaultValue($column->default);
+            $def .= ' DEFAULT ' . $this->formatDefaultValue($column->default);
         }
 
         return $def;
@@ -98,7 +97,7 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildDataType(ColumnSchema $column): string
     {
-        $type = strtoupper($column->type);
+        $type = mb_strtoupper($column->type);
 
         // Handle auto increment (SERIAL types)
         if ($column->autoIncrement) {
@@ -128,6 +127,7 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
         if (is_numeric($value)) {
             return (string) $value;
         }
+
         return $value;
     }
 

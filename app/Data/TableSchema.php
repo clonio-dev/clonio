@@ -29,7 +29,7 @@ final readonly class TableSchema
         public Collection $foreignKeys,
         public Collection $constraints,
         public array $metadata = [],
-        public ?TableMetricsData $metricsData,
+        public ?TableMetricsData $metricsData = null,
     ) {}
 
     /**
@@ -50,7 +50,7 @@ final readonly class TableSchema
             foreignKeys: collect($data['foreign_keys'])->map(fn (array $fk): ForeignKeySchema => ForeignKeySchema::fromArray($fk)),
             // @phpstan-ignore-next-line
             constraints: collect($data['constraints'])->map(fn (array $c): ConstraintSchema => ConstraintSchema::fromArray($c)),
-            metadata: $data['metadata'] ?? []
+            metadata: $data['metadata'] ?? [],
         );
     }
 

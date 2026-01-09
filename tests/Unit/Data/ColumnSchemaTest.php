@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Data\ColumnSchema;
 
-it('creates column schema with all properties', function () {
+it('creates column schema with all properties', function (): void {
     $column = new ColumnSchema(
         name: 'email',
         type: 'varchar',
@@ -26,7 +26,7 @@ it('creates column schema with all properties', function () {
         ->and($column->comment)->toBe('User email address');
 });
 
-it('detects numeric types correctly', function () {
+it('detects numeric types correctly', function (): void {
     $intColumn = new ColumnSchema('id', 'int', false, null);
     $textColumn = new ColumnSchema('name', 'varchar', false, null);
 
@@ -34,7 +34,7 @@ it('detects numeric types correctly', function () {
         ->and($textColumn->isNumeric())->toBeFalse();
 });
 
-it('detects string types correctly', function () {
+it('detects string types correctly', function (): void {
     $varcharColumn = new ColumnSchema('name', 'varchar', false, null);
     $intColumn = new ColumnSchema('id', 'int', false, null);
 
@@ -42,7 +42,7 @@ it('detects string types correctly', function () {
         ->and($intColumn->isString())->toBeFalse();
 });
 
-it('generates full type definition', function () {
+it('generates full type definition', function (): void {
     $varcharColumn = new ColumnSchema('name', 'varchar', false, null, 255);
     $decimalColumn = new ColumnSchema('price', 'decimal', false, null, 10, 2, unsigned: true);
 
@@ -50,7 +50,7 @@ it('generates full type definition', function () {
         ->and($decimalColumn->getFullType())->toBe('DECIMAL(10,2) UNSIGNED');
 });
 
-it('serializes and deserializes correctly', function () {
+it('serializes and deserializes correctly', function (): void {
     $original = new ColumnSchema(
         name: 'id',
         type: 'bigint',

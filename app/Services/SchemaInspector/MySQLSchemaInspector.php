@@ -142,16 +142,16 @@ class MySQLSchemaInspector extends AbstractSchemaInspector
 
     protected function getTableMetrics(Connection $connection, string $tableName): TableMetricsData
     {
-        $result = $connection->selectOne("
+        $result = $connection->selectOne('
             SELECT
                 TABLE_ROWS as row_count,
                 DATA_LENGTH as data_size
             FROM INFORMATION_SCHEMA.TABLES
             WHERE TABLE_SCHEMA = ?
             AND TABLE_NAME = ?
-        ", [$connection->getDatabaseName(), $tableName]);
+        ', [$connection->getDatabaseName(), $tableName]);
 
-        if (!$result) {
+        if (! $result) {
             return new TableMetricsData(rowsCount: 0, dataSizeInBytes: 0);
         }
 

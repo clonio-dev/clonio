@@ -12,6 +12,7 @@ use App\Data\TableMetricsData;
 use App\Data\TableSchema;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
+use stdClass;
 
 /**
  * PostgreSQL SchemaInspector
@@ -38,7 +39,7 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
      */
     public function getTableNames(Connection $connection): array
     {
-        /** @var array<int, \stdClass> $result */
+        /** @var array<int, stdClass> $result */
         $result = $connection->select("
             SELECT tablename
             FROM pg_catalog.pg_tables
@@ -47,20 +48,20 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
         ");
 
         // phpstan-ignore return.type
-        return array_map(fn($row) => $row->tablename, $result);
+        return array_map(fn (stdClass $row) => $row->tablename, $result);
     }
 
     public function getDatabaseMetadata(Connection $connection): array
     {
-        $version = $connection->selectOne("SELECT version() as version");
+        $version = $connection->selectOne('SELECT version() as version');
 
         return [
             // phpstan-ignore-next-line
             'version' => $version->version ?? null,
             // phpstan-ignore property.nonObject
-            'encoding' => $connection->selectOne("SHOW server_encoding")->server_encoding ?? null,
+            'encoding' => $connection->selectOne('SHOW server_encoding')->server_encoding ?? null,
             // phpstan-ignore-next-line
-            'collation' => $connection->selectOne("SHOW lc_collate")->lc_collate ?? null,
+            'collation' => $connection->selectOne('SHOW lc_collate')->lc_collate ?? null,
         ];
     }
 
@@ -86,12 +87,12 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
             ORDER BY c.ordinal_position
         ", [$tableName]);
 
-        return collect($result)->map(function ($column) {
+        return collect($result)->map(function ($column): ColumnSchema {
             // Check if auto-increment (SERIAL types or sequences)
             $autoIncrement = str_contains($column->column_default ?? '', 'nextval');
 
             // Parse actual type (PostgreSQL returns composite types differently)
-            $type = $this->normalizeType($column->data_type, $column->udt_name);
+            $type = $this->normalizeType($column->data_type);
 
             return new ColumnSchema(
                 name: $column->name,
@@ -115,16 +116,16 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
 
     protected function getTableMetrics(Connection $connection, string $tableName): TableMetricsData
     {
-        $rowCount = $connection->selectOne("
+        $rowCount = $connection->selectOne('
             SELECT reltuples::bigint AS row_count
             FROM pg_class
             WHERE relname = ?
-        ", [$tableName])->row_count ?? 0;
+        ', [$tableName])->row_count ?? 0;
 
         // Data Size (nur Table Data, ohne Indexes)
-        $dataSize = $connection->selectOne("
+        $dataSize = $connection->selectOne('
             SELECT pg_relation_size(?)::bigint AS data_size
-        ", [$tableName])->data_size ?? 0;
+        ', [$tableName])->data_size ?? 0;
 
         return new TableMetricsData(
             rowsCount: (int) $rowCount,
@@ -153,7 +154,7 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
             ORDER BY i.relname
         ", [$tableName]);
 
-        return collect($result)->map(function ($index) {
+        return collect($result)->map(function ($index): IndexSchema {
             // Determine type
             $type = 'index';
             if ($index->is_primary) {
@@ -204,7 +205,7 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
 
         $grouped = collect($result)->groupBy('constraint_name');
 
-        return $grouped->map(function ($fkColumns, $constraintName) use ($tableName) {
+        return $grouped->map(function ($fkColumns, $constraintName) use ($tableName): ForeignKeySchema {
             $firstColumn = $fkColumns->first();
 
             return new ForeignKeySchema(
@@ -234,15 +235,13 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
             AND con.contype = 'c'  -- CHECK constraints
         ", [$tableName]);
 
-        return collect($result)->map(function ($constraint) {
-            return new ConstraintSchema(
-                name: $constraint->name,
-                type: 'check',
-                column: null,
-                expression: $constraint->definition,
-                metadata: []
-            );
-        });
+        return collect($result)->map(fn ($constraint): ConstraintSchema => new ConstraintSchema(
+            name: $constraint->name,
+            type: 'check',
+            column: null,
+            expression: $constraint->definition,
+            metadata: []
+        ));
     }
 
     /**
@@ -265,7 +264,7 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
     /**
      * Normalize PostgreSQL type names to standard types
      */
-    private function normalizeType(string $dataType, string $udtName): string
+    private function normalizeType(string $dataType): string
     {
         // Map PostgreSQL-specific types to standard types
         $typeMap = [
@@ -287,8 +286,9 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
      */
     private function parsePostgresArray(string $array): array
     {
-        $array = trim($array, '{}');
-        return array_map('trim', explode(',', $array));
+        $array = mb_trim($array, '{}');
+
+        return array_map(trim(...), explode(',', $array));
     }
 
     /**
@@ -296,7 +296,7 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
      */
     private function parseDefaultValue(?string $default): mixed
     {
-        if ($default === null || strtoupper($default) === 'NULL') {
+        if ($default === null || mb_strtoupper($default) === 'NULL') {
             return null;
         }
 
@@ -311,7 +311,7 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
         $default = preg_replace('/::[a-z]+/', '', $default);
 
         // Remove quotes
-        if (preg_match("/^'(.*)'$/", $default, $matches)) {
+        if (preg_match("/^'(.*)'$/", (string) $default, $matches)) {
             return $matches[1];
         }
 

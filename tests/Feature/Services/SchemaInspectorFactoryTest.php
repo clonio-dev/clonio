@@ -6,7 +6,7 @@ use App\Services\SchemaInspector\SchemaInspectorFactory;
 use App\Services\SchemaReplicator;
 use Illuminate\Support\Facades\DB;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Setup two in-memory SQLite databases
     config(['database.connections.source_test' => [
         'driver' => 'sqlite',
@@ -19,11 +19,11 @@ beforeEach(function () {
     ]]);
 });
 
-it('inspects complete database schema', function () {
+it('inspects complete database schema', function (): void {
     $conn = DB::connection('source_test');
 
     // Create test table
-    $conn->statement("
+    $conn->statement('
         CREATE TABLE users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(255) NOT NULL,
@@ -31,11 +31,11 @@ it('inspects complete database schema', function () {
             age INTEGER DEFAULT 0,
             created_at DATETIME
         )
-    ");
+    ');
 
-    $conn->statement("
+    $conn->statement('
         CREATE UNIQUE INDEX idx_email ON users (email)
-    ");
+    ');
 
     $inspector = SchemaInspectorFactory::create($conn);
     $schema = $inspector->getDatabaseSchema($conn);
@@ -55,12 +55,12 @@ it('inspects complete database schema', function () {
         ->and($emailColumn->length)->toBe(255);
 });
 
-it('replicates table structure from source to target', function () {
+it('replicates table structure from source to target', function (): void {
     $source = DB::connection('source_test');
     $target = DB::connection('target_test');
 
     // Create source table with multiple columns
-    $source->statement("
+    $source->statement('
         CREATE TABLE products (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             sku VARCHAR(50) NOT NULL,
@@ -69,11 +69,11 @@ it('replicates table structure from source to target', function () {
             stock INTEGER DEFAULT 0,
             active INTEGER DEFAULT 1
         )
-    ");
+    ');
 
-    $source->statement("
+    $source->statement('
         CREATE UNIQUE INDEX idx_sku ON products (sku)
-    ");
+    ');
 
     // Replicate to target
     $replicator = new SchemaReplicator();
@@ -96,27 +96,27 @@ it('replicates table structure from source to target', function () {
         ->and($priceColumn->scale)->toBe(2);
 });
 
-it('detects schema differences correctly', function () {
+it('detects schema differences correctly', function (): void {
     $source = DB::connection('source_test');
     $target = DB::connection('target_test');
 
     // Create table in source with 4 columns
-    $source->statement("
+    $source->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             customer_id INTEGER NOT NULL,
             total DECIMAL(10,2),
             status VARCHAR(50)
         )
-    ");
+    ');
 
     // Create table in target with only 2 columns (missing 'total' and 'status')
-    $target->statement("
+    $target->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             customer_id INTEGER NOT NULL
         )
-    ");
+    ');
 
     $replicator = new SchemaReplicator();
     $diff = $replicator->getSchemaDiff($source, $target);
@@ -130,25 +130,25 @@ it('detects schema differences correctly', function () {
         ->and(count($ordersDiff['missing_columns']))->toBe(2);
 });
 
-it('handles foreign keys correctly', function () {
+it('handles foreign keys correctly', function (): void {
     $source = DB::connection('source_test');
 
     // Create parent table
-    $source->statement("
+    $source->statement('
         CREATE TABLE customers (
             id INTEGER PRIMARY KEY,
             name VARCHAR(255)
         )
-    ");
+    ');
 
     // Create child table with foreign key
-    $source->statement("
+    $source->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             customer_id INTEGER NOT NULL,
             FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
         )
-    ");
+    ');
 
     $inspector = SchemaInspectorFactory::create($source);
     $ordersTable = $inspector->getTableSchema($source, 'orders');
@@ -163,35 +163,35 @@ it('handles foreign keys correctly', function () {
         ->and($fk->onDelete)->toBe('CASCADE');
 });
 
-it('replicates entire database with multiple tables', function () {
+it('replicates entire database with multiple tables', function (): void {
     $source = DB::connection('source_test');
     $target = DB::connection('target_test');
 
     // Create multiple tables in source
-    $source->statement("
+    $source->statement('
         CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             name VARCHAR(255)
         )
-    ");
+    ');
 
-    $source->statement("
+    $source->statement('
         CREATE TABLE posts (
             id INTEGER PRIMARY KEY,
             user_id INTEGER,
             title VARCHAR(255),
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
-    ");
+    ');
 
-    $source->statement("
+    $source->statement('
         CREATE TABLE comments (
             id INTEGER PRIMARY KEY,
             post_id INTEGER,
             content TEXT,
             FOREIGN KEY (post_id) REFERENCES posts(id)
         )
-    ");
+    ');
 
     // Replicate entire database
     $replicator = new SchemaReplicator();
@@ -205,27 +205,27 @@ it('replicates entire database with multiple tables', function () {
         ->and($targetInspector->tableExists($target, 'comments'))->toBeTrue();
 });
 
-it('updates existing table with new columns', function () {
+it('updates existing table with new columns', function (): void {
     $source = DB::connection('source_test');
     $target = DB::connection('target_test');
 
     // Create initial table in both
-    $source->statement("
+    $source->statement('
         CREATE TABLE products (
             id INTEGER PRIMARY KEY,
             name VARCHAR(255)
         )
-    ");
+    ');
 
-    $target->statement("
+    $target->statement('
         CREATE TABLE products (
             id INTEGER PRIMARY KEY,
             name VARCHAR(255)
         )
-    ");
+    ');
 
     // Add new column to source
-    $source->statement("ALTER TABLE products ADD COLUMN price DECIMAL(10,2)");
+    $source->statement('ALTER TABLE products ADD COLUMN price DECIMAL(10,2)');
 
     // Replicate (should add the missing column to target)
     $replicator = new SchemaReplicator();

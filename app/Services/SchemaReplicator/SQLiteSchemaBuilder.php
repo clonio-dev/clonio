@@ -9,6 +9,7 @@ use App\Data\ColumnSchema;
 use App\Data\ForeignKeySchema;
 use App\Data\IndexSchema;
 use App\Data\TableSchema;
+use RuntimeException;
 
 class SQLiteSchemaBuilder implements SchemaBuilderInterface
 {
@@ -26,10 +27,9 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
         }
 
         $sql = "CREATE TABLE \"{$table->name}\" (\n";
-        $sql .= "  " . implode(",\n  ", $columns) . "\n";
-        $sql .= ")";
+        $sql .= '  ' . implode(",\n  ", $columns) . "\n";
 
-        return $sql;
+        return $sql . ')';
     }
 
     public function buildCreateIndex(string $tableName, IndexSchema $index): string
@@ -47,9 +47,9 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
     {
         // SQLite doesn't support adding foreign keys to existing tables
         // This would require recreating the table
-        throw new \RuntimeException(
-            "SQLite does not support adding foreign keys to existing tables. " .
-            "Table must be recreated with foreign key definition."
+        throw new RuntimeException(
+            'SQLite does not support adding foreign keys to existing tables. ' .
+            'Table must be recreated with foreign key definition.'
         );
     }
 
@@ -62,9 +62,9 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
     {
         // SQLite doesn't support modifying columns
         // This would require recreating the table
-        throw new \RuntimeException(
-            "SQLite does not support modifying columns. " .
-            "Table must be recreated with new column definition."
+        throw new RuntimeException(
+            'SQLite does not support modifying columns. ' .
+            'Table must be recreated with new column definition.'
         );
     }
 
@@ -73,17 +73,17 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
         $def = "\"{$column->name}\" " . $this->buildDataType($column);
 
         // Primary key for single-column auto-increment
-        $isPrimaryAutoIncrement = $column->autoIncrement && strtoupper($column->type) === 'INTEGER';
+        $isPrimaryAutoIncrement = $column->autoIncrement && mb_strtoupper($column->type) === 'INTEGER';
         if ($isPrimaryAutoIncrement) {
-            $def .= " PRIMARY KEY AUTOINCREMENT";
+            $def .= ' PRIMARY KEY AUTOINCREMENT';
         }
 
-        if (!$column->nullable && !$isPrimaryAutoIncrement) {
-            $def .= " NOT NULL";
+        if (! $column->nullable && ! $isPrimaryAutoIncrement) {
+            $def .= ' NOT NULL';
         }
 
-        if ($column->default !== null && !$isPrimaryAutoIncrement) {
-            $def .= " DEFAULT " . $this->formatDefaultValue($column->default);
+        if ($column->default !== null && ! $isPrimaryAutoIncrement) {
+            $def .= ' DEFAULT ' . $this->formatDefaultValue($column->default);
         }
 
         return $def;
@@ -91,9 +91,9 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
 
     public function buildDataType(ColumnSchema $column): string
     {
-        $type = strtoupper($column->type);
+        $type = mb_strtoupper($column->type);
 
-        if ($column->length !== null && !in_array($type, ['TEXT', 'BLOB'])) {
+        if ($column->length !== null && ! in_array($type, ['TEXT', 'BLOB'])) {
             if ($column->scale !== null) {
                 $type .= "({$column->length},{$column->scale})";
             } else {
@@ -112,6 +112,7 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
         if (is_numeric($value)) {
             return (string) $value;
         }
+
         return $value;
     }
 

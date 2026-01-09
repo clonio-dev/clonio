@@ -43,12 +43,12 @@ class SQLServerSchemaInspector extends AbstractSchemaInspector
             ORDER BY TABLE_NAME
         ");
 
-        return array_map(fn($row) => $row->TABLE_NAME, $result);
+        return array_map(fn ($row) => $row->TABLE_NAME, $result);
     }
 
     public function getDatabaseMetadata(Connection $connection): array
     {
-        $version = $connection->selectOne("SELECT @@VERSION as version");
+        $version = $connection->selectOne('SELECT @@VERSION as version');
         $dbInfo = $connection->selectOne("
             SELECT
                 DATABASEPROPERTYEX(DB_NAME(), 'Collation') as collation,
@@ -85,40 +85,38 @@ class SQLServerSchemaInspector extends AbstractSchemaInspector
             ORDER BY c.ORDINAL_POSITION
         ", [$tableName]);
 
-        return collect($result)->map(function ($column) {
-            return new ColumnSchema(
-                name: $column->name,
-                type: $column->data_type,
-                nullable: $column->is_nullable === 'YES',
-                default: $this->parseDefaultValue($column->default_value),
-                length: $column->max_length ? (int) $column->max_length : null,
-                scale: $column->numeric_scale ? (int) $column->numeric_scale : null,
-                autoIncrement: $column->is_identity == 1,
-                unsigned: false, // SQL Server doesn't have unsigned
-                charset: null,
-                collation: null,
-                comment: $column->comment ?: null,
-                metadata: [
-                    'data_type' => $column->data_type,
-                ]
-            );
-        });
+        return collect($result)->map(fn ($column): ColumnSchema => new ColumnSchema(
+            name: $column->name,
+            type: $column->data_type,
+            nullable: $column->is_nullable === 'YES',
+            default: $this->parseDefaultValue($column->default_value),
+            length: $column->max_length ? (int) $column->max_length : null,
+            scale: $column->numeric_scale ? (int) $column->numeric_scale : null,
+            autoIncrement: $column->is_identity === 1,
+            unsigned: false, // SQL Server doesn't have unsigned
+            charset: null,
+            collation: null,
+            comment: $column->comment ?: null,
+            metadata: [
+                'data_type' => $column->data_type,
+            ]
+        ));
     }
 
     protected function getTableMetrics(Connection $connection, string $tableName): TableMetricsData
     {
-        $rowCount = $connection->selectOne("
+        $rowCount = $connection->selectOne('
             SELECT SUM(rows) AS row_count
             FROM sys.partitions
             WHERE object_id = OBJECT_ID(?)
             AND index_id IN (0, 1) -- Heap or Clustered Index
-        ", [$tableName])->row_count ?? 0;
+        ', [$tableName])->row_count ?? 0;
 
-        $dataSize = $connection->selectOne("
+        $dataSize = $connection->selectOne('
             SELECT SUM(reserved_page_count) * 8192 AS data_size
             FROM sys.dm_db_partition_stats
             WHERE object_id = OBJECT_ID(?)
-        ", [$tableName])->data_size ?? 0;
+        ', [$tableName])->data_size ?? 0;
 
         return new TableMetricsData(
             rowsCount: (int) $rowCount,
@@ -144,7 +142,7 @@ class SQLServerSchemaInspector extends AbstractSchemaInspector
             ORDER BY i.name
         ", [$tableName]);
 
-        return collect($result)->map(function ($index) {
+        return collect($result)->map(function ($index): IndexSchema {
             // Determine type
             $type = 'index';
             if ($index->is_primary_key) {
@@ -154,7 +152,7 @@ class SQLServerSchemaInspector extends AbstractSchemaInspector
             }
 
             // Parse comma-separated columns
-            $columns = explode(',', $index->columns);
+            $columns = explode(',', (string) $index->columns);
 
             return new IndexSchema(
                 name: $index->index_name,
@@ -186,17 +184,15 @@ class SQLServerSchemaInspector extends AbstractSchemaInspector
             ORDER BY fk.name
         ", [$tableName]);
 
-        return collect($result)->map(function ($fk) use ($tableName) {
-            return new ForeignKeySchema(
-                name: $fk->constraint_name,
-                table: $tableName,
-                columns: explode(',', $fk->columns),
-                referencedTable: $fk->referenced_table,
-                referencedColumns: explode(',', $fk->referenced_columns),
-                onUpdate: $this->normalizeReferentialAction($fk->update_rule),
-                onDelete: $this->normalizeReferentialAction($fk->delete_rule)
-            );
-        });
+        return collect($result)->map(fn ($fk): ForeignKeySchema => new ForeignKeySchema(
+            name: $fk->constraint_name,
+            table: $tableName,
+            columns: explode(',', (string) $fk->columns),
+            referencedTable: $fk->referenced_table,
+            referencedColumns: explode(',', (string) $fk->referenced_columns),
+            onUpdate: $this->normalizeReferentialAction($fk->update_rule),
+            onDelete: $this->normalizeReferentialAction($fk->delete_rule)
+        ));
     }
 
     protected function getConstraints(Connection $connection, string $tableName): Collection
@@ -210,15 +206,13 @@ class SQLServerSchemaInspector extends AbstractSchemaInspector
             ORDER BY cc.name
         ", [$tableName]);
 
-        return collect($result)->map(function ($constraint) {
-            return new ConstraintSchema(
-                name: $constraint->name,
-                type: 'check',
-                column: null,
-                expression: $constraint->definition,
-                metadata: []
-            );
-        });
+        return collect($result)->map(fn ($constraint): ConstraintSchema => new ConstraintSchema(
+            name: $constraint->name,
+            type: 'check',
+            column: null,
+            expression: $constraint->definition,
+            metadata: []
+        ));
     }
 
     /**
@@ -263,16 +257,16 @@ class SQLServerSchemaInspector extends AbstractSchemaInspector
      */
     private function parseDefaultValue(?string $default): mixed
     {
-        if ($default === null || strtoupper($default) === 'NULL') {
+        if ($default === null || mb_strtoupper($default) === 'NULL') {
             return null;
         }
 
         // Remove outer parentheses: ((value))
-        $default = preg_replace('/^\((.*)\)$/', '$1', trim($default));
-        $default = preg_replace('/^\((.*)\)$/', '$1', $default);
+        $default = preg_replace('/^\((.*)\)$/', '$1', mb_trim($default));
+        $default = preg_replace('/^\((.*)\)$/', '$1', (string) $default);
 
         // Remove quotes
-        if (preg_match("/^'(.*)'$/", $default, $matches)) {
+        if (preg_match("/^'(.*)'$/", (string) $default, $matches)) {
             return $matches[1];
         }
 

@@ -10,6 +10,7 @@ use App\Data\ForeignKeySchema;
 use App\Data\IndexSchema;
 use App\Data\TableMetricsData;
 use App\Data\TableSchema;
+use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
 
@@ -43,16 +44,16 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
             ORDER BY name
         ");
 
-        return array_map(fn($row) => $row->name, $result);
+        return array_map(fn ($row) => $row->name, $result);
     }
 
     public function getDatabaseMetadata(Connection $connection): array
     {
-        $version = $connection->selectOne("SELECT sqlite_version() as version");
+        $version = $connection->selectOne('SELECT sqlite_version() as version');
 
         return [
             'version' => $version->version ?? null,
-            'encoding' => $connection->selectOne("PRAGMA encoding")->encoding ?? null,
+            'encoding' => $connection->selectOne('PRAGMA encoding')->encoding ?? null,
         ];
     }
 
@@ -60,7 +61,7 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
     {
         $result = $connection->select("PRAGMA table_info({$tableName})");
 
-        return collect($result)->map(function ($column) {
+        return collect($result)->map(function ($column): ColumnSchema {
             // Parse type and length (e.g., "VARCHAR(255)")
             $type = $column->type;
             $length = null;
@@ -78,12 +79,12 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
             }
 
             // Check if auto increment (SQLite uses INTEGER PRIMARY KEY AUTOINCREMENT)
-            $autoIncrement = $column->pk == 1 && strtoupper($type) === 'INTEGER';
+            $autoIncrement = $column->pk === 1 && mb_strtoupper($type) === 'INTEGER';
 
             return new ColumnSchema(
                 name: $column->name,
-                type: strtolower($type),
-                nullable: $column->notnull == 0,
+                type: mb_strtolower($type),
+                nullable: $column->notnull === 0,
                 default: $this->parseDefaultValue($column->dflt_value),
                 length: $length,
                 scale: $scale,
@@ -115,7 +116,7 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
 
         try {
             // Page Size (standardmäßig 4096 Bytes)
-            $pageSize = $connection->selectOne("PRAGMA page_size")->page_size ?? 4096;
+            $pageSize = $connection->selectOne('PRAGMA page_size')->page_size ?? 4096;
 
             // Anzahl Seiten für diese Tabelle
             // Hinweis: SQLite speichert Tabellen nicht isoliert
@@ -145,7 +146,7 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
                 $dataSize = $rowCount * 500;
             }
 
-        } catch (\Exception) {
+        } catch (Exception) {
             // Fallback bei Fehler: Grobe Schätzung
             $dataSize = $rowCount * 500; // 500 Bytes durchschnittlich pro Row
         }
@@ -161,16 +162,16 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
         // Get all indexes
         $indexes = $connection->select("PRAGMA index_list({$tableName})");
 
-        $result = collect($indexes)->map(function ($index) use ($connection, $tableName) {
+        return collect($indexes)->map(function ($index) use ($connection): IndexSchema {
             // Get columns for this index
             $indexInfo = $connection->select("PRAGMA index_info({$index->name})");
-            $columns = array_map(fn($col) => $col->name, $indexInfo);
+            $columns = array_map(fn ($col) => $col->name, $indexInfo);
 
             // Determine type
             $type = 'index';
             if ($index->origin === 'pk') {
                 $type = 'primary';
-            } elseif ($index->unique == 1) {
+            } elseif ($index->unique === 1) {
                 $type = 'unique';
             }
 
@@ -183,8 +184,6 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
                 ]
             );
         });
-
-        return $result;
     }
 
     protected function getForeignKeys(Connection $connection, string $tableName): Collection
@@ -194,7 +193,7 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
         // Group by id (foreign key constraint id)
         $grouped = collect($result)->groupBy('id');
 
-        return $grouped->map(function ($fkColumns, $id) use ($tableName) {
+        return $grouped->map(function ($fkColumns, $id) use ($tableName): ForeignKeySchema {
             $firstColumn = $fkColumns->first();
 
             return new ForeignKeySchema(
@@ -218,7 +217,7 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
             WHERE type = 'table' AND name = ?
         ", [$tableName]);
 
-        if (!$createTable || !$createTable->sql) {
+        if (! $createTable || ! $createTable->sql) {
             return collect();
         }
 
@@ -227,13 +226,13 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
         $sql = $createTable->sql;
 
         // Match CHECK constraints: CHECK (expression)
-        if (preg_match_all('/CHECK\s*\((.*?)\)/i', $sql, $matches)) {
+        if (preg_match_all('/CHECK\s*\((.*?)\)/i', (string) $sql, $matches)) {
             foreach ($matches[1] as $index => $expression) {
                 $constraints->push(new ConstraintSchema(
                     name: "check_{$tableName}_{$index}",
                     type: 'check',
                     column: null,
-                    expression: trim($expression),
+                    expression: mb_trim($expression),
                     metadata: []
                 ));
             }
@@ -247,7 +246,7 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
      */
     private function parseDefaultValue(?string $default): mixed
     {
-        if ($default === null || strtoupper($default) === 'NULL') {
+        if ($default === null || mb_strtoupper($default) === 'NULL') {
             return null;
         }
 
