@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
+use App\Data\SynchronizationOptionsData;
 use App\Jobs\TransferRecordsForAllTables;
 use App\Jobs\TransferRecordsForOneTable;
 use App\Services\DatabaseInformationRetrievalService;
@@ -16,8 +17,9 @@ it('returns correct middleware', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: new ConnectionData('source', new SqliteDriverData()),
         targetConnectionData: new ConnectionData('target', new SqliteDriverData()),
-        chunkSize: 100,
-        migrationTableName: null,
+        options: new SynchronizationOptionsData(
+            chunkSize: 100,
+        ),
     );
 
     $middleware = $job->middleware();
@@ -63,8 +65,9 @@ it('transfers records from all tables', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        chunkSize: 100,
-        migrationTableName: null,
+        options: new SynchronizationOptionsData(
+            chunkSize: 100,
+        ),
     );
     $job->withBatchId($batch->id);
 
@@ -113,8 +116,10 @@ it('skips migration table when specified', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        chunkSize: 100,
-        migrationTableName: 'migrations',
+        options: new SynchronizationOptionsData(
+            chunkSize: 100,
+            migrationTableName: 'migrations',
+        ),
     );
     $job->withBatchId($batch->id);
 
@@ -163,8 +168,9 @@ it('skips tables with no records', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        chunkSize: 100,
-        migrationTableName: null,
+        options: new SynchronizationOptionsData(
+            chunkSize: 100,
+        ),
     );
     $job->withBatchId($batch->id);
 
@@ -207,9 +213,9 @@ it('passes foreign key constraints flag to child jobs', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        chunkSize: 100,
-        migrationTableName: null,
-        disableForeignKeyConstraints: true,
+        options: new SynchronizationOptionsData(
+            chunkSize: 100,
+        ),
     );
     $job->withBatchId($batch->id);
 
@@ -252,8 +258,9 @@ it('passes chunk size to child jobs', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        chunkSize: 250,
-        migrationTableName: null,
+        options: new SynchronizationOptionsData(
+            chunkSize: 250,
+        ),
     );
     $job->withBatchId($batch->id);
 
@@ -261,7 +268,7 @@ it('passes chunk size to child jobs', function (): void {
     $job->handle($dbService);
 
     // Verify the child job has correct chunk size
-    Queue::assertPushed(TransferRecordsForOneTable::class, fn ($job): bool => $job->chunkSize === 250);
+    Queue::assertPushed(TransferRecordsForOneTable::class, fn (TransferRecordsForOneTable $job): bool => $job->chunkSize === 250);
 
     // Clean up
     @unlink($sourceDb);
@@ -315,8 +322,9 @@ it('handles multiple tables with mixed empty and non-empty', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        chunkSize: 100,
-        migrationTableName: null,
+        options: new SynchronizationOptionsData(
+            chunkSize: 100
+        ),
     );
     $job->withBatchId($batch->id);
 

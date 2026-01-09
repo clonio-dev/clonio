@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Data\ColumnMutationData;
+use App\Data\ColumnMutationStrategyEnum;
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
+use App\Data\TableAnonymizationOptionsData;
 use App\Jobs\TransferRecordsForOneTable;
+use App\Services\AnonymizationService;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Facades\DB;
@@ -75,7 +79,9 @@ it('transfers records from source to target table', function (): void {
     );
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
+    $anonymizationService = resolve(AnonymizationService::class);
+
+    $job->handle($dbService, $anonymizationService);
 
     // Verify records were transferred
     expect(DB::connection('test_target')->table('posts')->count())->toBe(3);
@@ -136,7 +142,9 @@ it('transfers records in chunks', function (): void {
     );
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
+    $anonymizationService = resolve(AnonymizationService::class);
+
+    $job->handle($dbService, $anonymizationService);
 
     // Verify all records were transferred despite chunking
     expect(DB::connection('test_target')->table('posts')->count())->toBe(5);
@@ -196,17 +204,27 @@ it('mutates user data during transfer', function (): void {
         targetConnectionData: $targetConnectionData,
         tableName: 'users',
         chunkSize: 100,
+        tableAnonymizationOptions: new TableAnonymizationOptionsData(
+            tableName: 'users',
+            columnMutations: collect([
+                new ColumnMutationData(columnName: 'name', strategy: ColumnMutationStrategyEnum::FAKE),
+                new ColumnMutationData(columnName: 'email', strategy: ColumnMutationStrategyEnum::FAKE),
+                new ColumnMutationData(columnName: 'password', strategy: ColumnMutationStrategyEnum::MASK, options: ['visible_chars' => 0]),
+            ]),
+        )
     );
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
+    $anonymizationService = resolve(AnonymizationService::class);
+
+    $job->handle($dbService, $anonymizationService);
 
     $targetUser = DB::connection('test_target')->table('users')->first();
 
     // Verify user data was mutated
     expect($targetUser->name)->not->toBe('John Doe');
     expect($targetUser->email)->not->toBe('john@example.com');
-    expect($targetUser->password)->toBe('********');
+    expect($targetUser->password)->toBe('*********');
 
     // Clean up
     @unlink($sourceDb);
@@ -259,7 +277,9 @@ it('transfers records with foreign key constraints disabled', function (): void 
     );
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
+    $anonymizationService = resolve(AnonymizationService::class);
+
+    $job->handle($dbService, $anonymizationService);
 
     // Verify records were transferred
     expect(DB::connection('test_target')->table('posts')->count())->toBe(1);
@@ -311,8 +331,9 @@ it('fails when table does not exist in source database', function (): void {
     );
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
+    $anonymizationService = resolve(AnonymizationService::class);
 
-    expect(fn () => $job->handle($dbService))
+    expect(fn () => $job->handle($dbService, $anonymizationService))
         ->toThrow(RuntimeException::class, 'Table posts does not exist in source or target database.');
 
     // Clean up
@@ -359,8 +380,9 @@ it('fails when table does not exist in target database', function (): void {
     );
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
+    $anonymizationService = resolve(AnonymizationService::class);
 
-    expect(fn () => $job->handle($dbService))
+    expect(fn () => $job->handle($dbService, $anonymizationService))
         ->toThrow(RuntimeException::class, 'Table posts does not exist in source or target database.');
 
     // Clean up
@@ -417,7 +439,9 @@ it('transfers records ordered by primary key', function (): void {
     );
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
+    $anonymizationService = resolve(AnonymizationService::class);
+
+    $job->handle($dbService, $anonymizationService);
 
     // Verify records were transferred in order by ID
     $targetTitles = DB::connection('test_target')->table('posts')->orderBy('id')->pluck('title')->toArray();

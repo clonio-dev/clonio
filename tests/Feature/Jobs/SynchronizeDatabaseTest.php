@@ -73,15 +73,15 @@ it('synchronizes database with single target', function (): void {
     $job->handle($dbService);
 
     // Verify CloneSchemaAndPrepareForData was queued
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn ($job): bool => $job->synchronizeTableSchemaEnum === $options->synchronizeTableSchema
+    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn (CloneSchemaAndPrepareForData $job): bool => $job->synchronizeTableSchemaEnum === $options->synchronizeTableSchema
         && $job->keepUnknownTablesOnTarget === $options->keepUnknownTablesOnTarget
         && $job->migrationTableName === $options->migrationTableName
         && $job->disableForeignKeyConstraints === $options->disableForeignKeyConstraints);
 
     // Verify TransferRecordsForAllTables was queued
-    Queue::assertPushed(TransferRecordsForAllTables::class, fn ($job): bool => $job->chunkSize === $options->chunkSize
-        && $job->migrationTableName === $options->migrationTableName
-        && $job->disableForeignKeyConstraints === $options->disableForeignKeyConstraints);
+    Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === $options->chunkSize
+        && $job->options->migrationTableName === $options->migrationTableName
+        && $job->options->disableForeignKeyConstraints === $options->disableForeignKeyConstraints);
 
     // Clean up
     @unlink($sourceDb);
@@ -184,9 +184,9 @@ it('passes synchronization options to child jobs', function (): void {
         && $job->disableForeignKeyConstraints === false);
 
     // Verify all options were passed correctly to TransferRecordsForAllTables
-    Queue::assertPushed(TransferRecordsForAllTables::class, fn ($job): bool => $job->chunkSize === 250
-        && $job->migrationTableName === 'custom_migrations'
-        && $job->disableForeignKeyConstraints === false);
+    Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === 250
+        && $job->options->migrationTableName === 'custom_migrations'
+        && $job->options->disableForeignKeyConstraints === false);
 
     // Clean up
     @unlink($sourceDb);
@@ -228,14 +228,14 @@ it('uses default synchronization options when not specified', function (): void 
     $job->handle($dbService);
 
     // Verify default options
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn ($job): bool => $job->synchronizeTableSchemaEnum === SynchronizeTableSchemaEnum::DROP_CREATE
+    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn (CloneSchemaAndPrepareForData $job): bool => $job->synchronizeTableSchemaEnum === SynchronizeTableSchemaEnum::DROP_CREATE
         && $job->keepUnknownTablesOnTarget === true
         && $job->migrationTableName === null
         && $job->disableForeignKeyConstraints === true);
 
-    Queue::assertPushed(TransferRecordsForAllTables::class, fn ($job): bool => $job->chunkSize === 1000
-        && $job->migrationTableName === null
-        && $job->disableForeignKeyConstraints === true);
+    Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === 1000
+        && $job->options->migrationTableName === null
+        && $job->options->disableForeignKeyConstraints === true);
 
     // Clean up
     @unlink($sourceDb);
