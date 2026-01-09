@@ -41,7 +41,7 @@ interface SchemaInspectorInterface
     /**
      * Get database metadata (version, charset, etc.)
      *
-     * @return array{version: null|string, charset: null|string, collation: null|string}
+     * @return array{version: null|string, charset?: null|string, encoding?: null|string, collation: null|string}
      */
     public function getDatabaseMetadata(Connection $connection): array;
 }
