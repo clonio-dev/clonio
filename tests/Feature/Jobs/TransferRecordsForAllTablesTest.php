@@ -117,8 +117,8 @@ it('skips migration table when specified', function (): void {
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         options: new SynchronizationOptionsData(
-            chunkSize: 100,
             migrationTableName: 'migrations',
+            chunkSize: 100,
         ),
     );
     $job->withBatchId($batch->id);

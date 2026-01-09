@@ -6,9 +6,8 @@ use App\Data\ColumnMutationData;
 use App\Data\ColumnMutationStrategyEnum;
 use App\Data\TableAnonymizationOptionsData;
 use App\Services\AnonymizationService;
-use Illuminate\Support\Collection;
 
-it('returns record unchanged when no table options provided', function () {
+it('returns record unchanged when no table options provided', function (): void {
     $service = new AnonymizationService();
     $record = ['name' => 'John Doe', 'email' => 'john@example.com'];
 
@@ -17,7 +16,7 @@ it('returns record unchanged when no table options provided', function () {
     expect($result)->toBe($record);
 });
 
-it('applies fake strategy to generate fake data', function () {
+it('applies fake strategy to generate fake data', function (): void {
     $service = new AnonymizationService();
     $record = ['name' => 'John Doe', 'email' => 'john@example.com'];
 
@@ -35,7 +34,7 @@ it('applies fake strategy to generate fake data', function () {
         ->and($result['email'])->not->toBe('john@example.com');
 });
 
-it('applies fake strategy with arguments', function () {
+it('applies fake strategy with arguments', function (): void {
     $service = new AnonymizationService();
     $record = ['description' => 'original'];
 
@@ -55,7 +54,7 @@ it('applies fake strategy with arguments', function () {
         ->and($result['description'])->toBeString();
 });
 
-it('applies mask strategy to mask data', function () {
+it('applies mask strategy to mask data', function (): void {
     $service = new AnonymizationService();
     $record = ['name' => 'JohnDoe'];
 
@@ -71,7 +70,7 @@ it('applies mask strategy to mask data', function () {
     expect($result['name'])->toBe('Jo*****');
 });
 
-it('applies mask strategy with custom mask character', function () {
+it('applies mask strategy with custom mask character', function (): void {
     $service = new AnonymizationService();
     $record = ['name' => 'JohnDoe'];
 
@@ -90,7 +89,7 @@ it('applies mask strategy with custom mask character', function () {
     expect($result['name'])->toBe('Joh####');
 });
 
-it('applies mask strategy to email preserving format', function () {
+it('applies mask strategy to email preserving format', function (): void {
     $service = new AnonymizationService();
     $record = ['email' => 'john.doe@example.com'];
 
@@ -109,7 +108,7 @@ it('applies mask strategy to email preserving format', function () {
     expect($result['email'])->toBe('jo******@example.com');
 });
 
-it('applies mask strategy to null values', function () {
+it('applies mask strategy to null values', function (): void {
     $service = new AnonymizationService();
     $record = ['name' => null];
 
@@ -125,7 +124,7 @@ it('applies mask strategy to null values', function () {
     expect($result['name'])->toBe('');
 });
 
-it('applies hash strategy to hash data', function () {
+it('applies hash strategy to hash data', function (): void {
     $service = new AnonymizationService();
     $record = ['password' => 'secret123'];
 
@@ -142,7 +141,7 @@ it('applies hash strategy to hash data', function () {
         ->and($result['password'])->toHaveLength(64);
 });
 
-it('applies hash strategy with custom algorithm', function () {
+it('applies hash strategy with custom algorithm', function (): void {
     $service = new AnonymizationService();
     $record = ['password' => 'secret123'];
 
@@ -159,7 +158,7 @@ it('applies hash strategy with custom algorithm', function () {
         ->and($result['password'])->toHaveLength(32);
 });
 
-it('applies hash strategy with salt', function () {
+it('applies hash strategy with salt', function (): void {
     $service = new AnonymizationService();
     $record = ['password' => 'secret123'];
 
@@ -172,10 +171,10 @@ it('applies hash strategy with salt', function () {
 
     $result = $service->anonymizeRecord($record, $tableOptions);
 
-    expect($result['password'])->toBe(hash('sha256', 'mysalt'.'secret123'));
+    expect($result['password'])->toBe(hash('sha256', 'mysaltsecret123'));
 });
 
-it('applies hash strategy to null values', function () {
+it('applies hash strategy to null values', function (): void {
     $service = new AnonymizationService();
     $record = ['password' => null];
 
@@ -191,7 +190,7 @@ it('applies hash strategy to null values', function () {
     expect($result['password'])->toBe('');
 });
 
-it('applies null strategy to set column to null', function () {
+it('applies null strategy to set column to null', function (): void {
     $service = new AnonymizationService();
     $record = ['notes' => 'Some private notes'];
 
@@ -207,7 +206,7 @@ it('applies null strategy to set column to null', function () {
     expect($result['notes'])->toBeNull();
 });
 
-it('applies static strategy to set fixed value', function () {
+it('applies static strategy to set fixed value', function (): void {
     $service = new AnonymizationService();
     $record = ['password' => 'secret123'];
 
@@ -223,7 +222,7 @@ it('applies static strategy to set fixed value', function () {
     expect($result['password'])->toBe('********');
 });
 
-it('applies multiple mutations to same record', function () {
+it('applies multiple mutations to same record', function (): void {
     $service = new AnonymizationService();
     $record = [
         'name' => 'John Doe',
@@ -254,7 +253,7 @@ it('applies multiple mutations to same record', function () {
         ->and($result['notes'])->toBeNull();
 });
 
-it('ignores columns not present in record', function () {
+it('ignores columns not present in record', function (): void {
     $service = new AnonymizationService();
     $record = ['name' => 'John Doe'];
 

@@ -22,7 +22,7 @@ final readonly class SynchronizationOptionsData
 
     public function getAnonymizationOptionsForTable(string $tableName): ?TableAnonymizationOptionsData
     {
-        if ($this->tableAnonymizationOptions === null) {
+        if (! $this->tableAnonymizationOptions instanceof Collection) {
             return null;
         }
 

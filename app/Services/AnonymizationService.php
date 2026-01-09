@@ -18,7 +18,7 @@ final readonly class AnonymizationService
      */
     public function anonymizeRecord(array $record, ?TableAnonymizationOptionsData $tableOptions): array
     {
-        if ($tableOptions === null) {
+        if (! $tableOptions instanceof TableAnonymizationOptionsData) {
             return $record;
         }
 
@@ -77,7 +77,7 @@ final readonly class AnonymizationService
         $visible = mb_substr($valueStr, 0, $visibleChars);
         $masked = str_repeat($maskChar, $length - $visibleChars);
 
-        return $visible.$masked;
+        return $visible . $masked;
     }
 
     private function maskEmail(string $email, int $visibleChars, string $maskChar): string
@@ -89,10 +89,10 @@ final readonly class AnonymizationService
             $maskedLocal = str_repeat($maskChar, $localLength);
         } else {
             $visible = mb_substr($localPart, 0, $visibleChars);
-            $maskedLocal = $visible.str_repeat($maskChar, $localLength - $visibleChars);
+            $maskedLocal = $visible . str_repeat($maskChar, $localLength - $visibleChars);
         }
 
-        return $maskedLocal.'@'.$domain;
+        return $maskedLocal . '@' . $domain;
     }
 
     private function applyHashStrategy(mixed $value, ColumnMutationData $mutationData): string
@@ -104,7 +104,7 @@ final readonly class AnonymizationService
         $algorithm = $mutationData->options['algorithm'] ?? 'sha256';
         $salt = $mutationData->options['salt'] ?? '';
 
-        return hash($algorithm, $salt.$value);
+        return hash($algorithm, $salt . $value);
     }
 
     private function applyStaticStrategy(ColumnMutationData $mutationData): mixed

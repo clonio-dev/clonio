@@ -229,13 +229,13 @@ it('uses default synchronization options when not specified', function (): void 
 
     // Verify default options
     Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn (CloneSchemaAndPrepareForData $job): bool => $job->synchronizeTableSchemaEnum === SynchronizeTableSchemaEnum::DROP_CREATE
-        && $job->keepUnknownTablesOnTarget === true
+        && $job->keepUnknownTablesOnTarget
         && $job->migrationTableName === null
-        && $job->disableForeignKeyConstraints === true);
+        && $job->disableForeignKeyConstraints);
 
     Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === 1000
         && $job->options->migrationTableName === null
-        && $job->options->disableForeignKeyConstraints === true);
+        && $job->options->disableForeignKeyConstraints);
 
     // Clean up
     @unlink($sourceDb);
