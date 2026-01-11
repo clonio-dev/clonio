@@ -22,6 +22,9 @@ use Throwable;
  */
 class SchemaReplicator
 {
+    public function __construct(public readonly DependencyResolver $dependencyResolver)
+    {}
+
     /**
      * Replicate entire database schema
      */
@@ -33,8 +36,12 @@ class SchemaReplicator
         $sourceSchema = $sourceInspector->getDatabaseSchema($source);
         $targetSchema = $targetInspector->getDatabaseSchema($target);
 
+        $tableNames = $sourceSchema->getTableNames()->all();
+
+        $order = $this->dependencyResolver->getProcessingOrder($tableNames, $source);
+
         // Replicate tables
-        foreach ($sourceSchema->tables as $sourceTable) {
+        foreach ($order['insert_order'] as $sourceTable) {
             $this->replicateTable($source, $target, $sourceTable, $visitor);
         }
 

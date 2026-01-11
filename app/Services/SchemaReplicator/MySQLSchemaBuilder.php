@@ -121,6 +121,12 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
     {
         $type = mb_strtoupper($column->type);
 
+        if (($type === 'SET' || $type === 'ENUM') && isset($column->metadata['column_type'])) {
+            return $column->metadata['column_type']
+                // special trick to support NULL on SET/ENUM
+                . ($column->nullable && $column->default === null ? ' DEFAULT NULL' : '');
+        }
+
         if ($column->length !== null) {
             if ($column->scale !== null) {
                 $type .= "({$column->length},{$column->scale})";

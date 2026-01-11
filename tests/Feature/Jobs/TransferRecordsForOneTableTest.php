@@ -8,10 +8,10 @@ use App\Data\ColumnMutationStrategyEnum;
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
 use App\Data\TableAnonymizationOptionsData;
+use App\Jobs\Middleware\SkipWhenBatchCancelled;
 use App\Jobs\TransferRecordsForOneTable;
 use App\Services\AnonymizationService;
 use App\Services\DatabaseInformationRetrievalService;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Facades\DB;
 
 it('returns correct middleware', function (): void {
@@ -26,7 +26,7 @@ it('returns correct middleware', function (): void {
 
     expect($middleware)
         ->toHaveCount(1)
-        ->and($middleware[0])->toBeInstanceOf(SkipIfBatchCancelled::class);
+        ->and($middleware[0])->toBeInstanceOf(SkipWhenBatchCancelled::class);
 });
 
 it('transfers records from source to target table', function (): void {
