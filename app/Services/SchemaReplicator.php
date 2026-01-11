@@ -25,7 +25,7 @@ class SchemaReplicator
     /**
      * Replicate entire database schema
      */
-    public function replicateDatabase(Connection $source, Connection $target): void
+    public function replicateDatabase(Connection $source, Connection $target, callable|null $visitor = null): void
     {
         $sourceInspector = SchemaInspectorFactory::create($source);
         $targetInspector = SchemaInspectorFactory::create($target);
@@ -35,7 +35,7 @@ class SchemaReplicator
 
         // Replicate tables
         foreach ($sourceSchema->tables as $sourceTable) {
-            $this->replicateTable($source, $target, $sourceTable);
+            $this->replicateTable($source, $target, $sourceTable, $visitor);
         }
 
         Log::info('Schema replication completed', [
@@ -48,7 +48,7 @@ class SchemaReplicator
     /**
      * Replicate a single table
      */
-    public function replicateTable(Connection $source, Connection $target, TableSchema|string $table): void
+    public function replicateTable(Connection $source, Connection $target, TableSchema|string $table, callable|null $visitor = null): void
     {
         // Get table schema if string provided
         if (is_string($table)) {
@@ -60,15 +60,14 @@ class SchemaReplicator
 
         // Check if table exists in target
         if ($targetInspector->tableExists($target, $table->name)) {
-            $this->updateTable($target, $table);
+            $this->updateTable($target, $table, $visitor);
         } else {
-            $this->createTable($target, $table);
+            $this->createTable($target, $table, $visitor);
         }
 
-        Log::info('Table replicated', [
-            'table' => $table->name,
-            'columns' => $table->getColumnNames()->count(),
-        ]);
+        if ($visitor !== null) {
+            $visitor($table->name, 'replicating_table', 'Table replicated with ' . $table->getColumnNames()->count() . ' columns');
+        }
     }
 
     /**
@@ -154,7 +153,7 @@ class SchemaReplicator
     /**
      * Create a new table in target database
      */
-    protected function createTable(Connection $target, TableSchema $table): void
+    protected function createTable(Connection $target, TableSchema $table, callable|null $visitor = null): void
     {
         $driver = $target->getDriverName();
         $builder = $this->getBuilderForDriver($driver);
@@ -181,12 +180,16 @@ class SchemaReplicator
 
             $target->statement($sql);
         }
+
+        if ($visitor !== null) {
+            $visitor($table->name, 'replicating_table', 'Missing table created');
+        }
     }
 
     /**
      * Update existing table structure
      */
-    protected function updateTable(Connection $target, TableSchema $table): void
+    protected function updateTable(Connection $target, TableSchema $table, callable|null $visitor = null): void
     {
         $inspector = SchemaInspectorFactory::create($target);
         $currentTable = $inspector->getTableSchema($target, $table->name);
@@ -206,6 +209,10 @@ class SchemaReplicator
             $column = $table->getColumn($columnName);
             $sql = $builder->buildAddColumn($table->name, $column);
             $target->statement($sql);
+
+            if ($visitor !== null) {
+                $visitor($table->name, 'replicating_table', 'Add a missing column: ' . $columnName);;
+            }
         }
 
         // Modify changed columns
@@ -213,6 +220,14 @@ class SchemaReplicator
             $column = $table->getColumn($columnName);
             $sql = $builder->buildModifyColumn($table->name, $column);
             $target->statement($sql);
+
+            if ($visitor !== null) {
+                $visitor($table->name, 'replicating_table', 'Modified an existing column: ' . $columnName);;
+            }
+        }
+
+        if ($visitor !== null) {
+            $visitor($table->name, 'replicating_table', 'Table updated');
         }
     }
 
