@@ -261,9 +261,9 @@ class MySQLSchemaInspector extends AbstractSchemaInspector
     {
         $result = $connection->select("
             SELECT
-                CONSTRAINT_NAME as name,
-                CONSTRAINT_TYPE as type,
-                CHECK_CLAUSE as check_clause
+                tc.CONSTRAINT_NAME as name,
+                tc.CONSTRAINT_TYPE as type,
+                cc.CHECK_CLAUSE as check_clause
             FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
             LEFT JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS cc
                 ON tc.CONSTRAINT_NAME = cc.CONSTRAINT_NAME
