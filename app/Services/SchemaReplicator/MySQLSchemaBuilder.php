@@ -138,6 +138,10 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
 
     protected function formatDefaultValue(mixed $value): string
     {
+        if ($value === 'CURRENT_TIMESTAMP') {
+            return $value;
+        }
+
         if (is_string($value)) {
             return $this->quote($value);
         }
