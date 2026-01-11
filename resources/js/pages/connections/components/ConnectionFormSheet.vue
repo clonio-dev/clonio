@@ -1,15 +1,27 @@
 <script setup lang="ts">
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import CreateController from '@/actions/App/Http/Controllers/DatabaseConnections/CreateController';
+import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-vue-next';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
 import { Connection } from '@/pages/connections/types';
 import { Form } from '@inertiajs/vue3';
-import InputError from '@/components/InputError.vue';
-import { Checkbox } from '@/components/ui/checkbox';
-import CreateController from '@/actions/App/Http/Controllers/DatabaseConnections/CreateController';
+import { Loader2 } from 'lucide-vue-next';
 
 interface Props {
     open: boolean;
@@ -34,17 +46,18 @@ function handleClose() {
 
 <template>
     <Sheet :open="props.open" @update:open="handleClose">
-        <SheetContent class="sm:max-w-md overflow-y-auto">
+        <SheetContent class="overflow-y-auto sm:max-w-md">
             <SheetHeader>
                 <SheetTitle>New Database Connection</SheetTitle>
                 <SheetDescription>
-                    Add a new database connection to use in your transfer configs
+                    Add a new database connection to use in your transfer
+                    configs
                 </SheetDescription>
             </SheetHeader>
 
             <Form
                 v-bind="CreateController.post()"
-                class="space-y-4 mt-6 mx-4"
+                class="mx-4 mt-6 space-y-4"
                 v-slot="{ errors, processing, recentlySuccessful }"
                 :reset-on-error="['username', 'password']"
                 :onSubmitComplete="handleClose"
@@ -69,8 +82,12 @@ function handleClose() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="mysql">MySQL</SelectItem>
-                                <SelectItem value="pgsql">PostgreSQL</SelectItem>
-                                <SelectItem value="sqlserver">SQL Server</SelectItem>
+                                <SelectItem value="pgsql"
+                                    >PostgreSQL</SelectItem
+                                >
+                                <SelectItem value="sqlserver"
+                                    >SQL Server</SelectItem
+                                >
                             </SelectContent>
                         </Select>
                         <InputError class="mt-2" :message="errors.type" />
@@ -78,17 +95,29 @@ function handleClose() {
 
                     <div class="space-y-2">
                         <Label for="is_production_stage">Stage? *</Label>
-                        <div class="flex items-center gap-2 mt-4">
-                            <Input type="hidden" name="is_production_stage" :value="false" />
+                        <div class="mt-4 flex items-center gap-2">
+                            <Input
+                                type="hidden"
+                                name="is_production_stage"
+                                :value="false"
+                            />
                             <Checkbox
                                 id="is_production_stage"
                                 name="is_production_stage"
-                                :class="{ 'border-destructive': errors.is_production_stage }"
+                                :class="{
+                                    'border-destructive':
+                                        errors.is_production_stage,
+                                }"
                                 :default-value="false"
                             />
-                            <Label for="is_production_stage">Is it a production stage?</Label>
+                            <Label for="is_production_stage"
+                                >Is it a production stage?</Label
+                            >
                         </div>
-                        <InputError class="mt-2" :message="errors.is_production_stage" />
+                        <InputError
+                            class="mt-2"
+                            :message="errors.is_production_stage"
+                        />
                     </div>
                 </div>
 
@@ -136,10 +165,7 @@ function handleClose() {
                         autocomplete="off"
                         :class="{ 'border-destructive': errors.username }"
                     />
-                    <InputError
-                        class="mt-2"
-                        :message="errors.username"
-                    />
+                    <InputError class="mt-2" :message="errors.username" />
                 </div>
 
                 <div class="space-y-2">
@@ -160,7 +186,10 @@ function handleClose() {
                         :disabled="processing || recentlySuccessful"
                         class="flex-1"
                     >
-                        <Loader2 v-if="processing" class="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2
+                            v-if="processing"
+                            class="mr-2 h-4 w-4 animate-spin"
+                        />
                         {{ props.submitLabel }}
                     </Button>
                 </div>

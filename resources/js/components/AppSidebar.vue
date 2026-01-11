@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import IndexController from '@/actions/App/Http/Controllers/DatabaseConnections/IndexController';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -16,7 +17,6 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { DatabaseIcon, LayoutGridIcon, RulerIcon } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-import IndexController from '@/actions/App/Http/Controllers/DatabaseConnections/IndexController';
 
 const mainNavItems: NavItem[] = [
     {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { router } from '@inertiajs/vue3';
 import type { RunCardProps } from '@/types/transfer-run.types';
+import { router } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import RunStatusBadge from './RunStatusBadge.vue';
 
 const props = defineProps<RunCardProps>();
@@ -13,7 +13,7 @@ const formattedStartedAt = computed(() => {
         month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
     });
 });
 
@@ -21,7 +21,9 @@ const duration = computed(() => {
     if (!props.run.started_at) return null;
 
     const start = new Date(props.run.started_at);
-    const end = props.run.finished_at ? new Date(props.run.finished_at) : new Date();
+    const end = props.run.finished_at
+        ? new Date(props.run.finished_at)
+        : new Date();
 
     const diffMs = end.getTime() - start.getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -34,7 +36,11 @@ const duration = computed(() => {
 });
 
 const configName = computed(() => {
-    return props.run.config?.name || props.run.config_snapshot?.name || 'Unknown Config';
+    return (
+        props.run.config?.name ||
+        props.run.config_snapshot?.name ||
+        'Unknown Config'
+    );
 });
 
 const sourceTarget = computed(() => {
@@ -43,7 +49,7 @@ const sourceTarget = computed(() => {
 
     return {
         source: `${snapshot.source_connection.name} (${snapshot.source_connection.type})`,
-        target: `${snapshot.target_connection.name} (${snapshot.target_connection.type})`
+        target: `${snapshot.target_connection.name} (${snapshot.target_connection.type})`,
     };
 });
 
@@ -54,21 +60,24 @@ function openRunDetail() {
 
 <template>
     <div
-        class="border rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer bg-white"
-        :class="{ 'ring-2 ring-green-500 ring-opacity-50': isActive }"
+        class="cursor-pointer rounded-lg border bg-white p-4 transition-shadow hover:shadow-lg"
+        :class="{ 'ring-opacity-50 ring-2 ring-green-500': isActive }"
         @click="openRunDetail"
     >
         <!-- Header -->
-        <div class="flex items-start justify-between mb-3">
+        <div class="mb-3 flex items-start justify-between">
             <div>
-                <h3 class="font-semibold text-lg">{{ configName }}</h3>
+                <h3 class="text-lg font-semibold">{{ configName }}</h3>
                 <p class="text-sm text-gray-500">Run #{{ run.id }}</p>
             </div>
-            <RunStatusBadge :status="run.status" :progress="run.progress_percent" />
+            <RunStatusBadge
+                :status="run.status"
+                :progress="run.progress_percent"
+            />
         </div>
 
         <!-- Source → Target -->
-        <div v-if="sourceTarget" class="text-sm text-gray-600 mb-3">
+        <div v-if="sourceTarget" class="mb-3 text-sm text-gray-600">
             <div class="flex items-center gap-2">
                 <span class="font-medium">{{ sourceTarget.source }}</span>
                 <span>→</span>
@@ -78,13 +87,17 @@ function openRunDetail() {
 
         <!-- Progress Bar (only for processing/queued) -->
         <div v-if="['processing', 'queued'].includes(run.status)" class="mb-3">
-            <div class="flex items-center justify-between text-xs text-gray-600 mb-1">
+            <div
+                class="mb-1 flex items-center justify-between text-xs text-gray-600"
+            >
                 <span>Progress</span>
-                <span>{{ run.current_step }} / {{ run.total_steps }} tables</span>
+                <span
+                    >{{ run.current_step }} / {{ run.total_steps }} tables</span
+                >
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="h-2 w-full rounded-full bg-gray-200">
                 <div
-                    class="bg-green-500 h-2 rounded-full transition-all duration-500"
+                    class="h-2 rounded-full bg-green-500 transition-all duration-500"
                     :style="{ width: `${run.progress_percent}%` }"
                 ></div>
             </div>
@@ -97,7 +110,10 @@ function openRunDetail() {
         </div>
 
         <!-- Error Message (if failed) -->
-        <div v-if="run.status === 'failed' && run.error_message" class="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-800">
+        <div
+            v-if="run.status === 'failed' && run.error_message"
+            class="mt-3 rounded border border-red-200 bg-red-50 p-2 text-sm text-red-800"
+        >
             <span class="font-medium">Error:</span> {{ run.error_message }}
         </div>
     </div>

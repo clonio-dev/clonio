@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue';
-import { router } from '@inertiajs/vue3';
 import type { RunDetailProps } from '@/types/transfer-run.types';
-import RunStatusBadge from './RunStatusBadge.vue';
+import { router } from '@inertiajs/vue3';
+import { computed, onMounted, onUnmounted } from 'vue';
 import RunLog from './RunLog.vue';
+import RunStatusBadge from './RunStatusBadge.vue';
 
 const props = defineProps<RunDetailProps>();
 
@@ -17,7 +17,11 @@ const isActive = computed(() => {
 
 const configName = computed(() => {
     if (!run.value) return 'Loading...';
-    return run.value.config?.name || run.value.config_snapshot?.name || 'Unknown Config';
+    return (
+        run.value.config?.name ||
+        run.value.config_snapshot?.name ||
+        'Unknown Config'
+    );
 });
 
 const sourceTarget = computed(() => {
@@ -26,7 +30,7 @@ const sourceTarget = computed(() => {
     const snapshot = run.value.config_snapshot;
     return {
         source: `${snapshot.source_connection.name} (${snapshot.source_connection.type})`,
-        target: `${snapshot.target_connection.name} (${snapshot.target_connection.type})`
+        target: `${snapshot.target_connection.name} (${snapshot.target_connection.type})`,
     };
 });
 
@@ -34,7 +38,9 @@ const duration = computed(() => {
     if (!run.value?.started_at) return null;
 
     const start = new Date(run.value.started_at);
-    const end = run.value.finished_at ? new Date(run.value.finished_at) : new Date();
+    const end = run.value.finished_at
+        ? new Date(run.value.finished_at)
+        : new Date();
 
     const diffMs = end.getTime() - start.getTime();
     const hours = Math.floor(diffMs / 3600000);
@@ -72,10 +78,13 @@ function refreshRunData() {
         preserveState: true,
         onSuccess: () => {
             // Stop polling if run finished
-            if (run.value && !['queued', 'processing'].includes(run.value.status)) {
+            if (
+                run.value &&
+                !['queued', 'processing'].includes(run.value.status)
+            ) {
                 stopRefresh();
             }
-        }
+        },
     });
 }
 
@@ -84,13 +93,17 @@ function cancelRun() {
         return;
     }
 
-    router.post(`/transfer-runs/${props.runId}/cancel`, {}, {
-        preserveState: true,
-        preserveScroll: true,
-        onSuccess: () => {
-            stopRefresh();
-        }
-    });
+    router.post(
+        `/transfer-runs/${props.runId}/cancel`,
+        {},
+        {
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                stopRefresh();
+            },
+        },
+    );
 }
 
 function retryRun() {
@@ -124,30 +137,42 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="mx-auto max-w-7xl px-4 py-8">
         <!-- Header -->
         <div class="mb-6">
             <button
                 @click="goBack"
-                class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 mb-4"
+                class="mb-4 inline-flex items-center gap-2 font-medium text-blue-600 hover:text-blue-700"
             >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 19l-7-7 7-7"
+                    />
                 </svg>
                 Back to Dashboard
             </button>
 
             <div class="flex items-start justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">{{ configName }}</h1>
-                    <p class="text-gray-600 mt-1">Transfer Run #{{ runId }}</p>
+                    <h1 class="text-3xl font-bold text-gray-900">
+                        {{ configName }}
+                    </h1>
+                    <p class="mt-1 text-gray-600">Transfer Run #{{ runId }}</p>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <button
                         v-if="isActive"
                         @click="cancelRun"
-                        class="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors inline-flex items-center gap-2"
+                        class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700"
                     >
                         🛑 Cancel
                     </button>
@@ -155,7 +180,7 @@ onUnmounted(() => {
                     <button
                         v-if="run?.status === 'failed'"
                         @click="retryRun"
-                        class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
                     >
                         🔄 Retry
                     </button>
@@ -164,8 +189,8 @@ onUnmounted(() => {
         </div>
 
         <!-- Status Section -->
-        <div class="bg-white border rounded-lg p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
+        <div class="mb-6 rounded-lg border bg-white p-6">
+            <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-xl font-semibold">Status</h2>
                 <RunStatusBadge
                     v-if="run"
@@ -175,76 +200,111 @@ onUnmounted(() => {
             </div>
 
             <!-- Source → Target -->
-            <div v-if="sourceTarget" class="mb-4 pb-4 border-b">
+            <div v-if="sourceTarget" class="mb-4 border-b pb-4">
                 <div class="flex items-center gap-3 text-sm">
                     <div class="flex-1">
-                        <p class="text-gray-500 mb-1">Source</p>
+                        <p class="mb-1 text-gray-500">Source</p>
                         <p class="font-medium">{{ sourceTarget.source }}</p>
                     </div>
-                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    <svg
+                        class="h-6 w-6 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6"
+                        />
                     </svg>
                     <div class="flex-1">
-                        <p class="text-gray-500 mb-1">Target</p>
+                        <p class="mb-1 text-gray-500">Target</p>
                         <p class="font-medium">{{ sourceTarget.target }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Progress Bar -->
-            <div v-if="run && ['processing', 'queued'].includes(run.status)" class="mb-4">
-                <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+            <div
+                v-if="run && ['processing', 'queued'].includes(run.status)"
+                class="mb-4"
+            >
+                <div
+                    class="mb-2 flex items-center justify-between text-sm text-gray-600"
+                >
                     <span>Overall Progress</span>
-                    <span>{{ run.current_step }} / {{ run.total_steps }} tables</span>
+                    <span
+                        >{{ run.current_step }} /
+                        {{ run.total_steps }} tables</span
+                    >
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="h-3 w-full rounded-full bg-gray-200">
                     <div
-                        class="bg-green-500 h-3 rounded-full transition-all duration-500 flex items-center justify-end pr-2"
+                        class="flex h-3 items-center justify-end rounded-full bg-green-500 pr-2 transition-all duration-500"
                         :style="{ width: `${run.progress_percent}%` }"
                     >
-            <span v-if="run.progress_percent > 10" class="text-xs text-white font-medium">
-              {{ run.progress_percent }}%
-            </span>
+                        <span
+                            v-if="run.progress_percent > 10"
+                            class="text-xs font-medium text-white"
+                        >
+                            {{ run.progress_percent }}%
+                        </span>
                     </div>
                 </div>
             </div>
 
             <!-- Meta Info Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div class="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
                 <div>
-                    <p class="text-gray-500 mb-1">Started</p>
+                    <p class="mb-1 text-gray-500">Started</p>
                     <p class="font-medium">
-                        {{ run?.started_at ? new Date(run.started_at).toLocaleString('de-DE') : '-' }}
+                        {{
+                            run?.started_at
+                                ? new Date(run.started_at).toLocaleString(
+                                      'de-DE',
+                                  )
+                                : '-'
+                        }}
                     </p>
                 </div>
 
                 <div v-if="run?.finished_at">
-                    <p class="text-gray-500 mb-1">Finished</p>
+                    <p class="mb-1 text-gray-500">Finished</p>
                     <p class="font-medium">
                         {{ new Date(run.finished_at).toLocaleString('de-DE') }}
                     </p>
                 </div>
 
                 <div>
-                    <p class="text-gray-500 mb-1">Duration</p>
+                    <p class="mb-1 text-gray-500">Duration</p>
                     <p class="font-medium">{{ duration || '-' }}</p>
                 </div>
 
                 <div v-if="estimatedRemaining">
-                    <p class="text-gray-500 mb-1">Estimated Remaining</p>
+                    <p class="mb-1 text-gray-500">Estimated Remaining</p>
                     <p class="font-medium">{{ estimatedRemaining }}</p>
                 </div>
             </div>
 
             <!-- Error Message -->
-            <div v-if="run?.status === 'failed' && run.error_message" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p class="text-sm font-medium text-red-900 mb-1">Error</p>
+            <div
+                v-if="run?.status === 'failed' && run.error_message"
+                class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4"
+            >
+                <p class="mb-1 text-sm font-medium text-red-900">Error</p>
                 <p class="text-sm text-red-800">{{ run.error_message }}</p>
             </div>
 
             <!-- Auto-update indicator -->
-            <div v-if="isActive" class="mt-4 flex items-center gap-2 text-sm text-gray-600">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div
+                v-if="isActive"
+                class="mt-4 flex items-center gap-2 text-sm text-gray-600"
+            >
+                <div
+                    class="h-2 w-2 animate-pulse rounded-full bg-green-500"
+                ></div>
                 <span>Auto-updating every 2 seconds</span>
             </div>
         </div>

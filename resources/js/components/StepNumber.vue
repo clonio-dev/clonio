@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface Props {
-    step: number|string;
+    step: number | string;
     active?: boolean;
 }
 

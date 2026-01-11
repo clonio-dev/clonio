@@ -1,7 +1,12 @@
 /**
  * Transfer Run Status Types
  */
-export type RunStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
+export type RunStatus =
+    | 'queued'
+    | 'processing'
+    | 'completed'
+    | 'failed'
+    | 'cancelled';
 
 /**
  * Log Level Types
