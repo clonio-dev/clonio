@@ -9,5 +9,5 @@ it('can return a connection name', function (): void {
     $connectionData = new ConnectionData('mysql', new SqliteDriverData());
 
     expect($connectionData->name)->toBe('mysql');
-    expect($connectionData->connectionName())->toStartWith('dyn_')->toEndWith('_mysql');
+    expect($connectionData->connectionName)->toStartWith('dyn_')->toEndWith('_mysql');
 });

@@ -8,17 +8,12 @@ use Illuminate\Support\Str;
 
 final readonly class ConnectionData
 {
-    private string $internalConnectionName;
+    public string $connectionName;
 
     public function __construct(
         public string $name,
         public ConnectionDriverData $driver,
     ) {
-        $this->internalConnectionName = 'dyn_' . Str::random() . '_' . $name;
-    }
-
-    public function connectionName(): string
-    {
-        return $this->internalConnectionName;
+        $this->connectionName = 'dyn_' . Str::random() . '_' . $name;
     }
 }
