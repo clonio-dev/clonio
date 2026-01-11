@@ -6,21 +6,25 @@ namespace App\Jobs;
 
 use App\Data\ConnectionData;
 use App\Data\SynchronizationOptionsData;
+use App\Jobs\Concerns\HandlesExceptions;
+use App\Jobs\Concerns\TransferBatchJob;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\QueryException;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Support\Facades\Log;
+use PDOException;
 use Throwable;
 
 class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, InteractsWithQueue, Queueable;
+    use Batchable, InteractsWithQueue, Queueable, HandlesExceptions, TransferBatchJob;
 
     public int $tries = 2;
+
+    public string $tableName = '';
 
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
@@ -33,49 +37,44 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
     ): void {
         try {
             $tableNames = $dbInformationRetrievalService->getTableNames($this->sourceConnectionData);
-        } catch (Throwable $exception) {
-            Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
-            $this->fail($exception);
 
-            return;
-        }
+            foreach ($tableNames as $tableName) {
+                $this->tableName = $tableName;
 
-        foreach ($tableNames as $tableName) {
-            if ($this->options->migrationTableName !== null && $tableName === $this->options->migrationTableName) {
-                Log::info("Migration table {$tableName} will not be transferred again. Skipping.");
+                // @TODO check if it is good to skip it
+//                if ($this->options->migrationTableName !== null && $tableName === $this->options->migrationTableName) {
+//                    $this->logInfo('table_skipped', "Skipped table {$tableName} because it is a migration table.");
+//                    continue;
+//                }
 
-                continue;
+                $recordCount = $dbInformationRetrievalService
+                    ->withConnectionForTable($this->sourceConnectionData, $tableName)
+                    ->recordCount();
+                $this->logInfo('table_started', "Starting table copy process for {$tableName} table ($recordCount records).");
+
+                if ($recordCount > 0) {
+                    $batch = $this->batch();
+                    assert($batch !== null);
+                    $batch->add(
+                        new TransferRecordsForOneTable(
+                            sourceConnectionData: $this->sourceConnectionData,
+                            targetConnectionData: $this->targetConnectionData,
+                            tableName: $tableName,
+                            chunkSize: $this->options->chunkSize,
+                            disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
+                            tableAnonymizationOptions: $this->options->getAnonymizationOptionsForTable($tableName),
+                        )
+                    );
+                } else {
+                    $this->logInfo('table_done', "Skipped table {$tableName} because it has no records.");
+                }
             }
-
-            $recordCount = $dbInformationRetrievalService
-                ->withConnectionForTable($this->sourceConnectionData, $tableName)
-                ->recordCount();
-            Log::info("Transferring {$recordCount} records from {$tableName} table.");
-
-            if ($recordCount > 0) {
-                $batch = $this->batch();
-                assert($batch !== null);
-                $batch->add(
-                    new TransferRecordsForOneTable(
-                        sourceConnectionData: $this->sourceConnectionData,
-                        targetConnectionData: $this->targetConnectionData,
-                        tableName: $tableName,
-                        chunkSize: $this->options->chunkSize,
-                        disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
-                        tableAnonymizationOptions: $this->options->getAnonymizationOptionsForTable($tableName),
-                    )
-                );
-            }
+        } catch (QueryException $e) {
+            $this->handleQueryException($e);
+        } catch (PDOException $e) {
+            $this->handleConnectionException($e);
+        } catch (Throwable $e) {
+            $this->handleUnexpectedException($e);
         }
-    }
-
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return list<object>
-     */
-    public function middleware(): array
-    {
-        return [new SkipIfBatchCancelled];
     }
 }
