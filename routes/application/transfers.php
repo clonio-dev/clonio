@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TransferRunController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('transfers')
     ->name('transfers.')
-    ->group(function () {
+    ->group(function (): void {
         Route::get('/create', [TransferRunController::class, 'create'])
             ->name('transfers.create');
         Route::post('/', [TransferRunController::class, 'store'])

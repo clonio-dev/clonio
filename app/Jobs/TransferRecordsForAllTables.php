@@ -20,7 +20,7 @@ use Throwable;
 
 class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, InteractsWithQueue, Queueable, HandlesExceptions, TransferBatchJob;
+    use Batchable, HandlesExceptions, InteractsWithQueue, Queueable, TransferBatchJob;
 
     public int $tries = 2;
 
@@ -40,12 +40,6 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
 
             foreach ($tableNames as $tableName) {
                 $this->tableName = $tableName;
-
-                // @TODO check if it is good to skip it
-//                if ($this->options->migrationTableName !== null && $tableName === $this->options->migrationTableName) {
-//                    $this->logInfo('table_skipped', "Skipped table {$tableName} because it is a migration table.");
-//                    continue;
-//                }
 
                 $recordCount = $dbInformationRetrievalService
                     ->withConnectionForTable($this->sourceConnectionData, $tableName)

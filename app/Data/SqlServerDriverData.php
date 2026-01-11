@@ -15,7 +15,7 @@ final readonly class SqlServerDriverData implements ConnectionDriverData
         public string $prefix = '',
         public bool $prefixIndexes = true,
         public string $charset = 'utf8',
-        public string|null $url = null,
+        public ?string $url = null,
     ) {}
 
     public function toArray(): array

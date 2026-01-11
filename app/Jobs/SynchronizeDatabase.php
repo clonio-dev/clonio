@@ -15,14 +15,11 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, InteractsWithQueue, Queueable, TransferBatchJob, LogsProcessSteps;
+    use Batchable, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
 
     public int $tries = 2;
 

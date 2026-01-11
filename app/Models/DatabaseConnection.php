@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Data\ConnectionData;
@@ -9,6 +11,7 @@ use App\Data\PostgresSqlDriverData;
 use App\Data\SqliteDriverData;
 use App\Data\SqlServerDriverData;
 use App\Enums\DatabaseConnectionTypes;
+use Exception;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -78,7 +81,7 @@ class DatabaseConnection extends Model
     public function toConnectionDataDto(): ConnectionData
     {
         $driverData = match ($this->type) {
-            DatabaseConnectionTypes::MYSQL => new MySqlDriverData(
+            DatabaseConnectionTypes::MYSQL => new MysqlDriverData(
                 database: $this->database,
                 host: $this->host,
                 username: $this->username,
@@ -107,7 +110,7 @@ class DatabaseConnection extends Model
                 port: $this->port,
             ),
             DatabaseConnectionTypes::SQLITE => new SqliteDriverData($this->database),
-            default => throw new \Exception("Unsupported connection type: {$this->type}")
+            default => throw new Exception("Unsupported connection type: {$this->type}")
         };
 
         return new ConnectionData(

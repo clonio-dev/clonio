@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Enums\DatabaseConnectionTypes;
@@ -25,14 +27,14 @@ class StoreDatabaseConnectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255'],
             'type' => ['required', 'string', Rule::enum(DatabaseConnectionTypes::class)],
-            'host' => 'required|string|max:255',
-            'port' => 'required|integer|min:1|max:65535',
-            'database' => 'required|string|max:255',
-            'username' => 'required|string|max:255',
-            'password' => 'nullable|string|max:255',
-            'is_production_stage' => 'accepted',
+            'host' => ['required', 'string', 'max:255'],
+            'port' => ['required', 'integer', 'min:1', 'max:65535'],
+            'database' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255'],
+            'password' => ['nullable', 'string', 'max:255'],
+            'is_production_stage' => ['accepted'],
         ];
     }
 }

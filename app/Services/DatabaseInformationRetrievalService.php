@@ -58,9 +58,7 @@ final readonly class DatabaseInformationRetrievalService
     }
 
     /**
-     * @param \App\Data\ConnectionData $connectionData
-     * @return \Illuminate\Database\ConnectionInterface
-     * @throws \RuntimeException when PDO connection failed
+     * @throws RuntimeException when PDO connection failed
      */
     private function establishConnection(ConnectionData $connectionData): ConnectionInterface
     {

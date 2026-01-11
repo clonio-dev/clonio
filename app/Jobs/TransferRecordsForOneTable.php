@@ -28,7 +28,7 @@ use Throwable;
 
 class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, InteractsWithQueue, Queueable, HandlesExceptions, ClassifiesError, TransferBatchJob;
+    use Batchable, ClassifiesError, HandlesExceptions, InteractsWithQueue, Queueable, TransferBatchJob;
 
     public int $tries = 1;
 
@@ -121,7 +121,6 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                                 return $anonymizationService->anonymizeRecord($record,
                                     $this->tableAnonymizationOptions);
                             })->values()->all();
-
 
                             $targetConnection
                                 ->table($this->tableName)

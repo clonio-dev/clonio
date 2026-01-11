@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTransferRunLogRequest;
@@ -11,7 +13,7 @@ class TransferRunLogController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): void
     {
         //
     }
@@ -19,7 +21,7 @@ class TransferRunLogController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): void
     {
         //
     }
@@ -27,7 +29,7 @@ class TransferRunLogController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTransferRunLogRequest $request)
+    public function store(StoreTransferRunLogRequest $request): void
     {
         //
     }
@@ -35,7 +37,7 @@ class TransferRunLogController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(TransferRunLog $transferRunLog)
+    public function show(TransferRunLog $transferRunLog): void
     {
         //
     }
@@ -43,7 +45,7 @@ class TransferRunLogController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TransferRunLog $transferRunLog)
+    public function edit(TransferRunLog $transferRunLog): void
     {
         //
     }
@@ -51,7 +53,7 @@ class TransferRunLogController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTransferRunLogRequest $request, TransferRunLog $transferRunLog)
+    public function update(UpdateTransferRunLogRequest $request, TransferRunLog $transferRunLog): void
     {
         //
     }
@@ -59,7 +61,7 @@ class TransferRunLogController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TransferRunLog $transferRunLog)
+    public function destroy(TransferRunLog $transferRunLog): void
     {
         //
     }

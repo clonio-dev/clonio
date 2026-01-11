@@ -19,18 +19,19 @@ use Inertia\Response;
 
 class TransferRunController extends Controller
 {
+    public $transferService;
+
     public function index(): Response
     {
         $runs = TransferRun::query()
             ->with(['config:id,name', 'logs'])
             ->where('user_id', auth()->id())
-            ->orderByDesc('started_at')
+            ->latest('started_at')
             ->limit(20)
             ->get()
-            ->map(fn($run) => $this->enrichRunWithBatchProgress($run));
+            ->map(fn (TransferRun $run): TransferRun => $this->enrichRunWithBatchProgress($run));
 
-        $hasActiveRuns = $runs->contains(fn($run) =>
-        in_array($run->status, ['queued', 'processing'])
+        $hasActiveRuns = $runs->contains(fn ($run): false => in_array($run->status, ['queued', 'processing'])
         );
 
         return Inertia::render('Dashboard', [
@@ -68,24 +69,24 @@ class TransferRunController extends Controller
             ->forUser(auth()->id())
             ->prodDatabases()
             ->get(['id', 'name'])
-            ->map(fn ($c) => ['value' => $c->id, 'label' => $c->name]);
+            ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name]);
 
         $testConnections = DatabaseConnection::query()
             ->forUser(auth()->id())
             ->testDatabases()
             ->get(['id', 'name'])
-            ->map(fn ($c) => ['value' => $c->id, 'label' => $c->name]);
+            ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name]);
 
         return Inertia::render('transfer-runs/Create', [
-            'prod_connections' => Inertia::defer(fn() => $prodConnections),
-            'test_connections' => Inertia::defer(fn() => $testConnections),
+            'prod_connections' => Inertia::defer(fn () => $prodConnections),
+            'test_connections' => Inertia::defer(fn () => $testConnections),
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTransferRunRequest $request)
+    public function store(StoreTransferRunRequest $request): \Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
         /** @var TransferRun $transferRun */
         $transferRun = TransferRun::query()->create([
@@ -137,7 +138,7 @@ class TransferRunController extends Controller
             })
             ->dispatch();
 
-        return redirect()->route('batch.show', ['batch' => $batch->id]);
+        return to_route('batch.show', ['batch' => $batch->id]);
     }
 
     public function show(TransferRun $run): Response
@@ -175,8 +176,7 @@ class TransferRunController extends Controller
 
         $newRun = $this->transferService->retryTransfer($run);
 
-        return redirect()
-            ->route('transfer-runs.show', $newRun)
+        return to_route('transfer-runs.show', $newRun)
             ->with('success', 'Transfer retry started');
     }
 
@@ -187,8 +187,7 @@ class TransferRunController extends Controller
     {
         $this->authorize('view', $run);
 
-        $logs = $run->logs()
-            ->orderBy('created_at')
+        $logs = $run->logs()->oldest()
             ->get();
 
         $filename = "transfer-run-{$run->id}-logs.json";
@@ -207,7 +206,7 @@ class TransferRunController extends Controller
      */
     private function enrichRunWithBatchProgress(TransferRun $run): TransferRun
     {
-        if (!$run->batch_id) {
+        if (! $run->batch_id) {
             return $run;
         }
 

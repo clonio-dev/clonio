@@ -17,7 +17,7 @@ final readonly class PostgresSqlDriverData implements ConnectionDriverData
         public string $charset = 'utf8',
         public string $schema = 'public',
         public string $ssl = 'prefer',
-        public string|null $url = null,
+        public ?string $url = null,
     ) {}
 
     public function toArray(): array

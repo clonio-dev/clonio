@@ -25,7 +25,7 @@ class SchemaReplicator
     /**
      * Replicate entire database schema
      */
-    public function replicateDatabase(Connection $source, Connection $target, callable|null $visitor = null): void
+    public function replicateDatabase(Connection $source, Connection $target, ?callable $visitor = null): void
     {
         $sourceInspector = SchemaInspectorFactory::create($source);
         $targetInspector = SchemaInspectorFactory::create($target);
@@ -48,7 +48,7 @@ class SchemaReplicator
     /**
      * Replicate a single table
      */
-    public function replicateTable(Connection $source, Connection $target, TableSchema|string $table, callable|null $visitor = null): void
+    public function replicateTable(Connection $source, Connection $target, TableSchema|string $table, ?callable $visitor = null): void
     {
         // Get table schema if string provided
         if (is_string($table)) {
@@ -153,7 +153,7 @@ class SchemaReplicator
     /**
      * Create a new table in target database
      */
-    protected function createTable(Connection $target, TableSchema $table, callable|null $visitor = null): void
+    protected function createTable(Connection $target, TableSchema $table, ?callable $visitor = null): void
     {
         $driver = $target->getDriverName();
         $builder = $this->getBuilderForDriver($driver);
@@ -189,7 +189,7 @@ class SchemaReplicator
     /**
      * Update existing table structure
      */
-    protected function updateTable(Connection $target, TableSchema $table, callable|null $visitor = null): void
+    protected function updateTable(Connection $target, TableSchema $table, ?callable $visitor = null): void
     {
         $inspector = SchemaInspectorFactory::create($target);
         $currentTable = $inspector->getTableSchema($target, $table->name);
@@ -211,7 +211,7 @@ class SchemaReplicator
             $target->statement($sql);
 
             if ($visitor !== null) {
-                $visitor($table->name, 'replicating_table', 'Add a missing column: ' . $columnName);;
+                $visitor($table->name, 'replicating_table', 'Add a missing column: ' . $columnName);
             }
         }
 
@@ -222,7 +222,7 @@ class SchemaReplicator
             $target->statement($sql);
 
             if ($visitor !== null) {
-                $visitor($table->name, 'replicating_table', 'Modified an existing column: ' . $columnName);;
+                $visitor($table->name, 'replicating_table', 'Modified an existing column: ' . $columnName);
             }
         }
 

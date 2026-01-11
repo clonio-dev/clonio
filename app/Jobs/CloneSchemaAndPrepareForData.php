@@ -24,7 +24,7 @@ use Throwable;
 
 class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, InteractsWithQueue, Queueable, HandlesExceptions, LogsProcessSteps, TransferBatchJob;
+    use Batchable, HandlesExceptions, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
 
     public int $tries = 2;
 
@@ -49,7 +49,7 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
             /** @var Connection $targetConnection */
             $targetConnection = $dbInformationRetrievalService->getConnection($this->targetConnectionData);
 
-            $schemaReplicator->replicateDatabase($sourceConnection, $targetConnection, function (string $tableName, string $event, string $message) {
+            $schemaReplicator->replicateDatabase($sourceConnection, $targetConnection, function (string $tableName, string $event, string $message): void {
                 $this->tableName = $tableName;
                 $this->logInfo($event, $message);
             });
