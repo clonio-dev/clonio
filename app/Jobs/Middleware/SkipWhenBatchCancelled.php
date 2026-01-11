@@ -7,9 +7,6 @@ namespace App\Jobs\Middleware;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Log;
 
-/**
- * @property-read string $tableName
- */
 class SkipWhenBatchCancelled
 {
     /**
@@ -21,8 +18,8 @@ class SkipWhenBatchCancelled
     public function handle($job, $next): void
     {
         if (method_exists($job, 'batch') && $job->batch() instanceof Batch && $job->batch()->cancelled()) {
-            if (!$job->batch()->hasFailures()) {
-                $this->logInfo('table_cancelled', 'Table processing cancelled by user');
+            if (! $job->batch()->hasFailures()) {
+                $this->logInfo($job, 'table_cancelled', 'Table processing cancelled by user');
             }
 
             return;
@@ -31,9 +28,9 @@ class SkipWhenBatchCancelled
         $next($job);
     }
 
-    private function logInfo(string $event, string $message): void
+    private function logInfo(object $job, string $event, string $message): void
     {
-        if (!isset($this->tableName)) {
+        if (! property_exists($job, 'tableName') || $job->tableName === null) {
             Log::info("[{$event}] {$message}");
 
             return;
@@ -47,6 +44,6 @@ class SkipWhenBatchCancelled
         //        ], 'info');
 
         // Zusätzlich in Laravel Log
-        Log::info("[Table: {$this->tableName}] [{$event}] {$message}");
+        Log::info("[Table: {$job->tableName}] [{$event}] {$message}");
     }
 }
