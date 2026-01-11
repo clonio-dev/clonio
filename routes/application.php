@@ -10,7 +10,7 @@ use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('queue', function (): Illuminate\Http\RedirectResponse {
 
         $synchronizationConfigData = new SynchronizationOptionsData(
@@ -56,5 +56,9 @@ Route::middleware('auth')->group(function (): void {
         return to_route('dashboard', ['batch' => $batch->id]);
     });
 
-    Route::get('/batch/{batchId}', fn (string $batchId) => Bus::findBatch($batchId));
+    Route::get('/batch/{batch}', fn (string $batchId) => Bus::findBatch($batchId))
+        ->name('batch.show');
+
+    include __DIR__ . '/application/connections.php';
+    include __DIR__ . '/application/transfers.php';
 });
