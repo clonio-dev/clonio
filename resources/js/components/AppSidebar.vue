@@ -14,19 +14,25 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, RulerIcon } from 'lucide-vue-next';
+import { DatabaseIcon, LayoutGridIcon, RulerIcon } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+import IndexController from '@/actions/App/Http/Controllers/DatabaseConnections/IndexController';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
-        icon: LayoutGrid,
+        icon: LayoutGridIcon,
     },
     {
         title: 'Queue',
         href: '/queue',
         icon: RulerIcon,
+    },
+    {
+        title: 'Database Connections',
+        href: IndexController.url(),
+        icon: DatabaseIcon,
     },
 ];
 
