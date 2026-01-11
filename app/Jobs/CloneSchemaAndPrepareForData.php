@@ -6,25 +6,29 @@ namespace App\Jobs;
 
 use App\Data\ConnectionData;
 use App\Data\SynchronizeTableSchemaEnum;
+use App\Jobs\Concerns\HandlesExceptions;
+use App\Jobs\Concerns\LogsProcessSteps;
+use App\Jobs\Concerns\TransferBatchJob;
 use App\Services\DatabaseInformationRetrievalService;
+use App\Services\SchemaReplicator;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Connection;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Builder;
-use Illuminate\Database\Schema\SchemaState;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Support\Facades\Log;
-use RuntimeException;
+use PDOException;
 use Throwable;
 
 class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, InteractsWithQueue, Queueable;
+    use Batchable, InteractsWithQueue, Queueable, HandlesExceptions, LogsProcessSteps, TransferBatchJob;
 
     public int $tries = 2;
+
+    public string $tableName = '';
 
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
@@ -37,59 +41,30 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
 
     public function handle(
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
+        SchemaReplicator $schemaReplicator,
     ): void {
         try {
             /** @var Connection $sourceConnection */
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
-
-            $sourceSchema = $dbInformationRetrievalService->getSchema($this->sourceConnectionData);
-        } catch (Throwable $exception) {
-            Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
-            $this->fail($exception);
-
-            return;
-        }
-
-        try {
             /** @var Connection $targetConnection */
             $targetConnection = $dbInformationRetrievalService->getConnection($this->targetConnectionData);
 
+            $schemaReplicator->replicateDatabase($sourceConnection, $targetConnection, function (string $tableName, string $event, string $message) {
+                $this->tableName = $tableName;
+                $this->logInfo($event, $message);
+            });
+
+            $sourceSchema = $dbInformationRetrievalService->getSchema($this->sourceConnectionData);
             $targetSchema = $dbInformationRetrievalService->getSchema($this->targetConnectionData);
-        } catch (Throwable $exception) {
-            Log::error("Failed to connect to database {$this->targetConnectionData->name}: {$exception->getMessage()}");
-            $this->fail($exception);
-
-            return;
+            $this->processUnknownTablesOnTargetWhenNecessary($sourceSchema, $targetSchema);
+            $this->truncateTablesOnTargetWhenNecessary($sourceSchema, $targetConnection);
+        } catch (QueryException $e) {
+            $this->handleQueryException($e);
+        } catch (PDOException $e) {
+            $this->handleConnectionException($e);
+        } catch (Throwable $e) {
+            $this->handleUnexpectedException($e);
         }
-
-        if ($this->disableForeignKeyConstraints) {
-            Log::debug('Disabling foreign key constraints on target database.');
-            $targetConnection->getSchemaBuilder()->disableForeignKeyConstraints();
-        }
-
-        $this->processUnknownTablesOnTargetWhenNecessary($sourceSchema, $targetSchema);
-        $this->truncateTablesOnTargetWhenNecessary($sourceSchema, $targetConnection);
-        $this->synchronizeTablesOnTargetWhenNecessary(
-            $sourceConnection,
-            $sourceSchema,
-            $targetConnection,
-            $targetSchema,
-        );
-
-        if ($this->disableForeignKeyConstraints) {
-            Log::debug('Enabling foreign key constraints on target database.');
-            $targetConnection->getSchemaBuilder()->enableForeignKeyConstraints();
-        }
-    }
-
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return list<object>
-     */
-    public function middleware(): array
-    {
-        return [new SkipIfBatchCancelled];
     }
 
     private function processUnknownTablesOnTargetWhenNecessary(Builder $sourceSchema, Builder $targetSchema): void
@@ -103,9 +78,9 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
 
         $unknownTableNames = array_diff($targetTableNames, $sourceTableNames);
         foreach ($unknownTableNames as $unknownTableName) {
-            Log::debug("Dropping table {$unknownTableName} from target database.");
+            $this->tableName = $unknownTableName;
             $targetSchema->drop($unknownTableName);
-            Log::info("Dropped table {$unknownTableName} from target database.");
+            $this->logSuccess('table_dropped', "Dropped table {$unknownTableName} from target database.");
         }
     }
 
@@ -117,50 +92,9 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
 
         $sourceTableNames = $sourceSchema->getTableListing();
         foreach ($sourceTableNames as $tableName) {
+            $this->tableName = $tableName;
             $targetConnection->table($tableName)->delete();
+            $this->logSuccess('table_emptied', "All rows on table {$tableName} deleted on target database.");
         }
-    }
-
-    private function synchronizeTablesOnTargetWhenNecessary(
-        Connection $sourceConnection,
-        Builder $sourceSchema,
-        Connection $targetConnection,
-        Builder $targetSchema,
-    ): void {
-        if ($this->synchronizeTableSchemaEnum !== SynchronizeTableSchemaEnum::DROP_CREATE) {
-            return;
-        }
-
-        assert(method_exists($sourceConnection, 'getSchemaState'));
-        /** @var SchemaState $sourceState */
-        $sourceState = $sourceConnection->getSchemaState();
-        if ($this->migrationTableName !== null) {
-            $sourceState->withMigrationTable($this->migrationTableName);
-        }
-        $tmpfile = tempnam(sys_get_temp_dir(), 'schema-');
-        $sourceState->dump($sourceConnection, $tmpfile);
-
-        if (! is_readable($tmpfile)) {
-            @unlink($tmpfile);
-            throw new RuntimeException("Failed to create temporary file {$tmpfile}.");
-        }
-
-        $schemaDump = file_get_contents($tmpfile);
-        if ($schemaDump === false || mb_strlen($schemaDump) === 0) {
-            @unlink($tmpfile);
-            throw new RuntimeException("Temporary file {$tmpfile} is empty.");
-        }
-
-        $sourceTableNames = $sourceSchema->getTableListing();
-        foreach ($sourceTableNames as $tableName) {
-            $targetSchema->dropIfExists($tableName);
-        }
-
-        assert(method_exists($targetConnection, 'getSchemaState'));
-        /** @var SchemaState $targetState */
-        $targetState = $targetConnection->getSchemaState();
-        $targetState->load($tmpfile);
-
-        @unlink($tmpfile);
     }
 }
