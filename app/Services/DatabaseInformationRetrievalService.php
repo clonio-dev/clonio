@@ -9,6 +9,8 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\Collection;
+use PDOException;
+use RuntimeException;
 
 final readonly class DatabaseInformationRetrievalService
 {
@@ -23,12 +25,12 @@ final readonly class DatabaseInformationRetrievalService
 
     public function getConnection(ConnectionData $connectionData): ConnectionInterface
     {
-        if (! $this->connections->has($connectionData->connectionName())) {
-            $this->connections->put($connectionData->connectionName(), $this->establishConnection($connectionData));
+        if (! $this->connections->has($connectionData->connectionName)) {
+            $this->connections->put($connectionData->connectionName, $this->establishConnection($connectionData));
         }
 
         /** @var ConnectionInterface $connection */
-        $connection = $this->connections->get($connectionData->connectionName());
+        $connection = $this->connections->get($connectionData->connectionName);
 
         return $connection;
     }
@@ -55,12 +57,32 @@ final readonly class DatabaseInformationRetrievalService
         return new TableInformationRetrievalService($this->getConnection($connectionData), $tableName);
     }
 
+    /**
+     * @param \App\Data\ConnectionData $connectionData
+     * @return \Illuminate\Database\ConnectionInterface
+     * @throws \RuntimeException when PDO connection failed
+     */
     private function establishConnection(ConnectionData $connectionData): ConnectionInterface
     {
-        return $this->databaseManager->connectUsing(
-            name: $connectionData->connectionName(),
-            config: $connectionData->driver->toArray(),
-            force: true,
-        );
+        try {
+            $connection = $this->databaseManager->connectUsing(
+                name: $connectionData->connectionName,
+                config: $connectionData->driver->toArray(),
+                force: true,
+            );
+
+            // Test connection
+            $connection->getPdo();
+
+            return $connection;
+        } catch (PDOException $e) {
+            //            $this->logError(
+            //                "connection_{$connectionData->connectionName}_failed",
+            //                "Failed to connect to {$connectionData->connectionName} database: {$e->getMessage()}"
+            //            );
+
+            throw new RuntimeException("Could not connect to {$connectionData->connectionName} database. " .
+                'Please check credentials and network connectivity.', $e->getCode(), previous: $e);
+        }
     }
 }
