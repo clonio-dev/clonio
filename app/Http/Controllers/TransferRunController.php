@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Data\SynchronizationOptionsData;
-use App\Enums\DatabaseConnectionTypes;
 use App\Enums\TransferRunStatus;
 use App\Http\Requests\StoreTransferRunRequest;
 use App\Jobs\SynchronizeDatabase;
@@ -24,7 +23,7 @@ class TransferRunController extends Controller
     public function index(): Response
     {
         $runs = TransferRun::query()
-            ->with(['config:id,name', 'logs'])
+//            ->with(['config:id,name', 'logs'])
             ->where('user_id', auth()->id())
             ->latest('started_at')
             ->limit(20)
@@ -215,7 +214,7 @@ class TransferRunController extends Controller
         if ($batch) {
             $run->batch_progress = [
                 'processed_jobs' => $batch->processedJobs(),
-                'pending_jobs' => $batch->pendingJobs(),
+                'pending_jobs' => $batch->pendingJobs,
                 'failed_jobs' => $batch->failedJobs,
                 'total_jobs' => $batch->totalJobs,
                 'finished' => $batch->finished(),
