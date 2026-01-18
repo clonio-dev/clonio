@@ -92,7 +92,6 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
             return;
         }
 
-        $sourceTableNames = $sourceSchema->getTableListing();
         $sourceTableNames = $sourceSchema->getTableListing($sourceSchema->getCurrentSchemaName(), false);
         foreach ($sourceTableNames as $tableName) {
             $this->tableName = $tableName;
