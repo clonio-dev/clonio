@@ -93,6 +93,7 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
         }
 
         $sourceTableNames = $sourceSchema->getTableListing();
+        $sourceTableNames = $sourceSchema->getTableListing($sourceSchema->getCurrentSchemaName(), false);
         foreach ($sourceTableNames as $tableName) {
             $this->tableName = $tableName;
             $targetConnection->table($tableName)->delete();
