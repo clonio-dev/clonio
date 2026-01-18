@@ -64,7 +64,6 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
             new CloneSchemaAndPrepareForData(
                 sourceConnectionData: $this->sourceConnectionData,
                 targetConnectionData: $this->targetConnectionData,
-                synchronizeTableSchemaEnum: $this->options->synchronizeTableSchema,
                 keepUnknownTablesOnTarget: $this->options->keepUnknownTablesOnTarget,
                 migrationTableName: $this->options->migrationTableName,
                 run: $this->run,

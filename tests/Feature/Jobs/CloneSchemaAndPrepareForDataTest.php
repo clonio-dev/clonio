@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
-use App\Data\SynchronizeTableSchemaEnum;
 use App\Jobs\CloneSchemaAndPrepareForData;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
@@ -15,7 +14,6 @@ it('returns correct middleware', function (): void {
     $job = new CloneSchemaAndPrepareForData(
         sourceConnectionData: new ConnectionData('source', new SqliteDriverData()),
         targetConnectionData: new ConnectionData('target', new SqliteDriverData()),
-        synchronizeTableSchemaEnum: SynchronizeTableSchemaEnum::DROP_CREATE,
         keepUnknownTablesOnTarget: false,
         migrationTableName: null,
     );
@@ -70,7 +68,6 @@ it('keeps unknown tables on target when configured', function (): void {
     $job = new CloneSchemaAndPrepareForData(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        synchronizeTableSchemaEnum: SynchronizeTableSchemaEnum::TRUNCATE,
         keepUnknownTablesOnTarget: true,
         migrationTableName: null,
     );
@@ -129,7 +126,6 @@ it('drops unknown tables on target when configured', function (): void {
     $job = new CloneSchemaAndPrepareForData(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        synchronizeTableSchemaEnum: SynchronizeTableSchemaEnum::TRUNCATE,
         keepUnknownTablesOnTarget: false,
         migrationTableName: null,
     );
@@ -186,7 +182,6 @@ it('truncates tables when using TRUNCATE mode', function (): void {
     $job = new CloneSchemaAndPrepareForData(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        synchronizeTableSchemaEnum: SynchronizeTableSchemaEnum::TRUNCATE,
         keepUnknownTablesOnTarget: true,
         migrationTableName: null,
     );
@@ -240,7 +235,6 @@ it('clones schema using DROP_CREATE with migration table', function (): void {
     $job = new CloneSchemaAndPrepareForData(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        synchronizeTableSchemaEnum: SynchronizeTableSchemaEnum::DROP_CREATE,
         keepUnknownTablesOnTarget: true,
         migrationTableName: 'custom_migrations',
     );
@@ -291,7 +285,6 @@ it('clones schema using DROP_CREATE without migration table', function (): void 
     $job = new CloneSchemaAndPrepareForData(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        synchronizeTableSchemaEnum: SynchronizeTableSchemaEnum::DROP_CREATE,
         keepUnknownTablesOnTarget: true,
         migrationTableName: null,
     );
@@ -349,7 +342,6 @@ it('disables and enables foreign key constraints when configured', function (): 
     $job = new CloneSchemaAndPrepareForData(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        synchronizeTableSchemaEnum: SynchronizeTableSchemaEnum::TRUNCATE,
         keepUnknownTablesOnTarget: true,
         migrationTableName: null,
         disableForeignKeyConstraints: true,
@@ -404,7 +396,6 @@ it('handles DROP_CREATE mode with foreign key constraints disabled', function ()
     $job = new CloneSchemaAndPrepareForData(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        synchronizeTableSchemaEnum: SynchronizeTableSchemaEnum::DROP_CREATE,
         keepUnknownTablesOnTarget: true,
         migrationTableName: null,
         disableForeignKeyConstraints: true,

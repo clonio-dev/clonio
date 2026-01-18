@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
 use App\Data\SynchronizationOptionsData;
-use App\Data\SynchronizeTableSchemaEnum;
 use App\Jobs\CloneSchemaAndPrepareForData;
 use App\Jobs\SynchronizeDatabase;
 use App\Jobs\TransferRecordsForAllTables;
@@ -52,7 +51,6 @@ it('synchronizes database with single target', function (): void {
 
     $options = new SynchronizationOptionsData(
         disableForeignKeyConstraints: true,
-        synchronizeTableSchema: SynchronizeTableSchemaEnum::DROP_CREATE,
         keepUnknownTablesOnTarget: false,
         migrationTableName: 'migrations',
         chunkSize: 500,
@@ -73,8 +71,7 @@ it('synchronizes database with single target', function (): void {
     $job->handle($dbService);
 
     // Verify CloneSchemaAndPrepareForData was queued
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn (CloneSchemaAndPrepareForData $job): bool => $job->synchronizeTableSchemaEnum === $options->synchronizeTableSchema
-        && $job->keepUnknownTablesOnTarget === $options->keepUnknownTablesOnTarget
+    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn (CloneSchemaAndPrepareForData $job): bool => $job->keepUnknownTablesOnTarget === $options->keepUnknownTablesOnTarget
         && $job->migrationTableName === $options->migrationTableName
         && $job->disableForeignKeyConstraints === $options->disableForeignKeyConstraints);
 
@@ -157,7 +154,6 @@ it('passes synchronization options to child jobs', function (): void {
 
     $options = new SynchronizationOptionsData(
         disableForeignKeyConstraints: false,
-        synchronizeTableSchema: SynchronizeTableSchemaEnum::TRUNCATE,
         keepUnknownTablesOnTarget: true,
         migrationTableName: 'custom_migrations',
         chunkSize: 250,
@@ -178,8 +174,7 @@ it('passes synchronization options to child jobs', function (): void {
     $job->handle($dbService);
 
     // Verify all options were passed correctly to CloneSchemaAndPrepareForData
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn ($job): bool => $job->synchronizeTableSchemaEnum === SynchronizeTableSchemaEnum::TRUNCATE
-        && $job->keepUnknownTablesOnTarget === true
+    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn ($job): bool => $job->keepUnknownTablesOnTarget === true
         && $job->migrationTableName === 'custom_migrations'
         && $job->disableForeignKeyConstraints === false);
 
@@ -228,8 +223,7 @@ it('uses default synchronization options when not specified', function (): void 
     $job->handle($dbService);
 
     // Verify default options
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn (CloneSchemaAndPrepareForData $job): bool => $job->synchronizeTableSchemaEnum === SynchronizeTableSchemaEnum::DROP_CREATE
-        && $job->keepUnknownTablesOnTarget
+    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn (CloneSchemaAndPrepareForData $job): bool => $job->keepUnknownTablesOnTarget
         && $job->migrationTableName === null
         && $job->disableForeignKeyConstraints);
 

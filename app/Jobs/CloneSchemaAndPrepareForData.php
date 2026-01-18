@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Data\ConnectionData;
-use App\Data\SynchronizeTableSchemaEnum;
 use App\Jobs\Concerns\HandlesExceptions;
 use App\Jobs\Concerns\LogsProcessSteps;
 use App\Jobs\Concerns\TransferBatchJob;
@@ -34,7 +33,6 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
         public readonly ConnectionData $targetConnectionData,
-        public readonly SynchronizeTableSchemaEnum $synchronizeTableSchemaEnum,
         public readonly bool $keepUnknownTablesOnTarget,
         public readonly ?string $migrationTableName,
         public readonly TransferRun $run,
@@ -88,10 +86,6 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
 
     private function truncateTablesOnTargetWhenNecessary(Builder $sourceSchema, Connection $targetConnection): void
     {
-        if ($this->synchronizeTableSchemaEnum !== SynchronizeTableSchemaEnum::TRUNCATE) {
-            return;
-        }
-
         $sourceTableNames = $sourceSchema->getTableListing($sourceSchema->getCurrentSchemaName(), false);
         foreach ($sourceTableNames as $tableName) {
             $this->tableName = $tableName;
