@@ -6,6 +6,7 @@ namespace App\Jobs\Concerns;
 
 use App\Models\TransferRun;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -55,5 +56,18 @@ trait LogsProcessSteps
         }
 
         Log::{$level}("[Table: {$tableName}] [{$event}] {$message}");
+    }
+
+    private function logErrorMessage(string $message, Collection $connectionMap): void
+    {
+        Log::debug(__METHOD__.'::before: ' . $message);
+
+        $message = strtr($message, $connectionMap->all());
+
+        Log::debug(__METHOD__.'::after: ' . $message, ['conecctions' => $connectionMap->all()]);
+
+        if (isset($this->run) && $this->run instanceof TransferRun) {
+            $this->run->update(['error_message' => $message]);
+        }
     }
 }

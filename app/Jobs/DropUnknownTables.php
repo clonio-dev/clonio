@@ -1,0 +1,59 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Jobs;
+
+use App\Data\ConnectionData;
+use App\Jobs\Concerns\HandlesExceptions;
+use App\Jobs\Concerns\LogsProcessSteps;
+use App\Jobs\Concerns\TransferBatchJob;
+use App\Models\TransferRun;
+use App\Services\DatabaseInformationRetrievalService;
+use Illuminate\Bus\Batchable;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeEncrypted;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\QueryException;
+use Illuminate\Queue\InteractsWithQueue;
+use PDOException;
+use Throwable;
+
+class DropUnknownTables implements ShouldBeEncrypted, ShouldQueue
+{
+    use Batchable, HandlesExceptions, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
+
+    public int $tries = 2;
+
+    public string $tableName = '';
+
+    public function __construct(
+        public readonly ConnectionData $sourceConnectionData,
+        public readonly ConnectionData $targetConnectionData,
+        public readonly TransferRun $run,
+    ) {}
+
+    public function handle(
+        DatabaseInformationRetrievalService $dbInformationRetrievalService,
+    ): void {
+        try {
+            $targetSchema = $dbInformationRetrievalService->getSchema($this->targetConnectionData);
+
+            $sourceTableNames = $dbInformationRetrievalService->getTableNames($this->sourceConnectionData);
+            $targetTableNames = $dbInformationRetrievalService->getTableNames($this->targetConnectionData);
+
+            $unknownTableNames = array_diff($targetTableNames, $sourceTableNames);
+            foreach ($unknownTableNames as $unknownTableName) {
+                $this->tableName = $unknownTableName;
+                $targetSchema->drop($unknownTableName);
+                $this->logSuccess('table_dropped', "Dropped table {$unknownTableName} from target database.");
+            }
+        } catch (QueryException $e) {
+            $this->handleQueryException($e);
+        } catch (PDOException $e) {
+            $this->handleConnectionException($e);
+        } catch (Throwable $e) {
+            $this->handleUnexpectedException($e);
+        }
+    }
+}

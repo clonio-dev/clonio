@@ -5,9 +5,11 @@ declare(strict_types=1);
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
 use App\Data\SynchronizationOptionsData;
-use App\Jobs\CloneSchemaAndPrepareForData;
+use App\Jobs\CloneSchema;
+use App\Jobs\DropUnknownTables;
 use App\Jobs\SynchronizeDatabase;
 use App\Jobs\TransferRecordsForAllTables;
+use App\Jobs\TruncateTargetTables;
 use App\Models\TransferRun;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
@@ -52,7 +54,6 @@ it('synchronizes database with single target', function (): void {
     $options = new SynchronizationOptionsData(
         disableForeignKeyConstraints: true,
         keepUnknownTablesOnTarget: false,
-        migrationTableName: 'migrations',
         chunkSize: 500,
     );
 
@@ -72,13 +73,12 @@ it('synchronizes database with single target', function (): void {
     $job->handle($dbService);
 
     // Verify CloneSchemaAndPrepareForData was queued
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn (CloneSchemaAndPrepareForData $job): bool => $job->keepUnknownTablesOnTarget === $options->keepUnknownTablesOnTarget
-        && $job->migrationTableName === $options->migrationTableName
-        && $job->disableForeignKeyConstraints === $options->disableForeignKeyConstraints);
+    Queue::assertPushed(CloneSchema::class);
+    Queue::assertPushed(TruncateTargetTables::class);
+    Queue::assertPushed(DropUnknownTables::class);
 
     // Verify TransferRecordsForAllTables was queued
     Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === $options->chunkSize
-        && $job->options->migrationTableName === $options->migrationTableName
         && $job->options->disableForeignKeyConstraints === $options->disableForeignKeyConstraints);
 
     // Clean up
@@ -107,7 +107,6 @@ it('passes synchronization options to child jobs', function (): void {
     $options = new SynchronizationOptionsData(
         disableForeignKeyConstraints: false,
         keepUnknownTablesOnTarget: true,
-        migrationTableName: 'custom_migrations',
         chunkSize: 250,
     );
 
@@ -127,13 +126,12 @@ it('passes synchronization options to child jobs', function (): void {
     $job->handle($dbService);
 
     // Verify all options were passed correctly to CloneSchemaAndPrepareForData
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn ($job): bool => $job->keepUnknownTablesOnTarget === true
+    Queue::assertPushed(CloneSchema::class, fn ($job): bool => $job->keepUnknownTablesOnTarget === true
         && $job->migrationTableName === 'custom_migrations'
         && $job->disableForeignKeyConstraints === false);
 
     // Verify all options were passed correctly to TransferRecordsForAllTables
     Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === 250
-        && $job->options->migrationTableName === 'custom_migrations'
         && $job->options->disableForeignKeyConstraints === false);
 
     // Clean up
@@ -177,12 +175,9 @@ it('uses default synchronization options when not specified', function (): void 
     $job->handle($dbService);
 
     // Verify default options
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, fn (CloneSchemaAndPrepareForData $job): bool => $job->keepUnknownTablesOnTarget
-        && $job->migrationTableName === null
-        && $job->disableForeignKeyConstraints);
+    Queue::assertPushed(CloneSchema::class);
 
     Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === 1000
-        && $job->options->migrationTableName === null
         && $job->options->disableForeignKeyConstraints);
 
     // Clean up

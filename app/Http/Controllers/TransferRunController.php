@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Data\ColumnMutationData;
+use App\Data\ColumnMutationDataOptions;
+use App\Data\ColumnMutationStrategyEnum;
 use App\Data\SynchronizationOptionsData;
+use App\Data\TableAnonymizationOptionsData;
 use App\Enums\TransferRunStatus;
 use App\Http\Requests\StoreTransferRunRequest;
 use App\Jobs\SynchronizeDatabase;
 use App\Models\DatabaseConnection;
 use App\Models\TransferRun;
 use Illuminate\Bus\Batch;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -101,7 +106,28 @@ class TransferRunController extends Controller
         $transferRun->log('transfer_run_created');
 
         $synchronizationConfigData = new SynchronizationOptionsData(
-            migrationTableName: 'migrations',
+            tableAnonymizationOptions: new Collection([
+                new TableAnonymizationOptionsData(
+                    tableName: 'products',
+                    columnMutations: new Collection([
+                        new ColumnMutationData(
+                            columnName: 'name',
+                            strategy: ColumnMutationStrategyEnum::MASK,
+                            options: new ColumnMutationDataOptions(
+                                visibleChars: 2,
+                                maskChar: '#',
+                            ),
+                        ),
+                        new ColumnMutationData(
+                            columnName: 'in_stock',
+                            strategy: ColumnMutationStrategyEnum::STATIC,
+                            options: new ColumnMutationDataOptions(
+                                value: 3,
+                            ),
+                        ),
+                    ])
+                ),
+            ]),
         );
 
         $connectionDataSource = $transferRun->sourceConnection->toConnectionDataDto();

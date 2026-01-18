@@ -17,10 +17,13 @@ final readonly class DatabaseInformationRetrievalService
     /** @var Collection<string, ConnectionInterface> */
     private Collection $connections;
 
+    private Collection $connectionMap;
+
     public function __construct(
         private DatabaseManager $databaseManager,
     ) {
         $this->connections = new Collection();
+        $this->connectionMap = new Collection();
     }
 
     public function getConnection(ConnectionData $connectionData): ConnectionInterface
@@ -33,6 +36,11 @@ final readonly class DatabaseInformationRetrievalService
         $connection = $this->connections->get($connectionData->connectionName);
 
         return $connection;
+    }
+
+    public function connectionMap(): Collection
+    {
+        return $this->connectionMap;
     }
 
     public function getSchema(ConnectionData $connectionData): Builder
@@ -71,6 +79,8 @@ final readonly class DatabaseInformationRetrievalService
 
             // Test connection
             $connection->getPdo();
+
+            $this->connectionMap->put($connectionData->connectionName, $connectionData->name);
 
             return $connection;
         } catch (PDOException $e) {

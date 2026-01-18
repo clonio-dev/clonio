@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
-use App\Jobs\CloneSchemaAndPrepareForData;
+use App\Jobs\CloneSchema;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 it('returns correct middleware', function (): void {
-    $job = new CloneSchemaAndPrepareForData(
+    $job = new CloneSchema(
         sourceConnectionData: new ConnectionData('source', new SqliteDriverData()),
         targetConnectionData: new ConnectionData('target', new SqliteDriverData()),
         keepUnknownTablesOnTarget: false,
@@ -65,7 +65,7 @@ it('keeps unknown tables on target when configured', function (): void {
     $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
     $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
 
-    $job = new CloneSchemaAndPrepareForData(
+    $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         keepUnknownTablesOnTarget: true,
@@ -123,7 +123,7 @@ it('drops unknown tables on target when configured', function (): void {
     Log::shouldReceive('debug')->once()->with(Mockery::pattern('/Dropping table (main\.)?old_table from target database\./'));
     Log::shouldReceive('info')->once()->with(Mockery::pattern('/Dropped table (main\.)?old_table from target database\./'));
 
-    $job = new CloneSchemaAndPrepareForData(
+    $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         keepUnknownTablesOnTarget: false,
@@ -179,7 +179,7 @@ it('truncates tables when using TRUNCATE mode', function (): void {
     $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
     $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
 
-    $job = new CloneSchemaAndPrepareForData(
+    $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         keepUnknownTablesOnTarget: true,
@@ -232,7 +232,7 @@ it('clones schema using DROP_CREATE with migration table', function (): void {
     $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
     $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
 
-    $job = new CloneSchemaAndPrepareForData(
+    $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         keepUnknownTablesOnTarget: true,
@@ -282,7 +282,7 @@ it('clones schema using DROP_CREATE without migration table', function (): void 
     $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
     $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
 
-    $job = new CloneSchemaAndPrepareForData(
+    $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         keepUnknownTablesOnTarget: true,
@@ -339,7 +339,7 @@ it('disables and enables foreign key constraints when configured', function (): 
     Log::shouldReceive('debug')->once()->with('Disabling foreign key constraints on target database.');
     Log::shouldReceive('debug')->once()->with('Enabling foreign key constraints on target database.');
 
-    $job = new CloneSchemaAndPrepareForData(
+    $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         keepUnknownTablesOnTarget: true,
@@ -393,7 +393,7 @@ it('handles DROP_CREATE mode with foreign key constraints disabled', function ()
     Log::shouldReceive('debug')->once()->with('Disabling foreign key constraints on target database.');
     Log::shouldReceive('debug')->once()->with('Enabling foreign key constraints on target database.');
 
-    $job = new CloneSchemaAndPrepareForData(
+    $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         keepUnknownTablesOnTarget: true,

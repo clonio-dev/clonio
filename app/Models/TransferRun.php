@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\TransferRunLogLevel;
 use App\Enums\TransferRunStatus;
+use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,6 +33,7 @@ use Illuminate\Support\Carbon;
  * @property-read User $user
  * @property-read DatabaseConnection $sourceConnection
  * @property-read DatabaseConnection $targetConnection
+ * @property-read ?Batch $batch
  * @property-read Collection<int, TransferRunLog> $logs
  * @property-read int|null $duration
  *
@@ -91,6 +93,14 @@ class TransferRun extends Model
     public function targetConnection(): BelongsTo
     {
         return $this->belongsTo(DatabaseConnection::class, 'target_connection_id');
+    }
+
+    /**
+     * @return BelongsTo<Batch, TransferRun>
+     */
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(Batch::class, 'batch_id');
     }
 
     /**

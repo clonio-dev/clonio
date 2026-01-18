@@ -14,7 +14,6 @@ final readonly class SynchronizationOptionsData
     public function __construct(
         public bool $disableForeignKeyConstraints = true,
         public bool $keepUnknownTablesOnTarget = true,
-        public ?string $migrationTableName = null,
         public int $chunkSize = 1000,
         public ?Collection $tableAnonymizationOptions = null,
     ) {}

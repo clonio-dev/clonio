@@ -42,6 +42,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
             $sourceConnection->getSchemaBuilder();
         } catch (Throwable $exception) {
             $this->logError('connection_failed', "Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
+            $this->logErrorMessage($exception->getMessage(), $dbInformationRetrievalService->connectionMap());
             $this->fail($exception);
 
             return;
@@ -51,6 +52,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
             $dbInformationRetrievalService->getConnection($this->targetConnectionData);
         } catch (Throwable $exception) {
             $this->logError('connection_failed', "Failed to connect to database {$this->targetConnectionData->name}: {$exception->getMessage()}");
+            $this->logErrorMessage($exception->getMessage(), $dbInformationRetrievalService->connectionMap());
             $this->fail($exception);
 
             return;
@@ -61,20 +63,35 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
         $this->logInfo('synchronization_started', "Starting database synchronization.");
 
         $batch->add([
-            new CloneSchemaAndPrepareForData(
+            new CloneSchema(
                 sourceConnectionData: $this->sourceConnectionData,
                 targetConnectionData: $this->targetConnectionData,
-                keepUnknownTablesOnTarget: $this->options->keepUnknownTablesOnTarget,
-                migrationTableName: $this->options->migrationTableName,
                 run: $this->run,
-                disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
             ),
+            new TruncateTargetTables(
+                sourceConnectionData: $this->sourceConnectionData,
+                targetConnectionData: $this->targetConnectionData,
+                run: $this->run,
+            )
+        ]);
+
+        if (! $this->options->keepUnknownTablesOnTarget) {
+            $batch->add(
+                new DropUnknownTables(
+                    sourceConnectionData: $this->sourceConnectionData,
+                    targetConnectionData: $this->targetConnectionData,
+                    run: $this->run,
+                )
+            );
+        }
+
+        $batch->add(
             new TransferRecordsForAllTables(
                 sourceConnectionData: $this->sourceConnectionData,
                 targetConnectionData: $this->targetConnectionData,
                 options: $this->options,
                 run: $this->run,
             ),
-        ]);
+        );
     }
 }

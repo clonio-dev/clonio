@@ -117,7 +117,6 @@ it('skips migration table when specified', function (): void {
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         options: new SynchronizationOptionsData(
-            migrationTableName: 'migrations',
             chunkSize: 100,
         ),
     );

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\SchemaBuilderInterface;
 use App\Data\TableSchema;
 use App\Services\SchemaInspector\SchemaInspectorFactory;
 use App\Services\SchemaReplicator\MySQLSchemaBuilder;
@@ -31,10 +32,7 @@ class SchemaReplicator
     public function replicateDatabase(Connection $source, Connection $target, ?callable $visitor = null): void
     {
         $sourceInspector = SchemaInspectorFactory::create($source);
-        $targetInspector = SchemaInspectorFactory::create($target);
-
         $sourceSchema = $sourceInspector->getDatabaseSchema($source);
-        $targetSchema = $targetInspector->getDatabaseSchema($target);
 
         $tableNames = $sourceSchema->getTableNames()->all();
 
@@ -44,12 +42,6 @@ class SchemaReplicator
         foreach ($order['insert_order'] as $sourceTable) {
             $this->replicateTable($source, $target, $sourceTable, $visitor);
         }
-
-        Log::info('Schema replication completed', [
-            'source_db' => $sourceSchema->databaseName,
-            'target_db' => $targetSchema->databaseName,
-            'tables_replicated' => $sourceSchema->getTableCount(),
-        ]);
     }
 
     /**
@@ -67,13 +59,15 @@ class SchemaReplicator
 
         // Check if table exists in target
         if ($targetInspector->tableExists($target, $table->name)) {
+            if ($visitor !== null) {
+                $visitor($table->name, 'replicating_table', 'Updating existing table');
+            }
             $this->updateTable($target, $table, $visitor);
         } else {
+            if ($visitor !== null) {
+                $visitor($table->name, 'replicating_table', 'Creating new table');
+            }
             $this->createTable($target, $table, $visitor);
-        }
-
-        if ($visitor !== null) {
-            $visitor($table->name, 'replicating_table', 'Table replicated with ' . $table->getColumnNames()->count() . ' columns');
         }
     }
 
@@ -121,6 +115,12 @@ class SchemaReplicator
 
     /**
      * Get differences between two table schemas
+     *
+     * @return array{
+     *     missing_columns: string[],
+     *     extra_columns: string[],
+     *     modified_columns: string[],
+     * }
      */
     public function getTableDiff(TableSchema $source, TableSchema $target): array
     {
@@ -203,8 +203,15 @@ class SchemaReplicator
 
         $diff = $this->getTableDiff($table, $currentTable);
 
-        if (empty($diff['missing_columns']) &&
-            empty($diff['modified_columns'])) {
+        if (
+            empty($diff['missing_columns'])
+            && empty($diff['modified_columns'])
+            && empty($diff['extra_columns'])
+        ) {
+            if ($visitor !== null) {
+                $visitor($table->name, 'replicating_table', 'No changes necessary.');
+            }
+
             return; // No changes needed
         }
 
@@ -218,7 +225,7 @@ class SchemaReplicator
             $target->statement($sql);
 
             if ($visitor !== null) {
-                $visitor($table->name, 'replicating_table', 'Add a missing column: ' . $columnName);
+                $visitor($table->name, 'replicating_table', 'Missing column added: ' . $columnName);
             }
         }
 
@@ -233,9 +240,7 @@ class SchemaReplicator
             }
         }
 
-        if ($visitor !== null) {
-            $visitor($table->name, 'replicating_table', 'Table updated');
-        }
+        // @TODO remove columns, that aren't in source
     }
 
     /**
@@ -253,7 +258,7 @@ class SchemaReplicator
     /**
      * Get SQL builder for specific driver
      */
-    protected function getBuilderForDriver(string $driver): object
+    protected function getBuilderForDriver(string $driver): SchemaBuilderInterface
     {
         return match ($driver) {
             'mysql' => new MySQLSchemaBuilder(),
