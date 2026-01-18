@@ -8,6 +8,7 @@ use App\Data\SynchronizationOptionsData;
 use App\Jobs\CloneSchemaAndPrepareForData;
 use App\Jobs\SynchronizeDatabase;
 use App\Jobs\TransferRecordsForAllTables;
+use App\Models\TransferRun;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Support\Facades\Bus;
@@ -18,9 +19,8 @@ it('returns correct middleware', function (): void {
     $job = new SynchronizeDatabase(
         options: new SynchronizationOptionsData(),
         sourceConnectionData: new ConnectionData('source', new SqliteDriverData()),
-        targetConnectionsData: collect([
-            new ConnectionData('target', new SqliteDriverData()),
-        ]),
+        targetConnectionData: new ConnectionData('target', new SqliteDriverData()),
+        run: TransferRun::factory()->create(),
     );
 
     $middleware = $job->middleware();
@@ -63,7 +63,8 @@ it('synchronizes database with single target', function (): void {
     $job = new SynchronizeDatabase(
         options: $options,
         sourceConnectionData: $sourceConnectionData,
-        targetConnectionsData: collect([$targetConnectionData]),
+        targetConnectionData: $targetConnectionData,
+        run: TransferRun::factory()->create(),
     );
     $job->withBatchId($batch->id);
 
@@ -79,55 +80,6 @@ it('synchronizes database with single target', function (): void {
     Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === $options->chunkSize
         && $job->options->migrationTableName === $options->migrationTableName
         && $job->options->disableForeignKeyConstraints === $options->disableForeignKeyConstraints);
-
-    // Clean up
-    @unlink($sourceDb);
-});
-
-it('synchronizes database with multiple targets', function (): void {
-    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
-    @unlink($sourceDb);
-    $sourceDb .= '.sqlite';
-    touch($sourceDb);
-
-    // Set up source database
-    config(['database.connections.test_source' => [
-        'driver' => 'sqlite',
-        'database' => $sourceDb,
-    ]]);
-    DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
-        $table->id();
-    });
-
-    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
-    $target1ConnectionData = new ConnectionData('test_target1', new SqliteDriverData('/path/to/target1.sqlite'));
-    $target2ConnectionData = new ConnectionData('test_target2', new SqliteDriverData('/path/to/target2.sqlite'));
-    $target3ConnectionData = new ConnectionData('test_target3', new SqliteDriverData('/path/to/target3.sqlite'));
-
-    $options = new SynchronizationOptionsData();
-
-    Queue::fake();
-
-    $batch = Bus::batch([])->dispatch();
-
-    $job = new SynchronizeDatabase(
-        options: $options,
-        sourceConnectionData: $sourceConnectionData,
-        targetConnectionsData: collect([
-            $target1ConnectionData,
-            $target2ConnectionData,
-            $target3ConnectionData,
-        ]),
-    );
-    $job->withBatchId($batch->id);
-
-    $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
-
-    // Verify jobs were queued for all 3 targets (2 jobs per target)
-    Queue::assertPushed(CloneSchemaAndPrepareForData::class, 3);
-    Queue::assertPushed(TransferRecordsForAllTables::class, 3);
 
     // Clean up
     @unlink($sourceDb);
@@ -166,7 +118,8 @@ it('passes synchronization options to child jobs', function (): void {
     $job = new SynchronizeDatabase(
         options: $options,
         sourceConnectionData: $sourceConnectionData,
-        targetConnectionsData: collect([$targetConnectionData]),
+        targetConnectionData: $targetConnectionData,
+        run: TransferRun::factory()->create(),
     );
     $job->withBatchId($batch->id);
 
@@ -215,7 +168,8 @@ it('uses default synchronization options when not specified', function (): void 
     $job = new SynchronizeDatabase(
         options: $options,
         sourceConnectionData: $sourceConnectionData,
-        targetConnectionsData: collect([$targetConnectionData]),
+        targetConnectionData: $targetConnectionData,
+        run: TransferRun::factory()->create(),
     );
     $job->withBatchId($batch->id);
 
@@ -261,7 +215,8 @@ it('connects to source and validates schema builder', function (): void {
     $job = new SynchronizeDatabase(
         options: new SynchronizationOptionsData(),
         sourceConnectionData: $sourceConnectionData,
-        targetConnectionsData: collect([$targetConnectionData]),
+        targetConnectionData: $targetConnectionData,
+        run: TransferRun::factory()->create(),
     );
     $job->withBatchId($batch->id);
 
