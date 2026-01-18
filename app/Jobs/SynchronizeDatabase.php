@@ -65,12 +65,14 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
                 synchronizeTableSchemaEnum: $this->options->synchronizeTableSchema,
                 keepUnknownTablesOnTarget: $this->options->keepUnknownTablesOnTarget,
                 migrationTableName: $this->options->migrationTableName,
+                run: $this->run,
                 disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
             ),
             new TransferRecordsForAllTables(
                 sourceConnectionData: $this->sourceConnectionData,
                 targetConnectionData: $this->targetConnectionData,
                 options: $this->options,
+                run: $this->run,
             ),
         ]);
     }

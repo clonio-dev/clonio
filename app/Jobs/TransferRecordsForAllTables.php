@@ -8,6 +8,7 @@ use App\Data\ConnectionData;
 use App\Data\SynchronizationOptionsData;
 use App\Jobs\Concerns\HandlesExceptions;
 use App\Jobs\Concerns\TransferBatchJob;
+use App\Models\TransferRun;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -30,6 +31,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
         public readonly ConnectionData $sourceConnectionData,
         public readonly ConnectionData $targetConnectionData,
         public readonly SynchronizationOptionsData $options,
+        public readonly TransferRun $run,
     ) {}
 
     public function handle(
@@ -55,6 +57,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
                             targetConnectionData: $this->targetConnectionData,
                             tableName: $tableName,
                             chunkSize: $this->options->chunkSize,
+                            run: $this->run,
                             disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
                             tableAnonymizationOptions: $this->options->getAnonymizationOptionsForTable($tableName),
                         )

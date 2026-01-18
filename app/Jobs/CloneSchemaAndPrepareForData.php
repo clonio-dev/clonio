@@ -9,6 +9,7 @@ use App\Data\SynchronizeTableSchemaEnum;
 use App\Jobs\Concerns\HandlesExceptions;
 use App\Jobs\Concerns\LogsProcessSteps;
 use App\Jobs\Concerns\TransferBatchJob;
+use App\Models\TransferRun;
 use App\Services\DatabaseInformationRetrievalService;
 use App\Services\SchemaReplicator;
 use Illuminate\Bus\Batchable;
@@ -36,6 +37,7 @@ class CloneSchemaAndPrepareForData implements ShouldBeEncrypted, ShouldQueue
         public readonly SynchronizeTableSchemaEnum $synchronizeTableSchemaEnum,
         public readonly bool $keepUnknownTablesOnTarget,
         public readonly ?string $migrationTableName,
+        public readonly TransferRun $run,
         public bool $disableForeignKeyConstraints = false,
     ) {}
 
