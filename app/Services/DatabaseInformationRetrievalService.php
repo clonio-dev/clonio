@@ -48,8 +48,8 @@ final readonly class DatabaseInformationRetrievalService
      */
     public function getTableNames(ConnectionData $connectionData, bool $schemaQualified = false): array
     {
-        return $this->getSchema($connectionData)
-            ->getTableListing(schemaQualified: $schemaQualified);
+        $schema = $this->getSchema($connectionData);
+        return $schema->getTableListing($schema->getCurrentSchemaName(), schemaQualified: $schemaQualified);
     }
 
     public function withConnectionForTable(ConnectionData $connectionData, string $tableName): TableInformationRetrievalService
