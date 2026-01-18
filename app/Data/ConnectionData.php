@@ -14,6 +14,6 @@ final readonly class ConnectionData
         public string $name,
         public ConnectionDriverData $driver,
     ) {
-        $this->connectionName = 'dyn_' . Str::random() . '_' . $name;
+        $this->connectionName = 'dyn_' . Str::random() . '_' . Str::slug($name);
     }
 }
