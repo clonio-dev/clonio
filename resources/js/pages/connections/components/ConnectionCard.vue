@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+    MariadbIcon,
+    MysqlIcon,
+    PostgresqlIcon,
+    SqliteIcon,
+    SqlserverIcon,
+} from '@/components/icons/databases';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,17 +22,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import type { Connection } from '@/pages/connections/types';
 import { router } from '@inertiajs/vue3';
 import {
     AlertTriangle,
-    Cable,
+    Check,
     Copy,
     Database,
     MoreVertical,
@@ -34,7 +35,7 @@ import {
     Trash2,
     User,
 } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, ref, type Component } from 'vue';
 
 interface Props {
     connection: Connection;
@@ -44,32 +45,72 @@ const props = defineProps<Props>();
 
 const copied = ref(false);
 
+interface DatabaseTypeConfig {
+    label: string;
+    icon: Component;
+    badgeClass: string;
+    iconBg: string;
+    accentColor: string;
+}
+
+const databaseTypeConfigs: Record<string, DatabaseTypeConfig> = {
+    mysql: {
+        label: 'MySQL',
+        icon: MysqlIcon,
+        badgeClass:
+            'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950/50 dark:text-orange-400 dark:border-orange-900',
+        iconBg:
+            'bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30',
+        accentColor: 'from-orange-500 to-amber-500',
+    },
+    mariadb: {
+        label: 'MariaDB',
+        icon: MariadbIcon,
+        badgeClass:
+            'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900',
+        iconBg:
+            'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30',
+        accentColor: 'from-amber-500 to-orange-500',
+    },
+    pgsql: {
+        label: 'PostgreSQL',
+        icon: PostgresqlIcon,
+        badgeClass:
+            'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-900',
+        iconBg:
+            'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30',
+        accentColor: 'from-blue-500 to-indigo-500',
+    },
+    sqlserver: {
+        label: 'SQL Server',
+        icon: SqlserverIcon,
+        badgeClass:
+            'bg-red-100 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900',
+        iconBg:
+            'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30',
+        accentColor: 'from-red-500 to-rose-500',
+    },
+    sqlite: {
+        label: 'SQLite',
+        icon: SqliteIcon,
+        badgeClass:
+            'bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-400 dark:border-sky-900',
+        iconBg:
+            'bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-950/30 dark:to-blue-950/30',
+        accentColor: 'from-sky-500 to-blue-500',
+    },
+};
+
 const databaseTypeConfig = computed(() => {
-    const configs: Record<
-        string,
-        { label: string; color: string; gradient: string }
-    > = {
-        mysql: {
-            label: 'MySQL',
-            color: 'text-orange-600 dark:text-orange-400',
-            gradient: 'from-orange-500/20 to-amber-500/20',
-        },
-        pgsql: {
-            label: 'PostgreSQL',
-            color: 'text-blue-600 dark:text-blue-400',
-            gradient: 'from-blue-500/20 to-indigo-500/20',
-        },
-        sqlserver: {
-            label: 'SQL Server',
-            color: 'text-red-600 dark:text-red-400',
-            gradient: 'from-red-500/20 to-rose-500/20',
-        },
-    };
     return (
-        configs[props.connection.type] || {
+        databaseTypeConfigs[props.connection.type] || {
             label: props.connection.type,
-            color: 'text-gray-600 dark:text-gray-400',
-            gradient: 'from-gray-500/20 to-slate-500/20',
+            icon: Database,
+            badgeClass:
+                'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-950/50 dark:text-gray-400 dark:border-gray-900',
+            iconBg:
+                'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-950/30 dark:to-slate-950/30',
+            accentColor: 'from-gray-500 to-slate-500',
         }
     );
 });
@@ -95,130 +136,142 @@ function deleteConnection() {
 
 <template>
     <Card
-        class="group relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/80 transition-all duration-300 hover:border-border hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20"
+        class="group relative overflow-hidden border-border/60 bg-card transition-all duration-300 hover:border-border hover:shadow-lg hover:shadow-black/5 dark:border-border/40 dark:hover:shadow-black/20"
     >
-        <!-- Decorative gradient line at top -->
+        <!-- Accent line at top -->
         <div
-            class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-            :class="databaseTypeConfig.gradient.replace('/20', '')"
-        ></div>
+            class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            :class="databaseTypeConfig.accentColor"
+        />
 
-        <!-- Production badge -->
-        <div
-            v-if="connection.is_production_stage"
-            class="absolute right-3 top-3 z-10"
-        >
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger as-child>
-                        <Badge
-                            variant="destructive"
-                            class="gap-1 bg-amber-500/90 text-amber-950 hover:bg-amber-500 dark:bg-amber-500/80 dark:text-amber-950"
-                        >
-                            <AlertTriangle class="h-3 w-3" />
-                            PROD
-                        </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Production environment - handle with care</p>
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-        </div>
-
-        <CardHeader class="pb-3">
-            <div class="flex items-start justify-between">
-                <div class="flex items-center gap-3">
-                    <!-- Database type icon -->
-                    <div
-                        class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-105 dark:ring-white/10"
-                        :class="databaseTypeConfig.gradient"
-                    >
-                        <Database class="h-5 w-5" :class="databaseTypeConfig.color" />
-                    </div>
-
-                    <div class="min-w-0 flex-1">
-                        <CardTitle
-                            class="truncate text-base font-semibold text-foreground"
-                        >
-                            {{ connection.name }}
-                        </CardTitle>
-                        <CardDescription class="mt-0.5 flex items-center gap-1.5">
-                            <span
-                                class="inline-flex items-center gap-1 text-xs font-medium"
-                                :class="databaseTypeConfig.color"
-                            >
-                                {{ databaseTypeConfig.label }}
-                            </span>
-                        </CardDescription>
-                    </div>
+        <CardHeader class="pb-4">
+            <div class="flex items-start gap-4">
+                <!-- Database icon -->
+                <div
+                    class="flex size-14 shrink-0 items-center justify-center rounded-xl ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-105 dark:ring-white/10"
+                    :class="databaseTypeConfig.iconBg"
+                >
+                    <component
+                        :is="databaseTypeConfig.icon"
+                        class="size-8"
+                    />
                 </div>
 
-                <!-- Actions dropdown -->
-                <DropdownMenu>
-                    <DropdownMenuTrigger as-child>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            class="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100"
-                        >
-                            <MoreVertical class="h-4 w-4" />
-                            <span class="sr-only">Open menu</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" class="w-48">
-                        <DropdownMenuItem class="gap-2">
-                            <Pencil class="h-4 w-4" />
-                            Edit connection
-                        </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-2" @click="copyConnectionString">
-                            <Copy class="h-4 w-4" />
-                            Copy connection string
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            class="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
-                            @click="deleteConnection"
-                        >
-                            <Trash2 class="h-4 w-4" />
-                            Delete connection
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <div class="min-w-0 flex-1 space-y-1.5">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <CardTitle
+                                class="truncate text-lg font-semibold leading-tight text-foreground"
+                            >
+                                {{ connection.name }}
+                            </CardTitle>
+                            <CardDescription class="mt-1 flex items-center gap-2">
+                                <Badge
+                                    variant="outline"
+                                    class="text-xs font-medium"
+                                    :class="databaseTypeConfig.badgeClass"
+                                >
+                                    {{ databaseTypeConfig.label }}
+                                </Badge>
+                                <Badge
+                                    v-if="connection.is_production_stage"
+                                    variant="outline"
+                                    class="gap-1 border-amber-300 bg-amber-100 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-400"
+                                >
+                                    <AlertTriangle class="size-3" />
+                                    PROD
+                                </Badge>
+                            </CardDescription>
+                        </div>
+
+                        <!-- Actions dropdown -->
+                        <DropdownMenu>
+                            <DropdownMenuTrigger as-child>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    class="size-8 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100"
+                                >
+                                    <MoreVertical class="size-4" />
+                                    <span class="sr-only">Open menu</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" class="w-48">
+                                <DropdownMenuItem class="gap-2">
+                                    <Pencil class="size-4" />
+                                    Edit connection
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    class="gap-2"
+                                    @click="copyConnectionString"
+                                >
+                                    <Copy class="size-4" />
+                                    Copy connection string
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    class="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                                    @click="deleteConnection"
+                                >
+                                    <Trash2 class="size-4" />
+                                    Delete connection
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </div>
             </div>
         </CardHeader>
 
         <CardContent class="space-y-3 pt-0">
             <!-- Connection details -->
-            <div class="space-y-2">
+            <div class="grid gap-2">
                 <!-- Host & Port -->
                 <div
-                    class="flex items-center gap-2 rounded-md bg-muted/50 px-2.5 py-1.5 text-sm transition-colors hover:bg-muted"
+                    class="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-2 transition-colors hover:bg-muted/60 dark:bg-muted/20 dark:hover:bg-muted/30"
                 >
-                    <Server class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    <span class="truncate font-mono text-xs text-foreground">
-                        {{ connection.host }}:{{ connection.port }}
-                    </span>
+                    <Server
+                        class="size-4 shrink-0 text-muted-foreground/70"
+                    />
+                    <div class="min-w-0 flex-1">
+                        <p
+                            class="truncate font-mono text-sm text-foreground"
+                        >
+                            {{ connection.host
+                            }}<span class="text-muted-foreground">:</span
+                            >{{ connection.port }}
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Database -->
                 <div
-                    class="flex items-center gap-2 rounded-md bg-muted/50 px-2.5 py-1.5 text-sm transition-colors hover:bg-muted"
+                    class="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-2 transition-colors hover:bg-muted/60 dark:bg-muted/20 dark:hover:bg-muted/30"
                 >
-                    <Cable class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    <span class="truncate font-mono text-xs text-foreground">
-                        {{ connection.database }}
-                    </span>
+                    <Database
+                        class="size-4 shrink-0 text-muted-foreground/70"
+                    />
+                    <div class="min-w-0 flex-1">
+                        <p
+                            class="truncate font-mono text-sm text-foreground"
+                        >
+                            {{ connection.database }}
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Username -->
                 <div
-                    class="flex items-center gap-2 rounded-md bg-muted/50 px-2.5 py-1.5 text-sm transition-colors hover:bg-muted"
+                    class="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-2 transition-colors hover:bg-muted/60 dark:bg-muted/20 dark:hover:bg-muted/30"
                 >
-                    <User class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    <span class="truncate font-mono text-xs text-foreground">
-                        {{ connection.username }}
-                    </span>
+                    <User class="size-4 shrink-0 text-muted-foreground/70" />
+                    <div class="min-w-0 flex-1">
+                        <p
+                            class="truncate font-mono text-sm text-foreground"
+                        >
+                            {{ connection.username }}
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -233,9 +286,9 @@ function deleteConnection() {
             >
                 <div
                     v-if="copied"
-                    class="flex items-center justify-center gap-1.5 rounded-md bg-emerald-500/10 py-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400"
+                    class="flex items-center justify-center gap-2 rounded-lg bg-emerald-500/10 py-2 text-sm font-medium text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
                 >
-                    <Copy class="h-3 w-3" />
+                    <Check class="size-4" />
                     Copied to clipboard
                 </div>
             </Transition>

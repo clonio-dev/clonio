@@ -35,6 +35,7 @@ import {
     User,
 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
+import { MariadbIcon, MysqlIcon, PostgresqlIcon, SqlserverIcon } from '@/components/icons/databases';
 
 interface Props {
     open: boolean;
@@ -144,34 +145,25 @@ watch(
                                 <SelectContent>
                                     <SelectItem value="mysql">
                                         <div class="flex items-center gap-2">
-                                            <Badge
-                                                variant="outline"
-                                                class="h-5 w-5 justify-center rounded p-0 text-[10px] font-bold text-orange-600 dark:text-orange-400"
-                                            >
-                                                M
-                                            </Badge>
+                                            <MysqlIcon />
                                             MySQL
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="mariadb">
+                                        <div class="flex items-center gap-2">
+                                            <MariadbIcon />
+                                            MariaDB
                                         </div>
                                     </SelectItem>
                                     <SelectItem value="pgsql">
                                         <div class="flex items-center gap-2">
-                                            <Badge
-                                                variant="outline"
-                                                class="h-5 w-5 justify-center rounded p-0 text-[10px] font-bold text-blue-600 dark:text-blue-400"
-                                            >
-                                                P
-                                            </Badge>
+                                            <PostgresqlIcon />
                                             PostgreSQL
                                         </div>
                                     </SelectItem>
                                     <SelectItem value="sqlserver">
                                         <div class="flex items-center gap-2">
-                                            <Badge
-                                                variant="outline"
-                                                class="h-5 w-5 justify-center rounded p-0 text-[10px] font-bold text-red-600 dark:text-red-400"
-                                            >
-                                                S
-                                            </Badge>
+                                            <SqlserverIcon />
                                             SQL Server
                                         </div>
                                     </SelectItem>
@@ -194,7 +186,7 @@ watch(
                                 <Input
                                     type="hidden"
                                     name="is_production_stage"
-                                    :value="isProduction"
+                                    :value="isProduction ? '1' : '0'"
                                 />
                                 <Checkbox
                                     id="is_production_stage"

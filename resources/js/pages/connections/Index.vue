@@ -62,16 +62,16 @@ function closeSheet() {
     <AppLayout :breadcrumbs="breadcrumbItems">
         <Head title="Database Connections" />
 
-        <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="px-6 py-8 lg:px-8">
             <!-- Header -->
             <div class="mb-8 flex items-start justify-between">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 ring-1 ring-emerald-500/30 dark:from-emerald-500/10 dark:to-teal-500/10"
+                            class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 ring-1 ring-emerald-500/30 dark:from-emerald-500/10 dark:to-teal-500/10"
                         >
                             <Database
-                                class="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+                                class="size-5 text-emerald-600 dark:text-emerald-400"
                             />
                         </div>
                         <h1
@@ -91,7 +91,7 @@ function closeSheet() {
                     class="group gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20 transition-all hover:from-emerald-500 hover:to-teal-500 hover:shadow-lg hover:shadow-emerald-500/30 dark:shadow-emerald-500/10 dark:hover:shadow-emerald-500/20"
                 >
                     <Plus
-                        class="h-4 w-4 transition-transform group-hover:rotate-90"
+                        class="size-4 transition-transform group-hover:rotate-90"
                     />
                     Add Connection
                 </Button>
@@ -104,7 +104,7 @@ function closeSheet() {
             >
                 <div class="flex items-center gap-2">
                     <div
-                        class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"
+                        class="size-2 animate-pulse rounded-full bg-emerald-500"
                     ></div>
                     <span class="text-sm font-medium text-foreground">
                         {{ totalConnections }}
@@ -126,7 +126,9 @@ function closeSheet() {
 
             <!-- Connections Grid -->
             <div v-else class="space-y-6">
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div
+                    class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+                >
                     <ConnectionCard
                         v-for="(connection, index) in props.connections.data"
                         :key="connection.id"
