@@ -183,11 +183,6 @@ watch(
                                         isProduction,
                                 }"
                             >
-                                <Input
-                                    type="hidden"
-                                    name="is_production_stage"
-                                    :value="isProduction ? '1' : '0'"
-                                />
                                 <Checkbox
                                     id="is_production_stage"
                                     name="is_production_stage"
