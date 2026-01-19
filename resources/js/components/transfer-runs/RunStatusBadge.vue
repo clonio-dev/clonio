@@ -1,38 +1,60 @@
 <script setup lang="ts">
+import { Badge } from '@/components/ui/badge';
 import type { RunStatus, StatusBadgeProps } from '@/types/transfer-run.types';
-import { computed } from 'vue';
+import {
+    AlertCircle,
+    CheckCircle2,
+    Clock,
+    Loader2,
+    XCircle,
+} from 'lucide-vue-next';
+import { computed, type Component } from 'vue';
 
 const props = defineProps<StatusBadgeProps>();
 
-const statusConfig = computed(() => {
-    const configs: Record<
-        RunStatus,
-        { icon: string; label: string; class: string }
-    > = {
+interface StatusConfig {
+    icon: Component;
+    label: string;
+    badgeClass: string;
+    iconClass: string;
+}
+
+const statusConfig = computed<StatusConfig>(() => {
+    const configs: Record<RunStatus, StatusConfig> = {
         queued: {
-            icon: '⏳',
+            icon: Clock,
             label: 'Queued',
-            class: 'bg-blue-100 text-blue-800 border-blue-200',
+            badgeClass:
+                'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-900',
+            iconClass: 'text-blue-600 dark:text-blue-400',
         },
         processing: {
-            icon: '✅',
+            icon: Loader2,
             label: 'Running',
-            class: 'bg-green-100 text-green-800 border-green-200 animate-pulse',
+            badgeClass:
+                'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-900',
+            iconClass: 'text-emerald-600 dark:text-emerald-400 animate-spin',
         },
         completed: {
-            icon: '✓',
+            icon: CheckCircle2,
             label: 'Completed',
-            class: 'bg-green-100 text-green-800 border-green-200',
+            badgeClass:
+                'bg-green-100 text-green-700 border-green-200 dark:bg-green-950/50 dark:text-green-400 dark:border-green-900',
+            iconClass: 'text-green-600 dark:text-green-400',
         },
         failed: {
-            icon: '❌',
+            icon: XCircle,
             label: 'Failed',
-            class: 'bg-red-100 text-red-800 border-red-200',
+            badgeClass:
+                'bg-red-100 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900',
+            iconClass: 'text-red-600 dark:text-red-400',
         },
         cancelled: {
-            icon: '⏹',
+            icon: AlertCircle,
             label: 'Cancelled',
-            class: 'bg-gray-100 text-gray-800 border-gray-200',
+            badgeClass:
+                'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-950/50 dark:text-gray-400 dark:border-gray-900',
+            iconClass: 'text-gray-600 dark:text-gray-400',
         },
     };
 
@@ -41,17 +63,22 @@ const statusConfig = computed(() => {
 </script>
 
 <template>
-    <div
-        class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium"
-        :class="statusConfig.class"
+    <Badge
+        variant="outline"
+        class="gap-1.5 text-xs font-medium"
+        :class="statusConfig.badgeClass"
     >
-        <span>{{ statusConfig.icon }}</span>
+        <component
+            :is="statusConfig.icon"
+            class="size-3.5"
+            :class="statusConfig.iconClass"
+        />
         <span>{{ statusConfig.label }}</span>
         <span
             v-if="progress !== undefined && status === 'processing'"
-            class="text-xs opacity-75"
+            class="tabular-nums opacity-80"
         >
             {{ progress }}%
         </span>
-    </div>
+    </Badge>
 </template>
