@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import IndexController from '@/actions/App/Http/Controllers/DatabaseConnections/IndexController';
+import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ConnectionCard from '@/pages/connections/components/ConnectionCard.vue';
@@ -40,7 +40,7 @@ const props = defineProps<Props>();
 const breadcrumbItems: BreadcrumbItem[] = [
     {
         title: 'Database Connections',
-        href: IndexController.url(),
+        href: DatabaseConnectionController.index().url,
     },
 ];
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import IndexController from '@/actions/App/Http/Controllers/DatabaseConnections/IndexController';
+import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -31,7 +31,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Database Connections',
-        href: IndexController.url(),
+        href: DatabaseConnectionController.index().url,
         icon: DatabaseIcon,
     },
 ];

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CreateController from '@/actions/App/Http/Controllers/DatabaseConnections/CreateController';
+import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
 import InputError from '@/components/InputError.vue';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -98,8 +98,8 @@ watch(
             <Separator />
 
             <Form
-                v-bind="CreateController.post()"
-                class="flex flex-1 flex-col gap-5 overflow-y-auto py-4 pr-1"
+                v-bind="DatabaseConnectionController.store()"
+                class="flex flex-1 flex-col gap-5 overflow-y-auto p-4"
                 v-slot="{ errors, processing, recentlySuccessful }"
                 :reset-on-error="['username', 'password']"
                 :onSuccess="handleSubmitComplete"
