@@ -10,7 +10,7 @@
             "Bash(vendor/bin/sail:*)"
         ],
         "ask": [
-            "Bash(*)",
+            "Bash(**)",
             "Edit(**)",
             "Write(**)"
         ],
