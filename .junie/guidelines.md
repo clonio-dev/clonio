@@ -21,6 +21,16 @@ Always try to support a dark mode by adding text and background color definition
 
 We try to support the WCAG 2.0 with at least AA standard. So try to keep enough contrast for the used text color on background color.
 
+=== .ai/design-conventions rules ===
+
+## Design Conventions
+
+For icons we try to get the most out of the Lucide Icons.
+
+When we need a new icon, then create one as vue component with an svg in it.
+
+Try to use shadcn-vue components in all cases.
+
 === foundation rules ===
 
 # Laravel Boost Guidelines
