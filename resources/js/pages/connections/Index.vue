@@ -127,7 +127,7 @@ function closeSheet() {
             <!-- Connections Grid -->
             <div v-else class="space-y-6">
                 <div
-                    class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+                    class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
                 >
                     <ConnectionCard
                         v-for="(connection, index) in props.connections.data"

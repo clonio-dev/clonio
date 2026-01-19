@@ -115,18 +115,6 @@ const databaseTypeConfig = computed(() => {
     );
 });
 
-const connectionString = computed(() => {
-    return `${props.connection.host}:${props.connection.port}/${props.connection.database}`;
-});
-
-function copyConnectionString() {
-    navigator.clipboard.writeText(connectionString.value);
-    copied.value = true;
-    setTimeout(() => {
-        copied.value = false;
-    }, 2000);
-}
-
 function deleteConnection() {
     if (confirm('Are you sure you want to delete this connection?')) {
         router.delete(`/connections/${props.connection.id}`);
@@ -200,13 +188,6 @@ function deleteConnection() {
                                 <DropdownMenuItem class="gap-2">
                                     <Pencil class="size-4" />
                                     Edit connection
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    class="gap-2"
-                                    @click="copyConnectionString"
-                                >
-                                    <Copy class="size-4" />
-                                    Copy connection string
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
