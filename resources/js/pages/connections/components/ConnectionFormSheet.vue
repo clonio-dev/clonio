@@ -96,14 +96,15 @@ watch(
                 </div>
             </SheetHeader>
 
-            <Separator />
+            <Separator class="-mt-4" />
 
             <Form
                 v-bind="DatabaseConnectionController.store()"
-                class="flex flex-1 flex-col gap-5 overflow-y-auto p-4"
+                class="flex flex-1 flex-col gap-5 overflow-y-auto pt-0 p-4"
                 v-slot="{ errors, processing, recentlySuccessful }"
                 :reset-on-error="['username', 'password']"
                 :onSuccess="handleSubmitComplete"
+                autocomplete="off"
             >
                 <!-- Connection Identity Section -->
                 <div class="space-y-4">
