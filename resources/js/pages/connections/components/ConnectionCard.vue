@@ -36,6 +36,7 @@ import {
     User,
 } from 'lucide-vue-next';
 import { computed, ref, type Component } from 'vue';
+import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
 
 interface Props {
     connection: Connection;
@@ -117,7 +118,7 @@ const databaseTypeConfig = computed(() => {
 
 function deleteConnection() {
     if (confirm('Are you sure you want to delete this connection?')) {
-        router.delete(`/connections/${props.connection.id}`);
+        router.delete(DatabaseConnectionController.destroy(props.connection.id).url);
     }
 }
 </script>
@@ -185,11 +186,6 @@ function deleteConnection() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" class="w-48">
-                                <DropdownMenuItem class="gap-2">
-                                    <Pencil class="size-4" />
-                                    Edit connection
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                     class="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
                                     @click="deleteConnection"

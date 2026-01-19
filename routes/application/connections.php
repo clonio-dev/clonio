@@ -15,4 +15,6 @@ Route::prefix('connections')
         Route::post('/', [DatabaseConnectionController::class, 'store'])
             ->name('store');
 
+        Route::delete('/{connection}', [DatabaseConnectionController::class, 'destroy'])
+            ->name('destroy');
     });

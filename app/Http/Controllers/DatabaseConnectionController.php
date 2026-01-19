@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDatabaseConnectionRequest;
-use App\Http\Requests\UpdateDatabaseConnectionRequest;
 use App\Models\DatabaseConnection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -37,6 +37,8 @@ class DatabaseConnectionController extends Controller
 
     public function store(StoreDatabaseConnectionRequest $request): RedirectResponse
     {
+        Gate::authorize('create', DatabaseConnection::class);
+
         $connection = DatabaseConnection::query()->create([
             'user_id' => $request->user()->id,
             ...$request->validated(),
@@ -50,27 +52,12 @@ class DatabaseConnectionController extends Controller
         return to_route('connections.index');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(DatabaseConnection $databaseConnection): void
+    public function destroy(DatabaseConnection $connection): RedirectResponse
     {
-        //
-    }
+        Gate::authorize('delete', $connection);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateDatabaseConnectionRequest $request, DatabaseConnection $databaseConnection): void
-    {
-        //
-    }
+        $connection->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(DatabaseConnection $databaseConnection): void
-    {
-        //
+        return to_route('connections.index');
     }
 }
