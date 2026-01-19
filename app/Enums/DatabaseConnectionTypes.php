@@ -19,7 +19,7 @@ enum DatabaseConnectionTypes: string
             self::MARIADB => 'MariaDB',
             self::POSTGRESQL => 'PostgreSQL',
             self::MSSQLSERVER => 'SQL Server',
-            self::SQLITE => 'SQlite',
+            self::SQLITE => 'SQLite',
             default => $this->value,
         };
     }
