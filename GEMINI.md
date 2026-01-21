@@ -21,6 +21,14 @@ Always try to support a dark mode by adding text and background color definition
 
 We try to support the WCAG 2.0 with at least AA standard. So try to keep enough contrast for the used text color on background color.
 
+=== .ai/frontend-requesting-conventions rules ===
+
+## Conventions for requesting backend
+
+Do not use axios or fetch, please stick to Inertia.
+
+So never use axios or fetch, because it may not be configured correctly.
+
 === .ai/design-conventions rules ===
 
 ## Design Conventions
