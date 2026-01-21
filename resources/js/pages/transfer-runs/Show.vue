@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import TransferRunController from '@/actions/App/Http/Controllers/TransferRunController';
+import TransferRunConsole from '@/components/transfer-runs/TransferRunConsole.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import type { LogLevel, RunStatus, TransferRun, TransferRunLog } from '@/types/transfer-run.types';
+import type { RunStatus, TransferRun, TransferRunLog } from '@/types/transfer-run.types';
 import { Head, router } from '@inertiajs/vue3';
 import {
     AlertCircle,
@@ -15,15 +16,13 @@ import {
     Clock,
     Database,
     Download,
-    Info,
     Loader2,
     RefreshCw,
     Terminal,
     Timer,
-    TriangleAlert,
     XCircle,
 } from 'lucide-vue-next';
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 interface Props {
     run: TransferRun;
@@ -45,8 +44,7 @@ const breadcrumbItems: BreadcrumbItem[] = [
 ];
 
 const isRefreshing = ref(false);
-const logContainerRef = ref<HTMLDivElement | null>(null);
-const autoScroll = ref(true);
+const consoleRef = ref<InstanceType<typeof TransferRunConsole> | null>(null);
 let refreshInterval: number | null = null;
 
 const statusConfig: Record<
@@ -101,48 +99,11 @@ const statusConfig: Record<
     },
 };
 
-const logLevelConfig: Record<
-    LogLevel,
-    {
-        icon: typeof Info;
-        class: string;
-        labelClass: string;
-    }
-> = {
-    info: {
-        icon: Info,
-        class: 'text-sky-400',
-        labelClass: 'text-sky-500',
-    },
-    warning: {
-        icon: TriangleAlert,
-        class: 'text-amber-400',
-        labelClass: 'text-amber-500',
-    },
-    error: {
-        icon: XCircle,
-        class: 'text-red-400',
-        labelClass: 'text-red-500',
-    },
-};
-
 const currentStatus = computed(() => statusConfig[props.run.status] || statusConfig.cancelled);
 
 const formattedStartedAt = computed(() => {
     if (!props.run.started_at) return 'Not started';
     return new Date(props.run.started_at).toLocaleString('de-DE', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    });
-});
-
-const formattedFinishedAt = computed(() => {
-    if (!props.run.finished_at) return props.isActive ? 'In progress...' : '-';
-    return new Date(props.run.finished_at).toLocaleString('de-DE', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -172,29 +133,6 @@ const duration = computed(() => {
     return `${secs}s`;
 });
 
-const logStats = computed(() => {
-    const stats = { info: 0, warning: 0, error: 0 };
-    props.logs.forEach((log) => {
-        if (log.level in stats) {
-            stats[log.level]++;
-        }
-    });
-    return stats;
-});
-
-function formatLogTime(dateString: string): string {
-    return new Date(dateString).toLocaleTimeString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        fractionalSecondDigits: 3,
-    });
-}
-
-function getLogLevelConfig(level: LogLevel) {
-    return logLevelConfig[level] || logLevelConfig.info;
-}
-
 function refreshPage() {
     isRefreshing.value = true;
     router.reload({
@@ -203,26 +141,8 @@ function refreshPage() {
         preserveState: true,
         onFinish: () => {
             isRefreshing.value = false;
-            if (autoScroll.value) {
-                scrollToBottom();
-            }
         },
     });
-}
-
-function scrollToBottom() {
-    nextTick(() => {
-        if (logContainerRef.value) {
-            logContainerRef.value.scrollTop = logContainerRef.value.scrollHeight;
-        }
-    });
-}
-
-function handleScroll() {
-    if (!logContainerRef.value) return;
-    const { scrollTop, scrollHeight, clientHeight } = logContainerRef.value;
-    // If user scrolled up more than 100px from bottom, disable auto-scroll
-    autoScroll.value = scrollHeight - scrollTop - clientHeight < 100;
 }
 
 function setupAutoRefresh() {
@@ -252,18 +172,8 @@ watch(
     },
 );
 
-watch(
-    () => props.logs.length,
-    () => {
-        if (autoScroll.value) {
-            scrollToBottom();
-        }
-    },
-);
-
 onMounted(() => {
     setupAutoRefresh();
-    scrollToBottom();
 });
 
 onUnmounted(() => {
@@ -452,124 +362,14 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <!-- Log Console -->
-            <div class="overflow-hidden rounded-xl border border-border/60 dark:border-border/40">
-                <!-- Console Header -->
-                <div class="flex items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 py-3">
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center gap-1.5">
-                            <div class="size-3 rounded-full bg-red-500/80"></div>
-                            <div class="size-3 rounded-full bg-yellow-500/80"></div>
-                            <div class="size-3 rounded-full bg-green-500/80"></div>
-                        </div>
-                        <span class="font-mono text-sm text-zinc-400">
-                            transfer-run-{{ run.id }}.log
-                        </span>
-                    </div>
-
-                    <div class="flex items-center gap-4 text-xs">
-                        <div class="flex items-center gap-1.5 text-sky-400">
-                            <Info class="size-3.5" />
-                            <span class="tabular-nums">{{ logStats.info }}</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 text-amber-400">
-                            <TriangleAlert class="size-3.5" />
-                            <span class="tabular-nums">{{ logStats.warning }}</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 text-red-400">
-                            <XCircle class="size-3.5" />
-                            <span class="tabular-nums">{{ logStats.error }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Console Output -->
-                <div
-                    ref="logContainerRef"
-                    class="h-[500px] overflow-y-auto bg-zinc-950 p-4 font-mono text-sm"
-                    @scroll="handleScroll"
-                >
-                    <!-- Empty State -->
-                    <div
-                        v-if="logs.length === 0"
-                        class="flex h-full items-center justify-center text-zinc-500"
-                    >
-                        <div class="text-center">
-                            <Terminal class="mx-auto mb-3 size-10 opacity-50" />
-                            <p>Waiting for log entries...</p>
-                            <p v-if="isActive" class="mt-1 text-xs text-zinc-600">
-                                Logs will appear here as the transfer progresses
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Log Entries -->
-                    <div v-else class="space-y-1">
-                        <div
-                            v-for="log in logs"
-                            :key="log.id"
-                            class="group flex items-start gap-3 rounded px-2 py-1 transition-colors hover:bg-zinc-900"
-                        >
-                            <!-- Timestamp -->
-                            <span class="shrink-0 text-zinc-600">
-                                [{{ formatLogTime(log.created_at) }}]
-                            </span>
-
-                            <!-- Level Badge -->
-                            <span
-                                class="w-16 shrink-0 text-right font-semibold uppercase"
-                                :class="getLogLevelConfig(log.level).labelClass"
-                            >
-                                {{ log.level }}
-                            </span>
-
-                            <!-- Event Type -->
-                            <span class="shrink-0 text-violet-400">
-                                {{ log.event_type }}
-                            </span>
-
-                            <!-- Message -->
-                            <span class="text-zinc-300">
-                                {{ log.message }}
-                            </span>
-
-                            <!-- Data (if present and has content) -->
-                            <span
-                                v-if="log.data && Object.keys(log.data).length > 0"
-                                class="shrink-0 text-zinc-600"
-                            >
-                                {{ JSON.stringify(log.data) }}
-                            </span>
-                        </div>
-
-                        <!-- Cursor / Active Indicator -->
-                        <div v-if="isActive" class="flex items-center gap-2 px-2 py-1">
-                            <span class="animate-pulse text-emerald-400">_</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Console Footer -->
-                <div class="flex items-center justify-between border-t border-zinc-800 bg-zinc-900 px-4 py-2 text-xs text-zinc-500">
-                    <span>{{ logs.length }} log entries</span>
-                    <div class="flex items-center gap-4">
-                        <button
-                            v-if="!autoScroll && isActive"
-                            @click="autoScroll = true; scrollToBottom()"
-                            class="text-emerald-400 hover:text-emerald-300"
-                        >
-                            Resume auto-scroll
-                        </button>
-                        <span v-if="run.finished_at">
-                            Completed: {{ formattedFinishedAt }}
-                        </span>
-                        <span v-else-if="isActive" class="flex items-center gap-1.5">
-                            <Loader2 class="size-3 animate-spin" />
-                            Processing...
-                        </span>
-                    </div>
-                </div>
-            </div>
+            <!-- Log Console Component -->
+            <TransferRunConsole
+                ref="consoleRef"
+                :logs="logs"
+                :run-id="run.id"
+                :is-active="isActive"
+                :finished-at="run.finished_at"
+            />
         </div>
     </AppLayout>
 </template>
