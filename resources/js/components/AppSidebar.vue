@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TransferRunController from '@/actions/App/Http/Controllers/TransferRunController';
 import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -12,22 +13,21 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { DatabaseIcon, LayoutGridIcon, RulerIcon } from 'lucide-vue-next';
+import { DatabaseIcon, FlaskConicalIcon, LayoutGridIcon, RulerIcon, TestTubeIcon } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: TransferRunController.dashboard().url,
         icon: LayoutGridIcon,
     },
     {
-        title: 'Queue',
-        href: '/queue',
-        icon: RulerIcon,
+        title: 'Transfers',
+        href: TransferRunController.index().url,
+        icon: LayoutGridIcon,
     },
     {
         title: 'Database Connections',
@@ -37,16 +37,11 @@ const mainNavItems: NavItem[] = [
 ];
 
 const footerNavItems: NavItem[] = [
-    // {
-    //     title: 'Github Repo',
-    //     href: 'https://github.com/laravel/vue-starter-kit',
-    //     icon: Folder,
-    // },
-    // {
-    //     title: 'Documentation',
-    //     href: 'https://laravel.com/docs/starter-kits#vue',
-    //     icon: BookOpen,
-    // },
+    {
+        title: 'Queue',
+        href: '/queue',
+        icon: FlaskConicalIcon,
+    },
 ];
 </script>
 
@@ -56,7 +51,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="TransferRunController.dashboard().url">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>
