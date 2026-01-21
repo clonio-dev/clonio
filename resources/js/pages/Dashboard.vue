@@ -39,35 +39,14 @@ const props = defineProps<DashboardProps>();
 
 const isRefreshing = ref(false);
 
-const activeRuns = computed(() => {
-    return props.runs.filter((run) =>
-        ['queued', 'processing'].includes(run.status),
-    );
-});
-
-const completedRuns = computed(() => {
-    return props.runs.filter((run) => run.status === 'completed');
-});
-
-const failedRuns = computed(() => {
-    return props.runs.filter((run) => run.status === 'failed');
-});
-
-const recentRuns = computed(() => {
-    if (activeRuns.value.length > 0) {
-        return activeRuns.value;
-    }
-    return props.runs.slice(0, 6);
-});
-
-const hasAnyRuns = computed(() => props.runs.length > 0);
+const hasAnyRuns = computed(() => props.recentRuns.length > 0);
 
 let refreshInterval: number | null = null;
 
 function refreshDashboard() {
     isRefreshing.value = true;
     router.reload({
-        only: ['runs', 'hasActiveRuns'],
+        only: ['recentRuns', 'activeRuns', 'totalRuns'],
         preserveScroll: true,
         preserveState: true,
         onFinish: () => {
@@ -77,7 +56,7 @@ function refreshDashboard() {
 }
 
 function createFirstConfig() {
-    router.visit('/configs/create');
+    router.visit('/connections');
 }
 
 function setupAutoRefresh() {
@@ -85,13 +64,13 @@ function setupAutoRefresh() {
         clearInterval(refreshInterval);
         refreshInterval = null;
     }
-    if (activeRuns.value.length > 0) {
+    if (props.activeRuns.length > 0) {
         refreshInterval = window.setInterval(refreshDashboard, 3000);
     }
 }
 
 watch(
-    () => activeRuns.value.length,
+    () => props.activeRuns.length,
     () => {
         setupAutoRefresh();
     },
@@ -138,7 +117,7 @@ onUnmounted(() => {
                 <div class="flex items-center gap-3">
                     <!-- Auto-refresh indicator -->
                     <div
-                        v-if="activeRuns.length > 0"
+                        v-if="props.activeRuns.length > 0"
                         class="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400"
                     >
                         <div
@@ -173,7 +152,7 @@ onUnmounted(() => {
                     class="relative overflow-hidden border-border/60 dark:border-border/40"
                 >
                     <div
-                        v-if="activeRuns.length > 0"
+                        v-if="props.activeRuns.length > 0"
                         class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5"
                     />
                     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -183,7 +162,7 @@ onUnmounted(() => {
                         <div
                             class="flex size-8 items-center justify-center rounded-lg"
                             :class="
-                                activeRuns.length > 0
+                                props.activeRuns.length > 0
                                     ? 'bg-emerald-100 dark:bg-emerald-950/50'
                                     : 'bg-muted'
                             "
@@ -191,7 +170,7 @@ onUnmounted(() => {
                             <Play
                                 class="size-4"
                                 :class="
-                                    activeRuns.length > 0
+                                    props.activeRuns.length > 0
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : 'text-muted-foreground'
                                 "
@@ -200,11 +179,11 @@ onUnmounted(() => {
                     </CardHeader>
                     <CardContent>
                         <div class="text-2xl font-bold text-foreground">
-                            {{ activeRuns.length }}
+                            {{ props.activeRuns.length }}
                         </div>
                         <p class="mt-1 text-xs text-muted-foreground">
                             {{
-                                activeRuns.length > 0
+                                props.activeRuns.length > 0
                                     ? 'Currently processing'
                                     : 'No active transfers'
                             }}
@@ -228,7 +207,7 @@ onUnmounted(() => {
                     </CardHeader>
                     <CardContent>
                         <div class="text-2xl font-bold text-foreground">
-                            {{ completedRuns.length }}
+                            {{ props.completedRuns }}
                         </div>
                         <p class="mt-1 text-xs text-muted-foreground">
                             Successful transfers
@@ -252,7 +231,7 @@ onUnmounted(() => {
                     </CardHeader>
                     <CardContent>
                         <div class="text-2xl font-bold text-foreground">
-                            {{ failedRuns.length }}
+                            {{ props.failedRuns }}
                         </div>
                         <p class="mt-1 text-xs text-muted-foreground">
                             Requires attention
@@ -276,7 +255,7 @@ onUnmounted(() => {
                     </CardHeader>
                     <CardContent>
                         <div class="text-2xl font-bold text-foreground">
-                            {{ runs.length }}
+                            {{ props.totalRuns }}
                         </div>
                         <p class="mt-1 text-xs text-muted-foreground">
                             All time transfers
@@ -386,7 +365,7 @@ onUnmounted(() => {
             <!-- Run List -->
             <div v-else class="space-y-6">
                 <!-- Active Runs Section -->
-                <div v-if="activeRuns.length > 0">
+                <div v-if="props.activeRuns.length > 0">
                     <div class="mb-4 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <h2
@@ -400,7 +379,7 @@ onUnmounted(() => {
                                 <div
                                     class="size-1.5 animate-pulse rounded-full bg-emerald-500"
                                 />
-                                {{ activeRuns.length }} running
+                                {{ props.activeRuns.length }} running
                             </div>
                         </div>
                         <p class="text-sm text-muted-foreground">
@@ -410,7 +389,7 @@ onUnmounted(() => {
 
                     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         <RunCard
-                            v-for="run in activeRuns"
+                            v-for="run in props.recentRuns"
                             :key="run.id"
                             :run="run"
                             :is-active="true"
@@ -419,7 +398,7 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Recent Runs Section -->
-                <div v-if="activeRuns.length === 0">
+                <div v-if="props.activeRuns.length === 0">
                     <div class="mb-4 flex items-center justify-between">
                         <h2
                             class="text-lg font-semibold tracking-tight text-foreground"
@@ -430,7 +409,7 @@ onUnmounted(() => {
 
                     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         <RunCard
-                            v-for="run in recentRuns"
+                            v-for="run in props.recentRuns"
                             :key="run.id"
                             :run="run"
                             :is-active="false"
@@ -441,7 +420,7 @@ onUnmounted(() => {
                         <Button
                             variant="ghost"
                             as="a"
-                            href="/transfer-runs/history"
+                            href="/transfers"
                             class="gap-2 text-muted-foreground hover:text-foreground"
                         >
                             View Full History

@@ -14,6 +14,10 @@ Route::prefix('transfers')
             ->name('transfers.store');
 
         // Show single run detail
+        Route::get('/', [TransferRunController::class, 'index'])
+            ->name('index');
+
+        // Show single run detail
         Route::get('/{run}', [TransferRunController::class, 'show'])
             ->name('show');
 

@@ -10,7 +10,7 @@ Route::get('/', fn () => view('home', [
     'canRegister' => Features::enabled(Features::registration()),
 ]))->name('home');
 
-Route::get('dashboard', [TransferRunController::class, 'index'])
+Route::get('dashboard', [TransferRunController::class, 'dashboard'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 

@@ -82,8 +82,11 @@ export interface BatchProgress {
  * Dashboard Props
  */
 export interface DashboardProps {
-    runs: TransferRun[];
-    hasActiveRuns: boolean;
+    recentRuns: TransferRun[];
+    activeRuns: TransferRun[];
+    completedRuns: number;
+    failedRuns: number;
+    totalRuns: number;
 }
 
 /**

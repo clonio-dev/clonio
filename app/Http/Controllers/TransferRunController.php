@@ -25,18 +25,49 @@ class TransferRunController extends Controller
 {
     public $transferService;
 
+    public function dashboard(): Response
+    {
+        $runs = TransferRun::query()
+            ->where('user_id', auth()->id())
+            ->latest('id')
+            ->limit(6)
+            ->get()
+            ->map(fn (TransferRun $run): TransferRun => $this->enrichRunWithBatchProgress($run));
+
+        $activeRuns = TransferRun::query()
+            ->where('user_id', auth()->id())
+            ->whereIn('status', ['queued', 'processing'])
+            ->get()
+            ->map(fn (TransferRun $run): TransferRun => $this->enrichRunWithBatchProgress($run));
+        $completedRuns = TransferRun::query()
+            ->where('user_id', auth()->id())
+            ->where('status', 'completed')
+            ->count();
+        $failedRuns = TransferRun::query()
+            ->where('user_id', auth()->id())
+            ->where('status', 'failed')
+            ->count();
+        $totalRuns = $activeRuns->count() + $completedRuns + $failedRuns;
+
+        return Inertia::render('Dashboard', [
+            'recentRuns' => $runs,
+            'activeRuns' => $activeRuns,
+            'completedRuns' => $completedRuns,
+            'failedRuns' => $failedRuns,
+            'totalRuns' => $totalRuns,
+        ]);
+    }
+
     public function index(): Response
     {
         $runs = TransferRun::query()
-//            ->with(['config:id,name', 'logs'])
             ->where('user_id', auth()->id())
-            ->latest('started_at')
+            ->latest('id')
             ->limit(20)
             ->get()
             ->map(fn (TransferRun $run): TransferRun => $this->enrichRunWithBatchProgress($run));
 
-        $hasActiveRuns = $runs->contains(fn ($run): false => in_array($run->status, ['queued', 'processing'])
-        );
+        $hasActiveRuns = $runs->contains(fn ($run): false => in_array($run->status, ['queued', 'processing']));
 
         return Inertia::render('Dashboard', [
             'runs' => $runs,
@@ -169,8 +200,6 @@ class TransferRunController extends Controller
     public function show(TransferRun $run): Response
     {
         Gate::authorize('view', $run);
-
-        $run->load(['config:id,name', 'logs']);
 
         // Enrich with batch progress
         $run = $this->enrichRunWithBatchProgress($run);
