@@ -199,9 +199,9 @@ class TransferRunController extends Controller
      */
     public function cancel(TransferRun $run): RedirectResponse
     {
-        $this->authorize('cancel', $run);
+        Gate::authorize('update', $run);
 
-        $this->transferService->cancelTransfer($run);
+        // $this->transferService->cancelTransfer($run);
 
         return back()->with('success', 'Transfer cancelled');
     }
@@ -211,9 +211,9 @@ class TransferRunController extends Controller
      */
     public function retry(TransferRun $run): RedirectResponse
     {
-        $this->authorize('retry', $run);
+        Gate::authorize('update', $run);
 
-        $newRun = $this->transferService->retryTransfer($run);
+        // $newRun = $this->transferService->retryTransfer($run);
 
         return to_route('transfer-runs.show', $newRun)
             ->with('success', 'Transfer retry started');
@@ -224,7 +224,10 @@ class TransferRunController extends Controller
      */
     public function exportLogs(TransferRun $run)
     {
-        $this->authorize('view', $run);
+        Gate::authorize('view', $run);
+
+        // Load relationships
+        $run->load(['sourceConnection:id,name,type,host,port,database,username', 'targetConnection:id,name,type,host,port,database,username']);
 
         $logs = $run->logs()->oldest()
             ->get();
@@ -233,7 +236,8 @@ class TransferRunController extends Controller
 
         return response()->json([
             'run_id' => $run->id,
-            'config_name' => $run->config->name,
+            'source' => $run->sourceConnection->toArray(),
+            'target' => $run->targetConnection->toArray(),
             'exported_at' => now()->toIso8601String(),
             'logs' => $logs,
         ])
