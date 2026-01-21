@@ -109,11 +109,20 @@ export interface RunCardProps {
 }
 
 /**
- * Run Detail Props
+ * Run Detail Props (legacy)
  */
 export interface RunDetailProps {
     runId: number;
     initialRun?: TransferRun;
+}
+
+/**
+ * Transfer Run Show Page Props
+ */
+export interface TransferRunShowProps {
+    run: TransferRun;
+    logs: TransferRunLog[];
+    isActive: boolean;
 }
 
 /**
