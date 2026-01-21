@@ -44,10 +44,7 @@ defineProps<{
             fill="url(#sqlserver-a)"
             d="M11.2 64.9 42.6 46l5.2 3v28.1l-5.2 3z"
         />
-        <path
-            fill="url(#sqlserver-b)"
-            d="M47.8 49.1v28.1L79.2 96V67.9z"
-        />
+        <path fill="url(#sqlserver-b)" d="M47.8 49.1v28.1L79.2 96V67.9z" />
         <path fill="#e53935" d="M11.2 64.9v28.1l31.4 18.9V83.8z" />
         <path fill="#c62828" d="M42.6 111.9l36.6-15.9V67.9l-31.4 9.1v31.9z" />
         <path

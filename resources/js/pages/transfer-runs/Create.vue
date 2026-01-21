@@ -122,16 +122,12 @@ const selectedTargetConnection = ref<string | number | null>(null);
                 </div>
 
                 <div class="grid max-w-120 gap-2">
-                    <Label for="script">Transformation options global and for all known tables</Label>
-                    <Input
-                        type="text"
-                        id="script"
-                        name="script"
-                    />
-                    <InputError
-                        class="mt-2"
-                        :message="errors.script"
-                    />
+                    <Label for="script"
+                        >Transformation options global and for all known
+                        tables</Label
+                    >
+                    <Input type="text" id="script" name="script" />
+                    <InputError class="mt-2" :message="errors.script" />
                 </div>
 
                 <Separator class="my-4 size-1" />

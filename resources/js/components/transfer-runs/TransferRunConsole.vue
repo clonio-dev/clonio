@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { LogLevel, TransferRunLog } from '@/types/transfer-run.types';
-import { Info, Loader2, Terminal, TriangleAlert, XCircle } from 'lucide-vue-next';
+import {
+    Info,
+    Loader2,
+    Terminal,
+    TriangleAlert,
+    XCircle,
+} from 'lucide-vue-next';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 interface Props {
@@ -36,7 +42,8 @@ const logLevelConfig: Record<
     warning: {
         icon: TriangleAlert,
         activeClass: 'bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/50',
-        inactiveClass: 'text-amber-400/60 hover:text-amber-400 hover:bg-amber-500/10',
+        inactiveClass:
+            'text-amber-400/60 hover:text-amber-400 hover:bg-amber-500/10',
         textClass: 'text-amber-400',
         labelClass: 'text-amber-500',
     },
@@ -119,7 +126,8 @@ function getLogLevelConfig(level: LogLevel) {
 function scrollToBottom() {
     nextTick(() => {
         if (logContainerRef.value) {
-            logContainerRef.value.scrollTop = logContainerRef.value.scrollHeight;
+            logContainerRef.value.scrollTop =
+                logContainerRef.value.scrollHeight;
         }
     });
 }
@@ -154,9 +162,13 @@ defineExpose({
 </script>
 
 <template>
-    <div class="overflow-hidden rounded-xl border border-border/60 dark:border-border/40">
+    <div
+        class="overflow-hidden rounded-xl border border-border/60 dark:border-border/40"
+    >
         <!-- Console Header -->
-        <div class="flex items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 py-3">
+        <div
+            class="flex items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 py-3"
+        >
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-1.5">
                     <div class="size-3 rounded-full bg-red-500/80"></div>
@@ -181,7 +193,7 @@ defineExpose({
                 </button>
 
                 <button
-                    v-for="level in (['info', 'warning', 'error'] as LogLevel[])"
+                    v-for="level in ['info', 'warning', 'error'] as LogLevel[]"
                     :key="level"
                     @click="toggleFilter(level)"
                     class="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-all duration-150"
@@ -192,7 +204,10 @@ defineExpose({
                     "
                     :title="`${isFilterActive(level) ? 'Hide' : 'Show only'} ${level} logs`"
                 >
-                    <component :is="logLevelConfig[level].icon" class="size-3.5" />
+                    <component
+                        :is="logLevelConfig[level].icon"
+                        class="size-3.5"
+                    />
                     <span class="tabular-nums">{{ logStats[level] }}</span>
                 </button>
             </div>
@@ -318,9 +333,15 @@ defineExpose({
         </div>
 
         <!-- Console Footer -->
-        <div class="flex items-center justify-between border-t border-zinc-800 bg-zinc-900 px-4 py-2 text-xs text-zinc-500">
+        <div
+            class="flex items-center justify-between border-t border-zinc-800 bg-zinc-900 px-4 py-2 text-xs text-zinc-500"
+        >
             <span>
-                {{ hasActiveFilters ? `${filteredLogs.length} / ${logs.length}` : logs.length }}
+                {{
+                    hasActiveFilters
+                        ? `${filteredLogs.length} / ${logs.length}`
+                        : logs.length
+                }}
                 log entries
             </span>
             <div class="flex items-center gap-4">

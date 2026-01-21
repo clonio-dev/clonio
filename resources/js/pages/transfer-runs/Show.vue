@@ -5,7 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import type { RunStatus, TransferRun, TransferRunLog } from '@/types/transfer-run.types';
+import type {
+    RunStatus,
+    TransferRun,
+    TransferRunLog,
+} from '@/types/transfer-run.types';
 import { Head, router } from '@inertiajs/vue3';
 import {
     AlertCircle,
@@ -99,7 +103,9 @@ const statusConfig: Record<
     },
 };
 
-const currentStatus = computed(() => statusConfig[props.run.status] || statusConfig.cancelled);
+const currentStatus = computed(
+    () => statusConfig[props.run.status] || statusConfig.cancelled,
+);
 
 const formattedStartedAt = computed(() => {
     if (!props.run.started_at) return 'Not started';
@@ -117,7 +123,9 @@ const duration = computed(() => {
     if (!props.run.started_at) return '-';
 
     const start = new Date(props.run.started_at);
-    const end = props.run.finished_at ? new Date(props.run.finished_at) : new Date();
+    const end = props.run.finished_at
+        ? new Date(props.run.finished_at)
+        : new Date();
 
     const diffMs = end.getTime() - start.getTime();
     const hours = Math.floor(diffMs / 3600000);
@@ -212,7 +220,9 @@ onUnmounted(() => {
                         </div>
                         <div>
                             <div class="flex items-center gap-3">
-                                <h1 class="text-2xl font-semibold tracking-tight text-foreground">
+                                <h1
+                                    class="text-2xl font-semibold tracking-tight text-foreground"
+                                >
                                     Transfer Run #{{ run.id }}
                                 </h1>
                                 <Badge
@@ -226,13 +236,17 @@ onUnmounted(() => {
                                         :class="currentStatus.iconClass"
                                     />
                                     {{ currentStatus.label }}
-                                    <span v-if="run.status === 'processing'" class="tabular-nums">
+                                    <span
+                                        v-if="run.status === 'processing'"
+                                        class="tabular-nums"
+                                    >
                                         {{ run.progress_percent }}%
                                     </span>
                                 </Badge>
                             </div>
                             <p class="mt-1 text-sm text-muted-foreground">
-                                Audit log for compliance and data privacy analysis
+                                Audit log for compliance and data privacy
+                                analysis
                             </p>
                         </div>
                     </div>
@@ -243,7 +257,9 @@ onUnmounted(() => {
                             v-if="isActive"
                             class="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400"
                         >
-                            <div class="size-2 animate-pulse rounded-full bg-emerald-500" />
+                            <div
+                                class="size-2 animate-pulse rounded-full bg-emerald-500"
+                            />
                             <span>Live (1s)</span>
                         </div>
 
@@ -254,7 +270,10 @@ onUnmounted(() => {
                             :disabled="isRefreshing"
                             class="gap-2"
                         >
-                            <RefreshCw class="size-4" :class="{ 'animate-spin': isRefreshing }" />
+                            <RefreshCw
+                                class="size-4"
+                                :class="{ 'animate-spin': isRefreshing }"
+                            />
                             Refresh
                         </Button>
 
@@ -274,8 +293,12 @@ onUnmounted(() => {
             <!-- Summary Cards -->
             <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <!-- Source -->
-                <div class="rounded-xl border border-border/60 bg-card p-4 dark:border-border/40">
-                    <div class="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <div
+                    class="rounded-xl border border-border/60 bg-card p-4 dark:border-border/40"
+                >
+                    <div
+                        class="mb-2 flex items-center gap-2 text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                    >
                         <Database class="size-3.5" />
                         Source
                     </div>
@@ -283,15 +306,23 @@ onUnmounted(() => {
                         <span class="font-medium text-foreground">
                             {{ run.source_connection?.name || '-' }}
                         </span>
-                        <Badge v-if="run.source_connection?.type" variant="secondary" class="text-xs">
+                        <Badge
+                            v-if="run.source_connection?.type"
+                            variant="secondary"
+                            class="text-xs"
+                        >
                             {{ run.source_connection.type }}
                         </Badge>
                     </div>
                 </div>
 
                 <!-- Target -->
-                <div class="rounded-xl border border-border/60 bg-card p-4 dark:border-border/40">
-                    <div class="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <div
+                    class="rounded-xl border border-border/60 bg-card p-4 dark:border-border/40"
+                >
+                    <div
+                        class="mb-2 flex items-center gap-2 text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                    >
                         <ArrowRight class="size-3.5" />
                         Target
                     </div>
@@ -299,15 +330,23 @@ onUnmounted(() => {
                         <span class="font-medium text-foreground">
                             {{ run.target_connection?.name || '-' }}
                         </span>
-                        <Badge v-if="run.target_connection?.type" variant="secondary" class="text-xs">
+                        <Badge
+                            v-if="run.target_connection?.type"
+                            variant="secondary"
+                            class="text-xs"
+                        >
                             {{ run.target_connection.type }}
                         </Badge>
                     </div>
                 </div>
 
                 <!-- Timing -->
-                <div class="rounded-xl border border-border/60 bg-card p-4 dark:border-border/40">
-                    <div class="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <div
+                    class="rounded-xl border border-border/60 bg-card p-4 dark:border-border/40"
+                >
+                    <div
+                        class="mb-2 flex items-center gap-2 text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                    >
                         <Calendar class="size-3.5" />
                         Started
                     </div>
@@ -317,14 +356,24 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Duration -->
-                <div class="rounded-xl border border-border/60 bg-card p-4 dark:border-border/40">
-                    <div class="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <div
+                    class="rounded-xl border border-border/60 bg-card p-4 dark:border-border/40"
+                >
+                    <div
+                        class="mb-2 flex items-center gap-2 text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                    >
                         <Timer class="size-3.5" />
                         Duration
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="tabular-nums font-medium text-foreground">{{ duration }}</span>
-                        <Loader2 v-if="isActive" class="size-4 animate-spin text-muted-foreground" />
+                        <span
+                            class="font-medium text-foreground tabular-nums"
+                            >{{ duration }}</span
+                        >
+                        <Loader2
+                            v-if="isActive"
+                            class="size-4 animate-spin text-muted-foreground"
+                        />
                     </div>
                 </div>
             </div>
@@ -333,12 +382,16 @@ onUnmounted(() => {
             <div v-if="isActive" class="mb-6">
                 <div class="mb-2 flex items-center justify-between text-sm">
                     <span class="text-muted-foreground">Progress</span>
-                    <span class="tabular-nums font-medium text-foreground">
+                    <span class="font-medium text-foreground tabular-nums">
                         {{ run.current_step }} / {{ run.total_steps }} steps
-                        <span class="text-muted-foreground">({{ run.progress_percent }}%)</span>
+                        <span class="text-muted-foreground"
+                            >({{ run.progress_percent }}%)</span
+                        >
                     </span>
                 </div>
-                <div class="h-2 w-full overflow-hidden rounded-full bg-muted/60 dark:bg-muted/40">
+                <div
+                    class="h-2 w-full overflow-hidden rounded-full bg-muted/60 dark:bg-muted/40"
+                >
                     <div
                         class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
                         :style="{ width: `${run.progress_percent}%` }"
@@ -352,9 +405,13 @@ onUnmounted(() => {
                 class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/30"
             >
                 <div class="flex items-start gap-3">
-                    <XCircle class="mt-0.5 size-5 shrink-0 text-red-600 dark:text-red-400" />
+                    <XCircle
+                        class="mt-0.5 size-5 shrink-0 text-red-600 dark:text-red-400"
+                    />
                     <div>
-                        <h3 class="font-medium text-red-800 dark:text-red-300">Transfer Failed</h3>
+                        <h3 class="font-medium text-red-800 dark:text-red-300">
+                            Transfer Failed
+                        </h3>
                         <p class="mt-1 text-sm text-red-700 dark:text-red-400">
                             {{ run.error_message }}
                         </p>

@@ -197,9 +197,13 @@ onUnmounted(() => {
                         <div
                             class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/30 dark:from-violet-500/10 dark:to-purple-500/10"
                         >
-                            <Send class="size-5 text-violet-600 dark:text-violet-400" />
+                            <Send
+                                class="size-5 text-violet-600 dark:text-violet-400"
+                            />
                         </div>
-                        <h1 class="text-2xl font-semibold tracking-tight text-foreground">
+                        <h1
+                            class="text-2xl font-semibold tracking-tight text-foreground"
+                        >
                             Transfer Runs
                         </h1>
                     </div>
@@ -214,7 +218,9 @@ onUnmounted(() => {
                         v-if="hasActiveRuns"
                         class="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400"
                     >
-                        <div class="size-2 animate-pulse rounded-full bg-emerald-500" />
+                        <div
+                            class="size-2 animate-pulse rounded-full bg-emerald-500"
+                        />
                         <span>Live</span>
                     </div>
 
@@ -225,7 +231,10 @@ onUnmounted(() => {
                         :disabled="isRefreshing"
                         class="gap-2"
                     >
-                        <RefreshCw class="size-4" :class="{ 'animate-spin': isRefreshing }" />
+                        <RefreshCw
+                            class="size-4"
+                            :class="{ 'animate-spin': isRefreshing }"
+                        />
                         Refresh
                     </Button>
 
@@ -234,7 +243,9 @@ onUnmounted(() => {
                         class="group gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/20 transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-lg hover:shadow-violet-500/30 dark:shadow-violet-500/10 dark:hover:shadow-violet-500/20"
                     >
                         <Link :href="TransferRunController.create().url">
-                            <Plus class="size-4 transition-transform group-hover:rotate-90" />
+                            <Plus
+                                class="size-4 transition-transform group-hover:rotate-90"
+                            />
                             New Transfer
                         </Link>
                     </Button>
@@ -247,7 +258,9 @@ onUnmounted(() => {
                 class="mb-6 flex items-center gap-6 rounded-lg border border-border/50 bg-gradient-to-r from-muted/30 to-muted/50 px-4 py-3 dark:from-muted/20 dark:to-muted/30"
             >
                 <div class="flex items-center gap-2">
-                    <div class="size-2 animate-pulse rounded-full bg-violet-500"></div>
+                    <div
+                        class="size-2 animate-pulse rounded-full bg-violet-500"
+                    ></div>
                     <span class="text-sm font-medium text-foreground">
                         {{ totalRuns }}
                         {{ totalRuns === 1 ? 'transfer run' : 'transfer runs' }}
@@ -267,16 +280,20 @@ onUnmounted(() => {
                 <div
                     class="mb-6 flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/20 dark:from-violet-500/10 dark:to-purple-500/10"
                 >
-                    <Send class="size-10 text-violet-600 dark:text-violet-400" />
+                    <Send
+                        class="size-10 text-violet-600 dark:text-violet-400"
+                    />
                 </div>
 
-                <h2 class="mb-2 text-xl font-semibold tracking-tight text-foreground">
+                <h2
+                    class="mb-2 text-xl font-semibold tracking-tight text-foreground"
+                >
                     No Transfer Runs Yet
                 </h2>
 
                 <p class="mx-auto mb-8 max-w-md text-sm text-muted-foreground">
-                    Start your first data transfer to anonymize and move data between your databases
-                    securely.
+                    Start your first data transfer to anonymize and move data
+                    between your databases securely.
                 </p>
 
                 <Button
@@ -292,63 +309,74 @@ onUnmounted(() => {
 
             <!-- Table -->
             <div v-else class="space-y-6">
-                <div class="overflow-hidden rounded-xl border border-border/60 bg-card dark:border-border/40">
+                <div
+                    class="overflow-hidden rounded-xl border border-border/60 bg-card dark:border-border/40"
+                >
                     <table class="w-full">
                         <thead>
-                            <tr class="border-b border-border/60 bg-muted/30 dark:border-border/40 dark:bg-muted/20">
+                            <tr
+                                class="border-b border-border/60 bg-muted/30 dark:border-border/40 dark:bg-muted/20"
+                            >
                                 <th
-                                    class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                                    class="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
                                 >
                                     Run
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                                    class="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
                                 >
                                     Status
                                 </th>
                                 <th
-                                    class="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground md:table-cell"
+                                    class="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase md:table-cell"
                                 >
                                     Source
                                 </th>
                                 <th
-                                    class="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground md:table-cell"
+                                    class="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase md:table-cell"
                                 >
                                     Target
                                 </th>
                                 <th
-                                    class="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground lg:table-cell"
+                                    class="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase lg:table-cell"
                                 >
                                     Started
                                 </th>
                                 <th
-                                    class="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground lg:table-cell"
+                                    class="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase lg:table-cell"
                                 >
                                     Duration
                                 </th>
-                                <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                <th
+                                    class="px-4 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                                >
                                     Actions
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-border/40 dark:divide-border/30">
+                        <tbody
+                            class="divide-y divide-border/40 dark:divide-border/30"
+                        >
                             <tr
                                 v-for="run in runs.data"
                                 :key="run.id"
                                 class="group relative transition-colors hover:bg-muted/30 dark:hover:bg-muted/20"
                                 :class="{
-                                    'bg-emerald-50/50 dark:bg-emerald-950/20': isActiveRun(run),
+                                    'bg-emerald-50/50 dark:bg-emerald-950/20':
+                                        isActiveRun(run),
                                 }"
                             >
                                 <!-- Active run animated border -->
                                 <td
                                     v-if="run.status === 'processing'"
                                     class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500"
-                                    style="animation: shimmer 2s infinite linear"
+                                    style="
+                                        animation: shimmer 2s infinite linear;
+                                    "
                                 />
 
                                 <!-- Run ID -->
-                                <td class="whitespace-nowrap px-4 py-4">
+                                <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-3">
                                         <div
                                             v-if="isActiveRun(run)"
@@ -362,7 +390,9 @@ onUnmounted(() => {
                                             ></span>
                                         </div>
                                         <div>
-                                            <span class="font-mono text-sm font-semibold text-foreground">
+                                            <span
+                                                class="font-mono text-sm font-semibold text-foreground"
+                                            >
                                                 #{{ run.id }}
                                             </span>
                                         </div>
@@ -370,16 +400,24 @@ onUnmounted(() => {
                                 </td>
 
                                 <!-- Status -->
-                                <td class="whitespace-nowrap px-4 py-4">
+                                <td class="px-4 py-4 whitespace-nowrap">
                                     <Badge
                                         variant="outline"
                                         class="gap-1.5 text-xs font-medium"
-                                        :class="getStatusConfig(run.status).badgeClass"
+                                        :class="
+                                            getStatusConfig(run.status)
+                                                .badgeClass
+                                        "
                                     >
                                         <component
-                                            :is="getStatusConfig(run.status).icon"
+                                            :is="
+                                                getStatusConfig(run.status).icon
+                                            "
                                             class="size-3.5"
-                                            :class="getStatusConfig(run.status).iconClass"
+                                            :class="
+                                                getStatusConfig(run.status)
+                                                    .iconClass
+                                            "
                                         />
                                         {{ getStatusConfig(run.status).label }}
                                         <span
@@ -397,46 +435,72 @@ onUnmounted(() => {
                                     >
                                         <div
                                             class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
-                                            :style="{ width: `${run.progress_percent}%` }"
+                                            :style="{
+                                                width: `${run.progress_percent}%`,
+                                            }"
                                         />
                                     </div>
                                 </td>
 
                                 <!-- Source -->
-                                <td class="hidden whitespace-nowrap px-4 py-4 md:table-cell">
+                                <td
+                                    class="hidden px-4 py-4 whitespace-nowrap md:table-cell"
+                                >
                                     <div class="flex items-center gap-2">
-                                        <Database class="size-4 text-muted-foreground/60" />
+                                        <Database
+                                            class="size-4 text-muted-foreground/60"
+                                        />
                                         <span class="text-sm text-foreground">
-                                            {{ run.source_connection?.name || '-' }}
+                                            {{
+                                                run.source_connection?.name ||
+                                                '-'
+                                            }}
                                         </span>
                                     </div>
                                 </td>
 
                                 <!-- Target -->
-                                <td class="hidden whitespace-nowrap px-4 py-4 md:table-cell">
+                                <td
+                                    class="hidden px-4 py-4 whitespace-nowrap md:table-cell"
+                                >
                                     <div class="flex items-center gap-2">
-                                        <ArrowRight class="size-3 text-muted-foreground/50" />
-                                        <Database class="size-4 text-muted-foreground/60" />
+                                        <ArrowRight
+                                            class="size-3 text-muted-foreground/50"
+                                        />
+                                        <Database
+                                            class="size-4 text-muted-foreground/60"
+                                        />
                                         <span class="text-sm text-foreground">
-                                            {{ run.target_connection?.name || '-' }}
+                                            {{
+                                                run.target_connection?.name ||
+                                                '-'
+                                            }}
                                         </span>
                                     </div>
                                 </td>
 
                                 <!-- Started -->
-                                <td class="hidden whitespace-nowrap px-4 py-4 text-sm text-muted-foreground lg:table-cell">
+                                <td
+                                    class="hidden px-4 py-4 text-sm whitespace-nowrap text-muted-foreground lg:table-cell"
+                                >
                                     {{ formatDate(run.started_at) }}
                                 </td>
 
                                 <!-- Duration -->
-                                <td class="hidden whitespace-nowrap px-4 py-4 lg:table-cell">
-                                    <span class="tabular-nums text-sm text-muted-foreground">
+                                <td
+                                    class="hidden px-4 py-4 whitespace-nowrap lg:table-cell"
+                                >
+                                    <span
+                                        class="text-sm text-muted-foreground tabular-nums"
+                                    >
                                         {{ formatDuration(run) }}
                                     </span>
                                 </td>
 
                                 <!-- Actions -->
-                                <td class="whitespace-nowrap px-4 py-4 text-right">
+                                <td
+                                    class="px-4 py-4 text-right whitespace-nowrap"
+                                >
                                     <Button
                                         variant="ghost"
                                         size="sm"

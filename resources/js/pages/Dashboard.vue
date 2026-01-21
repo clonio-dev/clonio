@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import RunCard from '@/components/transfer-runs/RunCard.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
@@ -155,8 +150,12 @@ onUnmounted(() => {
                         v-if="props.activeRuns.length > 0"
                         class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5"
                     />
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium text-muted-foreground">
+                    <CardHeader
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
+                    >
+                        <CardTitle
+                            class="text-sm font-medium text-muted-foreground"
+                        >
                             Active Runs
                         </CardTitle>
                         <div
@@ -193,8 +192,12 @@ onUnmounted(() => {
 
                 <!-- Completed -->
                 <Card class="border-border/60 dark:border-border/40">
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium text-muted-foreground">
+                    <CardHeader
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
+                    >
+                        <CardTitle
+                            class="text-sm font-medium text-muted-foreground"
+                        >
                             Completed
                         </CardTitle>
                         <div
@@ -217,8 +220,12 @@ onUnmounted(() => {
 
                 <!-- Failed -->
                 <Card class="border-border/60 dark:border-border/40">
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium text-muted-foreground">
+                    <CardHeader
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
+                    >
+                        <CardTitle
+                            class="text-sm font-medium text-muted-foreground"
+                        >
                             Failed
                         </CardTitle>
                         <div
@@ -241,8 +248,12 @@ onUnmounted(() => {
 
                 <!-- Total -->
                 <Card class="border-border/60 dark:border-border/40">
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium text-muted-foreground">
+                    <CardHeader
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
+                    >
+                        <CardTitle
+                            class="text-sm font-medium text-muted-foreground"
+                        >
                             Total Runs
                         </CardTitle>
                         <div
@@ -283,9 +294,7 @@ onUnmounted(() => {
                     No Transfer Runs Yet
                 </h2>
 
-                <p
-                    class="mx-auto mb-8 max-w-md text-sm text-muted-foreground"
-                >
+                <p class="mx-auto mb-8 max-w-md text-sm text-muted-foreground">
                     Get started by creating your first transfer configuration.
                     You'll be able to anonymize and transfer data between
                     databases securely.
@@ -300,7 +309,12 @@ onUnmounted(() => {
                         Create First Config
                     </Button>
 
-                    <Button variant="outline" as="a" href="/docs/getting-started" class="gap-2">
+                    <Button
+                        variant="outline"
+                        as="a"
+                        href="/docs/getting-started"
+                        class="gap-2"
+                    >
                         <FileText class="size-4" />
                         View Documentation
                     </Button>

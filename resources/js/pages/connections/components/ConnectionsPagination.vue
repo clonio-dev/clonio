@@ -54,7 +54,11 @@ const visiblePages = computed(() => {
     }
 
     // Pages around current
-    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+    for (
+        let i = Math.max(2, current - 1);
+        i <= Math.min(total - 1, current + 1);
+        i++
+    ) {
         const page = pages.find((p) => p.page === i);
         if (page) {
             result.push(page);
@@ -113,7 +117,10 @@ function isEllipsis(
 
         <!-- Page numbers -->
         <div class="flex items-center gap-1">
-            <template v-for="item in visiblePages" :key="isEllipsis(item) ? item.key : item.page">
+            <template
+                v-for="item in visiblePages"
+                :key="isEllipsis(item) ? item.key : item.page"
+            >
                 <!-- Ellipsis -->
                 <div
                     v-if="isEllipsis(item)"

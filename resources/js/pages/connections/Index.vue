@@ -108,12 +108,19 @@ function closeSheet() {
                     ></div>
                     <span class="text-sm font-medium text-foreground">
                         {{ totalConnections }}
-                        {{ totalConnections === 1 ? 'connection' : 'connections' }}
+                        {{
+                            totalConnections === 1
+                                ? 'connection'
+                                : 'connections'
+                        }}
                     </span>
                 </div>
                 <div class="h-4 w-px bg-border"></div>
                 <span class="text-sm text-muted-foreground">
-                    Showing {{ props.connections.from }}-{{ props.connections.to }} of
+                    Showing {{ props.connections.from }}-{{
+                        props.connections.to
+                    }}
+                    of
                     {{ totalConnections }}
                 </span>
             </div>
@@ -126,15 +133,13 @@ function closeSheet() {
 
             <!-- Connections Grid -->
             <div v-else class="space-y-6">
-                <div
-                    class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-                >
+                <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     <ConnectionCard
                         v-for="(connection, index) in props.connections.data"
                         :key="connection.id"
                         :connection="connection"
                         :style="{ animationDelay: `${index * 50}ms` }"
-                        class="animate-in fade-in-0 slide-in-from-bottom-4 fill-mode-both"
+                        class="animate-in fade-in-0 fill-mode-both slide-in-from-bottom-4"
                     />
                 </div>
 

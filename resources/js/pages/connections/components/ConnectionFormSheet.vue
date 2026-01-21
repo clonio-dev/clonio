@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
+import {
+    MariadbIcon,
+    MysqlIcon,
+    PostgresqlIcon,
+    SqlserverIcon,
+} from '@/components/icons/databases';
 import InputError from '@/components/InputError.vue';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -35,7 +40,6 @@ import {
     User,
 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import { MariadbIcon, MysqlIcon, PostgresqlIcon, SqlserverIcon } from '@/components/icons/databases';
 
 interface Props {
     open: boolean;
@@ -100,7 +104,7 @@ watch(
 
             <Form
                 v-bind="DatabaseConnectionController.store()"
-                class="flex flex-1 flex-col gap-5 overflow-y-auto pt-0 p-4"
+                class="flex flex-1 flex-col gap-5 overflow-y-auto p-4 pt-0"
                 v-slot="{ errors, processing, recentlySuccessful }"
                 :reset-on-error="['username', 'password']"
                 :onSuccess="handleSubmitComplete"
@@ -342,9 +346,12 @@ watch(
                     class="border-amber-500/30 bg-amber-500/5"
                 >
                     <AlertTriangle class="h-4 w-4 text-amber-500" />
-                    <AlertDescription class="text-xs text-amber-700 dark:text-amber-400">
+                    <AlertDescription
+                        class="text-xs text-amber-700 dark:text-amber-400"
+                    >
                         This connection is marked as production. Extra
-                        confirmation will be required for destructive operations.
+                        confirmation will be required for destructive
+                        operations.
                     </AlertDescription>
                 </Alert>
 

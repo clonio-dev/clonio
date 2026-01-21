@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
 import { dashboard, login, register } from '@/routes';
+import { Head, Link } from '@inertiajs/vue3';
 
 interface Props {
     title: string;
@@ -12,14 +12,8 @@ const props = defineProps<Props>();
 
 <template>
     <Head :title="props.title">
-        <link
-            rel="preconnect"
-            href="https://rsms.me/"
-        />
-        <link
-            rel="stylesheet"
-            href="https://rsms.me/inter/inter.css"
-        />
+        <link rel="preconnect" href="https://rsms.me/" />
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     </Head>
     <div
         class="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:justify-center lg:p-8 dark:bg-[#0a0a0a]"
@@ -58,7 +52,7 @@ const props = defineProps<Props>();
                 class="flex w-full max-w-[335px] flex-col-reverse overflow-hidden rounded-lg p-4 lg:max-w-4xl lg:flex-row dark:bg-gray-800"
             >
                 <div
-                    class="prose mt-6 w-full overflow-hidden sm:max-w-2xl dark:prose-invert"
+                    class="prose dark:prose-invert mt-6 w-full overflow-hidden sm:max-w-2xl"
                     v-html="props.content"
                 />
             </main>
@@ -116,7 +110,7 @@ const props = defineProps<Props>();
                         <Link
                             href="/datenschutz"
                             class="-ml-3 hover:text-gray-700 focus:rounded-sm focus:outline-2 focus:outline-indigo-500 dark:hover:text-white"
-                        >(de)</Link
+                            >(de)</Link
                         >
                         <Link
                             href="/terms"
@@ -126,7 +120,7 @@ const props = defineProps<Props>();
                         <Link
                             href="/agb"
                             class="-ml-3 hover:text-gray-700 focus:rounded-sm focus:outline-2 focus:outline-indigo-500 dark:hover:text-white"
-                        >(de)</Link
+                            >(de)</Link
                         >
                     </div>
                 </nav>

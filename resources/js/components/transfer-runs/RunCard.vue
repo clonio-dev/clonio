@@ -88,8 +88,7 @@ const statusConfig = computed(() => {
             label: 'Running',
             badgeClass:
                 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-900',
-            cardClass:
-                'ring-2 ring-emerald-500/30 dark:ring-emerald-500/20',
+            cardClass: 'ring-2 ring-emerald-500/30 dark:ring-emerald-500/20',
             iconClass: 'text-emerald-600 dark:text-emerald-400 animate-spin',
         },
         completed: {
@@ -190,25 +189,24 @@ function openRunDetail() {
 
         <CardContent class="space-y-4 pt-0">
             <!-- Source → Target -->
-            <div
-                v-if="sourceTarget"
-                class="flex items-center gap-2 text-sm"
-            >
+            <div v-if="sourceTarget" class="flex items-center gap-2 text-sm">
                 <div
                     class="flex min-w-0 flex-1 items-center gap-2 rounded-lg bg-muted/40 px-3 py-2 dark:bg-muted/20"
                 >
-                    <Database class="size-4 shrink-0 text-muted-foreground/70" />
+                    <Database
+                        class="size-4 shrink-0 text-muted-foreground/70"
+                    />
                     <span class="truncate font-medium text-foreground">
                         {{ sourceTarget.source }}
                     </span>
                 </div>
-                <ArrowRight
-                    class="size-4 shrink-0 text-muted-foreground"
-                />
+                <ArrowRight class="size-4 shrink-0 text-muted-foreground" />
                 <div
                     class="flex min-w-0 flex-1 items-center gap-2 rounded-lg bg-muted/40 px-3 py-2 dark:bg-muted/20"
                 >
-                    <Database class="size-4 shrink-0 text-muted-foreground/70" />
+                    <Database
+                        class="size-4 shrink-0 text-muted-foreground/70"
+                    />
                     <span class="truncate font-medium text-foreground">
                         {{ sourceTarget.target }}
                     </span>
