@@ -203,18 +203,18 @@ defineExpose({
             v-if="hasActiveFilters"
             class="flex items-center gap-2 border-b border-zinc-800 bg-zinc-900/50 px-4 py-2 text-xs"
         >
-            <span class="text-zinc-500">Filtering:</span>
+            <span class="text-zinc-900 dark:text-zinc-500">Filtering:</span>
             <div class="flex items-center gap-1.5">
                 <span
                     v-for="level in activeFilters"
                     :key="level"
-                    class="rounded px-1.5 py-0.5 font-medium"
+                    class="rounded px-1.5 py-0.5 font-medium uppercase"
                     :class="logLevelConfig[level].activeClass"
                 >
                     {{ level }}
                 </span>
             </div>
-            <span class="text-zinc-600">
+            <span class="text-zinc-800 dark:text-zinc-400">
                 ({{ filteredLogs.length }} of {{ logs.length }} entries)
             </span>
         </div>
@@ -261,43 +261,53 @@ defineExpose({
                 <div
                     v-for="log in filteredLogs"
                     :key="log.id"
-                    class="group flex items-start gap-3 rounded px-2 py-1 transition-all duration-150"
+                    class="group rounded px-2 py-1 transition-all duration-150"
                     :class="
                         isLogHighlighted(log)
                             ? 'hover:bg-zinc-900'
                             : 'opacity-30 hover:opacity-60'
                     "
                 >
-                    <!-- Timestamp -->
-                    <span class="shrink-0 text-zinc-600">
-                        [{{ formatLogTime(log.created_at) }}]
-                    </span>
+                    <!-- Main log line -->
+                    <div class="flex items-start gap-3">
+                        <!-- Timestamp -->
+                        <span class="shrink-0 text-zinc-600">
+                            [{{ formatLogTime(log.created_at) }}]
+                        </span>
 
-                    <!-- Level Badge -->
-                    <span
-                        class="w-16 shrink-0 text-right font-semibold uppercase"
-                        :class="getLogLevelConfig(log.level).labelClass"
-                    >
-                        {{ log.level }}
-                    </span>
+                        <!-- Level Badge -->
+                        <span
+                            class="w-16 shrink-0 text-right font-semibold uppercase"
+                            :class="getLogLevelConfig(log.level).labelClass"
+                        >
+                            {{ log.level }}
+                        </span>
 
-                    <!-- Event Type -->
-                    <span class="shrink-0 text-violet-400">
-                        {{ log.event_type }}
-                    </span>
+                        <!-- Event Type -->
+                        <span class="shrink-0 text-violet-400">
+                            {{ log.event_type }}
+                        </span>
 
-                    <!-- Message -->
-                    <span class="text-zinc-300">
-                        {{ log.message }}
-                    </span>
+                        <!-- Message -->
+                        <span class="break-words text-zinc-300">
+                            {{ log.message }}
+                        </span>
+                    </div>
 
-                    <!-- Data (if present and has content) -->
-                    <span
+                    <!-- Data (if present and has content) - on new line -->
+                    <div
                         v-if="log.data && Object.keys(log.data).length > 0"
-                        class="shrink-0 text-zinc-600"
+                        class="flex"
                     >
-                        {{ JSON.stringify(log.data) }}
-                    </span>
+                        <!-- Spacer to align with content after level -->
+                        <span class="shrink-0 text-transparent">
+                            [{{ formatLogTime(log.created_at) }}]
+                        </span>
+                        <span class="w-16 shrink-0"></span>
+                        <span class="ml-6 break-all text-zinc-500">
+                            {{ JSON.stringify(log.data) }}
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Cursor / Active Indicator -->
