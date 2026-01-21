@@ -23,8 +23,6 @@ use Inertia\Response;
 
 class TransferRunController extends Controller
 {
-    public $transferService;
-
     public function dashboard(): Response
     {
         $runs = TransferRun::query()
@@ -61,15 +59,16 @@ class TransferRunController extends Controller
     public function index(): Response
     {
         $runs = TransferRun::query()
+            ->with(['sourceConnection:id,name,type', 'targetConnection:id,name,type'])
             ->where('user_id', auth()->id())
             ->latest('id')
-            ->limit(20)
-            ->get()
-            ->map(fn (TransferRun $run): TransferRun => $this->enrichRunWithBatchProgress($run));
+            ->paginate(10);
 
-        $hasActiveRuns = $runs->contains(fn ($run): false => in_array($run->status, ['queued', 'processing']));
+        $runs->through(fn (TransferRun $run): TransferRun => $this->enrichRunWithBatchProgress($run));
 
-        return Inertia::render('Dashboard', [
+        $hasActiveRuns = $runs->contains(fn ($run): bool => in_array($run->status->value, ['queued', 'processing']));
+
+        return Inertia::render('transfer-runs/Index', [
             'runs' => $runs,
             'hasActiveRuns' => $hasActiveRuns,
         ]);
