@@ -6,6 +6,7 @@ use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
 use App\Data\SynchronizationOptionsData;
 use App\Jobs\SynchronizeDatabase;
+use App\Models\TransferRun;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Route;
@@ -29,9 +30,15 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             ),
         );
 
+        $run = TransferRun::factory()->create();
+
         $batch = Bus::batch([
-            new SynchronizeDatabase($synchronizationConfigData, $connectionDataSource,
-                collect([$connectionDataTarget])),
+            new SynchronizeDatabase(
+                $synchronizationConfigData,
+                $connectionDataSource,
+                $connectionDataTarget,
+                $run,
+            ),
         ])
             ->name('Synchronize database ' . $connectionDataSource->name)
             ->before(function (Batch $batch): void {
