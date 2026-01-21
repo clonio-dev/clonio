@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,8 +20,9 @@ import { ComboboxItems } from '@/components/ui/combobox/index';
 
 interface Props {
     modelValue?: string|number
-    items: ComboboxItems
+    items?: ComboboxItems
     class?: string
+    required?: boolean
 }
 
 const props = defineProps<Props>();
@@ -32,9 +33,19 @@ const emits = defineEmits<{
 const open = ref(false)
 const value = ref(props.modelValue ?? '')
 
+const itemsList = computed(() => props.items ?? [])
+
 const selectedItem = computed(() =>
-    props.items.find(item => item.value === value.value),
+    itemsList.value.find(item => item.value === value.value),
 )
+
+// Auto-select single item when required and only one option exists
+watch(itemsList, (items) => {
+    if (props.required && items.length === 1 && !value.value) {
+        value.value = items[0].value
+        emits('update:modelValue', value.value)
+    }
+}, { immediate: true })
 
 function selectItem(selectedValue: string) {
     value.value = selectedValue === value.value.toString() ? '' : selectedValue
@@ -64,7 +75,7 @@ function selectItem(selectedValue: string) {
                     <CommandEmpty>No item found.</CommandEmpty>
                     <CommandGroup>
                         <CommandItem
-                            v-for="item in props.items"
+                            v-for="item in itemsList"
                             :key="item.value"
                             :value="item.value"
                             @select="(ev) => { selectItem(ev.detail.value as string) }"
