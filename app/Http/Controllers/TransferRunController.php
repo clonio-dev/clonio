@@ -15,6 +15,7 @@ use App\Jobs\SynchronizeDatabase;
 use App\Models\DatabaseConnection;
 use App\Models\TransferRun;
 use Illuminate\Bus\Batch;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Gate;
@@ -76,29 +77,6 @@ class TransferRunController extends Controller
 
     public function create(): Response
     {
-        /*$c = DatabaseConnection::query()->create([
-            'user_id' => auth()->id(),
-            'name' => 'Local Prod DB',
-            'type' => DatabaseConnectionTypes::SQLITE,
-            'host' => '',
-            'port' => 0,
-            'database' => database_path('database.sqlite'),
-            'username' => '',
-            'password' => 'password',
-            'is_production_stage' => true,
-        ]);
-        $c2 = DatabaseConnection::query()->create([
-            'user_id' => auth()->id(),
-            'name' => 'Local Test DB',
-            'type' => DatabaseConnectionTypes::SQLITE,
-            'host' => '',
-            'port' => 0,
-            'database' => database_path('test.sqlite'),
-            'username' => '',
-            'password' => 'password',
-            'is_production_stage' => false,
-        ]);*/
-
         $prodConnections = DatabaseConnection::query()
             ->forUser(auth()->id())
             ->prodDatabases()
@@ -117,10 +95,7 @@ class TransferRunController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreTransferRunRequest $request): \Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    public function store(StoreTransferRunRequest $request): RedirectResponse
     {
         /** @var TransferRun $transferRun */
         $transferRun = TransferRun::query()->create([
@@ -200,11 +175,22 @@ class TransferRunController extends Controller
     {
         Gate::authorize('view', $run);
 
+        // Load relationships
+        $run->load(['sourceConnection:id,name,type', 'targetConnection:id,name,type']);
+
         // Enrich with batch progress
         $run = $this->enrichRunWithBatchProgress($run);
 
-        return Inertia::render('TransferRunDetail', [
+        // Determine if this is an active run
+        $isActive = in_array($run->status->value, ['queued', 'processing']);
+
+        // Get logs ordered by creation time
+        $logs = $run->logs()->oldest('created_at')->get();
+
+        return Inertia::render('transfer-runs/Show', [
             'run' => $run,
+            'logs' => $logs,
+            'isActive' => $isActive,
         ]);
     }
 
