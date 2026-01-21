@@ -1,12 +1,32 @@
 <script setup lang="ts">
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import RunCard from '@/components/transfer-runs/RunCard.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import type { DashboardProps } from '@/types/transfer-run.types';
 import { Head, router } from '@inertiajs/vue3';
-import { computed, onMounted, onUnmounted } from 'vue';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
+import {
+    Activity,
+    ArrowRight,
+    CheckCircle2,
+    Clock,
+    Database,
+    FileText,
+    Play,
+    Plus,
+    RefreshCw,
+    Shield,
+    XCircle,
+    Zap,
+} from 'lucide-vue-next';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,17 +37,27 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const props = defineProps<DashboardProps>();
 
+const isRefreshing = ref(false);
+
 const activeRuns = computed(() => {
     return props.runs.filter((run) =>
         ['queued', 'processing'].includes(run.status),
     );
 });
 
+const completedRuns = computed(() => {
+    return props.runs.filter((run) => run.status === 'completed');
+});
+
+const failedRuns = computed(() => {
+    return props.runs.filter((run) => run.status === 'failed');
+});
+
 const recentRuns = computed(() => {
     if (activeRuns.value.length > 0) {
         return activeRuns.value;
     }
-    return props.runs.slice(0, 5);
+    return props.runs.slice(0, 6);
 });
 
 const hasAnyRuns = computed(() => props.runs.length > 0);
@@ -35,10 +65,14 @@ const hasAnyRuns = computed(() => props.runs.length > 0);
 let refreshInterval: number | null = null;
 
 function refreshDashboard() {
+    isRefreshing.value = true;
     router.reload({
         only: ['runs', 'hasActiveRuns'],
         preserveScroll: true,
         preserveState: true,
+        onFinish: () => {
+            isRefreshing.value = false;
+        },
     });
 }
 
@@ -46,11 +80,25 @@ function createFirstConfig() {
     router.visit('/configs/create');
 }
 
-onMounted(() => {
-    // Only auto-refresh if there are active runs
-    if (activeRuns.value.length > 0) {
-        refreshInterval = window.setInterval(refreshDashboard, 2000); // Every 2s
+function setupAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
     }
+    if (activeRuns.value.length > 0) {
+        refreshInterval = window.setInterval(refreshDashboard, 3000);
+    }
+}
+
+watch(
+    () => activeRuns.value.length,
+    () => {
+        setupAutoRefresh();
+    },
+);
+
+onMounted(() => {
+    setupAutoRefresh();
 });
 
 onUnmounted(() => {
@@ -64,165 +112,271 @@ onUnmounted(() => {
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="mx-auto max-w-7xl px-4 py-8">
+        <div class="px-6 py-8 lg:px-8">
             <!-- Header -->
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Transfer Runs</h1>
-                <p class="mt-2 text-gray-600">
-                    {{
-                        activeRuns.length > 0
-                            ? `${activeRuns.length} active run(s)`
-                            : 'Recent transfer history'
-                    }}
-                </p>
+            <div class="mb-8 flex items-start justify-between">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/30 dark:from-violet-500/10 dark:to-purple-500/10"
+                        >
+                            <Activity
+                                class="size-5 text-violet-600 dark:text-violet-400"
+                            />
+                        </div>
+                        <h1
+                            class="text-2xl font-semibold tracking-tight text-foreground"
+                        >
+                            Dashboard
+                        </h1>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                        Monitor your data transfer runs and system activity
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <!-- Auto-refresh indicator -->
+                    <div
+                        v-if="activeRuns.length > 0"
+                        class="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400"
+                    >
+                        <div
+                            class="size-2 animate-pulse rounded-full bg-emerald-500"
+                        />
+                        <span>Live</span>
+                    </div>
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        @click="refreshDashboard"
+                        :disabled="isRefreshing"
+                        class="gap-2"
+                    >
+                        <RefreshCw
+                            class="size-4"
+                            :class="{ 'animate-spin': isRefreshing }"
+                        />
+                        Refresh
+                    </Button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div
+                v-if="hasAnyRuns"
+                class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            >
+                <!-- Active Runs -->
+                <Card
+                    class="relative overflow-hidden border-border/60 dark:border-border/40"
+                >
+                    <div
+                        v-if="activeRuns.length > 0"
+                        class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5"
+                    />
+                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle class="text-sm font-medium text-muted-foreground">
+                            Active Runs
+                        </CardTitle>
+                        <div
+                            class="flex size-8 items-center justify-center rounded-lg"
+                            :class="
+                                activeRuns.length > 0
+                                    ? 'bg-emerald-100 dark:bg-emerald-950/50'
+                                    : 'bg-muted'
+                            "
+                        >
+                            <Play
+                                class="size-4"
+                                :class="
+                                    activeRuns.length > 0
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : 'text-muted-foreground'
+                                "
+                            />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="text-2xl font-bold text-foreground">
+                            {{ activeRuns.length }}
+                        </div>
+                        <p class="mt-1 text-xs text-muted-foreground">
+                            {{
+                                activeRuns.length > 0
+                                    ? 'Currently processing'
+                                    : 'No active transfers'
+                            }}
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <!-- Completed -->
+                <Card class="border-border/60 dark:border-border/40">
+                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle class="text-sm font-medium text-muted-foreground">
+                            Completed
+                        </CardTitle>
+                        <div
+                            class="flex size-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/50"
+                        >
+                            <CheckCircle2
+                                class="size-4 text-blue-600 dark:text-blue-400"
+                            />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="text-2xl font-bold text-foreground">
+                            {{ completedRuns.length }}
+                        </div>
+                        <p class="mt-1 text-xs text-muted-foreground">
+                            Successful transfers
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <!-- Failed -->
+                <Card class="border-border/60 dark:border-border/40">
+                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle class="text-sm font-medium text-muted-foreground">
+                            Failed
+                        </CardTitle>
+                        <div
+                            class="flex size-8 items-center justify-center rounded-lg bg-red-100 dark:bg-red-950/50"
+                        >
+                            <XCircle
+                                class="size-4 text-red-600 dark:text-red-400"
+                            />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="text-2xl font-bold text-foreground">
+                            {{ failedRuns.length }}
+                        </div>
+                        <p class="mt-1 text-xs text-muted-foreground">
+                            Requires attention
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <!-- Total -->
+                <Card class="border-border/60 dark:border-border/40">
+                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle class="text-sm font-medium text-muted-foreground">
+                            Total Runs
+                        </CardTitle>
+                        <div
+                            class="flex size-8 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-950/50"
+                        >
+                            <Clock
+                                class="size-4 text-violet-600 dark:text-violet-400"
+                            />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="text-2xl font-bold text-foreground">
+                            {{ runs.length }}
+                        </div>
+                        <p class="mt-1 text-xs text-muted-foreground">
+                            All time transfers
+                        </p>
+                    </CardContent>
+                </Card>
             </div>
 
             <!-- Empty State -->
-            <div v-if="!hasAnyRuns" class="py-16 text-center">
+            <div
+                v-if="!hasAnyRuns"
+                class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-gradient-to-b from-muted/20 to-muted/40 px-6 py-20 text-center dark:border-border/40 dark:from-muted/10 dark:to-muted/20"
+            >
                 <div
-                    class="mb-6 inline-flex h-24 w-24 items-center justify-center rounded-full bg-gray-100"
+                    class="mb-6 flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/20 dark:from-violet-500/10 dark:to-purple-500/10"
                 >
-                    <svg
-                        class="h-12 w-12 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        />
-                    </svg>
+                    <Database
+                        class="size-10 text-violet-600 dark:text-violet-400"
+                    />
                 </div>
 
-                <h2 class="mb-3 text-2xl font-semibold text-gray-900">
+                <h2
+                    class="mb-2 text-xl font-semibold tracking-tight text-foreground"
+                >
                     No Transfer Runs Yet
                 </h2>
 
-                <p class="mx-auto mb-8 max-w-md text-gray-600">
+                <p
+                    class="mx-auto mb-8 max-w-md text-sm text-muted-foreground"
+                >
                     Get started by creating your first transfer configuration.
                     You'll be able to anonymize and transfer data between
-                    databases in minutes.
+                    databases securely.
                 </p>
 
-                <div class="flex flex-col justify-center gap-4 sm:flex-row">
-                    <button
+                <div class="flex flex-col gap-3 sm:flex-row">
+                    <Button
                         @click="createFirstConfig"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
+                        class="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/20 hover:from-violet-500 hover:to-purple-500"
                     >
-                        <svg
-                            class="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
+                        <Plus class="size-4" />
                         Create First Config
-                    </button>
+                    </Button>
 
-                    <a
-                        href="/docs/getting-started"
-                        class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                    >
-                        <svg
-                            class="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
+                    <Button variant="outline" as="a" href="/docs/getting-started" class="gap-2">
+                        <FileText class="size-4" />
                         View Documentation
-                    </a>
+                    </Button>
                 </div>
 
                 <!-- Feature Highlights -->
                 <div
-                    class="mx-auto mt-16 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-3"
+                    class="mt-16 grid max-w-3xl grid-cols-1 gap-8 sm:grid-cols-3"
                 >
-                    <div class="text-center">
+                    <div class="flex flex-col items-center text-center">
                         <div
-                            class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100"
+                            class="mb-4 flex size-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-950/50"
                         >
-                            <svg
-                                class="h-6 w-6 text-blue-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                />
-                            </svg>
+                            <Shield
+                                class="size-6 text-blue-600 dark:text-blue-400"
+                            />
                         </div>
-                        <h3 class="mb-2 font-semibold">Secure Anonymization</h3>
-                        <p class="text-sm text-gray-600">
+                        <h3 class="mb-1 font-medium text-foreground">
+                            Secure Anonymization
+                        </h3>
+                        <p class="text-sm text-muted-foreground">
                             GDPR-compliant data anonymization with customizable
                             rules
                         </p>
                     </div>
 
-                    <div class="text-center">
+                    <div class="flex flex-col items-center text-center">
                         <div
-                            class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-100"
+                            class="mb-4 flex size-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/50"
                         >
-                            <svg
-                                class="h-6 w-6 text-green-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                                />
-                            </svg>
+                            <Zap
+                                class="size-6 text-emerald-600 dark:text-emerald-400"
+                            />
                         </div>
-                        <h3 class="mb-2 font-semibold">Fast Transfer</h3>
-                        <p class="text-sm text-gray-600">
+                        <h3 class="mb-1 font-medium text-foreground">
+                            Fast Transfer
+                        </h3>
+                        <p class="text-sm text-muted-foreground">
                             Efficient batch processing with real-time progress
                             tracking
                         </p>
                     </div>
 
-                    <div class="text-center">
+                    <div class="flex flex-col items-center text-center">
                         <div
-                            class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100"
+                            class="mb-4 flex size-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-950/50"
                         >
-                            <svg
-                                class="h-6 w-6 text-purple-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
+                            <CheckCircle2
+                                class="size-6 text-violet-600 dark:text-violet-400"
+                            />
                         </div>
-                        <h3 class="mb-2 font-semibold">Full Audit Trail</h3>
-                        <p class="text-sm text-gray-600">
+                        <h3 class="mb-1 font-medium text-foreground">
+                            Full Audit Trail
+                        </h3>
+                        <p class="text-sm text-muted-foreground">
                             Complete logging and compliance documentation
                         </p>
                     </div>
@@ -230,24 +384,31 @@ onUnmounted(() => {
             </div>
 
             <!-- Run List -->
-            <div v-else>
+            <div v-else class="space-y-6">
                 <!-- Active Runs Section -->
-                <div v-if="activeRuns.length > 0" class="mb-8">
+                <div v-if="activeRuns.length > 0">
                     <div class="mb-4 flex items-center justify-between">
-                        <h2 class="text-xl font-semibold text-gray-900">
-                            Active Runs
-                        </h2>
-                        <div
-                            class="flex items-center gap-2 text-sm text-gray-600"
-                        >
+                        <div class="flex items-center gap-3">
+                            <h2
+                                class="text-lg font-semibold tracking-tight text-foreground"
+                            >
+                                Active Runs
+                            </h2>
                             <div
-                                class="h-2 w-2 animate-pulse rounded-full bg-green-500"
-                            ></div>
-                            <span>Auto-updating every 2s</span>
+                                class="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400"
+                            >
+                                <div
+                                    class="size-1.5 animate-pulse rounded-full bg-emerald-500"
+                                />
+                                {{ activeRuns.length }} running
+                            </div>
                         </div>
+                        <p class="text-sm text-muted-foreground">
+                            Auto-refreshing every 3s
+                        </p>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         <RunCard
                             v-for="run in activeRuns"
                             :key="run.id"
@@ -259,11 +420,15 @@ onUnmounted(() => {
 
                 <!-- Recent Runs Section -->
                 <div v-if="activeRuns.length === 0">
-                    <h2 class="mb-4 text-xl font-semibold text-gray-900">
-                        Recent Runs
-                    </h2>
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2
+                            class="text-lg font-semibold tracking-tight text-foreground"
+                        >
+                            Recent Runs
+                        </h2>
+                    </div>
 
-                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         <RunCard
                             v-for="run in recentRuns"
                             :key="run.id"
@@ -272,55 +437,18 @@ onUnmounted(() => {
                         />
                     </div>
 
-                    <div class="mt-6 text-center">
-                        <a
+                    <div class="mt-6 flex justify-center">
+                        <Button
+                            variant="ghost"
+                            as="a"
                             href="/transfer-runs/history"
-                            class="inline-flex items-center gap-2 font-medium text-blue-600 hover:text-blue-700"
+                            class="gap-2 text-muted-foreground hover:text-foreground"
                         >
                             View Full History
-                            <svg
-                                class="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 5l7 7-7 7"
-                                />
-                            </svg>
-                        </a>
+                            <ArrowRight class="size-4" />
+                        </Button>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div
-            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
-        >
-            <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-                >
-                    <PlaceholderPattern />
-                </div>
-                <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-                >
-                    <PlaceholderPattern />
-                </div>
-                <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-                >
-                    <PlaceholderPattern />
-                </div>
-            </div>
-            <div
-                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
             </div>
         </div>
     </AppLayout>
