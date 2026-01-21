@@ -27,6 +27,15 @@ export interface TransferRunLog {
 }
 
 /**
+ * Database Connection (partial, for relations)
+ */
+export interface DatabaseConnectionPartial {
+    id: number;
+    name: string;
+    type: string;
+}
+
+/**
  * Transfer Run Model
  */
 export interface TransferRun {
@@ -61,6 +70,8 @@ export interface TransferRun {
         id: number;
         name: string;
     };
+    source_connection?: DatabaseConnectionPartial;
+    target_connection?: DatabaseConnectionPartial;
 
     // Batch Progress (from Laravel Batch via Inertia)
     batch_progress?: BatchProgress;
