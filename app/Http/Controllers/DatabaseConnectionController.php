@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDatabaseConnectionRequest;
 use App\Models\DatabaseConnection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -35,7 +36,7 @@ class DatabaseConnectionController extends Controller
         ]);
     }
 
-    public function store(StoreDatabaseConnectionRequest $request): RedirectResponse
+    public function store(StoreDatabaseConnectionRequest $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', DatabaseConnection::class);
 
@@ -48,6 +49,17 @@ class DatabaseConnectionController extends Controller
 
         // try to connect
         $connection->update(['last_tested_at' => now()]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'connection' => [
+                    'id' => $connection->id,
+                    'name' => $connection->name,
+                    'type' => $connection->type,
+                    'is_production_stage' => $connection->is_production_stage,
+                ],
+            ], 201);
+        }
 
         return to_route('connections.index');
     }

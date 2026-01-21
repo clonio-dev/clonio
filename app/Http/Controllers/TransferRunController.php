@@ -11,10 +11,12 @@ use App\Data\SynchronizationOptionsData;
 use App\Data\TableAnonymizationOptionsData;
 use App\Enums\TransferRunStatus;
 use App\Http\Requests\StoreTransferRunRequest;
+use App\Http\Requests\ValidateTransferRunConnectionsRequest;
 use App\Jobs\SynchronizeDatabase;
 use App\Models\DatabaseConnection;
 use App\Models\TransferRun;
 use Illuminate\Bus\Batch;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
@@ -92,6 +94,22 @@ class TransferRunController extends Controller
         return Inertia::render('transfer-runs/Create', [
             'prod_connections' => $prodConnections,
             'test_connections' => $testConnections,
+        ]);
+    }
+
+    public function validateConnections(ValidateTransferRunConnectionsRequest $request): JsonResponse
+    {
+        return response()->json([
+            'source_connection' => [
+                'id' => $request->getSourceConnection()->id,
+                'name' => $request->getSourceConnection()->name,
+            ],
+            'target_connection' => [
+                'id' => $request->getTargetConnection()->id,
+                'name' => $request->getTargetConnection()->name,
+            ],
+            'source_schema' => $request->getSourceSchema(),
+            'target_schema' => $request->getTargetSchema(),
         ]);
     }
 

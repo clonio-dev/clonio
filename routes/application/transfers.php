@@ -10,6 +10,8 @@ Route::prefix('transfers')
     ->group(function (): void {
         Route::get('/create', [TransferRunController::class, 'create'])
             ->name('transfers.create');
+        Route::post('/validate-connections', [TransferRunController::class, 'validateConnections'])
+            ->name('validate-connections');
         Route::post('/', [TransferRunController::class, 'store'])
             ->name('transfers.store');
 
