@@ -126,7 +126,7 @@ const isProcessing = computed(() =>
 );
 
 function openRunDetail() {
-    router.visit(`/transfer-runs/${props.run.id}`);
+    router.visit(`/transfers/${props.run.id}`);
 }
 </script>
 
