@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import TransferRunController from '@/actions/App/Http/Controllers/TransferRunController';
 import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
+import TransferRunController from '@/actions/App/Http/Controllers/TransferRunController';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -14,9 +14,15 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { DatabaseIcon, FlaskConicalIcon, LayoutGridIcon, RulerIcon, TestTubeIcon } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import {
+    DatabaseIcon,
+    FlaskConicalIcon,
+    LayoutGridIcon,
+} from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+
+const page = usePage();
 
 const mainNavItems: NavItem[] = [
     {
@@ -28,6 +34,7 @@ const mainNavItems: NavItem[] = [
         title: 'Transfers',
         href: TransferRunController.index().url,
         icon: LayoutGridIcon,
+        isActive: page.url.startsWith('/transfers'),
     },
     {
         title: 'Database Connections',
