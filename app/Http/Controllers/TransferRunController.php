@@ -90,8 +90,8 @@ class TransferRunController extends Controller
             ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name]);
 
         return Inertia::render('transfer-runs/Create', [
-            'prod_connections' => Inertia::defer(fn () => $prodConnections),
-            'test_connections' => Inertia::defer(fn () => $testConnections),
+            'prod_connections' => $prodConnections,
+            'test_connections' => $testConnections,
         ]);
     }
 
