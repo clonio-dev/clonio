@@ -31,7 +31,7 @@ class DatabaseConnectionController extends Controller
                 'last_tested_at' => $connection->last_tested_at?->diffForHumans(),
                 'last_tested_at_label' => $connection->last_tested_at?->diffForHumans() ?? 'No logs available',
                 'is_connectable' => $connection->is_connectable,
-                'last_test_result' => 'Untested',
+                'last_test_result' => $connection->last_test_result ?? 'Untested',
             ]);
 
         return Inertia::render('connections/Index', [
@@ -67,6 +67,15 @@ class DatabaseConnectionController extends Controller
         }
 
         return to_route('connections.index');
+    }
+
+    public function testConnection(DatabaseConnection $connection): RedirectResponse
+    {
+        Gate::authorize('create', $connection);
+
+        TestConnection::dispatchSync($connection);
+
+        return back();
     }
 
     public function destroy(DatabaseConnection $connection): RedirectResponse
