@@ -36,7 +36,6 @@ class StoreTransferRunRequest extends FormRequest
                 Rule::exists('database_connections', 'id')
                     ->where('user_id', $this->user()->id),
             ],
-            'script' => ['required', 'string'],
             'anonymization_config' => ['nullable', 'string'],
         ];
     }

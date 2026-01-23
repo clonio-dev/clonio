@@ -21,7 +21,6 @@ use Illuminate\Support\Carbon;
  * @property int $user_id
  * @property int $source_connection_id
  * @property int $target_connection_id
- * @property string $script
  * @property array<string, array<string, mixed>>|null $anonymization_config
  * @property string $batch_id
  * @property TransferRunStatus $status
@@ -49,7 +48,6 @@ class TransferRun extends Model
         'user_id',
         'source_connection_id',
         'target_connection_id',
-        'script',
         'anonymization_config',
         'batch_id',
         'status',

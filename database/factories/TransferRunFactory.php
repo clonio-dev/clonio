@@ -28,7 +28,6 @@ class TransferRunFactory extends Factory
             'user_id' => User::factory(),
             'source_connection_id' => DatabaseConnection::factory()->sqlite(),
             'target_connection_id' => DatabaseConnection::factory()->sqlite()->testDatabase(),
-            'script' => null,
             'batch_id' => $this->faker->uuid(),
             'status' => TransferRunStatus::QUEUED->value,
             'started_at' => now(),

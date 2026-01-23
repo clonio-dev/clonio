@@ -23,7 +23,7 @@ return new class extends Migration
                 ->constrained('database_connections')
                 ->onDelete('cascade');
 
-            $table->text('script')->nullable()->default(null);
+            $table->json('anonymization_config')->nullable()->default(null);
 
             $table->string('batch_id')->nullable();
 

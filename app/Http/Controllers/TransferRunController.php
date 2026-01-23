@@ -122,7 +122,6 @@ class TransferRunController extends Controller
             'user_id' => $request->user()->id,
             'source_connection_id' => $request->validated('source_connection_id'),
             'target_connection_id' => $request->validated('target_connection_id'),
-            'script' => $request->validated('script'),
             'anonymization_config' => $anonymizationConfig,
             'batch_id' => null,
             'status' => TransferRunStatus::QUEUED,
