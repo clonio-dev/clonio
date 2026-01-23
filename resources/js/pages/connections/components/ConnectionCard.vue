@@ -93,7 +93,7 @@ const deleteConnection = () => {
 
 <template>
     <Card
-        class="group relative overflow-hidden border-border/60 bg-card transition-all duration-300 hover:border-border hover:shadow-lg hover:shadow-black/5 dark:border-border/40 dark:hover:shadow-black/20"
+        class="group relative overflow-hidden border-border/60 bg-card transition-all duration-300 hover:border-border hover:shadow-lg hover:shadow-black/5 dark:border-border dark:hover:shadow-black/20"
     >
         <CardHeader>
             <div class="flex items-start gap-4">
