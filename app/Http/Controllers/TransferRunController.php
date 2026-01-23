@@ -136,7 +136,7 @@ class TransferRunController extends Controller
         $connectionDataSource = $transferRun->sourceConnection->toConnectionDataDto();
         $connectionDataTarget = $transferRun->targetConnection->toConnectionDataDto();
 
-        $batch = Bus::batch([
+        Bus::batch([
             new SynchronizeDatabase($synchronizationConfigData, $connectionDataSource, $connectionDataTarget, $transferRun),
         ])
             ->name('Synchronize database ' . $connectionDataSource->name)
@@ -166,7 +166,7 @@ class TransferRunController extends Controller
             })
             ->dispatch();
 
-        return to_route('batch.show', ['batch' => $batch->id]);
+        return to_route('transfers.show', ['run' => $transferRun]);
     }
 
     public function show(TransferRun $run): Response
