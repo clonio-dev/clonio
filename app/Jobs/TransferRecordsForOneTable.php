@@ -9,7 +9,7 @@ use App\Data\TableAnonymizationOptionsData;
 use App\Jobs\Concerns\ClassifiesError;
 use App\Jobs\Concerns\HandlesExceptions;
 use App\Jobs\Concerns\TransferBatchJob;
-use App\Models\TransferRun;
+use App\Models\CloningRun;
 use App\Services\AnonymizationService;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
@@ -38,7 +38,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         public readonly ConnectionData $targetConnectionData,
         public readonly string $tableName,
         public readonly int $chunkSize,
-        public readonly TransferRun $run,
+        public readonly CloningRun $run,
         public readonly bool $disableForeignKeyConstraints = false,
         public readonly ?TableAnonymizationOptionsData $tableAnonymizationOptions = null,
     ) {}
