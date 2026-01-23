@@ -26,7 +26,9 @@ return new class extends Migration
             $table->string('username');
             $table->text('password'); // encrypted
             $table->boolean('is_production_stage')->default(false);
-            $table->timestamp('last_tested_at')->nullable();
+            $table->timestamp('last_tested_at')->nullable()->default(null);
+            $table->boolean('is_connectable')->default(false);
+            $table->string('last_test_result')->nullable()->default(null);
             $table->timestamps();
 
             // Indexes

@@ -88,6 +88,8 @@ class DatabaseConnectionFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'last_tested_at' => now(),
+            'is_connectable' => true,
+            'last_test_result' => 'Healthy',
         ]);
     }
 

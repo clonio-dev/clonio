@@ -28,6 +28,10 @@ class DatabaseConnectionController extends Controller
                 'database' => $connection->database,
                 'username' => $connection->username,
                 'is_production_stage' => $connection->is_production_stage,
+                'last_tested_at' => $connection->last_tested_at?->diffForHumans(),
+                'last_tested_at_label' => $connection->last_tested_at?->diffForHumans() ?? 'No logs available',
+                'is_connectable' => $connection->is_connectable,
+                'last_test_result' => 'Untested',
             ]);
 
         return Inertia::render('connections/Index', [
@@ -45,9 +49,6 @@ class DatabaseConnectionController extends Controller
             'password' => $request->string('password', ''),
             'is_production_stage' => $request->boolean('is_production_stage'),
         ]);
-
-        // try to connect
-        $connection->update(['last_tested_at' => now()]);
 
         // Flash the created connection for on-the-fly creation flows
         session()->flash('created_connection', [

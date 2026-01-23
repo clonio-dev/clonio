@@ -33,6 +33,8 @@ use Illuminate\Support\Facades\Crypt;
  * @property string $password
  * @property bool $is_production_stage
  * @property null|Carbon $last_tested_at
+ * @property bool $is_connectable
+ * @property null|string $last_test_result
  * @property-read User $user
  *
  * @mixin Model
@@ -53,6 +55,8 @@ class DatabaseConnection extends Model
         'password',
         'is_production_stage',
         'last_tested_at',
+        'is_connectable',
+        'last_test_result',
     ];
 
     protected $hidden = ['password'];
@@ -64,6 +68,7 @@ class DatabaseConnection extends Model
             'port' => 'integer',
             'is_production_stage' => 'boolean',
             'last_tested_at' => 'datetime',
+            'is_connectable' => 'boolean',
         ];
     }
 

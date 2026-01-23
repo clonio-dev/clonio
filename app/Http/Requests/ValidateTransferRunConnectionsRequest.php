@@ -121,12 +121,22 @@ class ValidateTransferRunConnectionsRequest extends FormRequest
             $sourceConnectionData = $this->sourceConnection->toConnectionDataDto();
             $service->getConnection($sourceConnectionData);
             $this->sourceSchema = $this->retrieveSchema($service, $sourceConnectionData);
-            $this->sourceConnection->update(['last_tested_at' => now()]);
+            $this->sourceConnection->update([
+                'last_tested_at' => now(),
+                'is_connectable' => true,
+                'last_test_result' => 'Healthy',
+            ]);
         } catch (RuntimeException $e) {
             $validator->errors()->add(
                 'source_connection_id',
                 "Could not connect to source database: {$e->getMessage()}"
             );
+
+            $this->sourceConnection->update([
+                'last_tested_at' => now(),
+                'is_connectable' => false,
+                'last_test_result' => 'Connection Failed',
+            ]);
 
             return;
         }
@@ -136,12 +146,22 @@ class ValidateTransferRunConnectionsRequest extends FormRequest
             $targetConnectionData = $this->targetConnection->toConnectionDataDto();
             $service->getConnection($targetConnectionData);
             $this->targetSchema = $this->retrieveSchema($service, $targetConnectionData);
-            $this->targetConnection->update(['last_tested_at' => now()]);
+            $this->targetConnection->update([
+                'last_tested_at' => now(),
+                'is_connectable' => true,
+                'last_test_result' => 'Healthy',
+            ]);
         } catch (RuntimeException $e) {
             $validator->errors()->add(
                 'target_connection_id',
                 "Could not connect to target database: {$e->getMessage()}"
             );
+
+            $this->targetConnection->update([
+                'last_tested_at' => now(),
+                'is_connectable' => false,
+                'last_test_result' => 'Connection Failed',
+            ]);
         }
     }
 
