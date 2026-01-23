@@ -160,7 +160,7 @@ function setupAutoRefresh() {
     }
     if (props.isActive) {
         // High frequency refresh for active runs (every 1 second)
-        refreshInterval = window.setInterval(refreshPage, 1000);
+        refreshInterval = window.setInterval(refreshPage, 100);
     }
 }
 
