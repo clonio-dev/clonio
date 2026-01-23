@@ -8,7 +8,7 @@ use App\Data\ConnectionData;
 use App\Data\SynchronizationOptionsData;
 use App\Jobs\Concerns\LogsProcessSteps;
 use App\Jobs\Concerns\TransferBatchJob;
-use App\Models\TransferRun;
+use App\Models\CloningRun;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -29,7 +29,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
         public readonly SynchronizationOptionsData $options,
         public readonly ConnectionData $sourceConnectionData,
         public readonly ConnectionData $targetConnectionData,
-        public readonly TransferRun $run,
+        public readonly CloningRun $run,
     ) {}
 
     public function handle(
@@ -60,7 +60,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
 
         $batch = $this->batch();
         assert($batch !== null);
-        $this->logInfo('synchronization_started', "Starting database synchronization.");
+        $this->logInfo('synchronization_started', 'Starting database synchronization.');
 
         $batch->add([
             new CloneSchema(
@@ -72,7 +72,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
                 sourceConnectionData: $this->sourceConnectionData,
                 targetConnectionData: $this->targetConnectionData,
                 run: $this->run,
-            )
+            ),
         ]);
 
         if (! $this->options->keepUnknownTablesOnTarget) {
