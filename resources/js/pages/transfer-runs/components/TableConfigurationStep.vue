@@ -649,7 +649,7 @@ function getTypeColor(type: string): string {
 
         <!-- Form submission -->
         <Form
-            v-bind="TransferRunController.store()"
+            v-bind="TransferRunController.store.form()"
             v-slot="{ errors, processing }"
             class="space-y-4"
         >
