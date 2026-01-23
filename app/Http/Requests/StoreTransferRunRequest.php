@@ -37,6 +37,7 @@ class StoreTransferRunRequest extends FormRequest
                     ->where('user_id', $this->user()->id),
             ],
             'script' => ['required', 'string'],
+            'anonymization_config' => ['nullable', 'string'],
         ];
     }
 }

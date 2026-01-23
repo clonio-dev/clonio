@@ -114,12 +114,16 @@ class TransferRunController extends Controller
 
     public function store(StoreTransferRunRequest $request): RedirectResponse
     {
+        $anonymizationConfigJson = $request->validated('anonymization_config');
+        $anonymizationConfig = $anonymizationConfigJson ? json_decode($anonymizationConfigJson, true) : null;
+
         /** @var TransferRun $transferRun */
         $transferRun = TransferRun::query()->create([
             'user_id' => $request->user()->id,
             'source_connection_id' => $request->validated('source_connection_id'),
             'target_connection_id' => $request->validated('target_connection_id'),
             'script' => $request->validated('script'),
+            'anonymization_config' => $anonymizationConfig,
             'batch_id' => null,
             'status' => TransferRunStatus::QUEUED,
             'started_at' => null,
@@ -127,30 +131,7 @@ class TransferRunController extends Controller
 
         $transferRun->log('transfer_run_created');
 
-        $synchronizationConfigData = new SynchronizationOptionsData(
-            tableAnonymizationOptions: new Collection([
-                new TableAnonymizationOptionsData(
-                    tableName: 'products',
-                    columnMutations: new Collection([
-                        new ColumnMutationData(
-                            columnName: 'name',
-                            strategy: ColumnMutationStrategyEnum::MASK,
-                            options: new ColumnMutationDataOptions(
-                                visibleChars: 2,
-                                maskChar: '#',
-                            ),
-                        ),
-                        new ColumnMutationData(
-                            columnName: 'in_stock',
-                            strategy: ColumnMutationStrategyEnum::STATIC,
-                            options: new ColumnMutationDataOptions(
-                                value: 3,
-                            ),
-                        ),
-                    ])
-                ),
-            ]),
-        );
+        $synchronizationConfigData = $this->buildSynchronizationOptions($anonymizationConfig);
 
         $connectionDataSource = $transferRun->sourceConnection->toConnectionDataDto();
         $connectionDataTarget = $transferRun->targetConnection->toConnectionDataDto();
@@ -259,6 +240,60 @@ class TransferRunController extends Controller
             'logs' => $logs,
         ])
             ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+    }
+
+    /**
+     * Build SynchronizationOptionsData from the stored anonymization config.
+     *
+     * @param  array{tables: array<int, array{tableName: string, columnMutations: array<int, array{columnName: string, strategy: string, options: array<string, mixed>}>}>}|null  $config
+     */
+    private function buildSynchronizationOptions(?array $config): SynchronizationOptionsData
+    {
+        if (! $config || ! isset($config['tables'])) {
+            return new SynchronizationOptionsData();
+        }
+
+        $tableAnonymizationOptions = new Collection();
+
+        foreach ($config['tables'] as $tableConfig) {
+            $columnMutations = new Collection();
+
+            foreach ($tableConfig['columnMutations'] ?? [] as $mutation) {
+                $strategy = ColumnMutationStrategyEnum::tryFrom($mutation['strategy']);
+
+                if (! $strategy || $strategy === ColumnMutationStrategyEnum::KEEP) {
+                    continue;
+                }
+
+                $options = $mutation['options'] ?? [];
+
+                $columnMutations->push(new ColumnMutationData(
+                    columnName: $mutation['columnName'],
+                    strategy: $strategy,
+                    options: new ColumnMutationDataOptions(
+                        fakerMethod: $options['fakerMethod'] ?? 'word',
+                        fakerMethodArguments: $options['fakerMethodArguments'] ?? [],
+                        visibleChars: $options['visibleChars'] ?? 2,
+                        maskChar: $options['maskChar'] ?? '*',
+                        preserveFormat: $options['preserveFormat'] ?? false,
+                        algorithm: $options['algorithm'] ?? 'sha256',
+                        salt: $options['salt'] ?? '',
+                        value: $options['value'] ?? null,
+                    ),
+                ));
+            }
+
+            if ($columnMutations->isNotEmpty()) {
+                $tableAnonymizationOptions->push(new TableAnonymizationOptionsData(
+                    tableName: $tableConfig['tableName'],
+                    columnMutations: $columnMutations,
+                ));
+            }
+        }
+
+        return new SynchronizationOptionsData(
+            tableAnonymizationOptions: $tableAnonymizationOptions->isNotEmpty() ? $tableAnonymizationOptions : null,
+        );
     }
 
     /**

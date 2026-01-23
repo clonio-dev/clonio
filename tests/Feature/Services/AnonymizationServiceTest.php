@@ -17,6 +17,24 @@ it('returns record unchanged when no table options provided', function (): void 
     expect($result)->toBe($record);
 });
 
+it('applies keep strategy to keep original value', function (): void {
+    $service = new AnonymizationService();
+    $record = ['name' => 'John Doe', 'id' => 42];
+
+    $tableOptions = new TableAnonymizationOptionsData(
+        tableName: 'users',
+        columnMutations: collect([
+            new ColumnMutationData('name', ColumnMutationStrategyEnum::KEEP),
+            new ColumnMutationData('id', ColumnMutationStrategyEnum::KEEP),
+        ])
+    );
+
+    $result = $service->anonymizeRecord($record, $tableOptions);
+
+    expect($result['name'])->toBe('John Doe')
+        ->and($result['id'])->toBe(42);
+});
+
 it('applies fake strategy to generate fake data', function (): void {
     $service = new AnonymizationService();
     $record = ['name' => 'John Doe', 'email' => 'john@example.com'];

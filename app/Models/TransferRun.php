@@ -22,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property int $source_connection_id
  * @property int $target_connection_id
  * @property string $script
+ * @property array<string, array<string, mixed>>|null $anonymization_config
  * @property string $batch_id
  * @property TransferRunStatus $status
  * @property Carbon|null $started_at
@@ -49,6 +50,7 @@ class TransferRun extends Model
         'source_connection_id',
         'target_connection_id',
         'script',
+        'anonymization_config',
         'batch_id',
         'status',
         'started_at',
@@ -63,6 +65,7 @@ class TransferRun extends Model
     {
         return [
             'status' => TransferRunStatus::class,
+            'anonymization_config' => 'array',
             'started_at' => 'datetime',
             'finished_at' => 'datetime',
             'current_step' => 'integer',
