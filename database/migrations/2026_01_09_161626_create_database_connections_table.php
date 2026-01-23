@@ -28,7 +28,6 @@ return new class extends Migration
             $table->boolean('is_production_stage')->default(false);
             $table->timestamp('last_tested_at')->nullable();
             $table->timestamps();
-            $table->softDeletes();
 
             // Indexes
             $table->index('user_id');
