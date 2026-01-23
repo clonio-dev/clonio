@@ -224,9 +224,9 @@ const deleteConnection = () => {
                         <span class="sr-only">edit</span>
                         <Pen />
                     </Button>
-                    <Button variant="ghost" @click="deleteConnection" title="Delete">
+                    <Button variant="ghost" @click="deleteConnection" title="Delete" class="group/button">
                         <span class="sr-only">delete</span>
-                        <Trash2 class="text-red-500" />
+                        <Trash2 class="text-slate-400 group-hover/button:text-red-600 dark:group-hover/button:text-red-400" />
                     </Button>
                 </div>
         </CardFooter>
