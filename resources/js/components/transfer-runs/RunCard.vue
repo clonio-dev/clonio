@@ -54,7 +54,9 @@ const duration = computed(() => {
 });
 
 const configName = computed(() => {
+    // Support both old (config) and new (cloning) structure
     return (
+        props.run.cloning?.title ||
         props.run.config?.name ||
         props.run.config_snapshot?.name ||
         'Unknown Config'
@@ -62,6 +64,24 @@ const configName = computed(() => {
 });
 
 const sourceTarget = computed(() => {
+    // Support new structure (cloning with connections)
+    const cloning = props.run.cloning as
+        | {
+              sourceConnection?: { name: string; type: string };
+              targetConnection?: { name: string; type: string };
+          }
+        | undefined;
+
+    if (cloning?.sourceConnection && cloning?.targetConnection) {
+        return {
+            source: cloning.sourceConnection.name,
+            sourceType: cloning.sourceConnection.type,
+            target: cloning.targetConnection.name,
+            targetType: cloning.targetConnection.type,
+        };
+    }
+
+    // Fallback to old structure (config_snapshot)
     const snapshot = props.run.config_snapshot;
     if (!snapshot) return null;
 
@@ -125,7 +145,7 @@ const isProcessing = computed(() =>
 );
 
 function openRunDetail() {
-    router.visit(`/transfers/${props.run.id}`);
+    router.visit(`/cloning-runs/${props.run.id}`);
 }
 </script>
 
