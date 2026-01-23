@@ -13,22 +13,17 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
-    CardTitle,
+    CardTitle
 } from '@/components/ui/card';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import type { Connection } from '@/pages/connections/types';
 import { router } from '@inertiajs/vue3';
 import {
-    AlertTriangle,
     Check,
     Database,
-    MoreVertical,
+    Pen,
+    RotateCw,
     Server,
     Trash2,
     User,
@@ -46,51 +41,34 @@ const copied = ref(false);
 interface DatabaseTypeConfig {
     label: string;
     icon: Component;
-    badgeClass: string;
     iconBg: string;
-    accentColor: string;
 }
 
 const databaseTypeConfigs: Record<string, DatabaseTypeConfig> = {
     mysql: {
         label: 'MySQL',
         icon: MysqlIcon,
-        badgeClass:
-            'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950/50 dark:text-orange-400 dark:border-orange-900',
         iconBg: 'bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30',
-        accentColor: 'from-orange-500 to-amber-500',
     },
     mariadb: {
         label: 'MariaDB',
         icon: MariadbIcon,
-        badgeClass:
-            'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900',
         iconBg: 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30',
-        accentColor: 'from-amber-500 to-orange-500',
     },
     pgsql: {
         label: 'PostgreSQL',
         icon: PostgresqlIcon,
-        badgeClass:
-            'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-900',
         iconBg: 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30',
-        accentColor: 'from-blue-500 to-indigo-500',
     },
     sqlserver: {
         label: 'SQL Server',
         icon: SqlserverIcon,
-        badgeClass:
-            'bg-red-100 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900',
         iconBg: 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30',
-        accentColor: 'from-red-500 to-rose-500',
     },
     sqlite: {
         label: 'SQLite',
         icon: SqliteIcon,
-        badgeClass:
-            'bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-400 dark:border-sky-900',
         iconBg: 'bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-950/30 dark:to-blue-950/30',
-        accentColor: 'from-sky-500 to-blue-500',
     },
 };
 
@@ -99,41 +77,32 @@ const databaseTypeConfig = computed(() => {
         databaseTypeConfigs[props.connection.type] || {
             label: props.connection.type,
             icon: Database,
-            badgeClass:
-                'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-950/50 dark:text-gray-400 dark:border-gray-900',
             iconBg: 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-950/30 dark:to-slate-950/30',
-            accentColor: 'from-gray-500 to-slate-500',
         }
     );
 });
 
-function deleteConnection() {
+const deleteConnection = () => {
     if (confirm('Are you sure you want to delete this connection?')) {
         router.delete(
             DatabaseConnectionController.destroy(props.connection.id).url,
         );
     }
-}
+};
 </script>
 
 <template>
     <Card
         class="group relative overflow-hidden border-border/60 bg-card transition-all duration-300 hover:border-border hover:shadow-lg hover:shadow-black/5 dark:border-border/40 dark:hover:shadow-black/20"
     >
-        <!-- Accent line at top -->
-        <div
-            class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-            :class="databaseTypeConfig.accentColor"
-        />
-
-        <CardHeader class="pb-4">
+        <CardHeader>
             <div class="flex items-start gap-4">
                 <!-- Database icon -->
                 <div
-                    class="flex size-14 shrink-0 items-center justify-center rounded-xl ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-105 dark:ring-white/10"
+                    class="flex size-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-105 dark:ring-white/10"
                     :class="databaseTypeConfig.iconBg"
                 >
-                    <component :is="databaseTypeConfig.icon" class="size-8" />
+                    <component :is="databaseTypeConfig.icon" class="size-6" />
                 </div>
 
                 <div class="min-w-0 flex-1 space-y-1.5">
@@ -147,46 +116,18 @@ function deleteConnection() {
                             <CardDescription
                                 class="mt-1 flex items-center gap-2"
                             >
-                                <Badge
-                                    variant="outline"
-                                    class="text-xs font-medium"
-                                    :class="databaseTypeConfig.badgeClass"
-                                >
-                                    {{ databaseTypeConfig.label }}
-                                </Badge>
-                                <Badge
-                                    v-if="connection.is_production_stage"
-                                    variant="outline"
-                                    class="gap-1 border-amber-300 bg-amber-100 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-400"
-                                >
-                                    <AlertTriangle class="size-3" />
-                                    PROD
-                                </Badge>
+                                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{{ databaseTypeConfig.label }}</p>
                             </CardDescription>
                         </div>
-
-                        <!-- Actions dropdown -->
-                        <DropdownMenu>
-                            <DropdownMenuTrigger as-child>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    class="size-8 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100"
-                                >
-                                    <MoreVertical class="size-4" />
-                                    <span class="sr-only">Open menu</span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" class="w-48">
-                                <DropdownMenuItem
-                                    class="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
-                                    @click="deleteConnection"
-                                >
-                                    <Trash2 class="size-4" />
-                                    Delete connection
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div>
+                            <Badge
+                                v-if="connection.is_production_stage"
+                                variant="outline"
+                                class="bg-amber-100 text-xs font-medium text-amber-700 dark:bg-amber-950/50 dark:text-amber-400"
+                            >
+                                Source
+                            </Badge>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -254,5 +195,40 @@ function deleteConnection() {
                 </div>
             </Transition>
         </CardContent>
+        <CardFooter class="justify-between">
+            <div class="flex items-center gap-2">
+                <div
+                    class="size-2 rounded-full"
+                    :class="{
+                        'bg-slate-400': !props.connection.last_tested_at,
+                        'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]': props.connection.last_tested_at && props.connection.is_connectable,
+                        'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]': props.connection.last_tested_at && !props.connection.is_connectable,
+                    }"></div>
+                <div class="flex flex-col">
+                    <span
+                        class="text-xs font-bold"
+                        :class="{
+                            'text-slate-500': !props.connection.last_tested_at,
+                            'text-emerald-600': props.connection.last_tested_at && props.connection.is_connectable,
+                            'text-red-600': props.connection.last_tested_at && !props.connection.is_connectable,
+                        }">{{ props.connection.last_test_result }}</span>
+                    <span class="text-[10px] text-slate-400">{{ props.connection.last_tested_at_label }}</span>
+                </div>
+            </div>
+                <div class="flex gap-1">
+                    <Button variant="ghost" title="Refresh" disabled>
+                        <span class="sr-only">refresh</span>
+                        <RotateCw />
+                    </Button>
+                    <Button variant="ghost" title="Edit" disabled>
+                        <span class="sr-only">edit</span>
+                        <Pen />
+                    </Button>
+                    <Button variant="ghost" @click="deleteConnection" title="Delete">
+                        <span class="sr-only">delete</span>
+                        <Trash2 class="text-red-500" />
+                    </Button>
+                </div>
+        </CardFooter>
     </Card>
 </template>
