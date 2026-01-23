@@ -16,8 +16,10 @@ import {
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
+    CopyIcon,
     DatabaseIcon,
     LayoutGridIcon,
+    RocketIcon,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import CloningController from '@/actions/App/Http/Controllers/CloningController';
@@ -34,17 +36,17 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Clones',
         href: CloningController.index().url,
-        icon: LayoutGridIcon,
+        icon: CopyIcon,
         isActive: page.url.startsWith(CloningController.index().url),
     },
     {
-        title: 'Runs',
+        title: 'Clone Jobs',
         href: CloningRunController.index().url,
-        icon: LayoutGridIcon,
+        icon: RocketIcon,
         isActive: page.url.startsWith(CloningRunController.index().url),
     },
     {
-        title: 'Connections',
+        title: 'Data Sources',
         href: DatabaseConnectionController.index().url,
         icon: DatabaseIcon,
         isActive: page.url.startsWith(DatabaseConnectionController.index().url),
