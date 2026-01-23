@@ -16,7 +16,6 @@ use App\Jobs\SynchronizeDatabase;
 use App\Models\DatabaseConnection;
 use App\Models\TransferRun;
 use Illuminate\Bus\Batch;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
@@ -97,9 +96,9 @@ class TransferRunController extends Controller
         ]);
     }
 
-    public function validateConnections(ValidateTransferRunConnectionsRequest $request): JsonResponse
+    public function validateConnections(ValidateTransferRunConnectionsRequest $request): RedirectResponse
     {
-        return response()->json([
+        return back()->with('validated_connections', [
             'source_connection' => [
                 'id' => $request->getSourceConnection()->id,
                 'name' => $request->getSourceConnection()->name,

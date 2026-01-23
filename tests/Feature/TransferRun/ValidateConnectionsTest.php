@@ -143,20 +143,15 @@ it('returns schema data on successful validation with valid sqlite connections',
             'host' => '',
         ]);
 
-    $response = postJson(route('transfers.validate-connections'), [
+    $response = $this->post(route('transfers.validate-connections'), [
         'source_connection_id' => $sourceConnection->id,
         'target_connection_id' => $targetConnection->id,
     ]);
 
-    $response->assertSuccessful()
-        ->assertJsonStructure([
-            'source_connection' => ['id', 'name'],
-            'target_connection' => ['id', 'name'],
-            'source_schema',
-            'target_schema',
-        ]);
+    $response->assertRedirect()
+        ->assertSessionHas('validated_connections');
 
-    $data = $response->json();
+    $data = session('validated_connections');
 
     expect($data['source_connection']['id'])->toBe($sourceConnection->id)
         ->and($data['target_connection']['id'])->toBe($targetConnection->id)
@@ -211,10 +206,10 @@ it('updates last_tested_at on successful validation', function (): void {
     expect($sourceConnection->fresh()->last_tested_at)->toBeNull();
     expect($targetConnection->fresh()->last_tested_at)->toBeNull();
 
-    postJson(route('transfers.validate-connections'), [
+    $this->post(route('transfers.validate-connections'), [
         'source_connection_id' => $sourceConnection->id,
         'target_connection_id' => $targetConnection->id,
-    ])->assertSuccessful();
+    ])->assertRedirect();
 
     expect($sourceConnection->fresh()->last_tested_at)->not->toBeNull();
     expect($targetConnection->fresh()->last_tested_at)->not->toBeNull();

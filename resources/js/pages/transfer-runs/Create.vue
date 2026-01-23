@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 
 import TransferRunController from '@/actions/App/Http/Controllers/TransferRunController';
 import Heading from '@/components/Heading.vue';
@@ -13,10 +13,9 @@ import { Combobox, ComboboxItems } from '@/components/ui/combobox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import ConnectionFormSheet from '@/pages/connections/components/ConnectionFormSheet.vue';
-import { Connection } from '@/pages/connections/types.d';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { ArrowRight, Loader2, Plus } from 'lucide-vue-next';
-import axios from 'axios';
+import TableConfigurationStep from './components/TableConfigurationStep.vue';
 
 interface Props {
     prod_connections: ComboboxItems;
@@ -33,14 +32,22 @@ interface SchemaData {
     [tableName: string]: SchemaColumn[];
 }
 
-interface ValidationResponse {
+interface ValidatedConnectionsFlash {
     source_connection: { id: number; name: string };
     target_connection: { id: number; name: string };
     source_schema: SchemaData;
     target_schema: SchemaData;
 }
 
+interface CreatedConnectionFlash {
+    id: number;
+    name: string;
+    type: string;
+    is_production_stage: boolean;
+}
+
 const props = defineProps<Props>();
+const page = usePage();
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
@@ -67,6 +74,7 @@ const targetSchema = ref<SchemaData | null>(null);
 // Sheet state for on-the-fly connection creation
 const showSourceConnectionSheet = ref(false);
 const showTargetConnectionSheet = ref(false);
+const pendingConnectionType = ref<'source' | 'target' | null>(null);
 
 // Validation state
 const isValidating = ref(false);
@@ -77,33 +85,49 @@ const canProceedToStep2 = computed(() => {
     return selectedSourceConnection.value !== null && selectedTargetConnection.value !== null;
 });
 
-// Handlers for connection creation
-function handleSourceConnectionCreated(connection: Connection) {
-    // Add to the list
-    prodConnections.value = [
-        ...prodConnections.value,
-        { value: connection.id, label: connection.name },
-    ];
-    // Auto-select the new connection
-    selectedSourceConnection.value = connection.id;
-    // Close the sheet
-    showSourceConnectionSheet.value = false;
+// Watch for flash data from validation
+watch(
+    () => page.props.flash as { validated_connections?: ValidatedConnectionsFlash; created_connection?: CreatedConnectionFlash },
+    (flash) => {
+        if (flash?.validated_connections) {
+            sourceSchema.value = flash.validated_connections.source_schema;
+            targetSchema.value = flash.validated_connections.target_schema;
+            currentStep.value = 2;
+            isValidating.value = false;
+        }
+
+        if (flash?.created_connection) {
+            const conn = flash.created_connection;
+            const newItem = { value: conn.id, label: conn.name };
+
+            if (pendingConnectionType.value === 'source' && conn.is_production_stage) {
+                prodConnections.value = [...prodConnections.value, newItem];
+                selectedSourceConnection.value = conn.id;
+                showSourceConnectionSheet.value = false;
+            } else if (pendingConnectionType.value === 'target' && !conn.is_production_stage) {
+                testConnections.value = [...testConnections.value, newItem];
+                selectedTargetConnection.value = conn.id;
+                showTargetConnectionSheet.value = false;
+            }
+            pendingConnectionType.value = null;
+        }
+    },
+    { immediate: true },
+);
+
+// Open connection sheet
+function openSourceConnectionSheet() {
+    pendingConnectionType.value = 'source';
+    showSourceConnectionSheet.value = true;
 }
 
-function handleTargetConnectionCreated(connection: Connection) {
-    // Add to the list
-    testConnections.value = [
-        ...testConnections.value,
-        { value: connection.id, label: connection.name },
-    ];
-    // Auto-select the new connection
-    selectedTargetConnection.value = connection.id;
-    // Close the sheet
-    showTargetConnectionSheet.value = false;
+function openTargetConnectionSheet() {
+    pendingConnectionType.value = 'target';
+    showTargetConnectionSheet.value = true;
 }
 
 // Navigate to next step with validation
-async function goToStep2() {
+function goToStep2() {
     if (!canProceedToStep2.value) {
         return;
     }
@@ -111,32 +135,27 @@ async function goToStep2() {
     isValidating.value = true;
     validationErrors.value = {};
 
-    try {
-        const response = await axios.post<ValidationResponse>(
-            TransferRunController.validateConnections().url,
-            {
-                source_connection_id: selectedSourceConnection.value,
-                target_connection_id: selectedTargetConnection.value,
+    router.post(
+        TransferRunController.validateConnections().url,
+        {
+            source_connection_id: selectedSourceConnection.value,
+            target_connection_id: selectedTargetConnection.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            onError: (errors) => {
+                validationErrors.value = errors as typeof validationErrors.value;
+                isValidating.value = false;
             },
-        );
-
-        // Store schema data for step 2
-        sourceSchema.value = response.data.source_schema;
-        targetSchema.value = response.data.target_schema;
-
-        // Move to step 2
-        currentStep.value = 2;
-    } catch (error: any) {
-        if (error.response?.status === 422) {
-            validationErrors.value = error.response.data.errors || {};
-        } else {
-            validationErrors.value = {
-                source_connection_id: 'An unexpected error occurred. Please try again.',
-            };
-        }
-    } finally {
-        isValidating.value = false;
-    }
+            onFinish: () => {
+                // Only set to false if not already moved to step 2
+                if (currentStep.value === 1) {
+                    isValidating.value = false;
+                }
+            },
+        },
+    );
 }
 
 // Go back to step 1
@@ -231,7 +250,7 @@ const selectedTargetName = computed(() => {
                         <Button
                             variant="outline"
                             size="sm"
-                            @click="showSourceConnectionSheet = true"
+                            @click="openSourceConnectionSheet"
                         >
                             <Plus class="mr-1 size-4" />
                             New
@@ -271,7 +290,7 @@ const selectedTargetName = computed(() => {
                         <Button
                             variant="outline"
                             size="sm"
-                            @click="showTargetConnectionSheet = true"
+                            @click="openTargetConnectionSheet"
                         >
                             <Plus class="mr-1 size-4" />
                             New
@@ -308,70 +327,31 @@ const selectedTargetName = computed(() => {
                 </div>
             </div>
 
-            <!-- Step 2: Configure Tables (placeholder) -->
-            <div v-if="currentStep === 2" class="space-y-6">
-                <div class="rounded-lg border bg-card p-6">
-                    <h3 class="mb-4 text-lg font-medium">
-                        Connection Details
-                    </h3>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
-                            <p class="text-sm text-muted-foreground">
-                                Source
-                            </p>
-                            <p class="font-medium">{{ selectedSourceName }}</p>
-                            <p class="text-sm text-muted-foreground">
-                                {{ Object.keys(sourceSchema || {}).length }} tables
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-muted-foreground">
-                                Target
-                            </p>
-                            <p class="font-medium">{{ selectedTargetName }}</p>
-                            <p class="text-sm text-muted-foreground">
-                                {{ Object.keys(targetSchema || {}).length }} tables
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rounded-lg border bg-muted/50 p-8 text-center">
-                    <p class="text-muted-foreground">
-                        Step 2 - Table/Column configuration will be implemented
-                        here.
-                    </p>
-                    <p class="mt-2 text-sm text-muted-foreground">
-                        Source has
-                        {{ Object.keys(sourceSchema || {}).length }} tables,
-                        Target has
-                        {{ Object.keys(targetSchema || {}).length }} tables
-                    </p>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <Button variant="outline" @click="goToStep1">
-                        Back
-                    </Button>
-                </div>
-            </div>
+            <!-- Step 2: Configure Tables -->
+            <TableConfigurationStep
+                v-if="currentStep === 2"
+                :source-schema="sourceSchema!"
+                :target-schema="targetSchema!"
+                :source-connection-id="selectedSourceConnection!"
+                :target-connection-id="selectedTargetConnection!"
+                :source-connection-name="selectedSourceName"
+                :target-connection-name="selectedTargetName"
+                @back="goToStep1"
+            />
         </div>
 
         <!-- Connection creation sheets -->
         <ConnectionFormSheet
             :open="showSourceConnectionSheet"
             submit-label="Create Source Connection"
-            emit-on-create
-            @close="showSourceConnectionSheet = false"
-            @created="handleSourceConnectionCreated"
+            default-production
+            @close="showSourceConnectionSheet = false; pendingConnectionType = null"
         />
 
         <ConnectionFormSheet
             :open="showTargetConnectionSheet"
             submit-label="Create Target Connection"
-            emit-on-create
-            @close="showTargetConnectionSheet = false"
-            @created="handleTargetConnectionCreated"
+            @close="showTargetConnectionSheet = false; pendingConnectionType = null"
         />
     </AppLayout>
 </template>

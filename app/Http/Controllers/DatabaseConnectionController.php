@@ -6,7 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDatabaseConnectionRequest;
 use App\Models\DatabaseConnection;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -36,7 +35,7 @@ class DatabaseConnectionController extends Controller
         ]);
     }
 
-    public function store(StoreDatabaseConnectionRequest $request): RedirectResponse|JsonResponse
+    public function store(StoreDatabaseConnectionRequest $request): RedirectResponse
     {
         Gate::authorize('create', DatabaseConnection::class);
 
@@ -50,15 +49,20 @@ class DatabaseConnectionController extends Controller
         // try to connect
         $connection->update(['last_tested_at' => now()]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'connection' => [
-                    'id' => $connection->id,
-                    'name' => $connection->name,
-                    'type' => $connection->type,
-                    'is_production_stage' => $connection->is_production_stage,
-                ],
-            ], 201);
+        // Flash the created connection for on-the-fly creation flows
+        session()->flash('created_connection', [
+            'id' => $connection->id,
+            'name' => $connection->name,
+            'type' => $connection->type->value,
+            'is_production_stage' => $connection->is_production_stage,
+        ]);
+
+        // Redirect back if coming from a different page, otherwise to index
+        $previousUrl = url()->previous();
+        $indexUrl = route('connections.index');
+
+        if ($previousUrl !== $indexUrl && ! str_contains($previousUrl, '/connections')) {
+            return back();
         }
 
         return to_route('connections.index');
