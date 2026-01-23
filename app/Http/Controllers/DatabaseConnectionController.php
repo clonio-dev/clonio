@@ -7,6 +7,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreDatabaseConnectionRequest;
 use App\Jobs\TestConnection;
 use App\Models\DatabaseConnection;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -75,6 +77,20 @@ class DatabaseConnectionController extends Controller
         Gate::authorize('create', $connection);
 
         TestConnection::dispatchSync($connection);
+
+        return back();
+    }
+
+    public function testAllConnections(#[CurrentUser] User $user): RedirectResponse
+    {
+        DatabaseConnection::query()
+            ->forUser($user->id)
+            ->get()
+            ->each(function (DatabaseConnection $connection) {
+                if (Gate::allows('create', $connection)) {
+                    TestConnection::dispatchSync($connection);
+                }
+            });
 
         return back();
     }

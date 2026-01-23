@@ -8,8 +8,8 @@ import ConnectionsEmptyState from '@/pages/connections/components/ConnectionsEmp
 import ConnectionsPagination from '@/pages/connections/components/ConnectionsPagination.vue';
 import { Connection } from '@/pages/connections/types';
 import type { BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
-import { ShieldCheckIcon, Plus } from 'lucide-vue-next';
+import { Head, router } from '@inertiajs/vue3';
+import { ShieldCheckIcon, Plus, RefreshCcw } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import InfoComponent from '@/components/InfoComponent.vue';
 
@@ -79,16 +79,27 @@ function closeSheet() {
                     </p>
                 </div>
 
-                <Button
-                    v-if="hasConnections"
-                    @click="openCreateSheet"
-                    class="group gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20 transition-all hover:from-emerald-500 hover:to-teal-500 hover:shadow-lg hover:shadow-emerald-500/30 dark:shadow-emerald-500/10 dark:hover:shadow-emerald-500/20"
-                >
-                    <Plus
-                        class="size-4 transition-transform group-hover:rotate-90"
-                    />
-                    Add Connection
-                </Button>
+                <div class="flex items-center gap-3">
+                    <Button
+                        variant="secondary"
+                        class="group gap-1"
+                        @click="router.post(DatabaseConnectionController.testAllConnections().url)"
+                        :disabled="!hasConnections">
+                        <RefreshCcw
+                            class="size-4 transition-transform group-hover:animate-spin"
+                        />
+                        Test all
+                    </Button>
+                    <Button
+                        v-if="hasConnections"
+                        @click="openCreateSheet"
+                        class="group gap-1">
+                        <Plus
+                            class="size-4 transition-transform group-hover:rotate-90"
+                        />
+                        Add Connection
+                    </Button>
+                </div>
             </div>
 
             <!-- Stats Bar -->
