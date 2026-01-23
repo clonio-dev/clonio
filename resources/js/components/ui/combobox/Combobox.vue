@@ -19,7 +19,7 @@ import {
 import { ComboboxItems } from '@/components/ui/combobox/index';
 
 interface Props {
-    modelValue?: string|number
+    modelValue?: string|number|null
     items?: ComboboxItems
     class?: string
     required?: boolean
