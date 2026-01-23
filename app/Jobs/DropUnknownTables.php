@@ -8,7 +8,7 @@ use App\Data\ConnectionData;
 use App\Jobs\Concerns\HandlesExceptions;
 use App\Jobs\Concerns\LogsProcessSteps;
 use App\Jobs\Concerns\TransferBatchJob;
-use App\Models\TransferRun;
+use App\Models\CloningRun;
 use App\Services\DatabaseInformationRetrievalService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -30,7 +30,7 @@ class DropUnknownTables implements ShouldBeEncrypted, ShouldQueue
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
         public readonly ConnectionData $targetConnectionData,
-        public readonly TransferRun $run,
+        public readonly CloningRun $run,
     ) {}
 
     public function handle(
