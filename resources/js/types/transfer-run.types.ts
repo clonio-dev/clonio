@@ -36,12 +36,23 @@ export interface DatabaseConnectionPartial {
 }
 
 /**
+ * Cloning (new structure)
+ */
+export interface CloningPartial {
+    id: number;
+    title: string;
+    sourceConnection?: DatabaseConnectionPartial;
+    targetConnection?: DatabaseConnectionPartial;
+}
+
+/**
  * Transfer Run Model
  */
 export interface TransferRun {
     id: number;
     config_id: number;
     user_id: number;
+    cloning_id?: number | null;
     batch_id: string | null;
     status: RunStatus;
     started_at: string | null;
@@ -70,6 +81,7 @@ export interface TransferRun {
         id: number;
         name: string;
     };
+    cloning?: CloningPartial;
     source_connection?: DatabaseConnectionPartial;
     target_connection?: DatabaseConnectionPartial;
 
@@ -90,6 +102,24 @@ export interface BatchProgress {
 }
 
 /**
+ * Cloning (full, for dashboard)
+ */
+export interface Cloning {
+    id: number;
+    user_id: number;
+    title: string;
+    source_connection_id: number;
+    target_connection_id: number;
+    schedule: string | null;
+    is_scheduled: boolean;
+    created_at: string;
+    updated_at: string;
+    sourceConnection?: DatabaseConnectionPartial;
+    targetConnection?: DatabaseConnectionPartial;
+    runs_count?: number;
+}
+
+/**
  * Dashboard Props
  */
 export interface DashboardProps {
@@ -98,6 +128,7 @@ export interface DashboardProps {
     completedRuns: number;
     failedRuns: number;
     totalRuns: number;
+    clonings?: Cloning[];
 }
 
 /**
