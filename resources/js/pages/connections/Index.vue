@@ -9,8 +9,9 @@ import ConnectionsPagination from '@/pages/connections/components/ConnectionsPag
 import { Connection } from '@/pages/connections/types';
 import type { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import { Database, Plus } from 'lucide-vue-next';
+import { ShieldCheckIcon, Plus } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import InfoComponent from '@/components/InfoComponent.vue';
 
 interface Props {
     connections: {
@@ -145,6 +146,12 @@ function closeSheet() {
                     :prev-url="props.connections.prev_page_url"
                     :next-url="props.connections.next_page_url"
                 />
+
+                <InfoComponent
+                    title="Security &amp; Privacy"
+                    :icon="ShieldCheckIcon"
+                    description="All database credentials are encrypted at rest using AES-256. Sensitive information such as passwords and secret keys are never displayed in the interface after initial configuration. Access to these profiles is governed by Clonio's policy."
+                    class="mt-12" />
             </div>
         </div>
 
