@@ -107,7 +107,7 @@ watch(
             <Separator class="-mt-4" />
 
             <Form
-                v-bind="DatabaseConnectionController.store()"
+                v-bind="DatabaseConnectionController.store.form()"
                 class="flex flex-1 flex-col gap-5 overflow-y-auto p-4 pt-0"
                 v-slot="{ errors, processing, recentlySuccessful }"
                 :reset-on-error="['username', 'password']"
