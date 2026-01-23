@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDatabaseConnectionRequest;
+use App\Jobs\TestConnection;
 use App\Models\DatabaseConnection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
