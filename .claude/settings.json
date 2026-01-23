@@ -10,9 +10,6 @@
             "Bash(vendor/bin/sail:*)"
         ],
         "ask": [
-            "Bash(**)",
-            "Edit(**)",
-            "Write(**)"
         ],
         "deny": [
             "Read(./.env)",
