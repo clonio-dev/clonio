@@ -17,11 +17,9 @@ return new class extends Migration
                 ->onDelete('cascade');
 
             $table->foreignId('source_connection_id')
-                ->constrained('database_connections')
-                ->onDelete('cascade');
+                ->constrained('database_connections');
             $table->foreignId('target_connection_id')
-                ->constrained('database_connections')
-                ->onDelete('cascade');
+                ->constrained('database_connections');
 
             $table->json('anonymization_config')->nullable()->default(null);
 
