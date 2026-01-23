@@ -37,7 +37,7 @@ const mainNavItems: NavItem[] = [
         isActive: page.url.startsWith('/transfers'),
     },
     {
-        title: 'Database Connections',
+        title: 'Connections',
         href: DatabaseConnectionController.index().url,
         icon: DatabaseIcon,
     },

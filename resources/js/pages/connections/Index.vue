@@ -39,7 +39,7 @@ const props = defineProps<Props>();
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
-        title: 'Database Connections',
+        title: 'Connections',
         href: DatabaseConnectionController.index().url,
     },
 ];
@@ -60,28 +60,21 @@ function closeSheet() {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbItems">
-        <Head title="Database Connections" />
+        <Head title="Connection Management" />
 
         <div class="px-6 py-8 lg:px-8">
             <!-- Header -->
             <div class="mb-8 flex items-start justify-between">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
-                        <div
-                            class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 ring-1 ring-emerald-500/30 dark:from-emerald-500/10 dark:to-teal-500/10"
-                        >
-                            <Database
-                                class="size-5 text-emerald-600 dark:text-emerald-400"
-                            />
-                        </div>
                         <h1
                             class="text-2xl font-semibold tracking-tight text-foreground"
                         >
-                            Database Connections
+                            Connection Management
                         </h1>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                        Manage your database connections for data transfers
+                        Configure and monitor database nodes for cloning operations.
                     </p>
                 </div>
 
@@ -133,7 +126,7 @@ function closeSheet() {
 
             <!-- Connections Grid -->
             <div v-else class="space-y-6">
-                <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <ConnectionCard
                         v-for="(connection, index) in props.connections.data"
                         :key="connection.id"
