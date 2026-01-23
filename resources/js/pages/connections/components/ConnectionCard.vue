@@ -22,7 +22,6 @@ import { router } from '@inertiajs/vue3';
 import {
     Check,
     Database,
-    Pen,
     RotateCw,
     Server,
     Trash2,
@@ -216,13 +215,9 @@ const deleteConnection = () => {
                 </div>
             </div>
                 <div class="flex gap-1">
-                    <Button variant="ghost" title="Refresh" disabled>
+                    <Button variant="ghost" title="Refresh" @click="router.post(DatabaseConnectionController.testConnection(props.connection).url)">
                         <span class="sr-only">refresh</span>
                         <RotateCw />
-                    </Button>
-                    <Button variant="ghost" title="Edit" disabled>
-                        <span class="sr-only">edit</span>
-                        <Pen />
                     </Button>
                     <Button variant="ghost" @click="deleteConnection" title="Delete" class="group/button">
                         <span class="sr-only">delete</span>
