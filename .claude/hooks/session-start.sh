@@ -7,5 +7,5 @@ echo "Repo: $(basename "$PWD")"
 git status -sb
 
 echo "Common tasks:"
-echo "- Backend tests: php artisan test (or ./vendor/bin/sail test)"
+echo "- Backend tests: composer run test"
 echo "- Frontend lint: npm run lint"
