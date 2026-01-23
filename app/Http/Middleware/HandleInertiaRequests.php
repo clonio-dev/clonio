@@ -51,6 +51,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'flash' => [
+                'validated_connections' => fn () => $request->session()->get('validated_connections'),
+                'created_connection' => fn () => $request->session()->get('created_connection'),
+            ],
         ];
     }
 }

@@ -144,6 +144,15 @@ function goToStep2() {
         {
             preserveState: true,
             preserveScroll: true,
+            onSuccess: (successPage) => {
+                const flash = successPage.props.flash as { validated_connections?: ValidatedConnectionsFlash };
+                if (flash?.validated_connections) {
+                    sourceSchema.value = flash.validated_connections.source_schema;
+                    targetSchema.value = flash.validated_connections.target_schema;
+                    currentStep.value = 2;
+                }
+                isValidating.value = false;
+            },
             onError: (errors) => {
                 validationErrors.value = errors as typeof validationErrors.value;
                 isValidating.value = false;
