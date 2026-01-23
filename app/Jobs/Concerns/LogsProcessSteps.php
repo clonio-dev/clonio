@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs\Concerns;
 
-use App\Models\TransferRun;
+use App\Models\CloningRun;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -47,7 +47,7 @@ trait LogsProcessSteps
     {
         $tableName = property_exists($this, 'tableName') ? $this->tableName : '';
 
-        if (isset($this->run) && $this->run instanceof TransferRun) {
+        if (isset($this->run) && $this->run instanceof CloningRun) {
             $this->run->log($event, [
                 'table' => $tableName,
                 'message' => $message,
@@ -60,13 +60,13 @@ trait LogsProcessSteps
 
     private function logErrorMessage(string $message, Collection $connectionMap): void
     {
-        Log::debug(__METHOD__.'::before: ' . $message);
+        Log::debug(__METHOD__ . '::before: ' . $message);
 
         $message = strtr($message, $connectionMap->all());
 
-        Log::debug(__METHOD__.'::after: ' . $message, ['conecctions' => $connectionMap->all()]);
+        Log::debug(__METHOD__ . '::after: ' . $message, ['conecctions' => $connectionMap->all()]);
 
-        if (isset($this->run) && $this->run instanceof TransferRun) {
+        if (isset($this->run) && $this->run instanceof CloningRun) {
             $this->run->update(['error_message' => $message]);
         }
     }
