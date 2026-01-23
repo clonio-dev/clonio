@@ -9,11 +9,11 @@ Route::prefix('transfers')
     ->name('transfers.')
     ->group(function (): void {
         Route::get('/create', [TransferRunController::class, 'create'])
-            ->name('transfers.create');
+            ->name('create');
         Route::post('/validate-connections', [TransferRunController::class, 'validateConnections'])
             ->name('validate-connections');
         Route::post('/', [TransferRunController::class, 'store'])
-            ->name('transfers.store');
+            ->name('store');
 
         // Show single run detail
         Route::get('/', [TransferRunController::class, 'index'])
