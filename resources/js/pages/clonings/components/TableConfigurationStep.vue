@@ -137,11 +137,13 @@ initializeConfigs();
 watch(() => props.sourceSchema, initializeConfigs, { deep: true });
 
 // Strategy display info
-const strategyOptions: {
+interface StrategyOption {
     value: StrategyType;
     label: string;
     description: string;
-}[] = [
+}
+
+const allStrategyOptions: StrategyOption[] = [
     { value: 'keep', label: 'Keep identical', description: 'Copy value as-is' },
     { value: 'fake', label: 'Fake', description: 'Generate fake data' },
     { value: 'mask', label: 'Mask', description: 'Partially hide value' },
@@ -153,6 +155,14 @@ const strategyOptions: {
         description: 'Replace with constant',
     },
 ];
+
+// Get strategy options for a column, filtering out 'null' for non-nullable columns
+function getStrategyOptionsForColumn(column: SchemaColumn): StrategyOption[] {
+    if (column.nullable) {
+        return allStrategyOptions;
+    }
+    return allStrategyOptions.filter((option) => option.value !== 'null');
+}
 
 // Common faker methods
 const fakerMethods = [
@@ -614,7 +624,9 @@ function getTypeColor(type: string): string {
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem
-                                                v-for="option in strategyOptions"
+                                                v-for="option in getStrategyOptionsForColumn(
+                                                    column,
+                                                )"
                                                 :key="option.value"
                                                 :value="option.value"
                                             >
