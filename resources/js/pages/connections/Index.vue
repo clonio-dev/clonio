@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
+import InfoComponent from '@/components/InfoComponent.vue';
+import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ConnectionCard from '@/pages/connections/components/ConnectionCard.vue';
 import ConnectionFormSheet from '@/pages/connections/components/ConnectionFormSheet.vue';
 import ConnectionsEmptyState from '@/pages/connections/components/ConnectionsEmptyState.vue';
-import ConnectionsPagination from '@/pages/connections/components/ConnectionsPagination.vue';
 import { Connection } from '@/pages/connections/types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { ShieldCheckIcon, Plus, RefreshCcw } from 'lucide-vue-next';
+import { Plus, RefreshCcw, ShieldCheckIcon } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
-import InfoComponent from '@/components/InfoComponent.vue';
 
 interface Props {
     connections: {
@@ -75,7 +75,8 @@ function closeSheet() {
                         </h1>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                        Configure and monitor database nodes for cloning operations.
+                        Configure and monitor database nodes for cloning
+                        operations.
                     </p>
                 </div>
 
@@ -83,8 +84,14 @@ function closeSheet() {
                     <Button
                         variant="secondary"
                         class="group gap-1"
-                        @click="router.post(DatabaseConnectionController.testAllConnections().url)"
-                        :disabled="!hasConnections">
+                        @click="
+                            router.post(
+                                DatabaseConnectionController.testAllConnections()
+                                    .url,
+                            )
+                        "
+                        :disabled="!hasConnections"
+                    >
                         <RefreshCcw
                             class="size-4 transition-transform group-hover:animate-spin"
                         />
@@ -93,41 +100,14 @@ function closeSheet() {
                     <Button
                         v-if="hasConnections"
                         @click="openCreateSheet"
-                        class="group gap-1">
+                        class="group gap-1"
+                    >
                         <Plus
                             class="size-4 transition-transform group-hover:rotate-90"
                         />
                         Add Connection
                     </Button>
                 </div>
-            </div>
-
-            <!-- Stats Bar -->
-            <div
-                v-if="hasConnections"
-                class="mb-6 flex items-center gap-6 rounded-lg border border-border/50 bg-gradient-to-r from-muted/30 to-muted/50 px-4 py-3 dark:from-muted/20 dark:to-muted/30"
-            >
-                <div class="flex items-center gap-2">
-                    <div
-                        class="size-2 animate-pulse rounded-full bg-emerald-500"
-                    ></div>
-                    <span class="text-sm font-medium text-foreground">
-                        {{ totalConnections }}
-                        {{
-                            totalConnections === 1
-                                ? 'connection'
-                                : 'connections'
-                        }}
-                    </span>
-                </div>
-                <div class="h-4 w-px bg-border"></div>
-                <span class="text-sm text-muted-foreground">
-                    Showing {{ props.connections.from }}-{{
-                        props.connections.to
-                    }}
-                    of
-                    {{ totalConnections }}
-                </span>
             </div>
 
             <!-- Empty State -->
@@ -138,7 +118,9 @@ function closeSheet() {
 
             <!-- Connections Grid -->
             <div v-else class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div
+                    class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+                >
                     <ConnectionCard
                         v-for="(connection, index) in props.connections.data"
                         :key="connection.id"
@@ -148,21 +130,26 @@ function closeSheet() {
                     />
                 </div>
 
-                <!-- Pagination -->
-                <ConnectionsPagination
-                    v-if="props.connections.last_page > 1"
+                <Pagination
                     :links="props.connections.links"
                     :current-page="props.connections.current_page"
                     :last-page="props.connections.last_page"
                     :prev-url="props.connections.prev_page_url"
                     :next-url="props.connections.next_page_url"
+                    :from="props.connections.from"
+                    :to="props.connections.to"
+                    :total="totalConnections"
+                    name="connection"
+                    plural-name="connections"
+                    variant="simple"
                 />
 
                 <InfoComponent
                     title="Security &amp; Privacy"
                     :icon="ShieldCheckIcon"
                     description="All database credentials are encrypted at rest using AES-256. Sensitive information such as passwords and secret keys are never displayed in the interface after initial configuration. Access to these profiles is governed by Clonio's policy."
-                    class="mt-12" />
+                    class="mt-12"
+                />
             </div>
         </div>
 
