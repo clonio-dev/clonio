@@ -32,6 +32,7 @@ class UpdateCloningRequest extends FormRequest
                     ->where('user_id', $this->user()->id),
             ],
             'anonymization_config' => ['nullable', 'string'],
+            'is_scheduled' => ['nullable', 'boolean'],
             'schedule' => ['nullable', 'string', 'max:100'],
         ];
     }
