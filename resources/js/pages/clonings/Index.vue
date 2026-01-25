@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Pagination from '@/components/Pagination.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +27,6 @@ import {
     Trash2,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
-import Pagination from '@/components/Pagination.vue';
 
 const props = defineProps<CloningsIndexProps>();
 
@@ -342,27 +342,27 @@ function deleteCloning(cloning: Cloning) {
                             </tr>
                         </tbody>
                         <tfoot>
-                        <tr
-                            class="border-t border-border/60 bg-muted/30 dark:border-border/40 dark:bg-muted/20"
-                        >
-                            <td
-                                colspan="7"
-                                class="px-4 py-3 text-xs tracking-wider text-muted-foreground"
+                            <tr
+                                class="border-t border-border/60 bg-muted/30 dark:border-border/40 dark:bg-muted/20"
                             >
-                                <Pagination
-                                    :links="clonings.links"
-                                    :current-page="clonings.current_page"
-                                    :last-page="clonings.last_page"
-                                    :prev-url="clonings.prev_page_url"
-                                    :next-url="clonings.next_page_url"
-                                    :from="clonings.from"
-                                    :to="clonings.to"
-                                    :total="totalClonings"
-                                    name="clone"
-                                    plural-name="clones"
-                                />
-                            </td>
-                        </tr>
+                                <td
+                                    colspan="7"
+                                    class="px-4 py-3 text-xs tracking-wider text-muted-foreground"
+                                >
+                                    <Pagination
+                                        :links="clonings.links"
+                                        :current-page="clonings.current_page"
+                                        :last-page="clonings.last_page"
+                                        :prev-url="clonings.prev_page_url"
+                                        :next-url="clonings.next_page_url"
+                                        :from="clonings.from"
+                                        :to="clonings.to"
+                                        :total="totalClonings"
+                                        name="clone"
+                                        plural-name="clones"
+                                    />
+                                </td>
+                            </tr>
                         </tfoot>
                     </table>
                 </div>
