@@ -15,19 +15,25 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
 {
     public function buildCreateTable(TableSchema $table): string
     {
-        $columns = [];
+        $definitions = [];
+
         foreach ($table->columns as $column) {
-            $columns[] = $this->buildColumnDefinition($column);
+            $definitions[] = $this->buildColumnDefinition($column);
         }
 
         $primaryKey = $table->getPrimaryKey();
         if ($primaryKey && count($primaryKey->columns) > 1) {
             $columnList = implode(', ', $primaryKey->columns);
-            $columns[] = "PRIMARY KEY ({$columnList})";
+            $definitions[] = "PRIMARY KEY ({$columnList})";
+        }
+
+        // Include foreign keys in CREATE TABLE (SQLite requires this)
+        foreach ($table->foreignKeys as $fk) {
+            $definitions[] = $this->buildForeignKeyConstraint($fk);
         }
 
         $sql = "CREATE TABLE \"{$table->name}\" (\n";
-        $sql .= '  ' . implode(",\n  ", $columns) . "\n";
+        $sql .= '  ' . implode(",\n  ", $definitions) . "\n";
 
         return $sql . ')';
     }
@@ -102,6 +108,24 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
         }
 
         return $type;
+    }
+
+    protected function buildForeignKeyConstraint(ForeignKeySchema $fk): string
+    {
+        $localColumns = implode(', ', array_map(fn ($c) => "\"{$c}\"", $fk->columns));
+        $referencedColumns = implode(', ', array_map(fn ($c) => "\"{$c}\"", $fk->referencedColumns));
+
+        $sql = "FOREIGN KEY ({$localColumns}) REFERENCES \"{$fk->referencedTable}\" ({$referencedColumns})";
+
+        if ($fk->onUpdate && $fk->onUpdate !== 'NO ACTION') {
+            $sql .= " ON UPDATE {$fk->onUpdate}";
+        }
+
+        if ($fk->onDelete && $fk->onDelete !== 'NO ACTION') {
+            $sql .= " ON DELETE {$fk->onDelete}";
+        }
+
+        return $sql;
     }
 
     protected function formatDefaultValue(mixed $value): string
