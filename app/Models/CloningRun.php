@@ -169,6 +169,10 @@ class CloningRun extends Model
      */
     private function generateMessage(string $eventType, array $data): string
     {
+        if (array_key_exists('message', $data)) {
+            return $data['message'];
+        }
+
         $data = array_merge([
             'total_jobs' => 0,
             'table' => 'unknown',
