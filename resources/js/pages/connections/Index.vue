@@ -8,32 +8,13 @@ import ConnectionCard from '@/pages/connections/components/ConnectionCard.vue';
 import ConnectionFormSheet from '@/pages/connections/components/ConnectionFormSheet.vue';
 import ConnectionsEmptyState from '@/pages/connections/components/ConnectionsEmptyState.vue';
 import { Connection } from '@/pages/connections/types';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, PaginatedData } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 import { Plus, RefreshCcw, ShieldCheckIcon } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface Props {
-    connections: {
-        data: Connection[];
-        current_page: number;
-        first_page_url: string;
-        from: number;
-        last_page: number;
-        last_page_url: string;
-        links: {
-            url: string | null;
-            label: string;
-            page: number | null;
-            active: boolean;
-        }[];
-        next_page_url: string | null;
-        path: string;
-        per_page: number;
-        prev_page_url: string | null;
-        to: number;
-        total: number;
-    };
+    connections: PaginatedData<Connection>;
 }
 
 const props = defineProps<Props>();

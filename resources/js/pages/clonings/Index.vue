@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ConnectionsPagination from '@/pages/connections/components/ConnectionsPagination.vue';
 import type { BreadcrumbItem } from '@/types';
@@ -18,14 +25,8 @@ import {
     Plus,
     Trash2,
 } from 'lucide-vue-next';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { computed } from 'vue';
+import Pagination from '@/components/Pagination.vue';
 
 const props = defineProps<CloningsIndexProps>();
 
@@ -104,30 +105,6 @@ function deleteCloning(cloning: Cloning) {
                 </Button>
             </div>
 
-            <!-- Stats Bar -->
-            <div
-                v-if="hasClonings"
-                class="mb-6 flex items-center gap-6 rounded-lg border border-border/50 bg-gradient-to-r from-muted/30 to-muted/50 px-4 py-3 dark:from-muted/20 dark:to-muted/30"
-            >
-                <div class="flex items-center gap-2">
-                    <div
-                        class="size-2 animate-pulse rounded-full bg-violet-500"
-                    ></div>
-                    <span class="text-sm font-medium text-foreground">
-                        {{ totalClonings }}
-                        {{
-                            totalClonings === 1
-                                ? 'cloning configuration'
-                                : 'cloning configurations'
-                        }}
-                    </span>
-                </div>
-                <div class="h-4 w-px bg-border"></div>
-                <span class="text-sm text-muted-foreground">
-                    Showing {{ clonings.data.length }} of {{ totalClonings }}
-                </span>
-            </div>
-
             <!-- Empty State -->
             <div
                 v-if="!hasClonings"
@@ -148,8 +125,8 @@ function deleteCloning(cloning: Cloning) {
                 </h2>
 
                 <p class="mx-auto mb-8 max-w-md text-sm text-muted-foreground">
-                    Create your first cloning configuration to start
-                    anonymizing and transferring data between your databases.
+                    Create your first cloning configuration to start anonymizing
+                    and transferring data between your databases.
                 </p>
 
                 <Button
@@ -300,7 +277,9 @@ function deleteCloning(cloning: Cloning) {
                                 <td
                                     class="px-4 py-4 text-right whitespace-nowrap"
                                 >
-                                    <div class="flex items-center justify-end gap-2">
+                                    <div
+                                        class="flex items-center justify-end gap-2"
+                                    >
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -362,6 +341,29 @@ function deleteCloning(cloning: Cloning) {
                                 </td>
                             </tr>
                         </tbody>
+                        <tfoot>
+                        <tr
+                            class="border-t border-border/60 bg-muted/30 dark:border-border/40 dark:bg-muted/20"
+                        >
+                            <td
+                                colspan="7"
+                                class="px-4 py-3 text-xs tracking-wider text-muted-foreground"
+                            >
+                                <Pagination
+                                    :links="clonings.links"
+                                    :current-page="clonings.current_page"
+                                    :last-page="clonings.last_page"
+                                    :prev-url="clonings.prev_page_url"
+                                    :next-url="clonings.next_page_url"
+                                    :from="clonings.from"
+                                    :to="clonings.to"
+                                    :total="totalClonings"
+                                    name="clone"
+                                    plural-name="clones"
+                                />
+                            </td>
+                        </tr>
+                        </tfoot>
                     </table>
                 </div>
 
