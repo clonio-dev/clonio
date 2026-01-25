@@ -197,8 +197,6 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
             throw $e;
         } finally {
-            $this->logWarning('table_done', "Table {$this->tableName} transferring records done with errors.");
-
             if ($this->disableForeignKeyConstraints) {
                 $this->logDebug('foreign_keys', 'Enabling foreign key constraints on target database');
                 $targetConnection->getSchemaBuilder()->enableForeignKeyConstraints();
