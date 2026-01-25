@@ -14,6 +14,7 @@ use App\Http\Requests\StoreCloningRequest;
 use App\Http\Requests\UpdateCloningRequest;
 use App\Http\Requests\ValidateCloningConnectionsRequest;
 use App\Jobs\SynchronizeDatabase;
+use App\Jobs\TestConnection;
 use App\Models\Cloning;
 use App\Models\CloningRun;
 use App\Models\DatabaseConnection;
@@ -237,6 +238,8 @@ class CloningController extends Controller
         $connectionDataTarget = $cloning->targetConnection->toConnectionDataDto();
 
         Bus::batch([
+            new TestConnection($cloning->sourceConnection, $run),
+            new TestConnection($cloning->targetConnection, $run),
             new SynchronizeDatabase($synchronizationConfigData, $connectionDataSource, $connectionDataTarget, $run),
         ])
             ->name('Synchronize database ' . $connectionDataSource->name)
