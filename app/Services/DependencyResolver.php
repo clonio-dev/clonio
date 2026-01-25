@@ -9,6 +9,7 @@ use App\Data\TableSchema;
 use App\Services\SchemaInspector\SchemaInspectorFactory;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 /**
  * DependencyResolver
@@ -21,11 +22,12 @@ class DependencyResolver
     /**
      * Get processing order for tables based on FK dependencies
      *
-     * @param string[] $tables List of table names
-     * @param Connection $connection Database connection
+     * @param  string[]  $tables  List of table names
+     * @param  Connection  $connection  Database connection
+     * @param  bool  $ignoreNullableFKs  If true, nullable FKs are ignored for dependency graph (helps with quasi-circular deps)
      * @return array{dependency_levels: array<int, string[]>, dependency_graph: array<string, string[]>, insert_order: array<int, string>, delete_order: array<int, string>} ['insert_order' => [...], 'delete_order' => [...], 'dependency_levels' => [...], 'dependency_graph' => [...]]
      */
-    public function getProcessingOrder(array $tables, Connection $connection): array
+    public function getProcessingOrder(array $tables, Connection $connection, bool $ignoreNullableFKs = false): array
     {
         // 1. Analyze FK dependencies
         $dependencies = $this->analyzeDependencies($tables, $connection, false);
@@ -110,13 +112,14 @@ class DependencyResolver
     /**
      * Topological sort using Kahn's Algorithm
      *
-     * @param array<string, array<int, string>> $dependencies ['table' => ['dependency1', 'dependency2', ...]]
+     * @param  array<string, array<int, string>>  $dependencies  ['table' => ['dependency1', 'dependency2', ...]]
      * @return string[] Sorted list of tables (parents first)
-     * @throws \RuntimeException If circular dependency detected
+     *
+     * @throws RuntimeException If circular dependency detected
      */
     public function topologicalSort(array $dependencies): array
     {
-// 1. Calculate in-degree (how many tables depend on each table)
+        // 1. Calculate in-degree (how many tables depend on each table)
         // We need to INVERT the graph: from "table needs X" to "X is needed by table"
         $inDegree = [];
         $dependents = []; // Inverted graph: who depends on me?
@@ -154,7 +157,7 @@ class DependencyResolver
         // 3. Process queue
         $result = [];
 
-        while (!empty($queue)) {
+        while (! empty($queue)) {
             // Remove table with in_degree 0 (no dependencies)
             $table = array_shift($queue);
             $result[] = $table;
@@ -173,7 +176,7 @@ class DependencyResolver
         if (count($result) !== count($dependencies)) {
             $missing = array_diff(array_keys($dependencies), $result);
 
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'Circular dependency detected! Tables involved: ' . implode(', ', $missing)
             );
         }
@@ -186,8 +189,8 @@ class DependencyResolver
      *
      * A FK is considered nullable if ALL its columns accept NULL values
      *
-     * @param TableSchema $tableSchema Table containing the FK
-     * @param ForeignKeySchema $fk Foreign key to check
+     * @param  TableSchema  $tableSchema  Table containing the FK
+     * @param  ForeignKeySchema  $fk  Foreign key to check
      * @return bool True if all FK columns are nullable
      */
     private function isForeignKeyNullable(TableSchema $tableSchema, ForeignKeySchema $fk): bool
@@ -196,7 +199,7 @@ class DependencyResolver
             $column = $tableSchema->getColumn($columnName);
 
             // If any column is NOT nullable, the FK is required
-            if ($column && !$column->nullable) {
+            if ($column && ! $column->nullable) {
                 return false;
             }
         }
@@ -212,7 +215,7 @@ class DependencyResolver
      * Level 1 = direct dependencies on level 0
      * Level 2 = dependencies on level 1, etc.
      *
-     * @param array<string, string[]> $dependencies Dependency graph
+     * @param  array<string, string[]>  $dependencies  Dependency graph
      * @return array<int, string[]> ['level' => ['table1', 'table2', ...]]
      */
     private function calculateLevels(array $dependencies): array
@@ -232,7 +235,7 @@ class DependencyResolver
                 // Check if all dependencies are already processed
                 $allDepsProcessed = true;
                 foreach ($deps as $dep) {
-                    if (!in_array($dep, $processed)) {
+                    if (! in_array($dep, $processed)) {
                         $allDepsProcessed = false;
                         break;
                     }
@@ -246,7 +249,7 @@ class DependencyResolver
 
             if (empty($currentLevel)) {
                 // No progress made → circular dependency
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     'Circular dependency detected! Cannot calculate levels.'
                 );
             }
@@ -313,7 +316,7 @@ class DependencyResolver
     /**
      * Find which level a table belongs to
      *
-     * @param array<int, string[]> $levels
+     * @param  array<int, string[]>  $levels
      */
     private function findLevel(string $table, array $levels): int
     {
