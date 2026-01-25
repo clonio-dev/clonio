@@ -46,7 +46,7 @@ class TruncateTargetTables implements ShouldBeEncrypted, ShouldQueue
             foreach ($sourceTableNames as $tableName) {
                 $this->tableName = $tableName;
                 $targetConnection->table($tableName)->delete();
-                $this->logSuccess('table_emptied', "All rows on table {$tableName} deleted on target database.");
+                $this->logSuccess('table_emptied', "All rows on table {$tableName} deleted on target database");
             }
         } catch (QueryException $e) {
             $this->handleQueryException($e);

@@ -46,7 +46,7 @@ class DropUnknownTables implements ShouldBeEncrypted, ShouldQueue
             foreach ($unknownTableNames as $unknownTableName) {
                 $this->tableName = $unknownTableName;
                 $targetSchema->drop($unknownTableName);
-                $this->logSuccess('table_dropped', "Dropped table {$unknownTableName} from target database.");
+                $this->logSuccess('table_dropped', "Dropped table {$unknownTableName} from target database");
             }
         } catch (QueryException $e) {
             $this->handleQueryException($e);

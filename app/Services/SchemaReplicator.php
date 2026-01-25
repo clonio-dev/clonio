@@ -207,7 +207,7 @@ class SchemaReplicator
             && empty($diff['extra_columns'])
         ) {
             if ($visitor !== null) {
-                $visitor($table->name, 'replicating_table', 'No changes necessary.');
+                $visitor($table->name, 'replicating_table', 'No changes necessary');
             }
 
             return; // No changes needed

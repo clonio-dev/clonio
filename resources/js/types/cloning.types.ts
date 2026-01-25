@@ -13,7 +13,7 @@ export type CloningRunStatus =
 /**
  * Log Level Types
  */
-export type CloningRunLogLevel = 'info' | 'warning' | 'error';
+export type CloningRunLogLevel = 'info' | 'warning' | 'error' | 'success';
 
 /**
  * Cloning Run Log Entry

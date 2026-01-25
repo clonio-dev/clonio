@@ -76,14 +76,14 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         }
 
         if ($this->disableForeignKeyConstraints) {
-            Log::debug('Disabling foreign key constraints on target database.');
+            $this->logDebug('foreign_keys', 'Disabling foreign key constraints on target database');
             $targetConnection->getSchemaBuilder()->disableForeignKeyConstraints();
         }
 
         $query = $sourceTable->query();
 
         $orderColumns = $sourceTable->orderColumns();
-        Log::debug("Order columns for table {$this->tableName}: " . implode(', ', $orderColumns));
+        $this->logDebug('order_columns', "Order columns for table {$this->tableName}: " . implode(', ', $orderColumns));
         foreach ($orderColumns as $column) {
             $query->orderBy($column);
         }
@@ -167,11 +167,10 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                 }
             );
 
-            $this->logInfo(
+            $this->logSuccess(
                 'data_copy_completed',
                 "Data copy completed. Total rows: {$totalRows}, Failed chunks: {$failedChunks}"
             );
-            $this->logInfo('table_done', "Table {$this->tableName} transferring records done.");
 
             return;
         } catch (QueryException $e) {
@@ -198,10 +197,10 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
             throw $e;
         } finally {
-            $this->logInfo('table_done', "Table {$this->tableName} transferring records done with errors.");
+            $this->logWarning('table_done', "Table {$this->tableName} transferring records done with errors.");
 
             if ($this->disableForeignKeyConstraints) {
-                Log::debug('Enabling foreign key constraints on target database.');
+                $this->logDebug('foreign_keys', 'Enabling foreign key constraints on target database');
                 $targetConnection->getSchemaBuilder()->enableForeignKeyConstraints();
             }
         }

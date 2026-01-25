@@ -60,7 +60,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
 
         $batch = $this->batch();
         assert($batch !== null);
-        $this->logInfo('synchronization_started', 'Starting database synchronization.');
+        $this->logInfo('synchronization_started', 'Starting database synchronization');
 
         $batch->add([
             new CloneSchema(

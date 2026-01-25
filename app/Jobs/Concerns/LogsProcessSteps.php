@@ -32,7 +32,7 @@ trait LogsProcessSteps
 
     private function logSuccess(string $event, string $message): void
     {
-        $this->log('info', $event, $message);
+        $this->log('success', $event, $message);
     }
 
     private function logDebug(string $event, string $message): void
@@ -55,6 +55,9 @@ trait LogsProcessSteps
             ], $level);
         }
 
+        if ($level === 'success') {
+            $level = 'info';
+        }
         Log::{$level}("[Table: {$tableName}] [{$event}] {$message}");
     }
 

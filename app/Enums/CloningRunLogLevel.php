@@ -9,6 +9,7 @@ enum CloningRunLogLevel: string
     case INFO = 'info';
     case WARNING = 'warning';
     case ERROR = 'error';
+    CASE SUCCESS = 'success';
 
     public function getLabel(): string
     {
@@ -16,6 +17,7 @@ enum CloningRunLogLevel: string
             self::INFO => 'info',
             self::WARNING => 'warning',
             self::ERROR => 'error',
+            self::SUCCESS => 'success',
         };
     }
 }
