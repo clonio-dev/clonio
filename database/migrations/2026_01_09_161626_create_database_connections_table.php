@@ -19,6 +19,7 @@ return new class extends Migration
 
             $table->string('name');
             $table->string('type'); // 'mysql', 'pgsql', 'sqlsrv', 'sqlite'
+            $table->string('dbms_version')->nullable()->default(null);
 
             $table->string('host');
             $table->unsignedInteger('port');
