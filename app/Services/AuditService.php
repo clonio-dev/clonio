@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\CloningRun;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class AuditService
 {
@@ -30,7 +31,7 @@ class AuditService
         $signature = hash_hmac(
             'sha256',
             $hash,
-            config('clonio.audit_secret')
+            (string) config('clonio.audit_secret')
         );
 
         // 6. In DB speichern
@@ -41,7 +42,7 @@ class AuditService
                 'audit_signature' => $signature,
                 'audit_signed_at' => now(),
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error('Failed to save audit signature for run ' . $run->id . ': ' . $e->getMessage());
         }
     }
@@ -51,7 +52,7 @@ class AuditService
      */
     public function verifyRun(CloningRun $run): bool
     {
-        if (!$run->audit_signature) {
+        if (! $run->audit_signature) {
             return false;
         }
 
@@ -67,7 +68,7 @@ class AuditService
         $currentHash = hash('sha256', $json);
 
         // 2. Hash-Vergleich
-        if (!hash_equals($run->audit_hash, $currentHash)) {
+        if (! hash_equals($run->audit_hash, $currentHash)) {
             return false; // Logs wurden verändert!
         }
 
@@ -75,7 +76,7 @@ class AuditService
         $expectedSignature = hash_hmac(
             'sha256',
             $currentHash,
-            config('clonio.audit_secret')
+            (string) config('clonio.audit_secret')
         );
 
         return hash_equals($run->audit_signature, $expectedSignature);
@@ -97,11 +98,6 @@ class AuditService
         ];
     }
 
-    /**
-     * @param \App\Models\CloningRun $run
-     * @param array $logs
-     * @return array
-     */
     private function createAuditRecord(CloningRun $run, array $logs): array
     {
         return [
