@@ -10,7 +10,13 @@ import { CronInput } from '@/components/ui/cron-input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Form } from '@inertiajs/vue3';
-import { ArrowLeft, ArrowRight, Calendar, Clock, Loader2 } from 'lucide-vue-next';
+import {
+    ArrowLeft,
+    ArrowRight,
+    Calendar,
+    Clock,
+    Loader2,
+} from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface Props {

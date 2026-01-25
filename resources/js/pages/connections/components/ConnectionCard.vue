@@ -118,7 +118,8 @@ const deleteConnection = () => {
                                 <p
                                     class="text-[10px] font-bold tracking-wider text-slate-400 uppercase"
                                 >
-                                    {{ databaseTypeConfig.label }} {{ connection.version }}
+                                    {{ databaseTypeConfig.label }}
+                                    {{ connection.version }}
                                 </p>
                             </CardDescription>
                         </div>
