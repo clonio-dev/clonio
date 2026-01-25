@@ -30,9 +30,9 @@ trait LogsProcessSteps
         $this->log('error', $event, $message);
     }
 
-    private function logSuccess(string $event, string $message): void
+    private function logSuccess(string $event, string $message, array $data = []): void
     {
-        $this->log('success', $event, $message);
+        $this->log('success', $event, $message, $data);
     }
 
     private function logDebug(string $event, string $message): void
@@ -43,12 +43,13 @@ trait LogsProcessSteps
         }
     }
 
-    private function log(string $level, string $event, string $message): void
+    private function log(string $level, string $event, string $message, array $data = []): void
     {
         $tableName = property_exists($this, 'tableName') ? $this->tableName : '';
 
         if (isset($this->run) && $this->run instanceof CloningRun) {
             $this->run->log($event, [
+                ...$data,
                 'table' => $tableName,
                 'message' => $message,
                 'batch_id' => $this->batch()?->id,
