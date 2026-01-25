@@ -95,6 +95,9 @@ class CloningController extends Controller
         $anonymizationConfigJson = $request->validated('anonymization_config');
         $anonymizationConfig = $anonymizationConfigJson ? json_decode($anonymizationConfigJson, true) : null;
 
+        $isScheduled = $request->boolean('is_scheduled', false);
+        $schedule = $isScheduled ? $request->validated('schedule') : null;
+
         /** @var Cloning $cloning */
         $cloning = Cloning::query()->create([
             'user_id' => $request->user()->id,
@@ -102,8 +105,9 @@ class CloningController extends Controller
             'source_connection_id' => $request->validated('source_connection_id'),
             'target_connection_id' => $request->validated('target_connection_id'),
             'anonymization_config' => $anonymizationConfig,
-            'schedule' => $request->validated('schedule'),
-            'is_scheduled' => (bool) $request->validated('schedule'),
+            'schedule' => $schedule,
+            'is_scheduled' => $isScheduled,
+            'next_run_at' => Cloning::calculateNextRunAt($schedule),
         ]);
 
         // If execute_now is true, trigger an immediate run
@@ -177,13 +181,17 @@ class CloningController extends Controller
         $anonymizationConfigJson = $request->validated('anonymization_config');
         $anonymizationConfig = $anonymizationConfigJson ? json_decode($anonymizationConfigJson, true) : null;
 
+        $isScheduled = $request->boolean('is_scheduled', false);
+        $schedule = $isScheduled ? $request->validated('schedule') : null;
+
         $cloning->update([
             'title' => $request->validated('title'),
             'source_connection_id' => $request->validated('source_connection_id'),
             'target_connection_id' => $request->validated('target_connection_id'),
             'anonymization_config' => $anonymizationConfig,
-            'schedule' => $request->validated('schedule'),
-            'is_scheduled' => (bool) $request->validated('schedule'),
+            'schedule' => $schedule,
+            'is_scheduled' => $isScheduled,
+            'next_run_at' => Cloning::calculateNextRunAt($schedule),
         ]);
 
         return to_route('clonings.show', ['cloning' => $cloning])
