@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import TransferRunController from '@/actions/App/Http/Controllers/TransferRunController';
+import CloningController from '@/actions/App/Http/Controllers/CloningController';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
 import StepNumber from '@/components/StepNumber.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -48,6 +50,10 @@ interface Props {
     targetConnectionId: string | number;
     sourceConnectionName: string;
     targetConnectionName: string;
+    cloningTitle: string;
+    cloningId?: number;
+    mode: 'create' | 'edit';
+    initialConfig?: AllTablesConfig;
 }
 
 interface Emits {
@@ -86,6 +92,9 @@ interface AllTablesConfig {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
+// Execute after save option
+const executeAfterSave = ref(props.mode === 'create');
+
 // Get all unique table names from source schema
 const availableTables = computed(() => {
     return Object.keys(props.sourceSchema).sort();
@@ -97,7 +106,7 @@ const openTableIndex = ref(0);
 // Track table configurations
 const tableConfigs = reactive<AllTablesConfig>({});
 
-// Initialize configs for all tables and columns with default "keep"
+// Initialize configs for all tables and columns with default "keep" or from initial config
 function initializeConfigs() {
     for (const tableName of availableTables.value) {
         if (!tableConfigs[tableName]) {
@@ -105,10 +114,17 @@ function initializeConfigs() {
         }
         for (const column of props.sourceSchema[tableName] || []) {
             if (!tableConfigs[tableName][column.name]) {
-                tableConfigs[tableName][column.name] = {
-                    strategy: 'keep',
-                    options: {},
-                };
+                // Check if there's an initial config for this column
+                const initialConfig =
+                    props.initialConfig?.[tableName]?.[column.name];
+                if (initialConfig) {
+                    tableConfigs[tableName][column.name] = { ...initialConfig };
+                } else {
+                    tableConfigs[tableName][column.name] = {
+                        strategy: 'keep',
+                        options: {},
+                    };
+                }
             }
         }
     }
@@ -121,13 +137,21 @@ initializeConfigs();
 watch(() => props.sourceSchema, initializeConfigs, { deep: true });
 
 // Strategy display info
-const strategyOptions: { value: StrategyType; label: string; description: string }[] = [
+const strategyOptions: {
+    value: StrategyType;
+    label: string;
+    description: string;
+}[] = [
     { value: 'keep', label: 'Keep identical', description: 'Copy value as-is' },
     { value: 'fake', label: 'Fake', description: 'Generate fake data' },
     { value: 'mask', label: 'Mask', description: 'Partially hide value' },
     { value: 'hash', label: 'Hash', description: 'Hash the value' },
     { value: 'null', label: 'Set to NULL', description: 'Replace with null' },
-    { value: 'static', label: 'Static value', description: 'Replace with constant' },
+    {
+        value: 'static',
+        label: 'Static value',
+        description: 'Replace with constant',
+    },
 ];
 
 // Common faker methods
@@ -170,11 +194,20 @@ const hashAlgorithms = [
 
 // Get column config
 function getColumnConfig(tableName: string, columnName: string): ColumnConfig {
-    return tableConfigs[tableName]?.[columnName] || { strategy: 'keep', options: {} };
+    return (
+        tableConfigs[tableName]?.[columnName] || {
+            strategy: 'keep',
+            options: {},
+        }
+    );
 }
 
 // Update column strategy
-function updateColumnStrategy(tableName: string, columnName: string, strategy: StrategyType) {
+function updateColumnStrategy(
+    tableName: string,
+    columnName: string,
+    strategy: StrategyType,
+) {
     if (!tableConfigs[tableName]) {
         tableConfigs[tableName] = {};
     }
@@ -185,7 +218,9 @@ function updateColumnStrategy(tableName: string, columnName: string, strategy: S
 }
 
 // Get default options for a strategy
-function getDefaultOptionsForStrategy(strategy: StrategyType): ColumnConfig['options'] {
+function getDefaultOptionsForStrategy(
+    strategy: StrategyType,
+): ColumnConfig['options'] {
     switch (strategy) {
         case 'fake':
             return { fakerMethod: 'word', fakerMethodArguments: [] };
@@ -243,11 +278,21 @@ function getPreviewValue(config: ColumnConfig, column: SchemaColumn): string {
 function getOriginalPreview(column: SchemaColumn): string {
     const type = column.type.toLowerCase();
     if (type.includes('int')) return '42';
-    if (type.includes('varchar') || type.includes('text') || type.includes('char')) return 'Example text';
+    if (
+        type.includes('varchar') ||
+        type.includes('text') ||
+        type.includes('char')
+    )
+        return 'Example text';
     if (type.includes('date')) return '2024-01-15';
     if (type.includes('time')) return '14:30:00';
     if (type.includes('bool')) return 'true';
-    if (type.includes('decimal') || type.includes('float') || type.includes('double')) return '19.99';
+    if (
+        type.includes('decimal') ||
+        type.includes('float') ||
+        type.includes('double')
+    )
+        return '19.99';
     if (type.includes('json')) return '{"key": "value"}';
     return 'value';
 }
@@ -286,7 +331,10 @@ function getFakePreview(fakerMethod: string): string {
 }
 
 // Get preview for mask strategy
-function getMaskPreview(column: SchemaColumn, options: ColumnConfig['options']): string {
+function getMaskPreview(
+    column: SchemaColumn,
+    options: ColumnConfig['options'],
+): string {
     const original = getOriginalPreview(column);
     const visibleChars = options.visibleChars || 2;
     const maskChar = options.maskChar || '*';
@@ -295,7 +343,10 @@ function getMaskPreview(column: SchemaColumn, options: ColumnConfig['options']):
         return maskChar.repeat(original.length);
     }
 
-    return original.substring(0, visibleChars) + maskChar.repeat(original.length - visibleChars);
+    return (
+        original.substring(0, visibleChars) +
+        maskChar.repeat(original.length - visibleChars)
+    );
 }
 
 // Get preview for hash strategy
@@ -329,7 +380,9 @@ function toggleTable(index: number) {
 
 // Check if on first/last table
 const isFirstTable = computed(() => openTableIndex.value === 0);
-const isLastTable = computed(() => openTableIndex.value === availableTables.value.length - 1);
+const isLastTable = computed(
+    () => openTableIndex.value === availableTables.value.length - 1,
+);
 
 // Generate the config payload for submission
 const configPayload = computed(() => {
@@ -365,14 +418,29 @@ const configPayload = computed(() => {
     });
 });
 
+// Get form action based on mode
+const formAction = computed(() => {
+    if (props.mode === 'edit' && props.cloningId) {
+        return CloningController.update(props.cloningId).url;
+    }
+    return CloningController.store().url;
+});
+
+const formMethod = computed(() => {
+    return props.mode === 'edit' ? 'put' : 'post';
+});
+
 // Get column type badge color
 function getTypeColor(type: string): string {
     const t = type.toLowerCase();
     if (t.includes('int')) return 'text-blue-600 dark:text-blue-400';
-    if (t.includes('varchar') || t.includes('text') || t.includes('char')) return 'text-emerald-600 dark:text-emerald-400';
-    if (t.includes('date') || t.includes('time')) return 'text-purple-600 dark:text-purple-400';
+    if (t.includes('varchar') || t.includes('text') || t.includes('char'))
+        return 'text-emerald-600 dark:text-emerald-400';
+    if (t.includes('date') || t.includes('time'))
+        return 'text-purple-600 dark:text-purple-400';
     if (t.includes('bool')) return 'text-amber-600 dark:text-amber-400';
-    if (t.includes('decimal') || t.includes('float') || t.includes('double')) return 'text-cyan-600 dark:text-cyan-400';
+    if (t.includes('decimal') || t.includes('float') || t.includes('double'))
+        return 'text-cyan-600 dark:text-cyan-400';
     return 'text-muted-foreground';
 }
 </script>
@@ -382,7 +450,7 @@ function getTypeColor(type: string): string {
         <!-- Step header -->
         <div class="flex flex-col space-y-6">
             <div class="flex w-full gap-4">
-                <StepNumber step="3" />
+                <StepNumber step="4" />
                 <HeadingSmall
                     title="Configure transformation rules"
                     description="Define how each column should be transformed during transfer."
@@ -392,10 +460,16 @@ function getTypeColor(type: string): string {
 
         <!-- Connection info cards -->
         <div class="grid gap-4 md:grid-cols-2">
-            <Card class="border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/5">
+            <Card
+                class="border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/5"
+            >
                 <CardHeader class="pb-2">
-                    <CardTitle class="flex items-center gap-2 text-sm font-medium">
-                        <Database class="size-4 text-emerald-600 dark:text-emerald-400" />
+                    <CardTitle
+                        class="flex items-center gap-2 text-sm font-medium"
+                    >
+                        <Database
+                            class="size-4 text-emerald-600 dark:text-emerald-400"
+                        />
                         Source
                     </CardTitle>
                 </CardHeader>
@@ -409,8 +483,12 @@ function getTypeColor(type: string): string {
 
             <Card class="border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/5">
                 <CardHeader class="pb-2">
-                    <CardTitle class="flex items-center gap-2 text-sm font-medium">
-                        <Database class="size-4 text-blue-600 dark:text-blue-400" />
+                    <CardTitle
+                        class="flex items-center gap-2 text-sm font-medium"
+                    >
+                        <Database
+                            class="size-4 text-blue-600 dark:text-blue-400"
+                        />
                         Target
                     </CardTitle>
                 </CardHeader>
@@ -440,10 +518,16 @@ function getTypeColor(type: string): string {
                 >
                     <div class="flex items-center gap-3">
                         <component
-                            :is="openTableIndex === index ? ChevronDown : ChevronRight"
+                            :is="
+                                openTableIndex === index
+                                    ? ChevronDown
+                                    : ChevronRight
+                            "
                             class="size-4 text-muted-foreground"
                         />
-                        <span class="font-mono text-sm font-medium">{{ tableName }}</span>
+                        <span class="font-mono text-sm font-medium">{{
+                            tableName
+                        }}</span>
                         <span class="text-xs text-muted-foreground">
                             ({{ sourceSchema[tableName]?.length || 0 }} columns)
                         </span>
@@ -462,7 +546,9 @@ function getTypeColor(type: string): string {
                 <CollapsibleContent>
                     <div class="border-t px-4 py-4">
                         <!-- Column headers -->
-                        <div class="mb-3 grid grid-cols-12 gap-4 border-b pb-2 text-xs font-medium text-muted-foreground">
+                        <div
+                            class="mb-3 grid grid-cols-12 gap-4 border-b pb-2 text-xs font-medium text-muted-foreground"
+                        >
                             <div class="col-span-3">Column</div>
                             <div class="col-span-2">Type</div>
                             <div class="col-span-3">Transformation</div>
@@ -479,7 +565,9 @@ function getTypeColor(type: string): string {
                             >
                                 <!-- Column name -->
                                 <div class="col-span-3 flex flex-col gap-0.5">
-                                    <span class="font-mono text-sm">{{ column.name }}</span>
+                                    <span class="font-mono text-sm">{{
+                                        column.name
+                                    }}</span>
                                     <span
                                         v-if="column.nullable"
                                         class="text-xs text-muted-foreground"
@@ -501,11 +589,28 @@ function getTypeColor(type: string): string {
                                 <!-- Transformation dropdown -->
                                 <div class="col-span-3">
                                     <Select
-                                        :model-value="getColumnConfig(tableName, column.name).strategy"
-                                        @update:model-value="(v) => v && updateColumnStrategy(tableName, column.name, v as StrategyType)"
+                                        :model-value="
+                                            getColumnConfig(
+                                                tableName,
+                                                column.name,
+                                            ).strategy
+                                        "
+                                        @update:model-value="
+                                            (v) =>
+                                                v &&
+                                                updateColumnStrategy(
+                                                    tableName,
+                                                    column.name,
+                                                    v as StrategyType,
+                                                )
+                                        "
                                     >
-                                        <SelectTrigger class="h-8 w-full text-xs">
-                                            <SelectValue placeholder="Select rule" />
+                                        <SelectTrigger
+                                            class="h-8 w-full text-xs"
+                                        >
+                                            <SelectValue
+                                                placeholder="Select rule"
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem
@@ -514,7 +619,9 @@ function getTypeColor(type: string): string {
                                                 :value="option.value"
                                             >
                                                 <div class="flex flex-col">
-                                                    <span>{{ option.label }}</span>
+                                                    <span>{{
+                                                        option.label
+                                                    }}</span>
                                                 </div>
                                             </SelectItem>
                                         </SelectContent>
@@ -524,13 +631,38 @@ function getTypeColor(type: string): string {
                                 <!-- Options based on strategy -->
                                 <div class="col-span-2">
                                     <!-- Fake options -->
-                                    <template v-if="getColumnConfig(tableName, column.name).strategy === 'fake'">
+                                    <template
+                                        v-if="
+                                            getColumnConfig(
+                                                tableName,
+                                                column.name,
+                                            ).strategy === 'fake'
+                                        "
+                                    >
                                         <Select
-                                            :model-value="getColumnConfig(tableName, column.name).options.fakerMethod || 'word'"
-                                            @update:model-value="(v) => v && updateColumnOption(tableName, column.name, 'fakerMethod', String(v))"
+                                            :model-value="
+                                                getColumnConfig(
+                                                    tableName,
+                                                    column.name,
+                                                ).options.fakerMethod || 'word'
+                                            "
+                                            @update:model-value="
+                                                (v) =>
+                                                    v &&
+                                                    updateColumnOption(
+                                                        tableName,
+                                                        column.name,
+                                                        'fakerMethod',
+                                                        String(v),
+                                                    )
+                                            "
                                         >
-                                            <SelectTrigger class="h-8 w-full text-xs">
-                                                <SelectValue placeholder="Method" />
+                                            <SelectTrigger
+                                                class="h-8 w-full text-xs"
+                                            >
+                                                <SelectValue
+                                                    placeholder="Method"
+                                                />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem
@@ -545,12 +677,32 @@ function getTypeColor(type: string): string {
                                     </template>
 
                                     <!-- Mask options -->
-                                    <template v-else-if="getColumnConfig(tableName, column.name).strategy === 'mask'">
+                                    <template
+                                        v-else-if="
+                                            getColumnConfig(
+                                                tableName,
+                                                column.name,
+                                            ).strategy === 'mask'
+                                        "
+                                    >
                                         <div class="flex items-center gap-1">
                                             <Input
                                                 type="number"
-                                                :model-value="getColumnConfig(tableName, column.name).options.visibleChars || 2"
-                                                @update:model-value="(v) => updateColumnOption(tableName, column.name, 'visibleChars', Number(v))"
+                                                :model-value="
+                                                    getColumnConfig(
+                                                        tableName,
+                                                        column.name,
+                                                    ).options.visibleChars || 2
+                                                "
+                                                @update:model-value="
+                                                    (v) =>
+                                                        updateColumnOption(
+                                                            tableName,
+                                                            column.name,
+                                                            'visibleChars',
+                                                            Number(v),
+                                                        )
+                                                "
                                                 class="h-8 w-12 px-2 text-xs"
                                                 min="0"
                                                 max="10"
@@ -558,8 +710,23 @@ function getTypeColor(type: string): string {
                                             />
                                             <Input
                                                 type="text"
-                                                :model-value="getColumnConfig(tableName, column.name).options.maskChar || '*'"
-                                                @update:model-value="(v) => updateColumnOption(tableName, column.name, 'maskChar', String(v).charAt(0) || '*')"
+                                                :model-value="
+                                                    getColumnConfig(
+                                                        tableName,
+                                                        column.name,
+                                                    ).options.maskChar || '*'
+                                                "
+                                                @update:model-value="
+                                                    (v) =>
+                                                        updateColumnOption(
+                                                            tableName,
+                                                            column.name,
+                                                            'maskChar',
+                                                            String(v).charAt(
+                                                                0,
+                                                            ) || '*',
+                                                        )
+                                                "
                                                 class="h-8 w-10 px-2 text-center text-xs"
                                                 maxlength="1"
                                                 placeholder="*"
@@ -568,13 +735,38 @@ function getTypeColor(type: string): string {
                                     </template>
 
                                     <!-- Hash options -->
-                                    <template v-else-if="getColumnConfig(tableName, column.name).strategy === 'hash'">
+                                    <template
+                                        v-else-if="
+                                            getColumnConfig(
+                                                tableName,
+                                                column.name,
+                                            ).strategy === 'hash'
+                                        "
+                                    >
                                         <Select
-                                            :model-value="getColumnConfig(tableName, column.name).options.algorithm || 'sha256'"
-                                            @update:model-value="(v) => v && updateColumnOption(tableName, column.name, 'algorithm', String(v))"
+                                            :model-value="
+                                                getColumnConfig(
+                                                    tableName,
+                                                    column.name,
+                                                ).options.algorithm || 'sha256'
+                                            "
+                                            @update:model-value="
+                                                (v) =>
+                                                    v &&
+                                                    updateColumnOption(
+                                                        tableName,
+                                                        column.name,
+                                                        'algorithm',
+                                                        String(v),
+                                                    )
+                                            "
                                         >
-                                            <SelectTrigger class="h-8 w-full text-xs">
-                                                <SelectValue placeholder="Algorithm" />
+                                            <SelectTrigger
+                                                class="h-8 w-full text-xs"
+                                            >
+                                                <SelectValue
+                                                    placeholder="Algorithm"
+                                                />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem
@@ -589,11 +781,33 @@ function getTypeColor(type: string): string {
                                     </template>
 
                                     <!-- Static options -->
-                                    <template v-else-if="getColumnConfig(tableName, column.name).strategy === 'static'">
+                                    <template
+                                        v-else-if="
+                                            getColumnConfig(
+                                                tableName,
+                                                column.name,
+                                            ).strategy === 'static'
+                                        "
+                                    >
                                         <Input
                                             type="text"
-                                            :model-value="String(getColumnConfig(tableName, column.name).options.value || '')"
-                                            @update:model-value="(v) => updateColumnOption(tableName, column.name, 'value', String(v))"
+                                            :model-value="
+                                                String(
+                                                    getColumnConfig(
+                                                        tableName,
+                                                        column.name,
+                                                    ).options.value || '',
+                                                )
+                                            "
+                                            @update:model-value="
+                                                (v) =>
+                                                    updateColumnOption(
+                                                        tableName,
+                                                        column.name,
+                                                        'value',
+                                                        String(v),
+                                                    )
+                                            "
                                             class="h-8 w-full text-xs"
                                             placeholder="Value"
                                         />
@@ -601,21 +815,36 @@ function getTypeColor(type: string): string {
 
                                     <!-- No options for keep and null -->
                                     <template v-else>
-                                        <span class="text-xs text-muted-foreground">-</span>
+                                        <span
+                                            class="text-xs text-muted-foreground"
+                                            >-</span
+                                        >
                                     </template>
                                 </div>
 
                                 <!-- Preview -->
                                 <div class="col-span-2">
-                                    <span class="font-mono text-xs text-muted-foreground">
-                                        {{ getPreviewValue(getColumnConfig(tableName, column.name), column) }}
+                                    <span
+                                        class="font-mono text-xs text-muted-foreground"
+                                    >
+                                        {{
+                                            getPreviewValue(
+                                                getColumnConfig(
+                                                    tableName,
+                                                    column.name,
+                                                ),
+                                                column,
+                                            )
+                                        }}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Navigation buttons within collapsible -->
-                        <div class="mt-6 flex items-center justify-between border-t pt-4">
+                        <div
+                            class="mt-6 flex items-center justify-between border-t pt-4"
+                        >
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -627,7 +856,8 @@ function getTypeColor(type: string): string {
                             </Button>
 
                             <span class="text-sm text-muted-foreground">
-                                Table {{ index + 1 }} of {{ availableTables.length }}
+                                Table {{ index + 1 }} of
+                                {{ availableTables.length }}
                             </span>
 
                             <Button
@@ -649,10 +879,12 @@ function getTypeColor(type: string): string {
 
         <!-- Form submission -->
         <Form
-            v-bind="TransferRunController.store.form()"
+            :action="formAction"
+            :method="formMethod"
             v-slot="{ errors, processing }"
             class="space-y-4"
         >
+            <input type="hidden" name="title" :value="cloningTitle" />
             <input
                 type="hidden"
                 name="source_connection_id"
@@ -663,13 +895,36 @@ function getTypeColor(type: string): string {
                 name="target_connection_id"
                 :value="targetConnectionId"
             />
-            <input type="hidden" name="script" :value="configPayload" />
-            <input type="hidden" name="anonymization_config" :value="configPayload" />
+            <input
+                type="hidden"
+                name="anonymization_config"
+                :value="configPayload"
+            />
+            <input
+                type="hidden"
+                name="execute_now"
+                :value="executeAfterSave ? '1' : '0'"
+            />
 
+            <InputError :message="errors.title" />
             <InputError :message="errors.source_connection_id" />
             <InputError :message="errors.target_connection_id" />
-            <InputError :message="errors.script" />
             <InputError :message="errors.anonymization_config" />
+
+            <!-- Execute after save option (only for create mode) -->
+            <div v-if="mode === 'create'" class="flex items-center gap-2">
+                <Checkbox
+                    id="execute_now"
+                    :checked="executeAfterSave"
+                    @update:checked="executeAfterSave = $event"
+                />
+                <Label
+                    for="execute_now"
+                    class="cursor-pointer text-sm font-normal"
+                >
+                    Execute cloning immediately after saving
+                </Label>
+            </div>
 
             <div class="flex items-center justify-between">
                 <Button
@@ -683,9 +938,16 @@ function getTypeColor(type: string): string {
                 </Button>
 
                 <Button type="submit" :disabled="processing">
-                    <Loader2 v-if="processing" class="mr-2 size-4 animate-spin" />
+                    <Loader2
+                        v-if="processing"
+                        class="mr-2 size-4 animate-spin"
+                    />
                     <template v-else>
-                        Execute Transfer
+                        {{
+                            mode === 'create'
+                                ? 'Save Cloning'
+                                : 'Update Cloning'
+                        }}
                         <ArrowRight class="ml-2 size-4" />
                     </template>
                 </Button>
