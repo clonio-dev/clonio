@@ -15,16 +15,16 @@ collect([
     'datenschutz' => resource_path('markdown/policy.de.md'),
     'agb' => resource_path('markdown/terms.de.md'),
 ])->each(function ($markdownFile, $path): void {
-        Route::get($path, function (StaticPageFileService $pageFileService) use ($path, $markdownFile) {
-            try {
-                $staticPage = $pageFileService->parseFile($markdownFile);
-            } catch (Throwable) {
-                abort(404);
-            }
+    Route::get($path, function (StaticPageFileService $pageFileService) use ($path, $markdownFile) {
+        try {
+            $staticPage = $pageFileService->parseFile($markdownFile);
+        } catch (Throwable) {
+            abort(404);
+        }
 
-            return Inertia::render('StaticPage', [
-                'title' => $staticPage->get('title', Str::title($path)),
-                'content' => $staticPage->getHtml(),
-            ]);
-        })->name('static.'.$path);
-    });
+        return Inertia::render('StaticPage', [
+            'title' => $staticPage->get('title', Str::title($path)),
+            'content' => $staticPage->getHtml(),
+        ]);
+    })->name('static.' . $path);
+});
