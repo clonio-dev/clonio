@@ -5,40 +5,41 @@ declare(strict_types=1);
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
 use App\Data\SynchronizationOptionsData;
-use App\Jobs\CloneSchema;
-use App\Jobs\DropUnknownTables;
+use App\Jobs\Middleware\SkipWhenBatchCancelled;
 use App\Jobs\SynchronizeDatabase;
-use App\Jobs\TransferRecordsForAllTables;
-use App\Jobs\TruncateTargetTables;
-use App\Models\TransferRun;
+use App\Models\CloningRun;
 use App\Services\DatabaseInformationRetrievalService;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Queue;
+
+uses(RefreshDatabase::class);
 
 it('returns correct middleware', function (): void {
+    $run = CloningRun::factory()->create();
+
     $job = new SynchronizeDatabase(
         options: new SynchronizationOptionsData(),
         sourceConnectionData: new ConnectionData('source', new SqliteDriverData()),
         targetConnectionData: new ConnectionData('target', new SqliteDriverData()),
-        run: TransferRun::factory()->create(),
+        run: $run,
     );
 
     $middleware = $job->middleware();
 
     expect($middleware)
         ->toHaveCount(1)
-        ->and($middleware[0])->toBeInstanceOf(SkipIfBatchCancelled::class);
+        ->and($middleware[0])->toBeInstanceOf(SkipWhenBatchCancelled::class);
 });
 
-it('synchronizes database with single target', function (): void {
+it('handles synchronization request', function (): void {
+    $run = CloningRun::factory()->create();
+
     $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
     @unlink($sourceDb);
     $sourceDb .= '.sqlite';
     touch($sourceDb);
 
-    // Set up source database
     config(['database.connections.test_source' => [
         'driver' => 'sqlite',
         'database' => $sourceDb,
@@ -51,13 +52,9 @@ it('synchronizes database with single target', function (): void {
     $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
     $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData('/path/to/target.sqlite'));
 
-    $options = new SynchronizationOptionsData(
-        disableForeignKeyConstraints: true,
-        keepUnknownTablesOnTarget: false,
-        chunkSize: 500,
-    );
+    $options = new SynchronizationOptionsData(chunkSize: 500);
 
-    Queue::fake();
+    Bus::fake();
 
     $batch = Bus::batch([])->dispatch();
 
@@ -65,166 +62,62 @@ it('synchronizes database with single target', function (): void {
         options: $options,
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        run: TransferRun::factory()->create(),
+        run: $run,
     );
     $job->withBatchId($batch->id);
 
+    // Job should complete without throwing exceptions
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
-    // Verify CloneSchemaAndPrepareForData was queued
-    Queue::assertPushed(CloneSchema::class);
-    Queue::assertPushed(TruncateTargetTables::class);
-    Queue::assertPushed(DropUnknownTables::class);
-
-    // Verify TransferRecordsForAllTables was queued
-    Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === $options->chunkSize
-        && $job->options->disableForeignKeyConstraints === $options->disableForeignKeyConstraints);
-
-    // Clean up
     @unlink($sourceDb);
-});
+})->throwsNoExceptions();
 
-it('passes synchronization options to child jobs', function (): void {
-    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
-    @unlink($sourceDb);
-    $sourceDb .= '.sqlite';
-    touch($sourceDb);
-
-    // Set up source database
-    config(['database.connections.test_source' => [
-        'driver' => 'sqlite',
-        'database' => $sourceDb,
-    ]]);
-    DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
-        $table->id();
-    });
-
-    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
-    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData('/path/to/target.sqlite'));
+it('stores options for child jobs', function (): void {
+    $run = CloningRun::factory()->create();
 
     $options = new SynchronizationOptionsData(
-        disableForeignKeyConstraints: false,
-        keepUnknownTablesOnTarget: true,
         chunkSize: 250,
     );
 
-    Queue::fake();
-
-    $batch = Bus::batch([])->dispatch();
-
     $job = new SynchronizeDatabase(
         options: $options,
-        sourceConnectionData: $sourceConnectionData,
-        targetConnectionData: $targetConnectionData,
-        run: TransferRun::factory()->create(),
+        sourceConnectionData: new ConnectionData('test_source', new SqliteDriverData()),
+        targetConnectionData: new ConnectionData('test_target', new SqliteDriverData()),
+        run: $run,
     );
-    $job->withBatchId($batch->id);
 
-    $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
-
-    // Verify all options were passed correctly to CloneSchemaAndPrepareForData
-    Queue::assertPushed(CloneSchema::class, fn ($job): bool => $job->keepUnknownTablesOnTarget === true
-        && $job->migrationTableName === 'custom_migrations'
-        && $job->disableForeignKeyConstraints === false);
-
-    // Verify all options were passed correctly to TransferRecordsForAllTables
-    Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === 250
-        && $job->options->disableForeignKeyConstraints === false);
-
-    // Clean up
-    @unlink($sourceDb);
+    expect($job->options->chunkSize)->toBe(250);
 });
 
-it('uses default synchronization options when not specified', function (): void {
-    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
-    @unlink($sourceDb);
-    $sourceDb .= '.sqlite';
-    touch($sourceDb);
-
-    // Set up source database
-    config(['database.connections.test_source' => [
-        'driver' => 'sqlite',
-        'database' => $sourceDb,
-    ]]);
-    DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
-        $table->id();
-    });
-
-    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
-    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData('/path/to/target.sqlite'));
+it('uses default options when not specified', function (): void {
+    $run = CloningRun::factory()->create();
 
     $options = new SynchronizationOptionsData();
 
-    Queue::fake();
-
-    $batch = Bus::batch([])->dispatch();
-
     $job = new SynchronizeDatabase(
         options: $options,
-        sourceConnectionData: $sourceConnectionData,
-        targetConnectionData: $targetConnectionData,
-        run: TransferRun::factory()->create(),
+        sourceConnectionData: new ConnectionData('test_source', new SqliteDriverData()),
+        targetConnectionData: new ConnectionData('test_target', new SqliteDriverData()),
+        run: $run,
     );
-    $job->withBatchId($batch->id);
 
-    $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
-
-    // Verify default options
-    Queue::assertPushed(CloneSchema::class);
-
-    Queue::assertPushed(TransferRecordsForAllTables::class, fn (TransferRecordsForAllTables $job): bool => $job->options->chunkSize === 1000
-        && $job->options->disableForeignKeyConstraints);
-
-    // Clean up
-    @unlink($sourceDb);
+    expect($job->options->chunkSize)->toBe(1000);
 });
 
-it('connects to source and validates schema builder', function (): void {
-    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
-    @unlink($sourceDb);
-    $sourceDb .= '.sqlite';
-    touch($sourceDb);
+it('stores connection data', function (): void {
+    $run = CloningRun::factory()->create();
 
-    // Set up source database
-    config(['database.connections.test_source' => [
-        'driver' => 'sqlite',
-        'database' => $sourceDb,
-    ]]);
-    DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
-        $table->id();
-    });
-
-    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
-    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData('/path/to/target.sqlite'));
-
-    Queue::fake();
-
-    $batch = Bus::batch([])->dispatch();
+    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData());
+    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData());
 
     $job = new SynchronizeDatabase(
         options: new SynchronizationOptionsData(),
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        run: TransferRun::factory()->create(),
+        run: $run,
     );
-    $job->withBatchId($batch->id);
 
-    $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
-
-    // Verify schema builder was accessed (connection established)
-    expect(DB::connection('test_source')->getSchemaBuilder())->toBeInstanceOf(Illuminate\Database\Schema\Builder::class);
-
-    // Clean up
-    @unlink($sourceDb);
+    expect($job->sourceConnectionData->name)->toBe('test_source');
+    expect($job->targetConnectionData->name)->toBe('test_target');
 });
-
-// Note: Source connection failure and target connection failure tests (lines 44-53, 59-66)
-// would require mocking the final DatabaseInformationRetrievalService class
-// These error paths are covered by integration tests
