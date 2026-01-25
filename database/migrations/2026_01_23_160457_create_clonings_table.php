@@ -16,16 +16,18 @@ return new class extends Migration
                 ->constrained('users')
                 ->onDelete('cascade');
             $table->string('title');
+
             $table->foreignId('source_connection_id')
-                ->constrained('database_connections')
-                ->onDelete('cascade');
+                ->constrained('database_connections');
             $table->foreignId('target_connection_id')
-                ->constrained('database_connections')
-                ->onDelete('cascade');
-            $table->json('anonymization_config')->nullable();
-            $table->string('schedule')->nullable();
+                ->constrained('database_connections');
+
+            $table->json('anonymization_config')->nullable()->default(null);
+
+            $table->string('schedule')->nullable()->default(null);
             $table->boolean('is_scheduled')->default(false);
             $table->timestamp('next_run_at')->nullable();
+
             $table->timestamps();
 
             $table->index(['user_id', 'created_at']);

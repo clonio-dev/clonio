@@ -10,11 +10,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('transfer_run_logs', function (Blueprint $table): void {
+        Schema::create('cloning_run_logs', function (Blueprint $table): void {
             $table->id();
 
             $table->foreignId('run_id')
-                ->constrained('transfer_runs')
+                ->constrained('cloning_runs')
                 ->onDelete('cascade');
 
             $table->string('level', 20);
@@ -33,6 +33,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('transfer_run_logs');
+        Schema::dropIfExists('cloning_run_logs');
     }
 };
