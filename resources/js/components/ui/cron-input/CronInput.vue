@@ -283,7 +283,7 @@ const isValidCron = computed(() => {
         "
     >
         <Tabs v-model="activeTab" class="w-full">
-            <TabsList class="mb-4 grid w-full grid-cols-2">
+            <TabsList class="mb-4 grid grid-cols-2">
                 <TabsTrigger value="simple" class="gap-2">
                     <Sparkles class="size-4" />
                     Simple
