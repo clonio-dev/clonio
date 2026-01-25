@@ -6,8 +6,8 @@ import {
     PostgresqlIcon,
     SqlserverIcon,
 } from '@/components/icons/databases';
+import InfoComponent from '@/components/InfoComponent.vue';
 import InputError from '@/components/InputError.vue';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -30,13 +30,9 @@ import {
 import { Form } from '@inertiajs/vue3';
 import {
     AlertTriangle,
-    Cable,
     Database,
-    Key,
     Loader2,
-    Server,
-    Tag,
-    User,
+    ShieldCheckIcon,
 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
@@ -89,10 +85,10 @@ watch(
             <SheetHeader class="space-y-3 pb-4">
                 <div class="flex items-center gap-3">
                     <div
-                        class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 ring-1 ring-emerald-500/30 dark:from-emerald-500/10 dark:to-teal-500/10"
+                        class="flex size-10 items-center justify-center rounded-lg bg-green-400/10 ring-1 ring-green-500/30 dark:bg-green-500/10"
                     >
                         <Database
-                            class="size-5 text-emerald-600 dark:text-emerald-400"
+                            class="size-5 text-green-600 dark:text-green-400"
                         />
                     </div>
                     <div>
@@ -116,14 +112,7 @@ watch(
             >
                 <!-- Connection Identity Section -->
                 <div class="space-y-4">
-                    <div class="flex items-center gap-2">
-                        <Tag class="size-4 text-muted-foreground" />
-                        <span class="text-sm font-medium text-foreground"
-                            >Identity</span
-                        >
-                    </div>
-
-                    <div class="space-y-1.5">
+                    <div>
                         <Label for="name" class="text-xs text-muted-foreground"
                             >Connection Name</Label
                         >
@@ -141,7 +130,7 @@ watch(
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="space-y-1.5">
+                        <div>
                             <Label
                                 for="type"
                                 class="text-xs text-muted-foreground"
@@ -181,7 +170,7 @@ watch(
                             <InputError :message="errors.type" />
                         </div>
 
-                        <div class="space-y-1.5">
+                        <div>
                             <Label class="text-xs text-muted-foreground"
                                 >Environment</Label
                             >
@@ -219,15 +208,8 @@ watch(
 
                 <!-- Server Section -->
                 <div class="space-y-4">
-                    <div class="flex items-center gap-2">
-                        <Server class="size-4 text-muted-foreground" />
-                        <span class="text-sm font-medium text-foreground"
-                            >Server</span
-                        >
-                    </div>
-
                     <div class="grid grid-cols-3 gap-3">
-                        <div class="col-span-2 space-y-1.5">
+                        <div class="col-span-2">
                             <Label
                                 for="host"
                                 class="text-xs text-muted-foreground"
@@ -246,7 +228,7 @@ watch(
                             <InputError :message="errors.host" />
                         </div>
 
-                        <div class="space-y-1.5">
+                        <div>
                             <Label
                                 for="port"
                                 class="text-xs text-muted-foreground"
@@ -267,12 +249,11 @@ watch(
                         </div>
                     </div>
 
-                    <div class="space-y-1.5">
+                    <div>
                         <Label
                             for="database"
-                            class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                            class="text-xs text-muted-foreground"
                         >
-                            <Cable class="size-3" />
                             Database Name
                         </Label>
                         <Input
@@ -293,19 +274,11 @@ watch(
 
                 <!-- Authentication Section -->
                 <div class="space-y-4">
-                    <div class="flex items-center gap-2">
-                        <Key class="size-4 text-muted-foreground" />
-                        <span class="text-sm font-medium text-foreground"
-                            >Authentication</span
-                        >
-                    </div>
-
-                    <div class="space-y-1.5">
+                    <div>
                         <Label
                             for="username"
-                            class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                            class="text-xs text-muted-foreground"
                         >
-                            <User class="size-3" />
                             Username
                         </Label>
                         <Input
@@ -322,7 +295,7 @@ watch(
                         <InputError :message="errors.username" />
                     </div>
 
-                    <div class="space-y-1.5">
+                    <div>
                         <Label
                             for="password"
                             class="text-xs text-muted-foreground"
@@ -344,27 +317,17 @@ watch(
                     </div>
                 </div>
 
-                <!-- Production warning -->
-                <Alert
-                    v-if="isProduction"
-                    class="border-amber-500/30 bg-amber-500/5"
-                >
-                    <AlertTriangle class="size-4 text-amber-500" />
-                    <AlertDescription
-                        class="text-xs text-amber-700 dark:text-amber-400"
-                    >
-                        This connection is marked as production. Extra
-                        confirmation will be required for destructive
-                        operations.
-                    </AlertDescription>
-                </Alert>
+                <InfoComponent
+                    title="Security &amp; Privacy"
+                    :icon="ShieldCheckIcon"
+                    description="All database credentials are encrypted at rest using AES-256. Sensitive information such as passwords and secret keys are never displayed in the interface after initial configuration. Access to these profiles is governed by Clonio's policy."
+                />
 
                 <!-- Submit button -->
                 <div class="mt-auto pt-4">
                     <Button
                         type="submit"
                         :disabled="processing || recentlySuccessful"
-                        class="w-full gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20 transition-all hover:from-emerald-500 hover:to-teal-500 hover:shadow-lg hover:shadow-emerald-500/30 disabled:opacity-50"
                     >
                         <Loader2
                             v-if="processing"
