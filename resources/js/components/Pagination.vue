@@ -33,7 +33,9 @@ const props = withDefaults(defineProps<Props>(), {
     display: 'when-necessary',
 });
 
-const shouldDisplay = computed(() => props.display === 'everytime' || props.lastPage > 1);
+const shouldDisplay = computed(
+    () => props.display === 'everytime' || props.lastPage > 1,
+);
 
 // Filter out prev/next labels and get page number links
 const pageLinks = computed(() => {
@@ -108,8 +110,8 @@ function isEllipsis(
     >
         <div class="shrink-0">
             <p class="text-slate-700 dark:text-slate-100">
-            Showing {{ props.from }} - {{ props.to }} of {{ props.total }}
-            {{ props.total === 1 ? props.name : props.pluralName }}
+                Showing {{ props.from }} - {{ props.to }} of {{ props.total }}
+                {{ props.total === 1 ? props.name : props.pluralName }}
             </p>
         </div>
         <div class="flex items-center justify-center gap-1">
