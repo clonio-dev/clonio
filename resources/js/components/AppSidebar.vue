@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
+import CloningController from '@/actions/App/Http/Controllers/CloningController';
 import CloningRunController from '@/actions/App/Http/Controllers/CloningRunController';
+import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -22,7 +23,6 @@ import {
     RocketIcon,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-import CloningController from '@/actions/App/Http/Controllers/CloningController';
 
 const page = usePage();
 
@@ -53,8 +53,7 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-];
+const footerNavItems: NavItem[] = [];
 </script>
 
 <template>
