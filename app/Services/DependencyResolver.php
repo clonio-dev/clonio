@@ -30,7 +30,7 @@ class DependencyResolver
     public function getProcessingOrder(array $tables, Connection $connection, bool $ignoreNullableFKs = false): array
     {
         // 1. Analyze FK dependencies
-        $dependencies = $this->analyzeDependencies($tables, $connection, false);
+        $dependencies = $this->analyzeDependencies($tables, $connection, $ignoreNullableFKs);
 
         // 2. Topological sort (parents first)
         $insertOrder = $this->topologicalSort($dependencies);
@@ -54,59 +54,6 @@ class DependencyResolver
             'dependency_levels' => $levels,
             'dependency_graph' => $dependencies,
         ];
-    }
-
-    /**
-     * Analyze FK dependencies for all tables
-     *
-     * Optionally ignores nullable FKs to handle quasi-circular dependencies
-     * where both FKs are NULL-able (e.g., employees.department_id NULL → departments,
-     * departments.manager_id NULL → employees)
-     *
-     * @param string[] $tables Table names
-     * @param Connection $connection Database connection
-     * @param bool $ignoreNullableFKs If true, nullable FKs are ignored for dependency graph
-     * @return array<string, string[]> ['table_name' => ['referenced_table1', 'referenced_table2', ...]]
-     */
-    private function analyzeDependencies(
-        array $tables,
-        Connection $connection,
-        bool $ignoreNullableFKs = true,
-    ): array
-    {
-        $inspector = SchemaInspectorFactory::create($connection);
-        $dependencies = [];
-
-        foreach ($tables as $table) {
-            // Get foreign keys for this table
-            $tableSchema = $inspector->getTableSchema($connection, $table);
-
-            $referencedTables = [];
-
-            foreach ($tableSchema->foreignKeys as $fk) {
-                // Skip if referenced table is not in our list
-                if (!in_array($fk->referencedTable, $tables)) {
-                    continue;
-                }
-
-                // Check if FK columns are nullable
-                if ($ignoreNullableFKs && $this->isForeignKeyNullable($tableSchema, $fk)) {
-                    Log::debug("Ignoring nullable FK for dependency graph", [
-                        'table' => $table,
-                        'fk' => $fk->name,
-                        'references' => $fk->referencedTable,
-                        'columns' => $fk->columns,
-                    ]);
-                    continue;
-                }
-
-                $referencedTables[] = $fk->referencedTable;
-            }
-
-            $dependencies[$table] = array_unique($referencedTables);
-        }
-
-        return $dependencies;
     }
 
     /**
@@ -182,6 +129,116 @@ class DependencyResolver
         }
 
         return $result;
+    }
+
+    /**
+     * Format dependency analysis for logging/display
+     *
+     * @param  array{dependency_levels: array<int, string[]>, dependency_graph: array<string, string[]>, insert_order: array<int, string>, delete_order: array<int, string>}  $order  Result from getProcessingOrder()
+     * @return string Formatted output
+     */
+    public function formatDependencyAnalysis(array $order): string
+    {
+        $output = "=== DEPENDENCY ANALYSIS ===\n\n";
+
+        // Show levels
+        foreach ($order['dependency_levels'] as $level => $tables) {
+            $output .= "Level {$level}";
+
+            if ($level === 0) {
+                $output .= " (Parent Tables - no dependencies):\n";
+            } else {
+                $output .= " (Children - {$level} level deep):\n";
+            }
+
+            foreach ($tables as $table) {
+                $deps = $order['dependency_graph'][$table] ?? [];
+
+                if (empty($deps)) {
+                    $output .= "  • {$table}\n";
+                } else {
+                    $output .= "  • {$table} → depends on [" . implode(', ', $deps) . "]\n";
+                }
+            }
+
+            $output .= "\n";
+        }
+
+        // Show insert order
+        $output .= "=== INSERT ORDER (Top-Down) ===\n";
+        foreach ($order['insert_order'] as $index => $table) {
+            $level = $this->findLevel($table, $order['dependency_levels']);
+            $output .= ($index + 1) . ". {$table} (Level {$level})\n";
+        }
+
+        $output .= "\n";
+
+        // Show delete order
+        $output .= "=== DELETE ORDER (Bottom-Up) ===\n";
+        foreach ($order['delete_order'] as $index => $table) {
+            $level = $this->findLevel($table, $order['dependency_levels']);
+            $output .= ($index + 1) . ". {$table} (Level {$level})\n";
+        }
+
+        return $output;
+    }
+
+    /**
+     * Analyze FK dependencies for all tables
+     *
+     * Optionally ignores nullable FKs to handle quasi-circular dependencies
+     * where both FKs are NULL-able (e.g., employees.department_id NULL → departments,
+     * departments.manager_id NULL → employees)
+     *
+     * @param  string[]  $tables  Table names
+     * @param  Connection  $connection  Database connection
+     * @param  bool  $ignoreNullableFKs  If true, nullable FKs are ignored for dependency graph
+     * @return array<string, string[]> ['table_name' => ['referenced_table1', 'referenced_table2', ...]]
+     */
+    private function analyzeDependencies(
+        array $tables,
+        Connection $connection,
+        bool $ignoreNullableFKs = true,
+    ): array {
+        $inspector = SchemaInspectorFactory::create($connection);
+        $dependencies = [];
+
+        foreach ($tables as $table) {
+            // Get foreign keys for this table
+            $tableSchema = $inspector->getTableSchema($connection, $table);
+
+            $referencedTables = [];
+
+            foreach ($tableSchema->foreignKeys as $fk) {
+                // Skip self-references (table referencing itself)
+                if ($fk->referencedTable === $table) {
+                    continue;
+                }
+
+                // Skip if referenced table is not in our list
+                if (! in_array($fk->referencedTable, $tables)) {
+                    continue;
+                }
+
+                // Check if FK columns are nullable
+                if ($ignoreNullableFKs && $this->isForeignKeyNullable($tableSchema, $fk)) {
+                    Log::debug('Ignoring nullable FK for dependency graph', [
+                        'table' => $table,
+                        'fk' => $fk->name,
+                        'references' => $fk->referencedTable,
+                        'columns' => $fk->columns,
+                    ]);
+
+                    continue;
+                }
+
+                $referencedTables[] = $fk->referencedTable;
+            }
+
+            $dependencies[$table] = array_unique($referencedTables);
+        }
+
+        return $dependencies;
     }
 
     /**
@@ -264,58 +321,6 @@ class DependencyResolver
         }
 
         return $levels;
-    }
-
-    /**
-     * Format dependency analysis for logging/display
-     *
-     * @param array{dependency_levels: array<int, string[]>, dependency_graph: array<string, string[]>, insert_order: array<int, string>, delete_order: array<int, string>} $order Result from getProcessingOrder()
-     * @return string Formatted output
-     */
-    public function formatDependencyAnalysis(array $order): string
-    {
-        $output = "=== DEPENDENCY ANALYSIS ===\n\n";
-
-        // Show levels
-        foreach ($order['dependency_levels'] as $level => $tables) {
-            $output .= "Level {$level}";
-
-            if ($level === 0) {
-                $output .= " (Parent Tables - no dependencies):\n";
-            } else {
-                $output .= " (Children - {$level} level deep):\n";
-            }
-
-            foreach ($tables as $table) {
-                $deps = $order['dependency_graph'][$table] ?? [];
-
-                if (empty($deps)) {
-                    $output .= "  • {$table}\n";
-                } else {
-                    $output .= "  • {$table} → depends on [" . implode(', ', $deps) . "]\n";
-                }
-            }
-
-            $output .= "\n";
-        }
-
-        // Show insert order
-        $output .= "=== INSERT ORDER (Top-Down) ===\n";
-        foreach ($order['insert_order'] as $index => $table) {
-            $level = $this->findLevel($table, $order['dependency_levels']);
-            $output .= ($index + 1) . ". {$table} (Level {$level})\n";
-        }
-
-        $output .= "\n";
-
-        // Show delete order
-        $output .= "=== DELETE ORDER (Bottom-Up) ===\n";
-        foreach ($order['delete_order'] as $index => $table) {
-            $level = $this->findLevel($table, $order['dependency_levels']);
-            $output .= ($index + 1) . ". {$table} (Level {$level})\n";
-        }
-
-        return $output;
     }
 
     /**
