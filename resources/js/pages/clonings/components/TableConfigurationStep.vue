@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import CloningController from '@/actions/App/Http/Controllers/CloningController';
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import InputError from '@/components/InputError.vue';
 import StepNumber from '@/components/StepNumber.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -21,7 +17,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Form } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     ArrowRight,
@@ -29,7 +24,6 @@ import {
     ChevronRight,
     Copy,
     Database,
-    Loader2,
 } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 
@@ -58,6 +52,7 @@ interface Props {
 
 interface Emits {
     (e: 'back'): void;
+    (e: 'next', config: string): void;
 }
 
 // Strategy enum values matching backend
@@ -92,9 +87,6 @@ interface AllTablesConfig {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-// Execute after save option
-const executeAfterSave = ref(props.mode === 'create');
-
 // Get all unique table names from source schema
 const availableTables = computed(() => {
     return Object.keys(props.sourceSchema).sort();
@@ -118,7 +110,17 @@ function initializeConfigs() {
                 const initialConfig =
                     props.initialConfig?.[tableName]?.[column.name];
                 if (initialConfig) {
-                    tableConfigs[tableName][column.name] = { ...initialConfig };
+                    // If the column is not nullable but has 'null' strategy, fall back to 'keep'
+                    if (!column.nullable && initialConfig.strategy === 'null') {
+                        tableConfigs[tableName][column.name] = {
+                            strategy: 'keep',
+                            options: {},
+                        };
+                    } else {
+                        tableConfigs[tableName][column.name] = {
+                            ...initialConfig,
+                        };
+                    }
                 } else {
                     tableConfigs[tableName][column.name] = {
                         strategy: 'keep',
@@ -426,18 +428,6 @@ const configPayload = computed(() => {
         tables,
         version: '1.0',
     });
-});
-
-// Get form action based on mode
-const formAction = computed(() => {
-    if (props.mode === 'edit' && props.cloningId) {
-        return CloningController.update(props.cloningId).url;
-    }
-    return CloningController.store().url;
-});
-
-const formMethod = computed(() => {
-    return props.mode === 'edit' ? 'put' : 'post';
 });
 
 // Get column type badge color
@@ -889,81 +879,17 @@ function getTypeColor(type: string): string {
 
         <Separator />
 
-        <!-- Form submission -->
-        <Form
-            :action="formAction"
-            :method="formMethod"
-            v-slot="{ errors, processing }"
-            class="space-y-4"
-        >
-            <input type="hidden" name="title" :value="cloningTitle" />
-            <input
-                type="hidden"
-                name="source_connection_id"
-                :value="sourceConnectionId"
-            />
-            <input
-                type="hidden"
-                name="target_connection_id"
-                :value="targetConnectionId"
-            />
-            <input
-                type="hidden"
-                name="anonymization_config"
-                :value="configPayload"
-            />
-            <input
-                type="hidden"
-                name="execute_now"
-                :value="executeAfterSave ? '1' : '0'"
-            />
+        <!-- Navigation buttons -->
+        <div class="flex items-center justify-between">
+            <Button type="button" variant="outline" @click="emit('back')">
+                <ArrowLeft class="mr-2 size-4" />
+                Back
+            </Button>
 
-            <InputError :message="errors.title" />
-            <InputError :message="errors.source_connection_id" />
-            <InputError :message="errors.target_connection_id" />
-            <InputError :message="errors.anonymization_config" />
-
-            <!-- Execute after save option (only for create mode) -->
-            <div v-if="mode === 'create'" class="flex items-center gap-2">
-                <Checkbox
-                    id="execute_now"
-                    :checked="executeAfterSave"
-                    @update:checked="executeAfterSave = $event"
-                />
-                <Label
-                    for="execute_now"
-                    class="cursor-pointer text-sm font-normal"
-                >
-                    Execute cloning immediately after saving
-                </Label>
-            </div>
-
-            <div class="flex items-center justify-between">
-                <Button
-                    type="button"
-                    variant="outline"
-                    @click="emit('back')"
-                    :disabled="processing"
-                >
-                    <ArrowLeft class="mr-2 size-4" />
-                    Back
-                </Button>
-
-                <Button type="submit" :disabled="processing">
-                    <Loader2
-                        v-if="processing"
-                        class="mr-2 size-4 animate-spin"
-                    />
-                    <template v-else>
-                        {{
-                            mode === 'create'
-                                ? 'Save Cloning'
-                                : 'Update Cloning'
-                        }}
-                        <ArrowRight class="ml-2 size-4" />
-                    </template>
-                </Button>
-            </div>
-        </Form>
+            <Button @click="emit('next', configPayload)">
+                Next
+                <ArrowRight class="ml-2 size-4" />
+            </Button>
+        </div>
     </div>
 </template>
