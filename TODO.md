@@ -8,7 +8,6 @@ Add some more details to a tested database connection. Add a schedule form on a 
 ### Phase 1: The easy things
 
 - [ ] /clonings/create and edit: Do not provide "Set to NULL" for columns which are not nullable
-- [ ] resources/js/components/ui/combobox/Combobox.vue: select a single item by default automatically and emit the update event afterwards
 
 ### Phase 2: improve
 
