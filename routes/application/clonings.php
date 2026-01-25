@@ -48,6 +48,9 @@ Route::prefix('cloning-runs')
         Route::get('/{run}', [CloningRunController::class, 'show'])
             ->name('show');
 
+        Route::get('/{run}/audit-log', [CloningRunController::class, 'auditlog'])
+            ->name('auditlog');
+
         Route::post('/{run}/cancel', [CloningRunController::class, 'cancel'])
             ->name('cancel');
 

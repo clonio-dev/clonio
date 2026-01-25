@@ -7,9 +7,11 @@ namespace App\Http\Controllers;
 use App\Enums\CloningRunStatus;
 use App\Models\Cloning;
 use App\Models\CloningRun;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -118,6 +120,19 @@ class CloningRunController extends Controller
             'run' => $run,
             'logs' => $logs,
             'isActive' => $isActive,
+        ]);
+    }
+
+    public function auditlog(CloningRun $run, AuditService $auditService): View
+    {
+        $run->loadMissing(['cloning', 'logs', 'user']);
+        $verification = $auditService->getVerificationDetails($run);
+
+        return view('reports.audit-trail', [
+            'run' => $run,
+            'config' => $run->config_snapshot,
+            'logs' => $run->logs,
+            'verification' => $verification,
         ]);
     }
 

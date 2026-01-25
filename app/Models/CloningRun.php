@@ -28,6 +28,10 @@ use Illuminate\Support\Carbon;
  * @property int $total_steps
  * @property int $progress_percent
  * @property string|null $error_message
+ * @property array<string, mixed>|null $config_snapshot
+ * @property string|null $audit_hash
+ * @property string|null $audit_signature
+ * @property Carbon|null $audit_signed_at
  * @property-read User $user
  * @property-read Cloning|null $cloning
  * @property-read ?Batch $batch
@@ -54,6 +58,10 @@ class CloningRun extends Model
         'total_steps',
         'progress_percent',
         'error_message',
+        'config_snapshot',
+        'audit_hash',
+        'audit_signature',
+        'audit_signed_at',
     ];
 
     public function casts(): array
@@ -65,6 +73,8 @@ class CloningRun extends Model
             'current_step' => 'integer',
             'total_steps' => 'integer',
             'progress_percent' => 'integer',
+            'config_snapshot' => 'array',
+            'audit_signed_at' => 'datetime',
         ];
     }
 

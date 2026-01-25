@@ -31,6 +31,11 @@ return new class extends Migration
             $table->unsignedInteger('total_steps')->default(0);
             $table->unsignedInteger('progress_percent')->default(0);
 
+            $table->json('config_snapshot')->nullable()->default(null);
+            $table->text('audit_hash')->nullable()->default(null);
+            $table->string('audit_signature', 64)->nullable()->default(null);
+            $table->timestamp('audit_signed_at')->nullable()->default(null);
+
             $table->text('error_message')->nullable()->default(null);
             $table->timestamps();
 
@@ -38,6 +43,7 @@ return new class extends Migration
             $table->index('batch_id');
             $table->index('status');
             $table->index(['user_id', 'created_at']);
+            $table->index('audit_signature');
         });
     }
 

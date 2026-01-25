@@ -66,6 +66,8 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
                     $this->logInfo('table_done', "Skipped table {$tableName} because it has no records.");
                 }
             }
+
+            $batch->add(new SignRun($this->run));
         } catch (QueryException $e) {
             $this->handleQueryException($e);
         } catch (PDOException $e) {
