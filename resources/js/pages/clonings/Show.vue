@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import RunCard from '@/components/transfer-runs/RunCard.vue';
+import RunCard from '@/components/cloning-runs/RunCard.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import type { CloningShowProps, CloningRun } from '@/types/cloning.types';
+import type { CloningRun, CloningShowProps } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     ArrowRight,
@@ -136,13 +136,17 @@ const runsWithCloning = computed(() =>
                             <CardTitle
                                 class="flex items-center gap-2 text-base font-semibold"
                             >
-                                <Database class="size-4 text-muted-foreground" />
+                                <Database
+                                    class="size-4 text-muted-foreground"
+                                />
                                 Connections
                             </CardTitle>
                         </CardHeader>
                         <CardContent class="space-y-4">
                             <div class="space-y-2">
-                                <div class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                <div
+                                    class="text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                                >
                                     Source
                                 </div>
                                 <div
@@ -173,7 +177,9 @@ const runsWithCloning = computed(() =>
                             </div>
 
                             <div class="space-y-2">
-                                <div class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                <div
+                                    class="text-xs font-medium tracking-wider text-muted-foreground uppercase"
+                                >
                                     Target
                                 </div>
                                 <div
@@ -212,10 +218,7 @@ const runsWithCloning = computed(() =>
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div
-                                v-if="cloning.is_scheduled"
-                                class="space-y-3"
-                            >
+                            <div v-if="cloning.is_scheduled" class="space-y-3">
                                 <div
                                     class="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
                                 >
@@ -237,7 +240,9 @@ const runsWithCloning = computed(() =>
                                 class="flex items-center gap-2 text-muted-foreground"
                             >
                                 <Settings class="size-4" />
-                                <span class="text-sm">Manual execution only</span>
+                                <span class="text-sm"
+                                    >Manual execution only</span
+                                >
                             </div>
                         </CardContent>
                     </Card>
@@ -251,7 +256,9 @@ const runsWithCloning = computed(() =>
                             <CardTitle
                                 class="flex items-center gap-2 text-base font-semibold"
                             >
-                                <Settings class="size-4 text-muted-foreground" />
+                                <Settings
+                                    class="size-4 text-muted-foreground"
+                                />
                                 Anonymization
                             </CardTitle>
                         </CardHeader>
@@ -297,9 +304,7 @@ const runsWithCloning = computed(() =>
                         v-else
                         class="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/60 bg-muted/20 px-6 py-12 text-center dark:border-border/40"
                     >
-                        <Play
-                            class="mb-4 size-10 text-muted-foreground/50"
-                        />
+                        <Play class="mb-4 size-10 text-muted-foreground/50" />
                         <h3 class="mb-1 font-medium text-foreground">
                             No Runs Yet
                         </h3>

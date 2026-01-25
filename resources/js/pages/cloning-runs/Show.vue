@@ -1,14 +1,10 @@
 <script setup lang="ts">
-import TransferRunConsole from '@/components/transfer-runs/TransferRunConsole.vue';
+import CloningRunConsole from '@/components/cloning-runs/CloningRunConsole.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import type {
-    CloningRunStatus,
-    CloningRun,
-    CloningRunLog,
-} from '@/types/cloning.types';
+import { CloningRunShowProps, CloningRunStatus } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     AlertCircle,
@@ -28,13 +24,7 @@ import {
 } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
-interface Props {
-    run: CloningRun;
-    logs: CloningRunLog[];
-    isActive: boolean;
-}
-
-const props = defineProps<Props>();
+const props = defineProps<CloningRunShowProps>();
 
 const breadcrumbItems = computed<BreadcrumbItem[]>(() => [
     {
@@ -48,7 +38,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => [
 ]);
 
 const isRefreshing = ref(false);
-const consoleRef = ref<InstanceType<typeof TransferRunConsole> | null>(null);
+const consoleRef = ref<InstanceType<typeof CloningRunConsole> | null>(null);
 let refreshInterval: number | null = null;
 
 const statusConfig: Record<
@@ -438,9 +428,9 @@ onUnmounted(() => {
             </div>
 
             <!-- Log Console Component -->
-            <TransferRunConsole
+            <CloningRunConsole
                 ref="consoleRef"
-                :logs="logs as any"
+                :logs="logs"
                 :run-id="run.id"
                 :is-active="isActive"
                 :finished-at="run.finished_at"
