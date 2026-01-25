@@ -17,6 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import ConnectionFormSheet from '@/pages/connections/components/ConnectionFormSheet.vue';
 import { ArrowRight, Loader2, Plus } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
+import ScheduleConfigurationStep from './components/ScheduleConfigurationStep.vue';
 import TableConfigurationStep from './components/TableConfigurationStep.vue';
 
 const props = defineProps<CloningFormProps>();
@@ -75,6 +76,9 @@ const testConnections = ref<ComboboxItems>([...props.test_connections]);
 // Schema data from validation
 const sourceSchema = ref<SchemaData | null>(null);
 const targetSchema = ref<SchemaData | null>(null);
+
+// Anonymization config from step 2
+const anonymizationConfig = ref<string>('');
 
 // Sheet state for on-the-fly connection creation
 const showSourceConnectionSheet = ref(false);
@@ -200,6 +204,17 @@ function goToStep1() {
     currentStep.value = 1;
 }
 
+// Go to step 3 with anonymization config
+function goToStep3(config: string) {
+    anonymizationConfig.value = config;
+    currentStep.value = 3;
+}
+
+// Go back to step 2
+function goToStep2FromStep3() {
+    currentStep.value = 2;
+}
+
 // Get selected connection names for display
 const selectedSourceName = computed(() => {
     const conn = prodConnections.value.find(
@@ -260,6 +275,23 @@ const selectedTargetName = computed(() => {
                         2
                     </div>
                     <span class="text-sm font-medium">Configure Tables</span>
+                </div>
+                <div class="h-px w-8 bg-border" />
+                <div
+                    class="flex items-center gap-2"
+                    :class="{ 'opacity-50': currentStep !== 3 }"
+                >
+                    <div
+                        class="flex size-8 items-center justify-center rounded-full text-sm font-medium"
+                        :class="
+                            currentStep >= 3
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground'
+                        "
+                    >
+                        3
+                    </div>
+                    <span class="text-sm font-medium">Schedule</span>
                 </div>
             </div>
 
@@ -410,6 +442,18 @@ const selectedTargetName = computed(() => {
                 :cloning-title="cloningTitle"
                 mode="create"
                 @back="goToStep1"
+                @next="goToStep3"
+            />
+
+            <!-- Step 3: Schedule Configuration -->
+            <ScheduleConfigurationStep
+                v-if="currentStep === 3"
+                :source-connection-id="selectedSourceConnection!"
+                :target-connection-id="selectedTargetConnection!"
+                :cloning-title="cloningTitle"
+                :anonymization-config="anonymizationConfig"
+                mode="create"
+                @back="goToStep2FromStep3"
             />
         </div>
 
