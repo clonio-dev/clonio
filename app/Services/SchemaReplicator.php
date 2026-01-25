@@ -12,7 +12,6 @@ use App\Services\SchemaReplicator\PostgreSQLSchemaBuilder;
 use App\Services\SchemaReplicator\SQLiteSchemaBuilder;
 use App\Services\SchemaReplicator\SQLServerSchemaBuilder;
 use Illuminate\Database\Connection;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
@@ -23,8 +22,7 @@ use Throwable;
  */
 class SchemaReplicator
 {
-    public function __construct(public readonly DependencyResolver $dependencyResolver)
-    {}
+    public function __construct(public readonly DependencyResolver $dependencyResolver) {}
 
     /**
      * Replicate entire database schema
