@@ -1,3 +1,5 @@
+import { PaginatedData } from '@/types/index';
+
 /**
  * Cloning Run Status Types
  */
@@ -112,14 +114,7 @@ export interface DashboardProps {
  * Clonings Index Page Props
  */
 export interface CloningsIndexProps {
-    clonings: {
-        data: Cloning[];
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-        links: PaginationLink[];
-    };
+    clonings: PaginatedData<Cloning>;
 }
 
 /**
@@ -152,30 +147,6 @@ export interface CloningRunShowProps {
  * Cloning Runs Index Page Props
  */
 export interface CloningRunsIndexProps {
-    runs: {
-        current_page: number;
-        data: CloningRun[];
-        first_page_url: string;
-        from: number;
-        last_page: number;
-        last_page_url: string;
-        links: PaginationLink[];
-        next_page_url: string | null;
-        path: string;
-        per_page: number;
-        prev_page_url: string | null;
-        to: number;
-        total: number;
-    };
+    runs: PaginatedData<CloningRun>;
     hasActiveRuns: boolean;
-}
-
-/**
- * Pagination Link
- */
-export interface PaginationLink {
-    url: string | null;
-    label: string;
-    page: number | null;
-    active: boolean;
 }
