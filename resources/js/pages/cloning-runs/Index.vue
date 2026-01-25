@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import Pagination from '@/components/Pagination.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
-import ConnectionsPagination from '@/pages/connections/components/ConnectionsPagination.vue';
 import type { BreadcrumbItem } from '@/types';
-import type { CloningRunsIndexProps, CloningRun, CloningRunStatus } from '@/types/cloning.types';
+import type {
+    CloningRun,
+    CloningRunsIndexProps,
+    CloningRunStatus,
+} from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     AlertCircle,
@@ -221,26 +225,6 @@ onUnmounted(() => {
                         </Link>
                     </Button>
                 </div>
-            </div>
-
-            <!-- Stats Bar -->
-            <div
-                v-if="hasRuns"
-                class="mb-6 flex items-center gap-6 rounded-lg border border-border/50 bg-gradient-to-r from-muted/30 to-muted/50 px-4 py-3 dark:from-muted/20 dark:to-muted/30"
-            >
-                <div class="flex items-center gap-2">
-                    <div
-                        class="size-2 animate-pulse rounded-full bg-violet-500"
-                    ></div>
-                    <span class="text-sm font-medium text-foreground">
-                        {{ totalRuns }}
-                        {{ totalRuns === 1 ? 'cloning run' : 'cloning runs' }}
-                    </span>
-                </div>
-                <div class="h-4 w-px bg-border"></div>
-                <span class="text-sm text-muted-foreground">
-                    Showing {{ runs.data.length }} of {{ totalRuns }}
-                </span>
             </div>
 
             <!-- Empty State -->
@@ -492,18 +476,31 @@ onUnmounted(() => {
                                 </td>
                             </tr>
                         </tbody>
+                        <tfoot>
+                            <tr
+                                class="border-t border-border/60 bg-muted/30 dark:border-border/40 dark:bg-muted/20"
+                            >
+                                <td
+                                    colspan="7"
+                                    class="px-4 py-3 text-xs tracking-wider text-muted-foreground"
+                                >
+                                    <Pagination
+                                        :links="runs.links"
+                                        :current-page="runs.current_page"
+                                        :last-page="runs.last_page"
+                                        :prev-url="runs.prev_page_url"
+                                        :next-url="runs.next_page_url"
+                                        :from="runs.from"
+                                        :to="runs.to"
+                                        :total="totalRuns"
+                                        name="cloning run"
+                                        plural-name="cloning runs"
+                                    />
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
-
-                <!-- Pagination -->
-                <ConnectionsPagination
-                    v-if="runs.last_page > 1"
-                    :links="runs.links"
-                    :current-page="runs.current_page"
-                    :last-page="runs.last_page"
-                    :prev-url="null"
-                    :next-url="null"
-                />
             </div>
         </div>
     </AppLayout>

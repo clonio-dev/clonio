@@ -142,6 +142,7 @@ function closeSheet() {
                     name="connection"
                     plural-name="connections"
                     variant="simple"
+                    class="text-xs tracking-wider text-muted-foreground"
                 />
 
                 <InfoComponent
