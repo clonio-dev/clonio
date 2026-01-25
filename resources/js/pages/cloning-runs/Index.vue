@@ -413,7 +413,7 @@ onUnmounted(() => {
                                         />
                                         <span class="text-sm text-foreground">
                                             {{
-                                                run.cloning?.sourceConnection
+                                                run.cloning?.source_connection
                                                     ?.name || '-'
                                             }}
                                         </span>
@@ -433,7 +433,7 @@ onUnmounted(() => {
                                         />
                                         <span class="text-sm text-foreground">
                                             {{
-                                                run.cloning?.targetConnection
+                                                run.cloning?.target_connection
                                                     ?.name || '-'
                                             }}
                                         </span>

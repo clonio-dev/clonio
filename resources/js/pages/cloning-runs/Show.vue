@@ -312,14 +312,14 @@ onUnmounted(() => {
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-medium text-foreground">
-                            {{ run.cloning?.sourceConnection?.name || '-' }}
+                            {{ run.cloning?.source_connection?.name || '-' }}
                         </span>
                         <Badge
-                            v-if="run.cloning?.sourceConnection?.type"
+                            v-if="run.cloning?.source_connection?.type"
                             variant="secondary"
                             class="text-xs"
                         >
-                            {{ run.cloning.sourceConnection.type }}
+                            {{ run.cloning.source_connection.type }}
                         </Badge>
                     </div>
                 </div>
@@ -336,14 +336,14 @@ onUnmounted(() => {
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-medium text-foreground">
-                            {{ run.cloning?.targetConnection?.name || '-' }}
+                            {{ run.cloning?.target_connection?.name || '-' }}
                         </span>
                         <Badge
-                            v-if="run.cloning?.targetConnection?.type"
+                            v-if="run.cloning?.target_connection?.type"
                             variant="secondary"
                             class="text-xs"
                         >
-                            {{ run.cloning.targetConnection.type }}
+                            {{ run.cloning.target_connection.type }}
                         </Badge>
                     </div>
                 </div>

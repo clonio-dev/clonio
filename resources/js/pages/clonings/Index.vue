@@ -218,7 +218,7 @@ function deleteCloning(cloning: Cloning) {
                                         />
                                         <span class="text-sm text-foreground">
                                             {{
-                                                cloning.sourceConnection
+                                                cloning.source_connection
                                                     ?.name || '-'
                                             }}
                                         </span>
@@ -238,7 +238,7 @@ function deleteCloning(cloning: Cloning) {
                                         />
                                         <span class="text-sm text-foreground">
                                             {{
-                                                cloning.targetConnection
+                                                cloning.target_connection
                                                     ?.name || '-'
                                             }}
                                         </span>

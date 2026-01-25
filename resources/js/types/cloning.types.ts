@@ -54,8 +54,8 @@ export interface Cloning {
     updated_at: string;
 
     // Relations
-    sourceConnection?: DatabaseConnectionPartial;
-    targetConnection?: DatabaseConnectionPartial;
+    source_connection?: DatabaseConnectionPartial;
+    target_connection?: DatabaseConnectionPartial;
     runs?: CloningRun[];
     runs_count?: number;
 }

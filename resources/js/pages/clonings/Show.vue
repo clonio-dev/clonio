@@ -157,7 +157,7 @@ const runsWithCloning = computed(() =>
                                     />
                                     <span class="font-medium text-foreground">
                                         {{
-                                            cloning.sourceConnection?.name ||
+                                            cloning.source_connection?.name ||
                                             'Unknown'
                                         }}
                                     </span>
@@ -165,7 +165,7 @@ const runsWithCloning = computed(() =>
                                         variant="outline"
                                         class="ml-auto text-xs"
                                     >
-                                        {{ cloning.sourceConnection?.type }}
+                                        {{ cloning.source_connection?.type }}
                                     </Badge>
                                 </div>
                             </div>
@@ -190,7 +190,7 @@ const runsWithCloning = computed(() =>
                                     />
                                     <span class="font-medium text-foreground">
                                         {{
-                                            cloning.targetConnection?.name ||
+                                            cloning.target_connection?.name ||
                                             'Unknown'
                                         }}
                                     </span>
@@ -198,7 +198,7 @@ const runsWithCloning = computed(() =>
                                         variant="outline"
                                         class="ml-auto text-xs"
                                     >
-                                        {{ cloning.targetConnection?.type }}
+                                        {{ cloning.target_connection?.type }}
                                     </Badge>
                                 </div>
                             </div>
