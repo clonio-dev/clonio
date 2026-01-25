@@ -57,6 +57,7 @@ final readonly class DatabaseInformationRetrievalService
     public function getTableNames(ConnectionData $connectionData, bool $schemaQualified = false): array
     {
         $schema = $this->getSchema($connectionData);
+
         return $schema->getTableListing($schema->getCurrentSchemaName(), schemaQualified: $schemaQualified);
     }
 
