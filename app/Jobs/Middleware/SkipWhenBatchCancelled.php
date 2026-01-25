@@ -36,7 +36,7 @@ class SkipWhenBatchCancelled
             return;
         }
 
-        // In TransferRunLog speichern
+        // In CloningRunLog speichern
         //        $this->run->log($event, [
         //            'table' => $this->tableName,
         //            'message' => $message,
