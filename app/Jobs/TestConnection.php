@@ -9,16 +9,18 @@ use App\Jobs\Concerns\TransferBatchJob;
 use App\Models\CloningRun;
 use App\Models\DatabaseConnection;
 use App\Services\DatabaseInformationRetrievalService;
+use App\Services\SchemaInspector\SchemaInspectorFactory;
 use Exception;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Connection;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class TestConnection implements ShouldQueue
 {
-    use Batchable, Queueable, LogsProcessSteps, TransferBatchJob;
+    use Batchable, LogsProcessSteps, Queueable, TransferBatchJob;
 
     public int $tries = 2;
 
@@ -31,11 +33,15 @@ class TestConnection implements ShouldQueue
         try {
             $connectionData = $this->databaseConnection->toConnectionDataDto();
 
-            $databaseInformationRetrievalService->getConnection($connectionData);
+            $connection = $databaseInformationRetrievalService->getConnection($connectionData);
 
-            $this->databaseConnection->markConnected();
+            // Get the DBMS version from database metadata
+            $dbmsVersion = $this->getDbmsVersion($connection);
 
-            $this->logSuccess('connection_tested', 'Connection successful to ' . $this->databaseConnection->name);
+            $this->databaseConnection->markConnected('Healthy', $dbmsVersion);
+
+            $versionInfo = $dbmsVersion ? " (version: {$dbmsVersion})" : '';
+            $this->logSuccess('connection_tested', 'Connection successful to ' . $this->databaseConnection->name . $versionInfo);
         } catch (RuntimeException $exception) {
             // PDO driver exception
             $this->databaseConnection->markNotConnected('Connection Failed');
@@ -46,6 +52,28 @@ class TestConnection implements ShouldQueue
             // driver missing for connection data DTO
             $this->logError('connection_failed', $exception->getMessage());
             $this->logErrorMessage($exception->getMessage(), $databaseInformationRetrievalService->connectionMap());
+        }
+    }
+
+    /**
+     * Get the DBMS version from the database connection.
+     */
+    private function getDbmsVersion(mixed $connection): ?string
+    {
+        if (! $connection instanceof Connection) {
+            return null;
+        }
+
+        try {
+            $inspector = SchemaInspectorFactory::create($connection);
+            $metadata = $inspector->getDatabaseMetadata($connection);
+
+            return $metadata['version'] ?? null;
+        } catch (Exception $e) {
+            // If we can't get the version, that's okay - connection still works
+            Log::warning('Could not retrieve DBMS version: ' . $e->getMessage());
+
+            return null;
         }
     }
 }

@@ -26,6 +26,7 @@ class DatabaseConnectionController extends Controller
                 'id' => $connection->id,
                 'name' => $connection->name,
                 'type' => $connection->type,
+                'version' => $connection->dbms_version,
                 'host' => $connection->host,
                 'port' => $connection->port,
                 'database' => $connection->database,

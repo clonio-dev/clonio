@@ -1,6 +1,7 @@
 export interface Connection {
     id: number;
     type: string;
+    version: null | string;
     name: string;
     host: string;
     port: number;

@@ -50,6 +50,17 @@ class DatabaseConnectionFactory extends Factory
     }
 
     /**
+     * State: MariaDB connection
+     */
+    public function mariadb(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'type' => 'mariadb',
+            'port' => 3306,
+        ]);
+    }
+
+    /**
      * State: PostgreSQL connection
      */
     public function pgsql(): static

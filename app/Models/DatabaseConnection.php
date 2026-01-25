@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Crypt;
  * @property int $user_id
  * @property string $name
  * @property DatabaseConnectionTypes $type
+ * @property string|null $dbms_version
  * @property string $host
  * @property int $port
  * @property string $database
@@ -48,6 +49,7 @@ class DatabaseConnection extends Model
         'user_id',
         'name',
         'type',
+        'dbms_version',
         'host',
         'port',
         'database',
@@ -121,13 +123,25 @@ class DatabaseConnection extends Model
         );
     }
 
-    public function markConnected(string $testResult = 'Healthy'): void
+    public function markConnected(string $testResult = 'Healthy', ?string $dbmsVersion = null): void
     {
-        $this->update([
+        $updateData = [
             'last_tested_at' => now(),
             'is_connectable' => true,
             'last_test_result' => $testResult,
-        ]);
+        ];
+
+        if ($dbmsVersion !== null) {
+            $updateData['dbms_version'] = $dbmsVersion;
+
+            // Correct MySQL/MariaDB type based on version string
+            $correctedType = $this->detectCorrectTypeFromVersion($dbmsVersion);
+            if ($correctedType !== null && $correctedType !== $this->type) {
+                $updateData['type'] = $correctedType;
+            }
+        }
+
+        $this->update($updateData);
     }
 
     public function markNotConnected(string $testResult): void
@@ -185,5 +199,30 @@ class DatabaseConnection extends Model
     protected function prodDatabases(Builder $query): Builder
     {
         return $query->where('is_production_stage', true);
+    }
+
+    /**
+     * Detect the correct database type from the version string.
+     * MariaDB includes "MariaDB" in its version string, allowing us to
+     * differentiate between MySQL and MariaDB even when configured incorrectly.
+     */
+    private function detectCorrectTypeFromVersion(string $version): ?DatabaseConnectionTypes
+    {
+        // Only applicable for MySQL/MariaDB connections
+        if (! in_array($this->type, [DatabaseConnectionTypes::MYSQL, DatabaseConnectionTypes::MARIADB], true)) {
+            return null;
+        }
+
+        $isMariaDB = mb_stripos($version, 'mariadb') !== false;
+
+        if ($isMariaDB && $this->type === DatabaseConnectionTypes::MYSQL) {
+            return DatabaseConnectionTypes::MARIADB;
+        }
+
+        if (! $isMariaDB && $this->type === DatabaseConnectionTypes::MARIADB) {
+            return DatabaseConnectionTypes::MYSQL;
+        }
+
+        return null;
     }
 }
