@@ -40,8 +40,7 @@ class TestConnection implements ShouldQueue
 
             $this->databaseConnection->markConnected('Healthy', $dbmsVersion);
 
-            $versionInfo = $dbmsVersion ? " (version: {$dbmsVersion})" : '';
-            $this->logSuccess('connection_tested', 'Connection successful to ' . $this->databaseConnection->name . $versionInfo);
+            $this->logSuccess('connection_tested', 'Connection successful to ' . $this->databaseConnection->name);
         } catch (RuntimeException $exception) {
             // PDO driver exception
             $this->databaseConnection->markNotConnected('Connection Failed');
