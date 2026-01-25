@@ -240,15 +240,18 @@ class CloningController extends Controller
 
         $run->log('cloning_run_created');
 
-        $synchronizationConfigData = $this->buildSynchronizationOptions($cloning->anonymization_config);
-
         $connectionDataSource = $cloning->sourceConnection->toConnectionDataDto();
         $connectionDataTarget = $cloning->targetConnection->toConnectionDataDto();
 
         Bus::batch([
             new TestConnection($cloning->sourceConnection, $run),
             new TestConnection($cloning->targetConnection, $run),
-            new SynchronizeDatabase($synchronizationConfigData, $connectionDataSource, $connectionDataTarget, $run),
+            new SynchronizeDatabase(
+                options: SynchronizationOptionsData::from($cloning->anonymization_config),
+                sourceConnectionData: $connectionDataSource,
+                targetConnectionData: $connectionDataTarget,
+                run: $run,
+            ),
         ])
             ->name('Synchronize database ' . $connectionDataSource->name)
             ->before(function (Batch $batch) use ($run): void {
@@ -276,60 +279,6 @@ class CloningController extends Controller
             ->dispatch();
 
         return $run;
-    }
-
-    /**
-     * Build SynchronizationOptionsData from the stored anonymization config.
-     *
-     * @param  array{tables: array<int, array{tableName: string, columnMutations: array<int, array{columnName: string, strategy: string, options: array<string, mixed>}>}>}|null  $config
-     */
-    private function buildSynchronizationOptions(?array $config): SynchronizationOptionsData
-    {
-        if (! $config || ! isset($config['tables'])) {
-            return new SynchronizationOptionsData();
-        }
-
-        $tableAnonymizationOptions = new Collection();
-
-        foreach ($config['tables'] as $tableConfig) {
-            $columnMutations = new Collection();
-
-            foreach ($tableConfig['columnMutations'] ?? [] as $mutation) {
-                $strategy = ColumnMutationStrategyEnum::tryFrom($mutation['strategy']);
-
-                if (! $strategy || $strategy === ColumnMutationStrategyEnum::KEEP) {
-                    continue;
-                }
-
-                $options = $mutation['options'] ?? [];
-
-                $columnMutations->push(new ColumnMutationData(
-                    columnName: $mutation['columnName'],
-                    strategy: $strategy,
-                    options: new ColumnMutationDataOptions(
-                        fakerMethod: $options['fakerMethod'] ?? 'word',
-                        fakerMethodArguments: $options['fakerMethodArguments'] ?? [],
-                        visibleChars: $options['visibleChars'] ?? 2,
-                        maskChar: $options['maskChar'] ?? '*',
-                        preserveFormat: $options['preserveFormat'] ?? false,
-                        algorithm: $options['algorithm'] ?? 'sha256',
-                        salt: $options['salt'] ?? '',
-                        value: $options['value'] ?? null,
-                    ),
-                ));
-            }
-
-            if ($columnMutations->isNotEmpty()) {
-                $tableAnonymizationOptions->push(new TableAnonymizationOptionsData(
-                    tableName: $tableConfig['tableName'],
-                    columnMutations: $columnMutations,
-                ));
-            }
-        }
-
-        return new SynchronizationOptionsData(
-            tableAnonymizationOptions: $tableAnonymizationOptions->isNotEmpty() ? $tableAnonymizationOptions : null,
-        );
     }
 
     /**
