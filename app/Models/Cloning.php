@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -98,6 +99,27 @@ class Cloning extends Model
     public function latestRun(): ?CloningRun
     {
         return $this->runs()->latest('id')->first();
+    }
+
+    /**
+     * Calculate the next run time from a cron expression.
+     *
+     * @param string|null $cronExpression
+     * @return \Illuminate\Support\Carbon|null
+     */
+    public static function calculateNextRunAt(?string $cronExpression): ?Carbon
+    {
+        if (empty($cronExpression)) {
+            return null;
+        }
+
+        try {
+            $cron = new \Cron\CronExpression($cronExpression);
+
+            return \Illuminate\Support\Carbon::instance($cron->getNextRunDate());
+        } catch (Exception) {
+            return null;
+        }
     }
 
     /**
