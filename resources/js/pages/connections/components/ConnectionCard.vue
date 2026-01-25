@@ -15,7 +15,7 @@ import {
     CardDescription,
     CardFooter,
     CardHeader,
-    CardTitle
+    CardTitle,
 } from '@/components/ui/card';
 import type { Connection } from '@/pages/connections/types';
 import { router } from '@inertiajs/vue3';
@@ -115,7 +115,11 @@ const deleteConnection = () => {
                             <CardDescription
                                 class="mt-1 flex items-center gap-2"
                             >
-                                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{{ databaseTypeConfig.label }}</p>
+                                <p
+                                    class="text-[10px] font-bold tracking-wider text-slate-400 uppercase"
+                                >
+                                    {{ databaseTypeConfig.label }}
+                                </p>
                             </CardDescription>
                         </div>
                         <div>
@@ -200,30 +204,61 @@ const deleteConnection = () => {
                     class="size-2 rounded-full"
                     :class="{
                         'bg-slate-400': !props.connection.last_tested_at,
-                        'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]': props.connection.last_tested_at && props.connection.is_connectable,
-                        'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]': props.connection.last_tested_at && !props.connection.is_connectable,
-                    }"></div>
+                        'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]':
+                            props.connection.last_tested_at &&
+                            props.connection.is_connectable,
+                        'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]':
+                            props.connection.last_tested_at &&
+                            !props.connection.is_connectable,
+                    }"
+                ></div>
                 <div class="flex flex-col">
                     <span
                         class="text-xs font-bold"
                         :class="{
                             'text-slate-500': !props.connection.last_tested_at,
-                            'text-emerald-600': props.connection.last_tested_at && props.connection.is_connectable,
-                            'text-red-600': props.connection.last_tested_at && !props.connection.is_connectable,
-                        }">{{ props.connection.last_test_result }}</span>
-                    <span class="text-[10px] text-slate-400">{{ props.connection.last_tested_at_label }}</span>
+                            'text-emerald-600':
+                                props.connection.last_tested_at &&
+                                props.connection.is_connectable,
+                            'text-red-600':
+                                props.connection.last_tested_at &&
+                                !props.connection.is_connectable,
+                        }"
+                        >{{ props.connection.last_test_result }}</span
+                    >
+                    <span class="text-[10px] text-slate-400">{{
+                        props.connection.last_tested_at_label
+                    }}</span>
                 </div>
             </div>
-                <div class="flex gap-1">
-                    <Button variant="ghost" title="Refresh" @click="router.post(DatabaseConnectionController.testConnection(props.connection).url)">
-                        <span class="sr-only">refresh</span>
-                        <RotateCw />
-                    </Button>
-                    <Button variant="ghost" @click="deleteConnection" title="Delete" class="group/button">
-                        <span class="sr-only">delete</span>
-                        <Trash2 class="text-slate-400 group-hover/button:text-red-600 dark:group-hover/button:text-red-400" />
-                    </Button>
-                </div>
+            <div class="flex gap-1">
+                <Button
+                    variant="ghost"
+                    title="Refresh"
+                    class="text-accent-foreground/50 group-hover:text-accent-foreground"
+                    @click="
+                        router.post(
+                            DatabaseConnectionController.testConnection(
+                                props.connection,
+                            ).url,
+                        )
+                    "
+                >
+                    <span class="sr-only">refresh</span>
+                    <RotateCw />
+                </Button>
+                <Button
+                    variant="ghost"
+                    @click="deleteConnection"
+                    title="Delete"
+                    class="group/button"
+                >
+                    <span class="sr-only">delete</span>
+                    <Trash2
+                        class="text-slate-400 group-hover:text-red-400 group-hover/button:text-red-600 dark:group-hover/button:text-red-400"
+                    />
+                </Button>
+            </div>
         </CardFooter>
     </Card>
 </template>
