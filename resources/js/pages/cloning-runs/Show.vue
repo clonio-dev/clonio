@@ -149,7 +149,7 @@ function setupAutoRefresh() {
         refreshInterval = null;
     }
     if (props.isActive) {
-        refreshInterval = window.setInterval(refreshPage, 1000);
+        refreshInterval = window.setInterval(refreshPage, 100);
     }
 }
 
