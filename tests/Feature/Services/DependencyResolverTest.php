@@ -16,21 +16,21 @@ it('resolves simple dependency chain', function () {
     $conn = DB::connection('test_deps');
 
     // Create tables with FK chain: users -> orders -> order_items
-    $conn->statement("CREATE TABLE users (id INTEGER PRIMARY KEY)");
-    $conn->statement("
+    $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
+    $conn->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
-    ");
-    $conn->statement("
+    ');
+    $conn->statement('
         CREATE TABLE order_items (
             id INTEGER PRIMARY KEY,
             order_id INTEGER,
             FOREIGN KEY (order_id) REFERENCES orders(id)
         )
-    ");
+    ');
 
     $resolver = new DependencyResolver();
     $order = $resolver->getProcessingOrder(['users', 'orders', 'order_items'], $conn);
@@ -46,16 +46,16 @@ it('handles multiple parents correctly', function () {
     $conn = DB::connection('test_deps');
 
     // Create schema: users + products (no deps) -> orders -> order_items
-    $conn->statement("CREATE TABLE users (id INTEGER PRIMARY KEY)");
-    $conn->statement("CREATE TABLE products (id INTEGER PRIMARY KEY)");
-    $conn->statement("
+    $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
+    $conn->statement('CREATE TABLE products (id INTEGER PRIMARY KEY)');
+    $conn->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
-    ");
-    $conn->statement("
+    ');
+    $conn->statement('
         CREATE TABLE order_items (
             id INTEGER PRIMARY KEY,
             order_id INTEGER,
@@ -63,7 +63,7 @@ it('handles multiple parents correctly', function () {
             FOREIGN KEY (order_id) REFERENCES orders(id),
             FOREIGN KEY (product_id) REFERENCES products(id)
         )
-    ");
+    ');
 
     $resolver = new DependencyResolver();
     $order = $resolver->getProcessingOrder(
@@ -94,7 +94,7 @@ it('detects circular dependencies', function () {
         'c' => ['a'],  // Cycle!
     ];
 
-    expect(fn() => $resolver->topologicalSort($dependencies))
+    expect(fn () => $resolver->topologicalSort($dependencies))
         ->toThrow(RuntimeException::class, 'Circular dependency detected');
 });
 
@@ -102,9 +102,9 @@ it('handles tables with no dependencies', function () {
     $conn = DB::connection('test_deps');
 
     // Create independent tables
-    $conn->statement("CREATE TABLE categories (id INTEGER PRIMARY KEY)");
-    $conn->statement("CREATE TABLE tags (id INTEGER PRIMARY KEY)");
-    $conn->statement("CREATE TABLE settings (id INTEGER PRIMARY KEY)");
+    $conn->statement('CREATE TABLE categories (id INTEGER PRIMARY KEY)');
+    $conn->statement('CREATE TABLE tags (id INTEGER PRIMARY KEY)');
+    $conn->statement('CREATE TABLE settings (id INTEGER PRIMARY KEY)');
 
     $resolver = new DependencyResolver();
     $order = $resolver->getProcessingOrder(['categories', 'tags', 'settings'], $conn);
@@ -120,16 +120,16 @@ it('handles tables with no dependencies', function () {
 it('calculates dependency levels correctly', function () {
     $conn = DB::connection('test_deps');
 
-    $conn->statement("CREATE TABLE users (id INTEGER PRIMARY KEY)");
-    $conn->statement("CREATE TABLE products (id INTEGER PRIMARY KEY)");
-    $conn->statement("
+    $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
+    $conn->statement('CREATE TABLE products (id INTEGER PRIMARY KEY)');
+    $conn->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
-    ");
-    $conn->statement("
+    ');
+    $conn->statement('
         CREATE TABLE order_items (
             id INTEGER PRIMARY KEY,
             order_id INTEGER,
@@ -137,7 +137,7 @@ it('calculates dependency levels correctly', function () {
             FOREIGN KEY (order_id) REFERENCES orders(id),
             FOREIGN KEY (product_id) REFERENCES products(id)
         )
-    ");
+    ');
 
     $resolver = new DependencyResolver();
     $order = $resolver->getProcessingOrder(
@@ -162,14 +162,14 @@ it('handles self-referencing tables', function () {
     $conn = DB::connection('test_deps');
 
     // Create self-referencing table (employees with manager_id)
-    $conn->statement("
+    $conn->statement('
         CREATE TABLE employees (
             id INTEGER PRIMARY KEY,
             manager_id INTEGER,
             FOREIGN KEY (manager_id) REFERENCES employees(id)
         )
-    ");
-    $conn->statement("CREATE TABLE departments (id INTEGER PRIMARY KEY)");
+    ');
+    $conn->statement('CREATE TABLE departments (id INTEGER PRIMARY KEY)');
 
     $resolver = new DependencyResolver();
     $order = $resolver->getProcessingOrder(['employees', 'departments'], $conn);
@@ -183,9 +183,9 @@ it('ignores foreign keys to tables not in the list', function () {
     $conn = DB::connection('test_deps');
 
     // Create tables where some FKs reference tables not in our list
-    $conn->statement("CREATE TABLE external_table (id INTEGER PRIMARY KEY)");
-    $conn->statement("CREATE TABLE our_table (id INTEGER PRIMARY KEY)");
-    $conn->statement("
+    $conn->statement('CREATE TABLE external_table (id INTEGER PRIMARY KEY)');
+    $conn->statement('CREATE TABLE our_table (id INTEGER PRIMARY KEY)');
+    $conn->statement('
         CREATE TABLE mixed_table (
             id INTEGER PRIMARY KEY,
             our_id INTEGER,
@@ -193,7 +193,7 @@ it('ignores foreign keys to tables not in the list', function () {
             FOREIGN KEY (our_id) REFERENCES our_table(id),
             FOREIGN KEY (external_id) REFERENCES external_table(id)
         )
-    ");
+    ');
 
     $resolver = new DependencyResolver();
 
@@ -212,14 +212,14 @@ it('ignores foreign keys to tables not in the list', function () {
 it('formats dependency analysis for display', function () {
     $conn = DB::connection('test_deps');
 
-    $conn->statement("CREATE TABLE users (id INTEGER PRIMARY KEY)");
-    $conn->statement("
+    $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
+    $conn->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
-    ");
+    ');
 
     $resolver = new DependencyResolver();
     $order = $resolver->getProcessingOrder(['users', 'orders'], $conn);
@@ -239,28 +239,28 @@ it('handles complex multi-level dependencies', function () {
     $conn = DB::connection('test_deps');
 
     // Create 4-level deep dependency chain
-    $conn->statement("CREATE TABLE countries (id INTEGER PRIMARY KEY)");
-    $conn->statement("
+    $conn->statement('CREATE TABLE countries (id INTEGER PRIMARY KEY)');
+    $conn->statement('
         CREATE TABLE cities (
             id INTEGER PRIMARY KEY,
             country_id INTEGER,
             FOREIGN KEY (country_id) REFERENCES countries(id)
         )
-    ");
-    $conn->statement("
+    ');
+    $conn->statement('
         CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             city_id INTEGER,
             FOREIGN KEY (city_id) REFERENCES cities(id)
         )
-    ");
-    $conn->statement("
+    ');
+    $conn->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
-    ");
+    ');
 
     $resolver = new DependencyResolver();
     $order = $resolver->getProcessingOrder(
