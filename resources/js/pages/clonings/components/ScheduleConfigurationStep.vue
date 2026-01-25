@@ -6,19 +6,12 @@ import StepNumber from '@/components/StepNumber.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
+import { CronInput } from '@/components/ui/cron-input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Form } from '@inertiajs/vue3';
 import { ArrowLeft, ArrowRight, Calendar, Clock, Loader2 } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Props {
     sourceConnectionId: string | number;
@@ -41,95 +34,7 @@ const emit = defineEmits<Emits>();
 // Schedule state
 const executeNow = ref(props.mode === 'create');
 const isScheduled = ref(props.initialIsScheduled ?? false);
-const schedule = ref(props.initialSchedule ?? '');
-
-// Schedule preset options
-const schedulePresets = [
-    { value: 'custom', label: 'Custom cron expression' },
-    { value: '0 0 * * *', label: 'Daily at midnight' },
-    { value: '0 0 * * 0', label: 'Weekly on Sunday at midnight' },
-    { value: '0 0 1 * *', label: 'Monthly on the 1st at midnight' },
-    { value: '0 */6 * * *', label: 'Every 6 hours' },
-    { value: '0 */12 * * *', label: 'Every 12 hours' },
-    { value: '0 2 * * *', label: 'Daily at 2:00 AM' },
-    { value: '0 3 * * 1-5', label: 'Weekdays at 3:00 AM' },
-];
-
-const selectedPreset = ref<string>(
-    schedulePresets.find((p) => p.value === props.initialSchedule)?.value ?? 'custom'
-);
-
-// Custom cron state (when custom is selected)
-const customCron = ref(
-    schedulePresets.find((p) => p.value === props.initialSchedule) ? '' : (props.initialSchedule ?? '')
-);
-
-// Cron field helpers for custom cron
-const cronParts = ref({
-    minute: '0',
-    hour: '0',
-    dayOfMonth: '*',
-    month: '*',
-    dayOfWeek: '*',
-});
-
-// Watch preset changes
-watch(selectedPreset, (newValue) => {
-    if (newValue !== 'custom') {
-        schedule.value = newValue;
-        customCron.value = '';
-    } else {
-        schedule.value = customCron.value;
-    }
-});
-
-// Watch custom cron changes
-watch(customCron, (newValue) => {
-    if (selectedPreset.value === 'custom') {
-        schedule.value = newValue;
-    }
-});
-
-// Generate human-readable schedule description
-const scheduleDescription = computed(() => {
-    if (!schedule.value) {
-        return 'No schedule configured';
-    }
-
-    const parts = schedule.value.split(' ');
-    if (parts.length !== 5) {
-        return 'Invalid cron expression';
-    }
-
-    const [minute, hour, dayOfMonth, month, dayOfWeek] = parts;
-
-    // Find matching preset
-    const preset = schedulePresets.find((p) => p.value === schedule.value);
-    if (preset && preset.value !== 'custom') {
-        return preset.label;
-    }
-
-    // Generate description for common patterns
-    if (dayOfMonth === '*' && month === '*') {
-        if (dayOfWeek === '*') {
-            if (hour === '*' && minute === '0') {
-                return 'Every hour at the start';
-            }
-            if (hour.startsWith('*/')) {
-                return `Every ${hour.slice(2)} hours`;
-            }
-            return `Daily at ${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
-        }
-        if (dayOfWeek === '0') {
-            return `Weekly on Sunday at ${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
-        }
-        if (dayOfWeek === '1-5') {
-            return `Weekdays at ${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
-        }
-    }
-
-    return `Custom schedule: ${schedule.value}`;
-});
+const schedule = ref(props.initialSchedule ?? '0 0 * * *');
 
 // Form action based on mode
 const formAction = computed(() => {
@@ -187,7 +92,8 @@ const formSchedule = computed(() => {
                         </Label>
                     </div>
                     <p class="mt-2 text-sm text-muted-foreground">
-                        When enabled, the cloning will start as soon as you save.
+                        When enabled, the cloning will start as soon as you
+                        save.
                     </p>
                 </CardContent>
             </Card>
@@ -215,70 +121,14 @@ const formSchedule = computed(() => {
                         </Label>
                     </div>
 
-                    <div v-if="isScheduled" class="space-y-4 pt-2">
-                        <!-- Schedule preset selector -->
-                        <div class="grid gap-2">
-                            <Label for="schedule_preset">Schedule</Label>
-                            <Select v-model="selectedPreset">
-                                <SelectTrigger class="w-full max-w-md">
-                                    <SelectValue placeholder="Select a schedule" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem
-                                        v-for="preset in schedulePresets"
-                                        :key="preset.value"
-                                        :value="preset.value"
-                                    >
-                                        {{ preset.label }}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                    <p class="text-sm text-muted-foreground">
+                        When enabled, this cloning will automatically run on the
+                        configured schedule.
+                    </p>
 
-                        <!-- Custom cron input (when custom is selected) -->
-                        <div v-if="selectedPreset === 'custom'" class="grid gap-2">
-                            <Label for="custom_cron">Cron expression</Label>
-                            <Input
-                                id="custom_cron"
-                                v-model="customCron"
-                                placeholder="* * * * * (minute hour day month weekday)"
-                                class="max-w-md font-mono"
-                            />
-                            <p class="text-xs text-muted-foreground">
-                                Format: minute (0-59) hour (0-23) day-of-month (1-31) month (1-12) day-of-week (0-6, 0=Sunday)
-                            </p>
-                        </div>
-
-                        <!-- Schedule preview -->
-                        <div
-                            class="rounded-md border border-blue-500/20 bg-blue-500/5 p-3 dark:bg-blue-500/10"
-                        >
-                            <p class="text-sm font-medium text-blue-700 dark:text-blue-300">
-                                {{ scheduleDescription }}
-                            </p>
-                            <p
-                                v-if="schedule"
-                                class="mt-1 font-mono text-xs text-blue-600/70 dark:text-blue-400/70"
-                            >
-                                {{ schedule }}
-                            </p>
-                        </div>
-
-                        <!-- Common cron patterns help -->
-                        <details class="text-sm">
-                            <summary class="cursor-pointer font-medium text-muted-foreground hover:text-foreground">
-                                Cron expression examples
-                            </summary>
-                            <div class="mt-2 space-y-1 rounded-md bg-muted/50 p-3 font-mono text-xs">
-                                <p><code>0 0 * * *</code> - Daily at midnight</p>
-                                <p><code>0 2 * * *</code> - Daily at 2:00 AM</p>
-                                <p><code>0 */6 * * *</code> - Every 6 hours</p>
-                                <p><code>0 0 * * 0</code> - Weekly on Sunday</p>
-                                <p><code>0 0 1 * *</code> - Monthly on the 1st</p>
-                                <p><code>0 3 * * 1-5</code> - Weekdays at 3:00 AM</p>
-                                <p><code>30 4 * * 1,3,5</code> - Mon, Wed, Fri at 4:30 AM</p>
-                            </div>
-                        </details>
+                    <!-- Cron Input Component -->
+                    <div v-if="isScheduled" class="pt-2">
+                        <CronInput v-model="schedule" />
                     </div>
                 </CardContent>
             </Card>
