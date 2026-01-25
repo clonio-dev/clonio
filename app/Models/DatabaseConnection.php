@@ -121,6 +121,24 @@ class DatabaseConnection extends Model
         );
     }
 
+    public function markConnected(string $testResult = 'Healthy'): void
+    {
+        $this->update([
+            'last_tested_at' => now(),
+            'is_connectable' => true,
+            'last_test_result' => $testResult,
+        ]);
+    }
+
+    public function markNotConnected(string $testResult): void
+    {
+        $this->update([
+            'last_tested_at' => now(),
+            'is_connectable' => false,
+            'last_test_result' => $testResult,
+        ]);
+    }
+
     /**
      * Encrypt password when setting
      */
@@ -167,23 +185,5 @@ class DatabaseConnection extends Model
     protected function prodDatabases(Builder $query): Builder
     {
         return $query->where('is_production_stage', true);
-    }
-
-    public function markConnected(string $testResult = 'Healthy'): void
-    {
-        $this->update([
-            'last_tested_at' => now(),
-            'is_connectable' => true,
-            'last_test_result' => $testResult,
-        ]);
-    }
-
-    public function markNotConnected(string $testResult): void
-    {
-        $this->update([
-            'last_tested_at' => now(),
-            'is_connectable' => false,
-            'last_test_result' => $testResult,
-        ]);
     }
 }
