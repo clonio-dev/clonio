@@ -243,7 +243,6 @@ class DependencyResolver
 
                 if ($allDepsProcessed) {
                     $currentLevel[] = $table;
-                    $processed[] = $table;
                 }
             }
 
@@ -252,6 +251,12 @@ class DependencyResolver
                 throw new RuntimeException(
                     'Circular dependency detected! Cannot calculate levels.'
                 );
+            }
+
+            // Add current level tables to processed AFTER the iteration
+            // to prevent dependent tables from being placed at the same level
+            foreach ($currentLevel as $table) {
+                $processed[] = $table;
             }
 
             $levels[$level] = $currentLevel;
