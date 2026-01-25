@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import RunCard from '@/components/transfer-runs/RunCard.vue';
+import RunCard from '@/components/cloning-runs/RunCard.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import type { DashboardProps } from '@/types/transfer-run.types';
-import { Head, router } from '@inertiajs/vue3';
+import type { DashboardProps } from '@/types/cloning.types';
+import { Head, Link, router } from '@inertiajs/vue3';
 import {
     Activity,
     ArrowRight,
@@ -50,8 +50,8 @@ function refreshDashboard() {
     });
 }
 
-function createFirstConfig() {
-    router.visit('/connections');
+function createFirstCloning() {
+    router.visit('/clonings/create');
 }
 
 function setupAutoRefresh() {
@@ -291,22 +291,22 @@ onUnmounted(() => {
                 <h2
                     class="mb-2 text-xl font-semibold tracking-tight text-foreground"
                 >
-                    No Transfer Runs Yet
+                    No Cloning Runs Yet
                 </h2>
 
                 <p class="mx-auto mb-8 max-w-md text-sm text-muted-foreground">
-                    Get started by creating your first transfer configuration.
+                    Get started by creating your first cloning configuration.
                     You'll be able to anonymize and transfer data between
                     databases securely.
                 </p>
 
                 <div class="flex flex-col gap-3 sm:flex-row">
                     <Button
-                        @click="createFirstConfig"
+                        @click="createFirstCloning"
                         class="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/20 hover:from-violet-500 hover:to-purple-500"
                     >
                         <Plus class="size-4" />
-                        Create First Config
+                        Create First Cloning
                     </Button>
 
                     <Button
@@ -433,12 +433,13 @@ onUnmounted(() => {
                     <div class="mt-6 flex justify-center">
                         <Button
                             variant="ghost"
-                            as="a"
-                            href="/transfers"
+                            as-child
                             class="gap-2 text-muted-foreground hover:text-foreground"
                         >
-                            View Full History
-                            <ArrowRight class="size-4" />
+                            <Link href="/cloning-runs">
+                                View Full History
+                                <ArrowRight class="size-4" />
+                            </Link>
                         </Button>
                     </div>
                 </div>
