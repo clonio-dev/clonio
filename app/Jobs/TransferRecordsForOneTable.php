@@ -91,6 +91,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         $totalRows = 0;
         $failedChunks = 0;
         $maxChunkRetries = 3;
+        $startTime = microtime(true);
 
         try {
             $this->logInfo(
@@ -169,7 +170,12 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
             $this->logSuccess(
                 'data_copy_completed',
-                "Data copy completed. Total rows: {$totalRows}, Failed chunks: {$failedChunks}"
+                "Data copy completed. Total rows: {$totalRows}, Failed chunks: {$failedChunks}",
+                data: [
+                    'rows_processed' => $totalRows,
+                    'failed_chunks' => $failedChunks,
+                    'duration_seconds' => microtime(true) - $startTime,
+                ],
             );
 
             return;
