@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('database_connections', function (Blueprint $table) {
+        Schema::table('database_connections', function (Blueprint $table): void {
             $table->string('dbms_version')->nullable()->after('type');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('database_connections', function (Blueprint $table) {
+        Schema::table('database_connections', function (Blueprint $table): void {
             $table->dropColumn('dbms_version');
         });
     }

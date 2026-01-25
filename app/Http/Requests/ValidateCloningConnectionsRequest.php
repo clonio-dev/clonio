@@ -116,7 +116,7 @@ class ValidateCloningConnectionsRequest extends FormRequest
             return;
         }
 
-        $service = app(DatabaseInformationRetrievalService::class);
+        $service = resolve(DatabaseInformationRetrievalService::class);
 
         // Test source connection
         try {

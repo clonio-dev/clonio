@@ -18,16 +18,6 @@ final readonly class SynchronizationOptionsData
         public ?Collection $tableAnonymizationOptions = null,
     ) {}
 
-    public function getAnonymizationOptionsForTable(string $tableName): ?TableAnonymizationOptionsData
-    {
-        if (! $this->tableAnonymizationOptions instanceof Collection) {
-            return null;
-        }
-
-        return $this->tableAnonymizationOptions
-            ->firstWhere('tableName', $tableName);
-    }
-
     /**
      * Build SynchronizationOptionsData from the stored anonymization config.
      *
@@ -36,7 +26,7 @@ final readonly class SynchronizationOptionsData
     public static function from(?array $config): self
     {
         if (! $config || ! isset($config['tables'])) {
-            return new SynchronizationOptionsData();
+            return new self();
         }
 
         $tableAnonymizationOptions = new Collection();
@@ -46,8 +36,10 @@ final readonly class SynchronizationOptionsData
 
             foreach ($tableConfig['columnMutations'] ?? [] as $mutation) {
                 $strategy = ColumnMutationStrategyEnum::tryFrom($mutation['strategy']);
-
-                if (! $strategy || $strategy === ColumnMutationStrategyEnum::KEEP) {
+                if (! $strategy) {
+                    continue;
+                }
+                if ($strategy === ColumnMutationStrategyEnum::KEEP) {
                     continue;
                 }
 
@@ -77,8 +69,18 @@ final readonly class SynchronizationOptionsData
             }
         }
 
-        return new SynchronizationOptionsData(
+        return new self(
             tableAnonymizationOptions: $tableAnonymizationOptions->isNotEmpty() ? $tableAnonymizationOptions : null,
         );
+    }
+
+    public function getAnonymizationOptionsForTable(string $tableName): ?TableAnonymizationOptionsData
+    {
+        if (! $this->tableAnonymizationOptions instanceof Collection) {
+            return null;
+        }
+
+        return $this->tableAnonymizationOptions
+            ->firstWhere('tableName', $tableName);
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Services\DependencyResolver;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Setup in-memory SQLite for testing
     config(['database.connections.test_deps' => [
         'driver' => 'sqlite',
@@ -12,8 +12,8 @@ beforeEach(function () {
     ]]);
 });
 
-it('resolves simple dependency chain', function () {
-    $conn = DB::connection('test_deps');
+it('resolves simple dependency chain', function (): void {
+    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
 
     // Create tables with FK chain: users -> orders -> order_items
     $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
@@ -42,8 +42,8 @@ it('resolves simple dependency chain', function () {
     expect($order['delete_order'])->toBe(['order_items', 'orders', 'users']);
 });
 
-it('handles multiple parents correctly', function () {
-    $conn = DB::connection('test_deps');
+it('handles multiple parents correctly', function (): void {
+    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
 
     // Create schema: users + products (no deps) -> orders -> order_items
     $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
@@ -84,7 +84,7 @@ it('handles multiple parents correctly', function () {
     expect($insertOrder[count($insertOrder) - 1])->toBe('order_items');
 });
 
-it('detects circular dependencies', function () {
+it('detects circular dependencies', function (): void {
     // Create manual dependency graph with cycle
     $resolver = new DependencyResolver();
 
@@ -94,12 +94,12 @@ it('detects circular dependencies', function () {
         'c' => ['a'],  // Cycle!
     ];
 
-    expect(fn () => $resolver->topologicalSort($dependencies))
+    expect(fn (): array => $resolver->topologicalSort($dependencies))
         ->toThrow(RuntimeException::class, 'Circular dependency detected');
 });
 
-it('handles tables with no dependencies', function () {
-    $conn = DB::connection('test_deps');
+it('handles tables with no dependencies', function (): void {
+    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
 
     // Create independent tables
     $conn->statement('CREATE TABLE categories (id INTEGER PRIMARY KEY)');
@@ -117,8 +117,8 @@ it('handles tables with no dependencies', function () {
     expect($order['delete_order'])->toHaveCount(3);
 });
 
-it('calculates dependency levels correctly', function () {
-    $conn = DB::connection('test_deps');
+it('calculates dependency levels correctly', function (): void {
+    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
 
     $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
     $conn->statement('CREATE TABLE products (id INTEGER PRIMARY KEY)');
@@ -158,8 +158,8 @@ it('calculates dependency levels correctly', function () {
     expect($levels[2])->toContain('order_items');
 });
 
-it('handles self-referencing tables', function () {
-    $conn = DB::connection('test_deps');
+it('handles self-referencing tables', function (): void {
+    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
 
     // Create self-referencing table (employees with manager_id)
     $conn->statement('
@@ -179,8 +179,8 @@ it('handles self-referencing tables', function () {
     expect($order['insert_order'])->toContain('departments');
 });
 
-it('ignores foreign keys to tables not in the list', function () {
-    $conn = DB::connection('test_deps');
+it('ignores foreign keys to tables not in the list', function (): void {
+    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
 
     // Create tables where some FKs reference tables not in our list
     $conn->statement('CREATE TABLE external_table (id INTEGER PRIMARY KEY)');
@@ -209,8 +209,8 @@ it('ignores foreign keys to tables not in the list', function () {
     expect($deps)->not->toContain('external_table');
 });
 
-it('formats dependency analysis for display', function () {
-    $conn = DB::connection('test_deps');
+it('formats dependency analysis for display', function (): void {
+    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
 
     $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
     $conn->statement('
@@ -235,8 +235,8 @@ it('formats dependency analysis for display', function () {
     expect($formatted)->toContain('orders');
 });
 
-it('handles complex multi-level dependencies', function () {
-    $conn = DB::connection('test_deps');
+it('handles complex multi-level dependencies', function (): void {
+    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
 
     // Create 4-level deep dependency chain
     $conn->statement('CREATE TABLE countries (id INTEGER PRIMARY KEY)');
@@ -292,7 +292,7 @@ it('can resolve dependencies correct', function (): void {
     expect($order)->toBe(['no_deps', 'second_dep', 'source', 'one_dep']);
 });
 
-it('correctly resolves the exact scenario from issue', function () {
+it('correctly resolves the exact scenario from issue', function (): void {
     // Test the exact case that was reported as broken
     $dependencies = [
         'no_deps' => [],
@@ -330,7 +330,7 @@ it('correctly resolves the exact scenario from issue', function () {
     expect($result)->toBeIn($validOrders);
 });
 
-it('handles complex multi-level chain correctly', function () {
+it('handles complex multi-level chain correctly', function (): void {
     $dependencies = [
         'level_0a' => [],
         'level_0b' => [],
@@ -365,7 +365,7 @@ it('handles complex multi-level chain correctly', function () {
     expect($result[count($result) - 1])->toBe('level_3');
 });
 
-it('handles diamond dependency correctly', function () {
+it('handles diamond dependency correctly', function (): void {
     /*
      *       A
      *      / \
@@ -403,7 +403,7 @@ it('handles diamond dependency correctly', function () {
     expect($result[count($result) - 1])->toBe('D');
 });
 
-it('verifies INSERT order matches schema creation requirements', function () {
+it('verifies INSERT order matches schema creation requirements', function (): void {
     // Real-world scenario: users -> orders -> order_items
     $dependencies = [
         'users' => [],

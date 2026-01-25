@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Data\ColumnSchema;
-use App\Data\ConstraintSchema;
 use App\Data\ForeignKeySchema;
 use App\Data\IndexSchema;
 use App\Data\TableSchema;

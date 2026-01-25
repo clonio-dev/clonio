@@ -6,7 +6,7 @@ use App\Http\Controllers\CloningRunController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
-Route::get('/', fn () => view('home', [
+Route::get('/', fn (): Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View => view('home', [
     'canRegister' => Features::enabled(Features::registration()),
 ]))->name('home');
 

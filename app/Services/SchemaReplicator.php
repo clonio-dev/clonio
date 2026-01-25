@@ -228,7 +228,7 @@ class SchemaReplicator
         }
 
         // Modify changed columns
-        foreach ($diff['modified_columns'] as $columnName => $changes) {
+        foreach (array_keys($diff['modified_columns']) as $columnName) {
             $column = $table->getColumn($columnName);
             $sql = $builder->buildModifyColumn($table->name, $column);
             $target->statement($sql);

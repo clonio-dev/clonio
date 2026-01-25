@@ -112,8 +112,8 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
 
     protected function buildForeignKeyConstraint(ForeignKeySchema $fk): string
     {
-        $localColumns = implode(', ', array_map(fn ($c) => "\"{$c}\"", $fk->columns));
-        $referencedColumns = implode(', ', array_map(fn ($c) => "\"{$c}\"", $fk->referencedColumns));
+        $localColumns = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $fk->columns));
+        $referencedColumns = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $fk->referencedColumns));
 
         $sql = "FOREIGN KEY ({$localColumns}) REFERENCES \"{$fk->referencedTable}\" ({$referencedColumns})";
 

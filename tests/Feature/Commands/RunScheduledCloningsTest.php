@@ -16,7 +16,7 @@ it('does nothing when no scheduled clonings are due', function (): void {
         ->expectsOutput('No scheduled clonings due to run.')
         ->assertSuccessful();
 
-    expect(CloningRun::count())->toBe(0);
+    expect(CloningRun::query()->count())->toBe(0);
 });
 
 it('executes scheduled clonings that are due', function (): void {
@@ -31,8 +31,8 @@ it('executes scheduled clonings that are due', function (): void {
         ->expectsOutputToContain("Executing cloning: {$cloning->title}")
         ->assertSuccessful();
 
-    expect(CloningRun::count())->toBe(1);
-    Bus::assertBatched(fn ($batch) => $batch->name === "Scheduled sync: {$cloning->title}");
+    expect(CloningRun::query()->count())->toBe(1);
+    Bus::assertBatched(fn ($batch): bool => $batch->name === "Scheduled sync: {$cloning->title}");
 });
 
 it('executes scheduled clonings with null next_run_at', function (): void {
@@ -45,7 +45,7 @@ it('executes scheduled clonings with null next_run_at', function (): void {
     $this->artisan('clonings:run-scheduled')
         ->assertSuccessful();
 
-    expect(CloningRun::count())->toBe(1);
+    expect(CloningRun::query()->count())->toBe(1);
 });
 
 it('updates next_run_at after execution', function (): void {
@@ -76,7 +76,7 @@ it('skips clonings that are not scheduled', function (): void {
         ->expectsOutput('No scheduled clonings due to run.')
         ->assertSuccessful();
 
-    expect(CloningRun::count())->toBe(0);
+    expect(CloningRun::query()->count())->toBe(0);
 });
 
 it('executes multiple scheduled clonings', function (): void {
@@ -90,5 +90,5 @@ it('executes multiple scheduled clonings', function (): void {
         ->expectsOutputToContain('Found 3 cloning(s) due to run.')
         ->assertSuccessful();
 
-    expect(CloningRun::count())->toBe(3);
+    expect(CloningRun::query()->count())->toBe(3);
 });

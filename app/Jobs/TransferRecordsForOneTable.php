@@ -47,7 +47,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
         AnonymizationService $anonymizationService,
     ): void {
-        Log::info(__CLASS__ . ':' . $this->tableName);
+        Log::info(self::class . ':' . $this->tableName);
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
 

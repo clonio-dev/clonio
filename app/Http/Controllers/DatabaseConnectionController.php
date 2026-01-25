@@ -77,7 +77,7 @@ class DatabaseConnectionController extends Controller
     {
         Gate::authorize('create', $connection);
 
-        TestConnection::dispatchSync($connection);
+        dispatch_sync(new TestConnection($connection));
 
         return back();
     }
@@ -87,9 +87,9 @@ class DatabaseConnectionController extends Controller
         DatabaseConnection::query()
             ->forUser($user->id)
             ->get()
-            ->each(function (DatabaseConnection $connection) {
+            ->each(function (DatabaseConnection $connection): void {
                 if (Gate::allows('create', $connection)) {
-                    TestConnection::dispatchSync($connection);
+                    dispatch_sync(new TestConnection($connection));
                 }
             });
 

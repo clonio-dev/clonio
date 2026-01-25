@@ -136,7 +136,7 @@ class DatabaseConnection extends Model
 
             // Correct MySQL/MariaDB type based on version string
             $correctedType = $this->detectCorrectTypeFromVersion($dbmsVersion);
-            if ($correctedType !== null && $correctedType !== $this->type) {
+            if ($correctedType instanceof DatabaseConnectionTypes && $correctedType !== $this->type) {
                 $updateData['type'] = $correctedType;
             }
         }

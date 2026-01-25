@@ -7,7 +7,7 @@ use App\Services\SchemaInspector\SchemaInspectorFactory;
 use App\Services\SchemaReplicator;
 use Illuminate\Support\Facades\DB;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Setup two in-memory SQLite databases
     config([
         'database.connections.source_fk' => [
@@ -24,7 +24,7 @@ beforeEach(function () {
     ]);
 });
 
-it('replicates tables in correct FK order', function () {
+it('replicates tables in correct FK order', function (): void {
     $source = DB::connection('source_fk');
     $target = DB::connection('target_fk');
 
@@ -68,7 +68,7 @@ it('replicates tables in correct FK order', function () {
     expect($orderItemsTable->foreignKeys->count())->toBe(2);
 });
 
-it('handles complex FK graph with multiple parents', function () {
+it('handles complex FK graph with multiple parents', function (): void {
     $source = DB::connection('source_fk');
     $target = DB::connection('target_fk');
 
@@ -128,7 +128,7 @@ it('handles complex FK graph with multiple parents', function () {
     expect($orderItems->foreignKeys->count())->toBe(2);
 });
 
-it('fails gracefully with circular dependencies', function () {
+it('fails gracefully with circular dependencies', function (): void {
     // Note: SQLite allows creation of circular FKs, but our DependencyResolver should catch it
     $source = DB::connection('source_fk');
     $target = DB::connection('target_fk');
@@ -167,7 +167,7 @@ it('fails gracefully with circular dependencies', function () {
                 FOREIGN KEY (a_id) REFERENCES a(id)
             );
         ');
-    } catch (Exception $e) {
+    } catch (Exception) {
         // SQLite might not allow this, skip test
         expect(true)->toBeTrue();
 
@@ -181,7 +181,7 @@ it('fails gracefully with circular dependencies', function () {
         ->toThrow(RuntimeException::class, 'Circular dependency');
 })->skip('SQLite may not support circular FKs in test environment');
 
-it('handles self-referencing tables correctly', function () {
+it('handles self-referencing tables correctly', function (): void {
     $source = DB::connection('source_fk');
     $target = DB::connection('target_fk');
 
@@ -208,12 +208,12 @@ it('handles self-referencing tables correctly', function () {
 
     // Verify self-referencing FK
     $employees = $inspector->getTableSchema($target, 'employees');
-    $selfFk = $employees->foreignKeys->first(fn ($fk) => $fk->referencedTable === 'employees');
+    $selfFk = $employees->foreignKeys->first(fn ($fk): bool => $fk->referencedTable === 'employees');
 
     expect($selfFk)->not->toBeNull();
 });
 
-it('replicates database schema in dependency order', function () {
+it('replicates database schema in dependency order', function (): void {
     $source = DB::connection('source_fk');
     $target = DB::connection('target_fk');
 

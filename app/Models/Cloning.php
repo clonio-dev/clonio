@@ -52,6 +52,24 @@ class Cloning extends Model
         'next_run_at',
     ];
 
+    /**
+     * Calculate the next run time from a cron expression.
+     */
+    public static function calculateNextRunAt(?string $cronExpression): ?Carbon
+    {
+        if (in_array($cronExpression, [null, '', '0'], true)) {
+            return null;
+        }
+
+        try {
+            $cron = new \Cron\CronExpression($cronExpression);
+
+            return \Illuminate\Support\Facades\Date::instance($cron->getNextRunDate());
+        } catch (Exception) {
+            return null;
+        }
+    }
+
     public function casts(): array
     {
         return [
@@ -99,27 +117,6 @@ class Cloning extends Model
     public function latestRun(): ?CloningRun
     {
         return $this->runs()->latest('id')->first();
-    }
-
-    /**
-     * Calculate the next run time from a cron expression.
-     *
-     * @param string|null $cronExpression
-     * @return \Illuminate\Support\Carbon|null
-     */
-    public static function calculateNextRunAt(?string $cronExpression): ?Carbon
-    {
-        if (empty($cronExpression)) {
-            return null;
-        }
-
-        try {
-            $cron = new \Cron\CronExpression($cronExpression);
-
-            return \Illuminate\Support\Carbon::instance($cron->getNextRunDate());
-        } catch (Exception) {
-            return null;
-        }
     }
 
     /**

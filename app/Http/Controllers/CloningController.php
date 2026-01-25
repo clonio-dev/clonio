@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Data\ColumnMutationData;
-use App\Data\ColumnMutationDataOptions;
-use App\Data\ColumnMutationStrategyEnum;
 use App\Data\SynchronizationOptionsData;
-use App\Data\TableAnonymizationOptionsData;
 use App\Enums\CloningRunStatus;
 use App\Http\Requests\StoreCloningRequest;
 use App\Http\Requests\UpdateCloningRequest;
@@ -20,7 +16,6 @@ use App\Models\CloningRun;
 use App\Models\DatabaseConnection;
 use Illuminate\Bus\Batch;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -93,7 +88,7 @@ class CloningController extends Controller
     public function store(StoreCloningRequest $request): RedirectResponse
     {
         $anonymizationConfigJson = $request->validated('anonymization_config');
-        $anonymizationConfig = $anonymizationConfigJson ? json_decode($anonymizationConfigJson, true) : null;
+        $anonymizationConfig = $anonymizationConfigJson ? json_decode((string) $anonymizationConfigJson, true) : null;
 
         $isScheduled = $request->boolean('is_scheduled', false);
         $schedule = $isScheduled ? $request->validated('schedule') : null;
@@ -179,7 +174,7 @@ class CloningController extends Controller
         Gate::authorize('update', $cloning);
 
         $anonymizationConfigJson = $request->validated('anonymization_config');
-        $anonymizationConfig = $anonymizationConfigJson ? json_decode($anonymizationConfigJson, true) : null;
+        $anonymizationConfig = $anonymizationConfigJson ? json_decode((string) $anonymizationConfigJson, true) : null;
 
         $isScheduled = $request->boolean('is_scheduled', false);
         $schedule = $isScheduled ? $request->validated('schedule') : null;

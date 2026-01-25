@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Services\DependencyResolver;
 use Illuminate\Support\Facades\DB;
 
-beforeEach(function () {
+beforeEach(function (): void {
     config([
         'database.connections.test_nullable' => [
             'driver' => 'sqlite',
@@ -14,7 +14,7 @@ beforeEach(function () {
     ]);
 });
 
-it('handles quasi-circular dependencies with nullable FKs', function () {
+it('handles quasi-circular dependencies with nullable FKs', function (): void {
     $conn = DB::connection('test_nullable');
 
     // Create employees table (references departments, nullable)
@@ -73,7 +73,7 @@ it('handles quasi-circular dependencies with nullable FKs', function () {
     expect($order['dependency_levels'][0])->toHaveCount(2);
 });
 
-it('detects quasi-circular dependencies when NOT ignoring nullable FKs', function () {
+it('detects quasi-circular dependencies when NOT ignoring nullable FKs', function (): void {
     $conn = DB::connection('test_nullable');
 
     // Same setup as above
@@ -99,11 +99,11 @@ it('detects quasi-circular dependencies when NOT ignoring nullable FKs', functio
 
     // With ignoreNullableFKs = false
     // Should detect circular dependency
-    expect(fn () => $resolver->getProcessingOrder(['employees', 'departments'], $conn, false))
+    expect(fn (): array => $resolver->getProcessingOrder(['employees', 'departments'], $conn, false))
         ->toThrow(RuntimeException::class, 'Circular dependency detected');
 });
 
-it('correctly identifies nullable vs non-nullable FKs', function () {
+it('correctly identifies nullable vs non-nullable FKs', function (): void {
     $conn = DB::connection('test_nullable');
 
     // Table with NULLABLE FK
@@ -142,7 +142,7 @@ it('correctly identifies nullable vs non-nullable FKs', function () {
         ->toBeLessThan(array_search('order_items', $insertOrder));
 });
 
-it('handles mixed nullable and non-nullable FKs in same table', function () {
+it('handles mixed nullable and non-nullable FKs in same table', function (): void {
     $conn = DB::connection('test_nullable');
 
     $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
@@ -169,7 +169,7 @@ it('handles mixed nullable and non-nullable FKs in same table', function () {
     expect($order['insert_order'])->toBe(['users', 'orders']);
 });
 
-it('handles composite FK with mixed nullability', function () {
+it('handles composite FK with mixed nullability', function (): void {
     $conn = DB::connection('test_nullable');
 
     // Note: SQLite doesn't fully support composite FKs in practice,
@@ -205,7 +205,7 @@ it('handles composite FK with mixed nullability', function () {
     expect($order)->toHaveKey('insert_order');
 });
 
-it('logs when ignoring nullable FKs', function () {
+it('logs when ignoring nullable FKs', function (): void {
     $conn = DB::connection('test_nullable');
 
     $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
@@ -218,15 +218,13 @@ it('logs when ignoring nullable FKs', function () {
     ');
 
     // Capture logs
-    Log::shouldReceive('debug')
+    Illuminate\Support\Facades\Log::shouldReceive('debug')
         ->once()
-        ->with('Ignoring nullable FK for dependency graph', Mockery::on(function ($data) {
-            return $data['table'] === 'orders' &&
-                $data['references'] === 'users' &&
-                in_array('user_id', $data['columns']);
-        }));
+        ->with('Ignoring nullable FK for dependency graph', Mockery::on(fn (array $data): bool => $data['table'] === 'orders' &&
+            $data['references'] === 'users' &&
+            in_array('user_id', $data['columns'])));
 
-    Log::shouldReceive('debug')
+    Illuminate\Support\Facades\Log::shouldReceive('debug')
         ->once()
         ->with('Dependency resolution completed', Mockery::any());
 

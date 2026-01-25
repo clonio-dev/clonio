@@ -104,7 +104,7 @@ class DependencyResolver
         // 3. Process queue
         $result = [];
 
-        while (! empty($queue)) {
+        while ($queue !== []) {
             // Remove table with in_degree 0 (no dependencies)
             $table = array_shift($queue);
             $result[] = $table;
@@ -303,12 +303,8 @@ class DependencyResolver
                 }
             }
 
-            if (empty($currentLevel)) {
-                // No progress made → circular dependency
-                throw new RuntimeException(
-                    'Circular dependency detected! Cannot calculate levels.'
-                );
-            }
+            // No progress made → circular dependency
+            throw_if($currentLevel === [], RuntimeException::class, 'Circular dependency detected! Cannot calculate levels.');
 
             // Add current level tables to processed AFTER the iteration
             // to prevent dependent tables from being placed at the same level

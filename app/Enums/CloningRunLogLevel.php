@@ -9,7 +9,7 @@ enum CloningRunLogLevel: string
     case INFO = 'info';
     case WARNING = 'warning';
     case ERROR = 'error';
-    CASE SUCCESS = 'success';
+    case SUCCESS = 'success';
 
     public function getLabel(): string
     {
