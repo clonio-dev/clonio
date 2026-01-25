@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Services\DependencyResolver;
 use App\Services\SchemaInspector\SchemaInspectorFactory;
 use App\Services\SchemaReplicator;
 use Illuminate\Support\Facades\DB;
@@ -76,7 +77,7 @@ it('replicates table structure from source to target', function (): void {
     ');
 
     // Replicate to target
-    $replicator = new SchemaReplicator();
+    $replicator = new SchemaReplicator(new DependencyResolver());
     $replicator->replicateTable($source, $target, 'products');
 
     // Verify table exists in target
@@ -118,7 +119,7 @@ it('detects schema differences correctly', function (): void {
         )
     ');
 
-    $replicator = new SchemaReplicator();
+    $replicator = new SchemaReplicator(new DependencyResolver());
     $diff = $replicator->getSchemaDiff($source, $target);
 
     expect($diff['table_diffs'])->toHaveKey('orders');
@@ -194,7 +195,7 @@ it('replicates entire database with multiple tables', function (): void {
     ');
 
     // Replicate entire database
-    $replicator = new SchemaReplicator();
+    $replicator = new SchemaReplicator(new DependencyResolver());
     $replicator->replicateDatabase($source, $target);
 
     // Verify all tables exist in target
@@ -228,7 +229,7 @@ it('updates existing table with new columns', function (): void {
     $source->statement('ALTER TABLE products ADD COLUMN price DECIMAL(10,2)');
 
     // Replicate (should add the missing column to target)
-    $replicator = new SchemaReplicator();
+    $replicator = new SchemaReplicator(new DependencyResolver());
     $replicator->replicateTable($source, $target, 'products');
 
     // Verify new column exists in target

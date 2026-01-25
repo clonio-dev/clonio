@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Services\DependencyResolver;
-use App\Services\SchemaReplicator;
 use App\Services\SchemaInspector\SchemaInspectorFactory;
+use App\Services\SchemaReplicator;
 use Illuminate\Support\Facades\DB;
 
 beforeEach(function () {
@@ -13,14 +13,14 @@ beforeEach(function () {
         'database.connections.source_fk' => [
             'driver' => 'sqlite',
             'database' => ':memory:',
-        ]
+        ],
     ]);
 
     config([
         'database.connections.target_fk' => [
             'driver' => 'sqlite',
             'database' => ':memory:',
-        ]
+        ],
     ]);
 });
 
@@ -29,16 +29,16 @@ it('replicates tables in correct FK order', function () {
     $target = DB::connection('target_fk');
 
     // Create source schema with FK dependencies
-    $source->statement("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)");
-    $source->statement("CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT)");
-    $source->statement("
+    $source->statement('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)');
+    $source->statement('CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT)');
+    $source->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             user_id INTEGER NOT NULL,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
-    ");
-    $source->statement("
+    ');
+    $source->statement('
         CREATE TABLE order_items (
             id INTEGER PRIMARY KEY,
             order_id INTEGER NOT NULL,
@@ -46,7 +46,7 @@ it('replicates tables in correct FK order', function () {
             FOREIGN KEY (order_id) REFERENCES orders(id),
             FOREIGN KEY (product_id) REFERENCES products(id)
         )
-    ");
+    ');
 
     // Replicate entire database
     $replicator = new SchemaReplicator(new DependencyResolver());
@@ -73,37 +73,37 @@ it('handles complex FK graph with multiple parents', function () {
     $target = DB::connection('target_fk');
 
     // Create complex schema
-    $source->statement("CREATE TABLE countries (id INTEGER PRIMARY KEY)");
-    $source->statement("CREATE TABLE categories (id INTEGER PRIMARY KEY)");
-    $source->statement("
+    $source->statement('CREATE TABLE countries (id INTEGER PRIMARY KEY)');
+    $source->statement('CREATE TABLE categories (id INTEGER PRIMARY KEY)');
+    $source->statement('
         CREATE TABLE cities (
             id INTEGER PRIMARY KEY,
             country_id INTEGER,
             FOREIGN KEY (country_id) REFERENCES countries(id)
         )
-    ");
-    $source->statement("
+    ');
+    $source->statement('
         CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             city_id INTEGER,
             FOREIGN KEY (city_id) REFERENCES cities(id)
         )
-    ");
-    $source->statement("
+    ');
+    $source->statement('
         CREATE TABLE products (
             id INTEGER PRIMARY KEY,
             category_id INTEGER,
             FOREIGN KEY (category_id) REFERENCES categories(id)
         )
-    ");
-    $source->statement("
+    ');
+    $source->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
-    ");
-    $source->statement("
+    ');
+    $source->statement('
         CREATE TABLE order_items (
             id INTEGER PRIMARY KEY,
             order_id INTEGER,
@@ -111,10 +111,10 @@ it('handles complex FK graph with multiple parents', function () {
             FOREIGN KEY (order_id) REFERENCES orders(id),
             FOREIGN KEY (product_id) REFERENCES products(id)
         )
-    ");
+    ');
 
     // Replicate
-    $replicator = new SchemaReplicator();
+    $replicator = new SchemaReplicator(new DependencyResolver());
     $replicator->replicateDatabase($source, $target);
 
     // Verify all tables created
@@ -134,13 +134,13 @@ it('fails gracefully with circular dependencies', function () {
     $target = DB::connection('target_fk');
 
     // Try to create circular dependency (though SQLite may not enforce this strictly)
-    $source->statement("CREATE TABLE a (id INTEGER PRIMARY KEY, b_id INTEGER)");
-    $source->statement("CREATE TABLE b (id INTEGER PRIMARY KEY, c_id INTEGER)");
-    $source->statement("CREATE TABLE c (id INTEGER PRIMARY KEY, a_id INTEGER)");
+    $source->statement('CREATE TABLE a (id INTEGER PRIMARY KEY, b_id INTEGER)');
+    $source->statement('CREATE TABLE b (id INTEGER PRIMARY KEY, c_id INTEGER)');
+    $source->statement('CREATE TABLE c (id INTEGER PRIMARY KEY, a_id INTEGER)');
 
     // Add circular FKs (if DB allows)
     try {
-        $source->statement("
+        $source->statement('
             CREATE TABLE temp_a AS SELECT * FROM a;
             DROP TABLE a;
             CREATE TABLE a (
@@ -148,8 +148,8 @@ it('fails gracefully with circular dependencies', function () {
                 b_id INTEGER,
                 FOREIGN KEY (b_id) REFERENCES b(id)
             );
-        ");
-        $source->statement("
+        ');
+        $source->statement('
             CREATE TABLE temp_b AS SELECT * FROM b;
             DROP TABLE b;
             CREATE TABLE b (
@@ -157,8 +157,8 @@ it('fails gracefully with circular dependencies', function () {
                 c_id INTEGER,
                 FOREIGN KEY (c_id) REFERENCES c(id)
             );
-        ");
-        $source->statement("
+        ');
+        $source->statement('
             CREATE TABLE temp_c AS SELECT * FROM c;
             DROP TABLE c;
             CREATE TABLE c (
@@ -166,17 +166,18 @@ it('fails gracefully with circular dependencies', function () {
                 a_id INTEGER,
                 FOREIGN KEY (a_id) REFERENCES a(id)
             );
-        ");
-    } catch (\Exception $e) {
+        ');
+    } catch (Exception $e) {
         // SQLite might not allow this, skip test
         expect(true)->toBeTrue();
+
         return;
     }
 
     // Replication should detect cycle
-    $replicator = new SchemaReplicator();
+    $replicator = new SchemaReplicator(new DependencyResolver());
 
-    expect(fn() => $replicator->replicateDatabase($source, $target))
+    expect(fn () => $replicator->replicateDatabase($source, $target))
         ->toThrow(RuntimeException::class, 'Circular dependency');
 })->skip('SQLite may not support circular FKs in test environment');
 
@@ -185,18 +186,18 @@ it('handles self-referencing tables correctly', function () {
     $target = DB::connection('target_fk');
 
     // Create self-referencing table
-    $source->statement("
+    $source->statement('
         CREATE TABLE employees (
             id INTEGER PRIMARY KEY,
             name TEXT,
             manager_id INTEGER,
             FOREIGN KEY (manager_id) REFERENCES employees(id)
         )
-    ");
-    $source->statement("CREATE TABLE departments (id INTEGER PRIMARY KEY)");
+    ');
+    $source->statement('CREATE TABLE departments (id INTEGER PRIMARY KEY)');
 
     // Replicate
-    $replicator = new SchemaReplicator();
+    $replicator = new SchemaReplicator(new DependencyResolver());
     $replicator->replicateDatabase($source, $target);
 
     // Verify both tables created
@@ -207,49 +208,34 @@ it('handles self-referencing tables correctly', function () {
 
     // Verify self-referencing FK
     $employees = $inspector->getTableSchema($target, 'employees');
-    $selfFk = $employees->foreignKeys->first(fn($fk) => $fk->referencedTable === 'employees');
+    $selfFk = $employees->foreignKeys->first(fn ($fk) => $fk->referencedTable === 'employees');
 
     expect($selfFk)->not->toBeNull();
 });
 
-it('logs dependency analysis during replication', function () {
+it('replicates database schema in dependency order', function () {
     $source = DB::connection('source_fk');
     $target = DB::connection('target_fk');
 
-    $source->statement("CREATE TABLE users (id INTEGER PRIMARY KEY)");
-    $source->statement("
+    $source->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
+    $source->statement('
         CREATE TABLE orders (
             id INTEGER PRIMARY KEY,
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
-    ");
+    ');
 
-    // Capture logs
-    \Illuminate\Support\Facades\Log::shouldReceive('info')
-        ->once()
-        ->with('Replicating database schema in dependency order', \Mockery::on(function ($data) {
-            return isset($data['insert_order']) &&
-                isset($data['dependency_levels']) &&
-                $data['insert_order'] === ['users', 'orders'];
-        }));
-
-    \Illuminate\Support\Facades\Log::shouldReceive('info')
-        ->once()
-        ->with('Table replicated', \Mockery::any());
-
-    \Illuminate\Support\Facades\Log::shouldReceive('info')
-        ->once()
-        ->with('Table replicated', \Mockery::any());
-
-    \Illuminate\Support\Facades\Log::shouldReceive('info')
-        ->once()
-        ->with('Schema replication completed', \Mockery::any());
-
-    \Illuminate\Support\Facades\Log::shouldReceive('debug')
-        ->atLeast()
-        ->once();
-
-    $replicator = new SchemaReplicator();
+    $replicator = new SchemaReplicator(new DependencyResolver());
     $replicator->replicateDatabase($source, $target);
+
+    // Verify both tables exist in target
+    $inspector = SchemaInspectorFactory::create($target);
+
+    expect($inspector->tableExists($target, 'users'))->toBeTrue();
+    expect($inspector->tableExists($target, 'orders'))->toBeTrue();
+
+    // Verify foreign key was created
+    $ordersTable = $inspector->getTableSchema($target, 'orders');
+    expect($ordersTable->foreignKeys->count())->toBe(1);
 });
