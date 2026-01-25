@@ -5,30 +5,34 @@ declare(strict_types=1);
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
 use App\Jobs\CloneSchema;
+use App\Jobs\Middleware\SkipWhenBatchCancelled;
+use App\Models\CloningRun;
 use App\Services\DatabaseInformationRetrievalService;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
+use App\Services\SchemaReplicator;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+
+uses(RefreshDatabase::class);
 
 it('returns correct middleware', function (): void {
+    $run = CloningRun::factory()->create();
+
     $job = new CloneSchema(
         sourceConnectionData: new ConnectionData('source', new SqliteDriverData()),
         targetConnectionData: new ConnectionData('target', new SqliteDriverData()),
-        keepUnknownTablesOnTarget: false,
-        migrationTableName: null,
+        run: $run,
     );
 
     $middleware = $job->middleware();
 
     expect($middleware)
         ->toHaveCount(1)
-        ->and($middleware[0])->toBeInstanceOf(SkipIfBatchCancelled::class);
+        ->and($middleware[0])->toBeInstanceOf(SkipWhenBatchCancelled::class);
 });
 
-// Note: Connection failure tests are covered by the other integration tests
-// Testing explicit failure scenarios would require mocking the final DatabaseInformationRetrievalService class
+it('clones schema from source to target', function (): void {
+    $run = CloningRun::factory()->create();
 
-it('keeps unknown tables on target when configured', function (): void {
     $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
     @unlink($sourceDb);
     $sourceDb .= '.sqlite';
@@ -39,120 +43,6 @@ it('keeps unknown tables on target when configured', function (): void {
     $targetDb .= '.sqlite';
     touch($targetDb);
 
-    // Set up source database
-    config(['database.connections.test_source' => [
-        'driver' => 'sqlite',
-        'database' => $sourceDb,
-    ]]);
-    DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
-        $table->id();
-    });
-
-    // Set up target database with an extra table
-    config(['database.connections.test_target' => [
-        'driver' => 'sqlite',
-        'database' => $targetDb,
-    ]]);
-    DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table): void {
-        $table->id();
-    });
-    DB::connection('test_target')->getSchemaBuilder()->create('old_table', function ($table): void {
-        $table->id();
-    });
-
-    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
-    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
-
-    $job = new CloneSchema(
-        sourceConnectionData: $sourceConnectionData,
-        targetConnectionData: $targetConnectionData,
-        keepUnknownTablesOnTarget: true,
-        migrationTableName: null,
-    );
-
-    $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
-
-    // Verify old_table still exists
-    expect(DB::connection('test_target')->getSchemaBuilder()->hasTable('old_table'))->toBeTrue();
-
-    // Clean up
-    @unlink($sourceDb);
-    @unlink($targetDb);
-});
-
-it('drops unknown tables on target when configured', function (): void {
-    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
-    @unlink($sourceDb);
-    $sourceDb .= '.sqlite';
-    touch($sourceDb);
-
-    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
-    @unlink($targetDb);
-    $targetDb .= '.sqlite';
-    touch($targetDb);
-
-    // Set up source database
-    config(['database.connections.test_source' => [
-        'driver' => 'sqlite',
-        'database' => $sourceDb,
-    ]]);
-    DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
-        $table->id();
-    });
-
-    // Set up target database with an extra table
-    config(['database.connections.test_target' => [
-        'driver' => 'sqlite',
-        'database' => $targetDb,
-    ]]);
-    DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table): void {
-        $table->id();
-    });
-    DB::connection('test_target')->getSchemaBuilder()->create('old_table', function ($table): void {
-        $table->id();
-    });
-
-    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
-    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
-
-    Log::shouldReceive('debug')->once()->with(Mockery::pattern('/Dropping table (main\.)?old_table from target database\./'));
-    Log::shouldReceive('info')->once()->with(Mockery::pattern('/Dropped table (main\.)?old_table from target database\./'));
-
-    $job = new CloneSchema(
-        sourceConnectionData: $sourceConnectionData,
-        targetConnectionData: $targetConnectionData,
-        keepUnknownTablesOnTarget: false,
-        migrationTableName: null,
-    );
-
-    $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
-
-    // Verify old_table was dropped
-    expect(DB::connection('test_target')->getSchemaBuilder()->hasTable('old_table'))->toBeFalse();
-
-    // Clean up
-    @unlink($sourceDb);
-    @unlink($targetDb);
-});
-
-it('truncates tables when using TRUNCATE mode', function (): void {
-    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
-    @unlink($sourceDb);
-    $sourceDb .= '.sqlite';
-    touch($sourceDb);
-
-    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
-    @unlink($targetDb);
-    $targetDb .= '.sqlite';
-    touch($targetDb);
-
-    // Set up source database
     config(['database.connections.test_source' => [
         'driver' => 'sqlite',
         'database' => $sourceDb,
@@ -163,7 +53,109 @@ it('truncates tables when using TRUNCATE mode', function (): void {
         $table->string('name');
     });
 
-    // Set up target database with data
+    config(['database.connections.test_target' => [
+        'driver' => 'sqlite',
+        'database' => $targetDb,
+    ]]);
+    DB::purge('test_target');
+
+    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
+    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
+
+    $job = new CloneSchema(
+        sourceConnectionData: $sourceConnectionData,
+        targetConnectionData: $targetConnectionData,
+        run: $run,
+    );
+
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
+    $schemaReplicator = resolve(SchemaReplicator::class);
+
+    $job->handle($dbService, $schemaReplicator);
+
+    expect(DB::connection('test_target')->getSchemaBuilder()->hasTable('users'))->toBeTrue();
+
+    @unlink($sourceDb);
+    @unlink($targetDb);
+});
+
+it('clones multiple tables', function (): void {
+    $run = CloningRun::factory()->create();
+
+    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
+    @unlink($sourceDb);
+    $sourceDb .= '.sqlite';
+    touch($sourceDb);
+
+    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
+    @unlink($targetDb);
+    $targetDb .= '.sqlite';
+    touch($targetDb);
+
+    config(['database.connections.test_source' => [
+        'driver' => 'sqlite',
+        'database' => $sourceDb,
+    ]]);
+    DB::purge('test_source');
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
+        $table->id();
+        $table->string('name');
+    });
+    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
+        $table->id();
+        $table->string('title');
+    });
+
+    config(['database.connections.test_target' => [
+        'driver' => 'sqlite',
+        'database' => $targetDb,
+    ]]);
+    DB::purge('test_target');
+
+    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
+    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
+
+    $job = new CloneSchema(
+        sourceConnectionData: $sourceConnectionData,
+        targetConnectionData: $targetConnectionData,
+        run: $run,
+    );
+
+    $dbService = resolve(DatabaseInformationRetrievalService::class);
+    $schemaReplicator = resolve(SchemaReplicator::class);
+
+    $job->handle($dbService, $schemaReplicator);
+
+    expect(DB::connection('test_target')->getSchemaBuilder()->hasTable('users'))->toBeTrue();
+    expect(DB::connection('test_target')->getSchemaBuilder()->hasTable('posts'))->toBeTrue();
+
+    @unlink($sourceDb);
+    @unlink($targetDb);
+});
+
+it('preserves existing data when replicating schema', function (): void {
+    $run = CloningRun::factory()->create();
+
+    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
+    @unlink($sourceDb);
+    $sourceDb .= '.sqlite';
+    touch($sourceDb);
+
+    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
+    @unlink($targetDb);
+    $targetDb .= '.sqlite';
+    touch($targetDb);
+
+    config(['database.connections.test_source' => [
+        'driver' => 'sqlite',
+        'database' => $sourceDb,
+    ]]);
+    DB::purge('test_source');
+    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
+        $table->id();
+        $table->string('name');
+    });
+
     config(['database.connections.test_target' => [
         'driver' => 'sqlite',
         'database' => $targetDb,
@@ -176,58 +168,7 @@ it('truncates tables when using TRUNCATE mode', function (): void {
     DB::connection('test_target')->table('users')->insert(['name' => 'John']);
     DB::connection('test_target')->table('users')->insert(['name' => 'Jane']);
 
-    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
-    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
-
-    $job = new CloneSchema(
-        sourceConnectionData: $sourceConnectionData,
-        targetConnectionData: $targetConnectionData,
-        keepUnknownTablesOnTarget: true,
-        migrationTableName: null,
-    );
-
-    $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
-
-    // Verify data was deleted
-    expect(DB::connection('test_target')->table('users')->count())->toBe(0);
-
-    // Clean up
-    @unlink($sourceDb);
-    @unlink($targetDb);
-});
-
-it('clones schema using DROP_CREATE with migration table', function (): void {
-    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
-    @unlink($sourceDb);
-    $sourceDb .= '.sqlite';
-    touch($sourceDb);
-
-    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
-    @unlink($targetDb);
-    $targetDb .= '.sqlite';
-    touch($targetDb);
-
-    // Set up source database
-    config(['database.connections.test_source' => [
-        'driver' => 'sqlite',
-        'database' => $sourceDb,
-    ]]);
-    DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
-        $table->id();
-        $table->string('email');
-    });
-    DB::connection('test_source')->getSchemaBuilder()->create('custom_migrations', function ($table): void {
-        $table->id();
-    });
-
-    // Set up target database
-    config(['database.connections.test_target' => [
-        'driver' => 'sqlite',
-        'database' => $targetDb,
-    ]]);
-    DB::purge('test_target');
+    expect(DB::connection('test_target')->table('users')->count())->toBe(2);
 
     $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
     $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
@@ -235,183 +176,17 @@ it('clones schema using DROP_CREATE with migration table', function (): void {
     $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        keepUnknownTablesOnTarget: true,
-        migrationTableName: 'custom_migrations',
+        run: $run,
     );
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
+    $schemaReplicator = resolve(SchemaReplicator::class);
 
-    // Verify schema was cloned
-    expect(DB::connection('test_target')->getSchemaBuilder()->hasTable('users'))->toBeTrue();
+    $job->handle($dbService, $schemaReplicator);
 
-    // Clean up
+    // Schema replication preserves existing data - truncation is done by separate job
+    expect(DB::connection('test_target')->table('users')->count())->toBe(2);
+
     @unlink($sourceDb);
     @unlink($targetDb);
 });
-
-it('clones schema using DROP_CREATE without migration table', function (): void {
-    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
-    @unlink($sourceDb);
-    $sourceDb .= '.sqlite';
-    touch($sourceDb);
-
-    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
-    @unlink($targetDb);
-    $targetDb .= '.sqlite';
-    touch($targetDb);
-
-    // Set up source database
-    config(['database.connections.test_source' => [
-        'driver' => 'sqlite',
-        'database' => $sourceDb,
-    ]]);
-    DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
-        $table->id();
-        $table->string('title');
-    });
-
-    // Set up target database
-    config(['database.connections.test_target' => [
-        'driver' => 'sqlite',
-        'database' => $targetDb,
-    ]]);
-    DB::purge('test_target');
-
-    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
-    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
-
-    $job = new CloneSchema(
-        sourceConnectionData: $sourceConnectionData,
-        targetConnectionData: $targetConnectionData,
-        keepUnknownTablesOnTarget: true,
-        migrationTableName: null,
-    );
-
-    $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
-
-    // Verify schema was cloned
-    expect(DB::connection('test_target')->getSchemaBuilder()->hasTable('posts'))->toBeTrue();
-
-    // Clean up
-    @unlink($sourceDb);
-    @unlink($targetDb);
-});
-
-it('disables and enables foreign key constraints when configured', function (): void {
-    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
-    @unlink($sourceDb);
-    $sourceDb .= '.sqlite';
-    touch($sourceDb);
-
-    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
-    @unlink($targetDb);
-    $targetDb .= '.sqlite';
-    touch($targetDb);
-
-    // Set up source database
-    config(['database.connections.test_source' => [
-        'driver' => 'sqlite',
-        'database' => $sourceDb,
-    ]]);
-    DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('users', function ($table): void {
-        $table->id();
-        $table->string('name');
-    });
-
-    // Set up target database
-    config(['database.connections.test_target' => [
-        'driver' => 'sqlite',
-        'database' => $targetDb,
-    ]]);
-    DB::purge('test_target');
-    DB::connection('test_target')->getSchemaBuilder()->create('users', function ($table): void {
-        $table->id();
-        $table->string('name');
-    });
-
-    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
-    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
-
-    Log::shouldReceive('debug')->once()->with('Disabling foreign key constraints on target database.');
-    Log::shouldReceive('debug')->once()->with('Enabling foreign key constraints on target database.');
-
-    $job = new CloneSchema(
-        sourceConnectionData: $sourceConnectionData,
-        targetConnectionData: $targetConnectionData,
-        keepUnknownTablesOnTarget: true,
-        migrationTableName: null,
-        disableForeignKeyConstraints: true,
-    );
-
-    $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
-
-    // Verify data was truncated (confirms job ran successfully)
-    expect(DB::connection('test_target')->table('users')->count())->toBe(0);
-
-    // Clean up
-    @unlink($sourceDb);
-    @unlink($targetDb);
-});
-
-it('handles DROP_CREATE mode with foreign key constraints disabled', function (): void {
-    $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
-    @unlink($sourceDb);
-    $sourceDb .= '.sqlite';
-    touch($sourceDb);
-
-    $targetDb = tempnam(sys_get_temp_dir(), 'target_');
-    @unlink($targetDb);
-    $targetDb .= '.sqlite';
-    touch($targetDb);
-
-    // Set up source database
-    config(['database.connections.test_source' => [
-        'driver' => 'sqlite',
-        'database' => $sourceDb,
-    ]]);
-    DB::purge('test_source');
-    DB::connection('test_source')->getSchemaBuilder()->create('posts', function ($table): void {
-        $table->id();
-        $table->string('title');
-    });
-
-    // Set up target database
-    config(['database.connections.test_target' => [
-        'driver' => 'sqlite',
-        'database' => $targetDb,
-    ]]);
-    DB::purge('test_target');
-
-    $sourceConnectionData = new ConnectionData('test_source', new SqliteDriverData($sourceDb));
-    $targetConnectionData = new ConnectionData('test_target', new SqliteDriverData($targetDb));
-
-    Log::shouldReceive('debug')->once()->with('Disabling foreign key constraints on target database.');
-    Log::shouldReceive('debug')->once()->with('Enabling foreign key constraints on target database.');
-
-    $job = new CloneSchema(
-        sourceConnectionData: $sourceConnectionData,
-        targetConnectionData: $targetConnectionData,
-        keepUnknownTablesOnTarget: true,
-        migrationTableName: null,
-        disableForeignKeyConstraints: true,
-    );
-
-    $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
-
-    // Verify schema was cloned
-    expect(DB::connection('test_target')->getSchemaBuilder()->hasTable('posts'))->toBeTrue();
-
-    // Clean up
-    @unlink($sourceDb);
-    @unlink($targetDb);
-});
-
-// Note: Connection failure tests (lines 46-50, 58-62) would require mocking the final DatabaseInformationRetrievalService class
-// Note: Exception tests for temp file failures (lines 143-144, 149-150) would require mocking SchemaState or filesystem
-// These error paths are covered by the RuntimeException checks in the code and integration tests
