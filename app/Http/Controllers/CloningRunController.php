@@ -112,7 +112,7 @@ class CloningRunController extends Controller
 
         $isActive = in_array($run->status->value, ['queued', 'processing']);
 
-        $logs = $run->logs()->oldest('created_at')->get();
+        $logs = $run->logs()->oldest('id')->get();
 
         return Inertia::render('cloning-runs/Show', [
             'run' => $run,
