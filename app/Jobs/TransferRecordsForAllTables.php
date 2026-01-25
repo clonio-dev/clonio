@@ -40,6 +40,8 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
         try {
             $tableNames = $dbInformationRetrievalService->getTableNames($this->sourceConnectionData);
 
+            $batch = $this->batch();
+
             foreach ($tableNames as $tableName) {
                 $this->tableName = $tableName;
 
@@ -67,6 +69,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
                 }
             }
 
+            assert($batch !== null);
             $batch->add(new SignRun($this->run));
         } catch (QueryException $e) {
             $this->handleQueryException($e);
