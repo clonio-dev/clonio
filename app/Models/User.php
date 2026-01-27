@@ -10,6 +10,19 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property ?\Carbon\Carbon $email_verified_at
+ * @property string $password
+ * @property ?string $remember_token
+ * @property \Carbon\Carbon $created_at
+ * @property ?\Carbon\Carbon $updated_at
+ * @property ?string $two_factor_secret
+ * @property ?string $two_factor_recovery_codes
+ * @property ?\Carbon\Carbon $two_factor_confirmed_at
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
