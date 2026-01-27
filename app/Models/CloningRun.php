@@ -194,6 +194,7 @@ class CloningRun extends Model
 
         return match ($eventType) {
             'cloning_run_created' => 'Cloning run created',
+            'scheduled_cloning_run_created' => 'Run was initiated by a schedule',
             'batch_started' => "Batch started with {$data['total_jobs']} jobs",
             'table_started' => "Processing table: {$data['table']}",
             'table_completed' => "Table {$data['table']} completed: {$data['rows_processed']} rows",
