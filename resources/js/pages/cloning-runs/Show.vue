@@ -32,6 +32,10 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => [
         href: '/cloning-runs',
     },
     {
+        title: `Cloning ${props.run.cloning.title}`,
+        href: `/clonings/${props.run.cloning.id}`,
+    },
+    {
         title: `Run #${props.run.id}`,
         href: `/cloning-runs/${props.run.id}`,
     },
