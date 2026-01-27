@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Data\SynchronizationOptionsData;
+use App\Actions\Clonio\ExecuteCloning;
 use App\Enums\CloningRunStatus;
 use App\Http\Requests\StoreCloningRequest;
 use App\Http\Requests\UpdateCloningRequest;
 use App\Http\Requests\ValidateCloningConnectionsRequest;
-use App\Jobs\SynchronizeDatabase;
-use App\Jobs\TestConnection;
 use App\Models\Cloning;
 use App\Models\CloningRun;
 use App\Models\DatabaseConnection;
-use Illuminate\Bus\Batch;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Gate;
@@ -85,7 +84,7 @@ class CloningController extends Controller
     /**
      * Store a newly created cloning and optionally execute it.
      */
-    public function store(StoreCloningRequest $request): RedirectResponse
+    public function store(#[CurrentUser] User $user, StoreCloningRequest $request, ExecuteCloning $executeCloning): RedirectResponse
     {
         $anonymizationConfigJson = $request->validated('anonymization_config');
         $anonymizationConfig = $anonymizationConfigJson ? json_decode((string) $anonymizationConfigJson, true) : null;
@@ -107,7 +106,8 @@ class CloningController extends Controller
 
         // If execute_now is true, trigger an immediate run
         if ($request->boolean('execute_now', true)) {
-            $run = $this->executeCloning($cloning);
+            $run = $executeCloning->start($cloning);
+            $run->log('user_initiated', ['message' => 'Cloning initiated by user ' . $user->name, 'name' => $user->name, 'email' => $user->email]);
 
             return to_route('cloning-runs.show', ['run' => $run])
                 ->with('success', 'Cloning created and execution started');
@@ -209,71 +209,15 @@ class CloningController extends Controller
     /**
      * Execute the cloning immediately.
      */
-    public function execute(Cloning $cloning): RedirectResponse
+    public function execute(#[CurrentUser] User $user, Cloning $cloning, ExecuteCloning $executeCloning): RedirectResponse
     {
         Gate::authorize('update', $cloning);
 
-        $run = $this->executeCloning($cloning);
+        $run = $executeCloning->start($cloning);
+        $run->log('user_initiated', ['message' => 'Cloning initiated by user ' . $user->name, 'name' => $user->name, 'email' => $user->email]);
 
         return to_route('cloning-runs.show', ['run' => $run])
             ->with('success', 'Cloning execution started');
-    }
-
-    /**
-     * Execute a cloning and return the created run.
-     */
-    private function executeCloning(Cloning $cloning): CloningRun
-    {
-        /** @var CloningRun $run */
-        $run = CloningRun::query()->create([
-            'user_id' => $cloning->user_id,
-            'cloning_id' => $cloning->id,
-            'batch_id' => null,
-            'status' => CloningRunStatus::QUEUED,
-            'started_at' => null,
-        ]);
-
-        $run->log('cloning_run_created');
-
-        $connectionDataSource = $cloning->sourceConnection->toConnectionDataDto();
-        $connectionDataTarget = $cloning->targetConnection->toConnectionDataDto();
-
-        Bus::batch([
-            new TestConnection($cloning->sourceConnection, $run),
-            new TestConnection($cloning->targetConnection, $run),
-            new SynchronizeDatabase(
-                options: SynchronizationOptionsData::from($cloning->anonymization_config),
-                sourceConnectionData: $connectionDataSource,
-                targetConnectionData: $connectionDataTarget,
-                run: $run,
-            ),
-        ])
-            ->name('Synchronize database ' . $connectionDataSource->name)
-            ->before(function (Batch $batch) use ($run): void {
-                $run->update(['batch_id' => $batch->id, 'started_at' => now()]);
-            })
-            ->then(function (Batch $batch) use ($run): void {
-                $run->update(['status' => CloningRunStatus::COMPLETED, 'finished_at' => now()]);
-            })
-            ->progress(function (Batch $batch) use ($run): void {
-                $run->update([
-                    'status' => CloningRunStatus::PROCESSING,
-                    'progress_percent' => $batch->progress(),
-                    'current_step' => $batch->processedJobs(),
-                    'total_steps' => $batch->totalJobs,
-                ]);
-            })
-            ->finally(function (Batch $batch) use ($run): void {
-                if ($batch->cancelled()) {
-                    $run->update(['status' => CloningRunStatus::CANCELLED]);
-                }
-                if ($batch->hasFailures()) {
-                    $run->update(['status' => CloningRunStatus::FAILED, 'finished_at' => now()]);
-                }
-            })
-            ->dispatch();
-
-        return $run;
     }
 
     /**
