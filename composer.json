@@ -6,6 +6,7 @@
     "license": "proprietary",
     "require": {
         "php": "^8.4",
+        "ext-pdo": "*",
         "inertiajs/inertia-laravel": "^2.0.19",
         "laravel/fortify": "^1.33.0",
         "laravel/framework": "^12.48.1",
