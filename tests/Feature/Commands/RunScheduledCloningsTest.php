@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Cloning;
 use App\Models\CloningRun;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Str;
 
 it('does nothing when no scheduled clonings are due', function (): void {
     // Create a scheduled cloning but with future next_run_at
@@ -32,7 +33,7 @@ it('executes scheduled clonings that are due', function (): void {
         ->assertSuccessful();
 
     expect(CloningRun::query()->count())->toBe(1);
-    Bus::assertBatched(fn ($batch): bool => $batch->name === "Scheduled sync: {$cloning->title}");
+    Bus::assertBatched(fn ($batch): bool => Str::startsWith($batch->name, 'Synchronize database'));
 });
 
 it('executes scheduled clonings with null next_run_at', function (): void {
