@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Pagination from '@/components/Pagination.vue';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -217,7 +216,10 @@ function deleteCloning(cloning: Cloning) {
                                             class="size-4 text-muted-foreground/60"
                                         />
                                         <span class="text-sm text-foreground">
-                                            {{ cloning.source_connection?.name || '-' }}
+                                            {{
+                                                cloning.source_connection
+                                                    ?.name || '-'
+                                            }}
                                         </span>
                                     </div>
                                 </td>
@@ -234,7 +236,10 @@ function deleteCloning(cloning: Cloning) {
                                             class="size-4 text-muted-foreground/60"
                                         />
                                         <span class="text-sm text-foreground">
-                                            {{ cloning.target_connection?.name || '-' }}
+                                            {{
+                                                cloning.target_connection
+                                                    ?.name || '-'
+                                            }}
                                         </span>
                                     </div>
                                 </td>
@@ -243,7 +248,7 @@ function deleteCloning(cloning: Cloning) {
                                 <td
                                     class="hidden px-4 py-4 whitespace-nowrap lg:table-cell"
                                 >
-                                        {{ cloning.runs_count || 0 }}
+                                    {{ cloning.runs_count || 0 }}
                                 </td>
 
                                 <!-- Schedule -->
@@ -256,7 +261,15 @@ function deleteCloning(cloning: Cloning) {
                                     >
                                         <Clock class="size-3.5" />
                                         {{ cloning.schedule }}
-                                        {{ cloning.next_run_at ? ' (next run at ' + formatDate(cloning.next_run_at) + ')' : ''}}
+                                        {{
+                                            cloning.next_run_at
+                                                ? ' (next run at ' +
+                                                  formatDate(
+                                                      cloning.next_run_at,
+                                                  ) +
+                                                  ')'
+                                                : ''
+                                        }}
                                     </div>
                                     <span
                                         v-else

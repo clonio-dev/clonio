@@ -138,7 +138,12 @@ export interface CloningFormProps {
  * Cloning Run Show Page Props
  */
 export interface CloningRunShowProps {
-    run: CloningRun & { cloning: Cloning & { source_connection: DatabaseConnectionPartial; target_connection: DatabaseConnectionPartial }};
+    run: CloningRun & {
+        cloning: Cloning & {
+            source_connection: DatabaseConnectionPartial;
+            target_connection: DatabaseConnectionPartial;
+        };
+    };
     logs: CloningRunLog[];
     isActive: boolean;
 }
