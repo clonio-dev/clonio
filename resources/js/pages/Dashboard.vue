@@ -91,12 +91,8 @@ onUnmounted(() => {
             <div class="mb-8 flex items-start justify-between">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
-                        <div
-                            class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/30 dark:from-violet-500/10 dark:to-purple-500/10"
-                        >
-                            <Activity
-                                class="size-5 text-violet-600 dark:text-violet-400"
-                            />
+                        <div class="brand-icon-container size-10">
+                            <Activity class="brand-icon size-5" />
                         </div>
                         <h1
                             class="text-2xl font-semibold tracking-tight text-foreground"
@@ -257,11 +253,9 @@ onUnmounted(() => {
                             Total Runs
                         </CardTitle>
                         <div
-                            class="flex size-8 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-950/50"
+                            class="brand-bg-muted flex size-8 items-center justify-center rounded-lg"
                         >
-                            <Clock
-                                class="size-4 text-violet-600 dark:text-violet-400"
-                            />
+                            <Clock class="brand-icon size-4" />
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -280,12 +274,8 @@ onUnmounted(() => {
                 v-if="!hasAnyRuns"
                 class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-gradient-to-b from-muted/20 to-muted/40 px-6 py-20 text-center dark:border-border/40 dark:from-muted/10 dark:to-muted/20"
             >
-                <div
-                    class="mb-6 flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/20 dark:from-violet-500/10 dark:to-purple-500/10"
-                >
-                    <Database
-                        class="size-10 text-violet-600 dark:text-violet-400"
-                    />
+                <div class="brand-icon-container-lg mb-6 size-20">
+                    <Database class="brand-icon size-10" />
                 </div>
 
                 <h2
@@ -303,7 +293,7 @@ onUnmounted(() => {
                 <div class="flex flex-col gap-3 sm:flex-row">
                     <Button
                         @click="createFirstCloning"
-                        class="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/20 hover:from-violet-500 hover:to-purple-500"
+                        class="brand-button gap-2"
                     >
                         <Plus class="size-4" />
                         Create First Cloning
@@ -360,11 +350,9 @@ onUnmounted(() => {
 
                     <div class="flex flex-col items-center text-center">
                         <div
-                            class="mb-4 flex size-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-950/50"
+                            class="brand-bg-muted mb-4 flex size-12 items-center justify-center rounded-xl"
                         >
-                            <CheckCircle2
-                                class="size-6 text-violet-600 dark:text-violet-400"
-                            />
+                            <CheckCircle2 class="brand-icon size-6" />
                         </div>
                         <h3 class="mb-1 font-medium text-foreground">
                             Full Audit Trail

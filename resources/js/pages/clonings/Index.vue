@@ -83,12 +83,8 @@ function resumeCloning(cloning: Cloning) {
             <div class="mb-8 flex items-start justify-between">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
-                        <div
-                            class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/30 dark:from-violet-500/10 dark:to-purple-500/10"
-                        >
-                            <Copy
-                                class="size-5 text-violet-600 dark:text-violet-400"
-                            />
+                        <div class="brand-icon-container size-10">
+                            <Copy class="brand-icon size-5" />
                         </div>
                         <h1
                             class="text-2xl font-semibold tracking-tight text-foreground"
@@ -101,10 +97,7 @@ function resumeCloning(cloning: Cloning) {
                     </p>
                 </div>
 
-                <Button
-                    as-child
-                    class="group gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/20 transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-lg hover:shadow-violet-500/30 dark:shadow-violet-500/10 dark:hover:shadow-violet-500/20"
-                >
+                <Button as-child class="brand-button group gap-2">
                     <Link href="/clonings/create">
                         <Plus
                             class="size-4 transition-transform group-hover:rotate-90"
@@ -119,12 +112,8 @@ function resumeCloning(cloning: Cloning) {
                 v-if="!hasClonings"
                 class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-gradient-to-b from-muted/20 to-muted/40 px-6 py-20 text-center dark:border-border/40 dark:from-muted/10 dark:to-muted/20"
             >
-                <div
-                    class="mb-6 flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/20 dark:from-violet-500/10 dark:to-purple-500/10"
-                >
-                    <Copy
-                        class="size-10 text-violet-600 dark:text-violet-400"
-                    />
+                <div class="brand-icon-container-lg mb-6 size-20">
+                    <Copy class="brand-icon size-10" />
                 </div>
 
                 <h2
@@ -138,10 +127,7 @@ function resumeCloning(cloning: Cloning) {
                     and transferring data between your databases.
                 </p>
 
-                <Button
-                    as-child
-                    class="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/20 hover:from-violet-500 hover:to-purple-500"
-                >
+                <Button as-child class="brand-button gap-2">
                     <Link href="/clonings/create">
                         <Plus class="size-4" />
                         Create First Cloning
@@ -204,7 +190,7 @@ function resumeCloning(cloning: Cloning) {
                                     <div class="flex flex-col">
                                         <Link
                                             :href="`/clonings/${cloning.id}`"
-                                            class="font-medium text-foreground hover:text-violet-600 dark:hover:text-violet-400"
+                                            class="font-medium text-foreground hover:text-brand"
                                         >
                                             {{ cloning.title }}
                                         </Link>
