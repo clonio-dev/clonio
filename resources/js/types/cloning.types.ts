@@ -49,6 +49,8 @@ export interface Cloning {
     anonymization_config: Record<string, unknown> | null;
     schedule: string | null;
     is_scheduled: boolean;
+    is_paused: boolean;
+    consecutive_failures: number;
     next_run_at: string | null;
     created_at: string;
     updated_at: string;
