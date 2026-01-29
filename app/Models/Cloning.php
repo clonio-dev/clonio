@@ -23,6 +23,8 @@ use Illuminate\Support\Carbon;
  * @property array<string, mixed>|null $anonymization_config
  * @property string|null $schedule
  * @property bool $is_scheduled
+ * @property bool $is_paused
+ * @property int $consecutive_failures
  * @property Carbon|null $next_run_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -49,6 +51,8 @@ class Cloning extends Model
         'anonymization_config',
         'schedule',
         'is_scheduled',
+        'is_paused',
+        'consecutive_failures',
         'next_run_at',
     ];
 
@@ -75,6 +79,8 @@ class Cloning extends Model
         return [
             'anonymization_config' => 'array',
             'is_scheduled' => 'boolean',
+            'is_paused' => 'boolean',
+            'consecutive_failures' => 'integer',
             'next_run_at' => 'datetime',
         ];
     }
@@ -120,6 +126,61 @@ class Cloning extends Model
     }
 
     /**
+     * Check if this cloning can run (is scheduled and not paused).
+     */
+    public function canRun(): bool
+    {
+        return $this->is_scheduled && ! $this->is_paused;
+    }
+
+    /**
+     * Pause this cloning.
+     */
+    public function pause(): void
+    {
+        $this->update(['is_paused' => true]);
+    }
+
+    /**
+     * Resume this cloning and reset failure counter.
+     */
+    public function resume(): void
+    {
+        $this->update([
+            'is_paused' => false,
+            'consecutive_failures' => 0,
+        ]);
+    }
+
+    /**
+     * Record a failure and auto-pause if threshold reached.
+     *
+     * @return bool True if the cloning was auto-paused
+     */
+    public function recordFailure(): bool
+    {
+        $newCount = $this->consecutive_failures + 1;
+        $shouldPause = $newCount >= 3;
+
+        $this->update([
+            'consecutive_failures' => $newCount,
+            'is_paused' => $shouldPause,
+        ]);
+
+        return $shouldPause;
+    }
+
+    /**
+     * Record a successful run and reset failure counter.
+     */
+    public function recordSuccess(): void
+    {
+        if ($this->consecutive_failures > 0) {
+            $this->update(['consecutive_failures' => 0]);
+        }
+    }
+
+    /**
      * Scopes
      */
     #[Scope]
@@ -132,5 +193,11 @@ class Cloning extends Model
     protected function scheduled(Builder $query): Builder
     {
         return $query->where('is_scheduled', true);
+    }
+
+    #[Scope]
+    protected function notPaused(Builder $query): Builder
+    {
+        return $query->where('is_paused', false);
     }
 }

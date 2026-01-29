@@ -29,6 +29,8 @@ class CloningFactory extends Factory
             'anonymization_config' => null,
             'schedule' => null,
             'is_scheduled' => false,
+            'is_paused' => false,
+            'consecutive_failures' => 0,
             'next_run_at' => null,
         ];
     }
@@ -66,6 +68,26 @@ class CloningFactory extends Factory
             'schedule' => $schedule,
             'is_scheduled' => true,
             'next_run_at' => now()->addDay(),
+        ]);
+    }
+
+    /**
+     * State: Paused
+     */
+    public function paused(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_paused' => true,
+        ]);
+    }
+
+    /**
+     * State: With consecutive failures
+     */
+    public function withConsecutiveFailures(int $count): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'consecutive_failures' => $count,
         ]);
     }
 }
