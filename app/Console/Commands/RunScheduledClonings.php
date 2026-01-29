@@ -28,6 +28,7 @@ class RunScheduledClonings extends Command
     {
         $dueClonings = Cloning::query()
             ->where('is_scheduled', true)
+            ->where('is_paused', false)
             ->whereNotNull('schedule')
             ->where(function ($query): void {
                 $query->whereNull('next_run_at')

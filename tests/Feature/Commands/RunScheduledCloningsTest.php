@@ -93,3 +93,23 @@ it('executes multiple scheduled clonings', function (): void {
 
     expect(CloningRun::query()->count())->toBe(3);
 });
+
+it('skips paused clonings', function (): void {
+    Bus::fake();
+
+    // Create a paused cloning that is otherwise due
+    Cloning::factory()->scheduled()->paused()->create([
+        'next_run_at' => now()->subMinute(),
+    ]);
+
+    // Create an active cloning that is due
+    Cloning::factory()->scheduled()->create([
+        'next_run_at' => now()->subMinute(),
+    ]);
+
+    $this->artisan('clonings:run-scheduled')
+        ->expectsOutputToContain('Found 1 cloning(s) due to run.')
+        ->assertSuccessful();
+
+    expect(CloningRun::query()->count())->toBe(1);
+});
