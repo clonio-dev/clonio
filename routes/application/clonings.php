@@ -36,6 +36,12 @@ Route::prefix('clonings')
 
         Route::post('/{cloning}/execute', [CloningController::class, 'execute'])
             ->name('execute');
+
+        Route::post('/{cloning}/pause', [CloningController::class, 'pause'])
+            ->name('pause');
+
+        Route::post('/{cloning}/resume', [CloningController::class, 'resume'])
+            ->name('resume');
     });
 
 // Cloning runs
