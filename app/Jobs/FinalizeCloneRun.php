@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Enums\CloningRunLogLevel;
 use App\Enums\CloningRunStatus;
 use App\Models\CloningRun;
 use App\Services\AuditService;
@@ -33,20 +34,34 @@ class FinalizeCloneRun implements ShouldQueue
             return;
         }
 
+        if ($batch->hasFailures()) {
+            $run->update(['status' => CloningRunStatus::FAILED, 'finished_at' => now()]);
+
+            if ($run->cloning) {
+                $wasPaused = $run->cloning->recordFailure();
+
+                if ($wasPaused) {
+                    $run->log('auto_paused', [
+                        'message' => 'Cloning auto-paused after 3 consecutive failures',
+                        'consecutive_failures' => $run->cloning->consecutive_failures,
+                        'level' => CloningRunLogLevel::WARNING,
+                    ]);
+                }
+            }
+
+            return;
+        }
+
         if ($batch->cancelled()) {
             $run->update(['status' => CloningRunStatus::CANCELLED, 'finished_at' => now()]);
 
             return;
         }
 
-        if ($batch->hasFailures()) {
-            $run->update(['status' => CloningRunStatus::FAILED, 'finished_at' => now()]);
-
-            return;
-        }
-
         if ($batch->finished()) {
             $run->update(['status' => CloningRunStatus::COMPLETED, 'finished_at' => now()]);
+
+            $run->cloning?->recordSuccess();
 
             try {
                 $auditService->signRun($run);
