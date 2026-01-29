@@ -1,13 +1,18 @@
 {
     "agents": [
-        "claude_code",
-        "gemini",
-        "phpstorm"
+        "claude_code"
     ],
-    "editors": [
-        "claude_code",
-        "gemini",
-        "phpstorm"
+    "guidelines": true,
+    "herd_mcp": false,
+    "mcp": true,
+    "packages": [
+        "laravel/fortify"
     ],
-    "guidelines": true
+    "sail": false,
+    "skills": [
+        "wayfinder-development",
+        "pest-testing",
+        "inertia-vue-development",
+        "tailwindcss-development"
+    ]
 }
