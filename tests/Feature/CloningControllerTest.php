@@ -270,3 +270,56 @@ describe('execute', function (): void {
         $response->assertForbidden();
     });
 });
+
+describe('pause', function (): void {
+    it('pauses a scheduled cloning', function (): void {
+        $cloning = Cloning::factory()->for($this->user)->scheduled()->create();
+
+        $response = $this->actingAs($this->user)
+            ->post("/clonings/{$cloning->id}/pause");
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Cloning paused');
+
+        expect($cloning->fresh()->is_paused)->toBeTrue();
+    });
+
+    it('forbids pausing other users cloning', function (): void {
+        $cloning = Cloning::factory()->scheduled()->create();
+
+        $response = $this->actingAs($this->user)
+            ->post("/clonings/{$cloning->id}/pause");
+
+        $response->assertForbidden();
+    });
+});
+
+describe('resume', function (): void {
+    it('resumes a paused cloning and resets failure count', function (): void {
+        $cloning = Cloning::factory()
+            ->for($this->user)
+            ->scheduled()
+            ->paused()
+            ->withConsecutiveFailures(3)
+            ->create();
+
+        $response = $this->actingAs($this->user)
+            ->post("/clonings/{$cloning->id}/resume");
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Cloning resumed');
+
+        $cloning->refresh();
+        expect($cloning->is_paused)->toBeFalse()
+            ->and($cloning->consecutive_failures)->toBe(0);
+    });
+
+    it('forbids resuming other users cloning', function (): void {
+        $cloning = Cloning::factory()->scheduled()->paused()->create();
+
+        $response = $this->actingAs($this->user)
+            ->post("/clonings/{$cloning->id}/resume");
+
+        $response->assertForbidden();
+    });
+});
