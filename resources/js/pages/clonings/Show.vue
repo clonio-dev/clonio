@@ -8,13 +8,16 @@ import type { BreadcrumbItem } from '@/types';
 import type { CloningRun, CloningShowProps } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
+    AlertTriangle,
     ArrowRight,
     Calendar,
     Clock,
     Copy,
     Database,
+    Pause,
     Pencil,
     Play,
+    PlayCircle,
     Settings,
     Trash2,
 } from 'lucide-vue-next';
@@ -55,6 +58,14 @@ function deleteCloning() {
     ) {
         router.delete(`/clonings/${props.cloning.id}`);
     }
+}
+
+function pauseCloning() {
+    router.post(`/clonings/${props.cloning.id}/pause`);
+}
+
+function resumeCloning() {
+    router.post(`/clonings/${props.cloning.id}/resume`);
 }
 
 // Map runs to include cloning data for RunCard compatibility
@@ -218,7 +229,52 @@ const runsWithCloning = computed(() =>
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div v-if="cloning.is_scheduled" class="space-y-3">
+                            <!-- Paused state -->
+                            <div
+                                v-if="cloning.is_scheduled && cloning.is_paused"
+                                class="space-y-3"
+                            >
+                                <div
+                                    class="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
+                                >
+                                    <AlertTriangle class="size-4" />
+                                    <span class="text-sm font-medium">
+                                        Schedule Paused
+                                    </span>
+                                </div>
+                                <p
+                                    v-if="cloning.consecutive_failures > 0"
+                                    class="text-sm text-muted-foreground"
+                                >
+                                    Auto-paused after
+                                    {{ cloning.consecutive_failures }}
+                                    consecutive failure{{
+                                        cloning.consecutive_failures === 1
+                                            ? ''
+                                            : 's'
+                                    }}.
+                                </p>
+                                <p class="text-sm text-muted-foreground">
+                                    Schedule:
+                                    <span class="font-mono">{{
+                                        cloning.schedule
+                                    }}</span>
+                                </p>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    @click="resumeCloning"
+                                    class="w-full gap-2"
+                                >
+                                    <PlayCircle class="size-4" />
+                                    Resume Schedule
+                                </Button>
+                            </div>
+                            <!-- Active scheduled state -->
+                            <div
+                                v-else-if="cloning.is_scheduled"
+                                class="space-y-3"
+                            >
                                 <div
                                     class="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
                                 >
@@ -234,7 +290,17 @@ const runsWithCloning = computed(() =>
                                     Next run:
                                     {{ formatDate(cloning.next_run_at) }}
                                 </p>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    @click="pauseCloning"
+                                    class="w-full gap-2"
+                                >
+                                    <Pause class="size-4" />
+                                    Pause Schedule
+                                </Button>
                             </div>
+                            <!-- Manual only -->
                             <div
                                 v-else
                                 class="flex items-center gap-2 text-muted-foreground"

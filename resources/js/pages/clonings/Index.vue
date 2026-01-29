@@ -20,8 +20,10 @@ import {
     Copy,
     Database,
     MoreHorizontal,
+    Pause,
     Pencil,
     Play,
+    PlayCircle,
     Plus,
     Trash2,
 } from 'lucide-vue-next';
@@ -61,6 +63,14 @@ function deleteCloning(cloning: Cloning) {
     ) {
         router.delete(`/clonings/${cloning.id}`);
     }
+}
+
+function pauseCloning(cloning: Cloning) {
+    router.post(`/clonings/${cloning.id}/pause`);
+}
+
+function resumeCloning(cloning: Cloning) {
+    router.post(`/clonings/${cloning.id}/resume`);
 }
 </script>
 
@@ -256,7 +266,26 @@ function deleteCloning(cloning: Cloning) {
                                     class="hidden px-4 py-4 whitespace-nowrap lg:table-cell"
                                 >
                                     <div
-                                        v-if="cloning.is_scheduled"
+                                        v-if="
+                                            cloning.is_scheduled &&
+                                            cloning.is_paused
+                                        "
+                                        class="flex items-center gap-1.5 text-sm text-amber-600 dark:text-amber-400"
+                                    >
+                                        <Pause class="size-3.5" />
+                                        Paused
+                                        <span
+                                            v-if="
+                                                cloning.consecutive_failures > 0
+                                            "
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            ({{ cloning.consecutive_failures }}
+                                            failures)
+                                        </span>
+                                    </div>
+                                    <div
+                                        v-else-if="cloning.is_scheduled"
                                         class="flex items-center gap-1.5 text-sm text-muted-foreground"
                                     >
                                         <Clock class="size-3.5" />
@@ -328,6 +357,34 @@ function deleteCloning(cloning: Cloning) {
                                                         />
                                                         Edit
                                                     </Link>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    v-if="
+                                                        cloning.is_scheduled &&
+                                                        !cloning.is_paused
+                                                    "
+                                                    @click="
+                                                        pauseCloning(cloning)
+                                                    "
+                                                >
+                                                    <Pause
+                                                        class="mr-2 size-4"
+                                                    />
+                                                    Pause Schedule
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    v-if="
+                                                        cloning.is_scheduled &&
+                                                        cloning.is_paused
+                                                    "
+                                                    @click="
+                                                        resumeCloning(cloning)
+                                                    "
+                                                >
+                                                    <PlayCircle
+                                                        class="mr-2 size-4"
+                                                    />
+                                                    Resume Schedule
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem
