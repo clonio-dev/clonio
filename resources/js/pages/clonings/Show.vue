@@ -86,8 +86,12 @@ const runsWithCloning = computed(() =>
             <div class="mb-8 flex items-start justify-between">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
-                        <div class="brand-icon-container size-10">
-                            <Copy class="brand-icon size-5" />
+                        <div
+                            class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/30 dark:from-violet-500/10 dark:to-purple-500/10"
+                        >
+                            <Copy
+                                class="size-5 text-violet-600 dark:text-violet-400"
+                            />
                         </div>
                         <div>
                             <h1

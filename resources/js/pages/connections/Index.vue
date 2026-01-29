@@ -81,7 +81,7 @@ function closeSheet() {
                     <Button
                         v-if="hasConnections"
                         @click="openCreateSheet"
-                        class="brand-button group gap-1"
+                        class="group gap-1"
                     >
                         <Plus
                             class="size-4 transition-transform group-hover:rotate-90"

@@ -437,7 +437,7 @@ function getTypeColor(type: string): string {
     if (t.includes('varchar') || t.includes('text') || t.includes('char'))
         return 'text-emerald-600 dark:text-emerald-400';
     if (t.includes('date') || t.includes('time'))
-        return 'text-rose-600 dark:text-rose-400';
+        return 'text-purple-600 dark:text-purple-400';
     if (t.includes('bool')) return 'text-amber-600 dark:text-amber-400';
     if (t.includes('decimal') || t.includes('float') || t.includes('double'))
         return 'text-cyan-600 dark:text-cyan-400';
