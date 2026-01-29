@@ -60,7 +60,7 @@ function setupAutoRefresh() {
         refreshInterval = null;
     }
     if (props.activeRuns.length > 0) {
-        refreshInterval = window.setInterval(refreshDashboard, 3000);
+        refreshInterval = window.setInterval(refreshDashboard, 300);
     }
 }
 
