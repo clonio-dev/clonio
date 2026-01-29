@@ -10,7 +10,7 @@ import ConnectionsEmptyState from '@/pages/connections/components/ConnectionsEmp
 import { Connection } from '@/pages/connections/types';
 import type { BreadcrumbItem, PaginatedData } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { Plus, RefreshCcw, ShieldCheckIcon } from 'lucide-vue-next';
+import { Plus, RefreshCw, ShieldCheckIcon } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -73,7 +73,7 @@ function closeSheet() {
                         "
                         :disabled="!hasConnections"
                     >
-                        <RefreshCcw
+                        <RefreshCw
                             class="size-4 transition-transform group-hover:animate-spin"
                         />
                         Test all
