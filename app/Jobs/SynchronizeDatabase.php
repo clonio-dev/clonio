@@ -41,7 +41,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
             assert($sourceConnection instanceof \Illuminate\Database\Connection);
             $sourceConnection->getSchemaBuilder();
         } catch (Throwable $exception) {
-            $this->logError('connection_failed', "Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
+            $this->logError('connection_failed', "Failed to connect to database `{$this->sourceConnectionData->name}`");
             $this->logErrorMessage($exception->getMessage(), $dbInformationRetrievalService->connectionMap());
             $this->fail($exception);
 
@@ -51,7 +51,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
         try {
             $dbInformationRetrievalService->getConnection($this->targetConnectionData);
         } catch (Throwable $exception) {
-            $this->logError('connection_failed', "Failed to connect to database {$this->targetConnectionData->name}: {$exception->getMessage()}");
+            $this->logError('connection_failed', "Failed to connect to database `{$this->targetConnectionData->name}`");
             $this->logErrorMessage($exception->getMessage(), $dbInformationRetrievalService->connectionMap());
             $this->fail($exception);
 
