@@ -8,7 +8,6 @@ import { CloningRunShowProps, CloningRunStatus } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     AlertCircle,
-    ArrowLeft,
     ArrowRight,
     Calendar,
     CheckCircle2,
@@ -197,18 +196,6 @@ onUnmounted(() => {
         <div class="px-6 py-6 lg:px-8">
             <!-- Back Button & Header -->
             <div class="mb-6">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    as-child
-                    class="mb-4 gap-2 text-muted-foreground hover:text-foreground"
-                >
-                    <Link href="/cloning-runs">
-                        <ArrowLeft class="size-4" />
-                        Back to Cloning Runs
-                    </Link>
-                </Button>
-
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div class="flex items-center gap-4">
                         <div
