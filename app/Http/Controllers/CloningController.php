@@ -221,6 +221,30 @@ class CloningController extends Controller
     }
 
     /**
+     * Pause a scheduled cloning.
+     */
+    public function pause(Cloning $cloning): RedirectResponse
+    {
+        Gate::authorize('update', $cloning);
+
+        $cloning->pause();
+
+        return back()->with('success', 'Cloning paused');
+    }
+
+    /**
+     * Resume a paused cloning.
+     */
+    public function resume(Cloning $cloning): RedirectResponse
+    {
+        Gate::authorize('update', $cloning);
+
+        $cloning->resume();
+
+        return back()->with('success', 'Cloning resumed');
+    }
+
+    /**
      * Enrich CloningRun with real-time batch progress
      */
     private function enrichRunWithBatchProgress(CloningRun $run): CloningRun
