@@ -162,18 +162,18 @@ const duration = computed(() => {
                 >
                     <div class="flex items-center gap-4">
                         <span
-                            v-if="run.cloning?.sourceConnection"
+                            v-if="run.cloning?.source_connection"
                             class="flex items-center gap-1"
                         >
                             <Database class="size-3" />
-                            {{ run.cloning.sourceConnection.name }}
+                            {{ run.cloning.source_connection.name }}
                         </span>
                         <ArrowRight
-                            v-if="run.cloning?.targetConnection"
+                            v-if="run.cloning?.target_connection"
                             class="size-3"
                         />
-                        <span v-if="run.cloning?.targetConnection">
-                            {{ run.cloning.targetConnection.name }}
+                        <span v-if="run.cloning?.target_connection">
+                            {{ run.cloning.target_connection.name }}
                         </span>
                     </div>
                     <span class="tabular-nums">{{ duration }}</span>
