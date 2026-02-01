@@ -396,9 +396,6 @@ onUnmounted(() => {
                                 {{ props.activeRuns.length }} running
                             </div>
                         </div>
-                        <p class="text-sm text-muted-foreground">
-                            Auto-refreshing every 3s
-                        </p>
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
