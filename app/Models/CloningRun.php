@@ -175,7 +175,7 @@ class CloningRun extends Model
     /**
      * Generate human-readable message from event type
      *
-     * @param  array{total_jobs?: int, table?: string, rows_processed?: int, error?: string, duration?: int, processed_before_cancel?: int}  $data
+     * @param  array{total_jobs?: int, table?: string, rows_processed?: int, error?: string, duration?: int}  $data
      */
     private function generateMessage(string $eventType, array $data): string
     {
@@ -189,7 +189,6 @@ class CloningRun extends Model
             'rows_processed' => 0,
             'duration' => 0,
             'error' => 'unknown error',
-            'processed_before_cancel' => 0,
         ], $data);
 
         return match ($eventType) {
@@ -201,7 +200,7 @@ class CloningRun extends Model
             'table_failed' => "Table {$data['table']} failed: {$data['error']}",
             'batch_completed' => "Batch completed in {$data['duration']}s",
             'batch_failed' => "Batch failed: {$data['error']}",
-            'batch_cancelled' => "Batch cancelled after {$data['processed_before_cancel']} jobs",
+            'batch_cancelled' => "Cloning run was cancelled",
             default => $eventType,
         };
     }
