@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { CloningRunLog } from '@/types/cloning.types';
 import {
     CircleCheckBigIcon,
     Info,
+    LogsIcon,
     Terminal,
     TriangleAlertIcon,
     XIcon,
@@ -24,6 +26,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const consoleRef = ref<HTMLDivElement | null>(null);
 const autoScroll = ref(true);
+const verbose = ref(false);
 
 const levelConfig: Record<
     string,
@@ -32,7 +35,6 @@ const levelConfig: Record<
     info: {
         icon: Info,
         class: 'text-blue-600 dark:text-blue-400',
-        badge: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
     },
     success: {
         icon: CircleCheckBigIcon,
@@ -52,10 +54,16 @@ const levelConfig: Record<
 };
 
 const sortedLogs = computed(() => {
-    return [...props.logs].sort(
-        (a, b) =>
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-    );
+    return [...props.logs]
+        .filter(
+            ({ level }: CloningRunLog) =>
+                verbose.value || !['debug'].includes(level),
+        )
+        .sort(
+            (a: CloningRunLog, b: CloningRunLog) =>
+                new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime(),
+        );
 });
 
 const openedLog = ref<{ [key: number]: boolean }>({});
@@ -110,6 +118,12 @@ defineExpose({
                 <Badge variant="secondary" class="text-xs">
                     {{ logs.length }} entries
                 </Badge>
+            </div>
+            <div class="flex items-center gap-1 text-xs text-muted-foreground">
+                <Checkbox v-model="verbose" id="verbose_output" />
+                <label for="verbose_output" class="text-muted-foreground"
+                    >Include verbose messages</label
+                >
             </div>
             <div
                 v-if="isActive"
