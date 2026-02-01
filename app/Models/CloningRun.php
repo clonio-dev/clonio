@@ -200,7 +200,7 @@ class CloningRun extends Model
             'table_failed' => "Table {$data['table']} failed: {$data['error']}",
             'batch_completed' => "Batch completed in {$data['duration']}s",
             'batch_failed' => "Batch failed: {$data['error']}",
-            'batch_cancelled' => "Cloning run was cancelled",
+            'batch_cancelled' => 'Cloning run was cancelled',
             default => $eventType,
         };
     }
