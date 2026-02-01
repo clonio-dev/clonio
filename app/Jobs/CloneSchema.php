@@ -29,6 +29,9 @@ class CloneSchema implements ShouldBeEncrypted, ShouldQueue
 
     public string $tableName = '';
 
+    /**
+     * @param array<int, string> $tables table names
+     */
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
         public readonly ConnectionData $targetConnectionData,
