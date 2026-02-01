@@ -6,6 +6,7 @@ namespace App\Enums;
 
 enum CloningRunLogLevel: string
 {
+    case DEBUG = 'debug';
     case INFO = 'info';
     case WARNING = 'warning';
     case ERROR = 'error';
@@ -14,6 +15,7 @@ enum CloningRunLogLevel: string
     public function getLabel(): string
     {
         return match ($this) {
+            self::DEBUG => 'debug',
             self::INFO => 'info',
             self::WARNING => 'warning',
             self::ERROR => 'error',
