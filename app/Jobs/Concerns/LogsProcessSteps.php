@@ -37,10 +37,7 @@ trait LogsProcessSteps
 
     private function logDebug(string $event, string $message): void
     {
-        // Nur in Development-Umgebung
-        if (config('app.debug')) {
-            $this->log('info', $event, $message);
-        }
+        $this->log('debug', $event, $message);
     }
 
     private function log(string $level, string $event, string $message, array $data = []): void
