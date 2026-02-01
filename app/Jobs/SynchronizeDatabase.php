@@ -81,6 +81,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
             new TruncateTargetTables(
                 sourceConnectionData: $this->sourceConnectionData,
                 targetConnectionData: $this->targetConnectionData,
+                tables: $order['delete_order'],
                 run: $this->run,
             ),
         ]);

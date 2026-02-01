@@ -31,6 +31,7 @@ class TruncateTargetTables implements ShouldBeEncrypted, ShouldQueue
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
         public readonly ConnectionData $targetConnectionData,
+        public readonly array $tables,
         public readonly CloningRun $run,
     ) {}
 
@@ -40,10 +41,8 @@ class TruncateTargetTables implements ShouldBeEncrypted, ShouldQueue
         try {
             /** @var Connection $targetConnection */
             $targetConnection = $dbInformationRetrievalService->getConnection($this->targetConnectionData);
-            $sourceSchema = $dbInformationRetrievalService->getSchema($this->sourceConnectionData);
-            $sourceTableNames = $sourceSchema->getTableListing($sourceSchema->getCurrentSchemaName(), false);
 
-            foreach ($sourceTableNames as $tableName) {
+            foreach ($this->tables as $tableName) {
                 $this->tableName = $tableName;
                 $targetConnection->table($tableName)->delete();
                 $this->logSuccess('table_emptied', "All rows on table {$tableName} deleted on target database");
