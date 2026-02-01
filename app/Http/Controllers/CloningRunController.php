@@ -157,7 +157,7 @@ class CloningRunController extends Controller
 
         $run->log('batch_cancelled', [
             'processed_before_cancel' => $run->current_step,
-        ]);
+        ], level: 'error');
 
         return back()->with('success', 'Cloning run cancelled');
     }
