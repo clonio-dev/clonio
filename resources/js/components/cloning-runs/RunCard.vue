@@ -104,10 +104,10 @@ const duration = computed(() => {
 <template>
     <Link :href="`/cloning-runs/${run.id}`">
         <Card
-            class="group cursor-pointer border-border/60 transition-all hover:border-border hover:shadow-md dark:border-border/40 dark:hover:border-border/60"
+            class="group cursor-pointer border-border/60 transition-all hover:border-border hover:shadow-md dark:border-border/40 dark:hover:border-border/60 h-full"
             :class="{ 'ring-2 ring-emerald-500/20': isActive }"
         >
-            <CardContent class="p-4">
+            <CardContent class="p-4 py-0">
                 <div class="mb-3 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                         <div
@@ -139,7 +139,7 @@ const duration = computed(() => {
                 </div>
 
                 <!-- Progress (for active runs) -->
-                <div v-if="run.status === 'processing'" class="mb-3">
+                <div v-if="run.status === 'processing'">
                     <div class="mb-1 flex items-center justify-between text-xs">
                         <span class="text-muted-foreground">Progress</span>
                         <span class="font-medium text-foreground tabular-nums">
