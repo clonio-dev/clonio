@@ -36,6 +36,8 @@ class DropUnknownTables implements ShouldBeEncrypted, ShouldQueue
     public function handle(
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
     ): void {
+        $this->logDebug('phase_started', 'Starting dropping unknown tables phase');
+
         try {
             $targetSchema = $dbInformationRetrievalService->getSchema($this->targetConnectionData);
 
