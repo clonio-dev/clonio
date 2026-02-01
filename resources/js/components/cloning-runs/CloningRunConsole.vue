@@ -28,10 +28,7 @@ const consoleRef = ref<HTMLDivElement | null>(null);
 const autoScroll = ref(true);
 const verbose = ref(false);
 
-const levelConfig: Record<
-    string,
-    { icon: typeof Info; class: string; badge: string }
-> = {
+const levelConfig: Record<string, { icon: typeof Info; class: string }> = {
     info: {
         icon: Info,
         class: 'text-blue-600 dark:text-blue-400',
@@ -39,17 +36,18 @@ const levelConfig: Record<
     success: {
         icon: CircleCheckBigIcon,
         class: 'text-green-600 dark:text-green-400',
-        badge: 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400',
     },
     warning: {
         icon: TriangleAlertIcon,
         class: 'text-amber-600 dark:text-amber-400',
-        badge: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400',
     },
     error: {
         icon: XIcon,
         class: 'text-red-600 dark:text-red-400',
-        badge: 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400',
+    },
+    debug: {
+        icon: LogsIcon,
+        class: 'text-slate-400 text-slate-400',
     },
 };
 
