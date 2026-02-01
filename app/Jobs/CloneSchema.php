@@ -49,6 +49,7 @@ class CloneSchema implements ShouldBeEncrypted, ShouldQueue
             $schemaReplicator->replicateDatabase(
                 source: $sourceConnection,
                 target: $targetConnection,
+                tables: $this->tables,
                 visitor: function (string $tableName, string $event, string $message): void {
                     $this->tableName = $tableName;
                     $this->logInfo($event, $message);

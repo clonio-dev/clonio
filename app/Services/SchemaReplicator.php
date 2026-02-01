@@ -27,17 +27,14 @@ class SchemaReplicator
     /**
      * Replicate entire database schema
      */
-    public function replicateDatabase(Connection $source, Connection $target, ?callable $visitor = null): void
+    public function replicateDatabase(Connection $source, Connection $target, array $tables = [], ?callable $visitor = null): void
     {
-        $sourceInspector = SchemaInspectorFactory::create($source);
-        $sourceSchema = $sourceInspector->getDatabaseSchema($source);
-
-        $tableNames = $sourceSchema->getTableNames()->all();
-
-        $order = $this->dependencyResolver->getProcessingOrder($tableNames, $source);
+        if ($tables === []) {
+            $tables = $this->resolveTables($source);
+        }
 
         // Replicate tables
-        foreach ($order['insert_order'] as $sourceTable) {
+        foreach ($tables as $sourceTable) {
             $this->replicateTable($source, $target, $sourceTable, $visitor);
         }
     }
@@ -264,5 +261,20 @@ class SchemaReplicator
             'sqlite' => new SQLiteSchemaBuilder(),
             'sqlsrv' => new SQLServerSchemaBuilder(),
         };
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function resolveTables(Connection $source): array
+    {
+        $sourceInspector = SchemaInspectorFactory::create($source);
+        $sourceSchema = $sourceInspector->getDatabaseSchema($source);
+
+        $tableNames = $sourceSchema->getTableNames()->all();
+
+        $order = $this->dependencyResolver->getProcessingOrder($tableNames, $source);
+
+        return $order['insert_order'];
     }
 }
