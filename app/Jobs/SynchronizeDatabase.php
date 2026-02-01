@@ -93,6 +93,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
                 new DropUnknownTables(
                     sourceConnectionData: $this->sourceConnectionData,
                     targetConnectionData: $this->targetConnectionData,
+                    sourceTables: $order['insert_order'],
                     run: $this->run,
                 )
             );

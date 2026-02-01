@@ -27,9 +27,13 @@ class DropUnknownTables implements ShouldBeEncrypted, ShouldQueue
 
     public string $tableName = '';
 
+    /**
+     * @param array<int, string> $sourceTables source table names
+     */
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
         public readonly ConnectionData $targetConnectionData,
+        public readonly array $sourceTables,
         public readonly CloningRun $run,
     ) {}
 
@@ -41,10 +45,9 @@ class DropUnknownTables implements ShouldBeEncrypted, ShouldQueue
         try {
             $targetSchema = $dbInformationRetrievalService->getSchema($this->targetConnectionData);
 
-            $sourceTableNames = $dbInformationRetrievalService->getTableNames($this->sourceConnectionData);
             $targetTableNames = $dbInformationRetrievalService->getTableNames($this->targetConnectionData);
 
-            $unknownTableNames = array_diff($targetTableNames, $sourceTableNames);
+            $unknownTableNames = array_diff($targetTableNames, $this->sourceTables);
             foreach ($unknownTableNames as $unknownTableName) {
                 $this->tableName = $unknownTableName;
                 $targetSchema->drop($unknownTableName);
