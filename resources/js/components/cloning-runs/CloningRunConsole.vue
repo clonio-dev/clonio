@@ -15,9 +15,12 @@ interface Props {
     runId: number;
     isActive: boolean;
     finishedAt: string | null;
+    lineLength?: number;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    lineLength: 80,
+});
 
 const consoleRef = ref<HTMLDivElement | null>(null);
 const autoScroll = ref(true);
@@ -54,6 +57,8 @@ const sortedLogs = computed(() => {
             new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
 });
+
+const openedLog = ref<{ [key: number]: boolean }>({});
 
 function formatTime(dateString: string): string {
     return new Date(dateString).toLocaleTimeString('de-DE', {
@@ -156,7 +161,13 @@ defineExpose({
                             'text-green-400': log.level === 'success',
                         }"
                     >
-                        {{ log.message }}
+                        {{ log.message.substring(0, props.lineLength) }}
+                        <span
+                            v-if="log.message.length > props.lineLength"
+                            @click="openedLog[log.id] = !openedLog[log.id]"
+                            class="cursor-pointer tracking-tighter text-slate-400 hover:text-slate-300"
+                            >[…]</span
+                        >
                     </span>
                     <Badge
                         v-if="log.data.table"
@@ -165,6 +176,14 @@ defineExpose({
                     >
                         {{ log.data.table }}
                     </Badge>
+                    <div
+                        v-if="
+                            log.message.length > props.lineLength &&
+                            openedLog[log.id]
+                        "
+                    >
+                        {{ log.message.substring(props.lineLength) }}
+                    </div>
                 </div>
             </div>
 
