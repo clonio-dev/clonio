@@ -321,15 +321,6 @@ onUnmounted(() => {
                                         isActiveRun(run),
                                 }"
                             >
-                                <!-- Active run animated border -->
-                                <td
-                                    v-if="run.status === 'processing'"
-                                    class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500"
-                                    style="
-                                        animation: shimmer 2s infinite linear;
-                                    "
-                                />
-
                                 <!-- Run ID & Cloning -->
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-3">
