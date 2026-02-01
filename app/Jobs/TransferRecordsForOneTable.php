@@ -111,6 +111,10 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     $maxChunkRetries,
                     $anonymizationService
                 ): void {
+                    if ($this->batch()->cancelled()) {
+                        return;
+                    }
+
                     $this->logDebug('chunk_processing', "Transferring {$records->count()} records from {$this->tableName} table.");
 
                     $retryCount = 0;
