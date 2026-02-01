@@ -203,7 +203,7 @@ onUnmounted(() => {
                         variant="outline"
                         size="sm"
                         @click="refreshPage"
-                        :disabled="isRefreshing"
+                        :disabled="isRefreshing || hasActiveRuns"
                         class="gap-2"
                     >
                         <RefreshCw
