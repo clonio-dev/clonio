@@ -20,7 +20,6 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\QueryException;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Sleep;
 use PDOException;
 use RuntimeException;
@@ -47,7 +46,8 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
         AnonymizationService $anonymizationService,
     ): void {
-        Log::info(self::class . ':' . $this->tableName);
+        $this->logDebug('phase_started', 'Starting data transfer for table ' . $this->tableName);
+
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
 

@@ -41,6 +41,8 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
     public function handle(
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
     ): void {
+        $this->logDebug('phase_started', 'Starting data transfer phase');
+
         try {
             foreach ($this->tables as $tableName) {
                 $this->tableName = $tableName;
@@ -65,7 +67,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
                         )
                     );
                 } else {
-                    $this->logInfo('table_done', "Skipped table {$tableName} because it has no records.");
+                    $this->logSuccess('table_done', "Skipped table {$tableName} because it has no records.");
                 }
             }
         } catch (QueryException $e) {
