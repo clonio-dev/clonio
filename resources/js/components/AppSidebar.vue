@@ -40,7 +40,7 @@ const mainNavItems: NavItem[] = [
         isActive: page.url.startsWith(CloningController.index().url),
     },
     {
-        title: 'Clone Jobs',
+        title: 'Executions',
         href: CloningRunController.index().url,
         icon: RocketIcon,
         isActive: page.url.startsWith(CloningRunController.index().url),
