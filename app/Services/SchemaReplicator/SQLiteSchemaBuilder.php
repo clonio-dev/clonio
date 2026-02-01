@@ -76,20 +76,23 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
 
     public function buildColumnDefinition(ColumnSchema $column): string
     {
-        $def = "\"{$column->name}\" " . $this->buildDataType($column);
+        // In SQLite, auto-increment requires INTEGER type (not BIGINT)
+        // INTEGER PRIMARY KEY is automatically a rowid alias and auto-increments
+        $isPrimaryAutoIncrement = $column->autoIncrement;
 
-        // Primary key for single-column auto-increment
-        $isPrimaryAutoIncrement = $column->autoIncrement && mb_strtoupper($column->type) === 'INTEGER';
         if ($isPrimaryAutoIncrement) {
-            $def .= ' PRIMARY KEY AUTOINCREMENT';
-        }
+            // SQLite requires INTEGER (not BIGINT) for auto-increment
+            $def = "\"{$column->name}\" INTEGER PRIMARY KEY AUTOINCREMENT";
+        } else {
+            $def = "\"{$column->name}\" " . $this->buildDataType($column);
 
-        if (! $column->nullable && ! $isPrimaryAutoIncrement) {
-            $def .= ' NOT NULL';
-        }
+            if (! $column->nullable) {
+                $def .= ' NOT NULL';
+            }
 
-        if ($column->default !== null && ! $isPrimaryAutoIncrement) {
-            $def .= ' DEFAULT ' . $this->formatDefaultValue($column->default);
+            if ($column->default !== null) {
+                $def .= ' DEFAULT ' . $this->formatDefaultValue($column->default);
+            }
         }
 
         return $def;
