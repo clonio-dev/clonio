@@ -27,10 +27,14 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
 
     public string $tableName = '';
 
+    /**
+     * @param  array<int, string>  $tables  table names
+     */
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
         public readonly ConnectionData $targetConnectionData,
         public readonly SynchronizationOptionsData $options,
+        public readonly array $tables,
         public readonly CloningRun $run,
     ) {}
 
@@ -38,11 +42,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
     ): void {
         try {
-            $tableNames = $dbInformationRetrievalService->getTableNames($this->sourceConnectionData);
-
-            $batch = $this->batch();
-
-            foreach ($tableNames as $tableName) {
+            foreach ($this->tables as $tableName) {
                 $this->tableName = $tableName;
 
                 $recordCount = $dbInformationRetrievalService

@@ -24,6 +24,7 @@ it('returns correct middleware', function (): void {
         sourceConnectionData: new ConnectionData('source', new SqliteDriverData()),
         targetConnectionData: new ConnectionData('target', new SqliteDriverData()),
         options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: [],
         run: $run,
     );
 
@@ -72,6 +73,7 @@ it('transfers records from all tables', function (): void {
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: ['users', 'posts'],
         run: $run,
     );
     $job->withBatchId($batch->id);
@@ -121,6 +123,7 @@ it('transfers all tables including migrations', function (): void {
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: ['users', 'migrations'],
         run: $run,
     );
     $job->withBatchId($batch->id);
@@ -171,6 +174,7 @@ it('skips tables with no records', function (): void {
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: ['users', 'posts'],
         run: $run,
     );
     $job->withBatchId($batch->id);
@@ -214,6 +218,7 @@ it('passes foreign key constraints flag to child jobs', function (): void {
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: ['users'],
         run: $run,
     );
     $job->withBatchId($batch->id);
@@ -257,6 +262,7 @@ it('passes chunk size to child jobs', function (): void {
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         options: new SynchronizationOptionsData(chunkSize: 250),
+        tables: ['users'],
         run: $run,
     );
     $job->withBatchId($batch->id);
@@ -319,6 +325,7 @@ it('handles multiple tables with mixed empty and non-empty', function (): void {
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
         options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: ['users', 'posts', 'comments', 'tags'],
         run: $run,
     );
     $job->withBatchId($batch->id);

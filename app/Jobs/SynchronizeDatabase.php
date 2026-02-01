@@ -104,6 +104,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
                 sourceConnectionData: $this->sourceConnectionData,
                 targetConnectionData: $this->targetConnectionData,
                 options: $this->options,
+                tables: $order['insert_order'],
                 run: $this->run,
             ),
         );
