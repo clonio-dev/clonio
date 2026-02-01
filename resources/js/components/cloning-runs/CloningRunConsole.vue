@@ -115,6 +115,9 @@ defineExpose({
                 <span class="font-medium text-foreground">Execution Log</span>
                 <Badge variant="secondary" class="text-xs">
                     {{ logs.length }} entries
+                    <template v-if="logs.length !== sortedLogs.length">
+                        ({{ sortedLogs.length }} filtered)
+                    </template>
                 </Badge>
             </div>
             <div class="flex items-center gap-1 text-xs text-muted-foreground">
