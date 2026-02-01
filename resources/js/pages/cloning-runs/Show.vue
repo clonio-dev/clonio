@@ -152,7 +152,7 @@ function setupAutoRefresh() {
         refreshInterval = null;
     }
     if (props.isActive) {
-        refreshInterval = window.setInterval(refreshPage, 100);
+        refreshInterval = window.setInterval(refreshPage, 1000);
     }
 }
 
@@ -248,7 +248,7 @@ onUnmounted(() => {
                             <div
                                 class="size-2 animate-pulse rounded-full bg-emerald-500"
                             />
-                            <span>Live (1s)</span>
+                            <span>Live</span>
                         </div>
 
                         <Button
