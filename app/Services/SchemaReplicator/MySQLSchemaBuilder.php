@@ -31,14 +31,6 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
             $columns[] = "PRIMARY KEY ({$columnList})";
         }
 
-        // Add unique indexes
-        foreach ($table->indexes as $index) {
-            if ($index->type === 'unique') {
-                $columnList = implode(', ', array_map(fn (string $c): string => "`{$c}`", $index->columns));
-                $columns[] = "UNIQUE KEY `{$index->name}` ({$columnList})";
-            }
-        }
-
         $sql = "CREATE TABLE `{$table->name}` (\n";
         $sql .= '  ' . implode(",\n  ", $columns) . "\n";
         $sql .= ')';
