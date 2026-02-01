@@ -204,7 +204,7 @@ class SchemaReplicator
             && empty($diff['extra_columns'])
         ) {
             if ($visitor !== null) {
-                $visitor($table->name, 'replicating_table', 'No changes necessary');
+                $visitor($table->name, 'replicating_table', 'No changes necessary', 'success');
             }
 
             return; // No changes needed
@@ -220,7 +220,7 @@ class SchemaReplicator
             $target->statement($sql);
 
             if ($visitor !== null) {
-                $visitor($table->name, 'replicating_table', 'Missing column added: ' . $columnName);
+                $visitor($table->name, 'replicating_table', 'Missing column added: ' . $columnName, 'success');
             }
         }
 
@@ -231,7 +231,7 @@ class SchemaReplicator
             $target->statement($sql);
 
             if ($visitor !== null) {
-                $visitor($table->name, 'replicating_table', 'Modified an existing column: ' . $columnName);
+                $visitor($table->name, 'replicating_table', 'Modified an existing column: ' . $columnName, 'success');
             }
         }
 

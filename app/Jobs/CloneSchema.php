@@ -50,9 +50,9 @@ class CloneSchema implements ShouldBeEncrypted, ShouldQueue
                 source: $sourceConnection,
                 target: $targetConnection,
                 tables: $this->tables,
-                visitor: function (string $tableName, string $event, string $message): void {
+                visitor: function (string $tableName, string $event, string $message, string $level = 'info'): void {
                     $this->tableName = $tableName;
-                    $this->logInfo($event, $message);
+                    $this->log($level, $event, $message);
                 },
             );
         } catch (QueryException $e) {
