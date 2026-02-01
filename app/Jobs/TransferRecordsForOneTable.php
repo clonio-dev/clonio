@@ -111,7 +111,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     $maxChunkRetries,
                     $anonymizationService
                 ): void {
-                    if ($this->batch()->cancelled()) {
+                    if ($this->batch()?->cancelled()) {
                         return;
                     }
 
