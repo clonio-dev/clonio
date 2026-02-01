@@ -60,7 +60,7 @@ function setupAutoRefresh() {
         refreshInterval = null;
     }
     if (props.activeRuns.length > 0) {
-        refreshInterval = window.setInterval(refreshDashboard, 300);
+        refreshInterval = window.setInterval(refreshDashboard, 1000);
     }
 }
 
@@ -125,7 +125,7 @@ onUnmounted(() => {
                         variant="outline"
                         size="sm"
                         @click="refreshDashboard"
-                        :disabled="isRefreshing"
+                        :disabled="isRefreshing || props.activeRuns.length > 0"
                         class="gap-2"
                     >
                         <RefreshCw
