@@ -14,6 +14,7 @@
         "pest-testing",
         "inertia-vue-development",
         "tailwindcss-development",
-        "frontend-design"
+        "frontend-design",
+        "laravel-inertia-isolated-plugin-architect"
     ]
 }
