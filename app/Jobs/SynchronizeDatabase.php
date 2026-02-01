@@ -10,11 +10,14 @@ use App\Jobs\Concerns\LogsProcessSteps;
 use App\Jobs\Concerns\TransferBatchJob;
 use App\Models\CloningRun;
 use App\Services\DatabaseInformationRetrievalService;
+use App\Services\DependencyResolver;
+use App\Services\SchemaInspector\SchemaInspectorFactory;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
@@ -34,6 +37,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
 
     public function handle(
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
+        DependencyResolver $dependencyResolver,
     ): void {
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
@@ -62,10 +66,18 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
         assert($batch !== null);
         $this->logInfo('synchronization_started', 'Starting database synchronization');
 
+        $sourceInspector = SchemaInspectorFactory::create($sourceConnection);
+        $sourceSchema = $sourceInspector->getDatabaseSchema($sourceConnection);
+        $tableNames = $sourceSchema->getTableNames()->all();
+
+        $order = $dependencyResolver->getProcessingOrder($tableNames, $sourceConnection);
+        Log::debug('Processing order: ', $order);
+
         $batch->add([
             new CloneSchema(
                 sourceConnectionData: $this->sourceConnectionData,
                 targetConnectionData: $this->targetConnectionData,
+                tables: $order['insert_order'],
                 run: $this->run,
             ),
             new TruncateTargetTables(

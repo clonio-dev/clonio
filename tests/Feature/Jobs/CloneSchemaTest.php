@@ -20,6 +20,7 @@ it('returns correct middleware', function (): void {
     $job = new CloneSchema(
         sourceConnectionData: new ConnectionData('source', new SqliteDriverData()),
         targetConnectionData: new ConnectionData('target', new SqliteDriverData()),
+        tables: ['users'],
         run: $run,
     );
 
@@ -65,6 +66,7 @@ it('clones schema from source to target', function (): void {
     $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
+        tables: ['users'],
         run: $run,
     );
 
@@ -118,6 +120,7 @@ it('clones multiple tables', function (): void {
     $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
+        tables: ['users', 'posts'],
         run: $run,
     );
 
@@ -176,6 +179,7 @@ it('preserves existing data when replicating schema', function (): void {
     $job = new CloneSchema(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
+        tables: ['users'],
         run: $run,
     );
 

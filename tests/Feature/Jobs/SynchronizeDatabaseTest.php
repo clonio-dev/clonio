@@ -9,6 +9,7 @@ use App\Jobs\Middleware\SkipWhenBatchCancelled;
 use App\Jobs\SynchronizeDatabase;
 use App\Models\CloningRun;
 use App\Services\DatabaseInformationRetrievalService;
+use App\Services\DependencyResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
@@ -68,7 +69,8 @@ it('handles synchronization request', function (): void {
 
     // Job should complete without throwing exceptions
     $dbService = resolve(DatabaseInformationRetrievalService::class);
-    $job->handle($dbService);
+    $dependencyResolver = resolve(DependencyResolver::class);
+    $job->handle($dbService, $dependencyResolver);
 
     @unlink($sourceDb);
 })->throwsNoExceptions();
