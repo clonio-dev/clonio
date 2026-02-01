@@ -28,7 +28,7 @@ class DropUnknownTables implements ShouldBeEncrypted, ShouldQueue
     public string $tableName = '';
 
     /**
-     * @param array<int, string> $sourceTables source table names
+     * @param  array<int, string>  $sourceTables  source table names
      */
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
