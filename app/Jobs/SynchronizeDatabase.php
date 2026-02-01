@@ -17,7 +17,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
@@ -71,7 +70,6 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
         $tableNames = $sourceSchema->getTableNames()->all();
 
         $order = $dependencyResolver->getProcessingOrder($tableNames, $sourceConnection);
-        Log::debug('Processing order: ', $order);
 
         $batch->add([
             new CloneSchema(
