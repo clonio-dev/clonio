@@ -38,6 +38,8 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
         DependencyResolver $dependencyResolver,
     ): void {
+        $this->logDebug('phase_started', 'Starting database synchronization phase');
+
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
 
