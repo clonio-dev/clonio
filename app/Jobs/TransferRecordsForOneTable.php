@@ -111,7 +111,8 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     &$failedChunks,
                     $maxChunkRetries,
                     $anonymizationService,
-                    $totalRowCount
+                    $totalRowCount,
+                    $startTime
                 ): void {
                     if ($this->batch()?->cancelled()) {
                         return;
@@ -137,6 +138,11 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                             $totalRows += $records->count();
 
                             $percent = $totalRowCount > 0 ? (int) round(($totalRows / $totalRowCount) * 100) : 100;
+                            $elapsedSeconds = microtime(true) - $startTime;
+                            $rowsPerSecond = $elapsedSeconds > 0 ? $totalRows / $elapsedSeconds : 0;
+                            $remainingRows = $totalRowCount - $totalRows;
+                            $estimatedSecondsRemaining = $rowsPerSecond > 0 ? (int) ceil($remainingRows / $rowsPerSecond) : null;
+
                             $this->logProgress(
                                 'table_transfer_progress',
                                 "Transferred {$totalRows} / {$totalRowCount} rows",
@@ -144,6 +150,9 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                                     'rows_processed' => $totalRows,
                                     'total_rows' => $totalRowCount,
                                     'percent' => $percent,
+                                    'rows_per_second' => (int) round($rowsPerSecond),
+                                    'elapsed_seconds' => (int) round($elapsedSeconds),
+                                    'estimated_seconds_remaining' => $estimatedSecondsRemaining,
                                 ]
                             );
 
