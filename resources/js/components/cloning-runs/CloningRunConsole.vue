@@ -153,6 +153,40 @@ function toggleProgressExpand(tableName: string): void {
     }
 }
 
+function formatDuration(seconds: number | null | undefined): string | null {
+    if (seconds === null || seconds === undefined || seconds <= 0) return null;
+
+    if (seconds < 60) {
+        return `~${seconds}s`;
+    }
+
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    if (minutes < 60) {
+        return remainingSeconds > 0
+            ? `~${minutes}m ${remainingSeconds}s`
+            : `~${minutes}m`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+
+    return remainingMinutes > 0
+        ? `~${hours}h ${remainingMinutes}m`
+        : `~${hours}h`;
+}
+
+function formatSpeed(rowsPerSecond: number | undefined): string | null {
+    if (!rowsPerSecond || rowsPerSecond <= 0) return null;
+
+    if (rowsPerSecond >= 1000) {
+        return `${(rowsPerSecond / 1000).toFixed(1)}k/s`;
+    }
+
+    return `${rowsPerSecond}/s`;
+}
+
 function formatTime(dateString: string): string {
     return new Date(dateString).toLocaleTimeString('de-DE', {
         hour: '2-digit',
@@ -329,6 +363,39 @@ defineExpose({
                             >
                                 {{ getProgressData(displayLog.log)?.percent }}%
                             </Badge>
+                            <span
+                                v-if="
+                                    formatDuration(
+                                        getProgressData(displayLog.log)
+                                            ?.estimated_seconds_remaining,
+                                    )
+                                "
+                                class="text-xs text-slate-400"
+                            >
+                                {{
+                                    formatDuration(
+                                        getProgressData(displayLog.log)
+                                            ?.estimated_seconds_remaining,
+                                    )
+                                }}
+                                remaining
+                            </span>
+                            <span
+                                v-if="
+                                    formatSpeed(
+                                        getProgressData(displayLog.log)
+                                            ?.rows_per_second,
+                                    )
+                                "
+                                class="text-xs text-slate-500"
+                            >
+                                ({{
+                                    formatSpeed(
+                                        getProgressData(displayLog.log)
+                                            ?.rows_per_second,
+                                    )
+                                }})
+                            </span>
                             <Badge
                                 v-if="displayLog.log.data.table"
                                 variant="outline"
