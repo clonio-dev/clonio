@@ -25,11 +25,11 @@ class CloningController extends Controller
     /**
      * Display a listing of clonings.
      */
-    public function index(): Response
+    public function index(#[CurrentUser] User $user): Response
     {
         $clonings = Cloning::query()
-            ->with(['sourceConnection:id,name,type', 'targetConnection:id,name,type'])
-            ->where('user_id', auth()->id())
+            ->forUser($user->id)
+            ->with(['sourceConnection:id,name,type', 'targetConnection:id,name,type', 'lastRun'])
             ->withCount('runs')
             ->latest('id')
             ->paginate(10);
