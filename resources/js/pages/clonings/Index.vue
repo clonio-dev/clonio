@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CloningController from '@/actions/App/Http/Controllers/CloningController';
+import CloningRunStatusBadge from '@/components/cloning-runs/CloningRunStatusBadge.vue';
 import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -168,6 +169,11 @@ function resumeCloning(cloning: Cloning) {
                                     Schedule
                                 </th>
                                 <th
+                                    class="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase lg:table-cell"
+                                >
+                                    Last Run
+                                </th>
+                                <th
                                     class="px-4 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase"
                                 >
                                     Actions
@@ -302,6 +308,20 @@ function resumeCloning(cloning: Cloning) {
                                     </span>
                                 </td>
 
+                                <!-- Last Run -->
+                                <td
+                                    class="hidden px-4 py-4 whitespace-nowrap lg:table-cell"
+                                >
+                                    <template v-if="cloning.last_run">
+                                        <CloningRunStatusBadge
+                                            :status="
+                                                cloning.last_run?.status ||
+                                                'queued'
+                                            "
+                                        />
+                                    </template>
+                                </td>
+
                                 <!-- Actions -->
                                 <td
                                     class="px-4 py-4 text-right whitespace-nowrap"
@@ -366,9 +386,7 @@ function resumeCloning(cloning: Cloning) {
                                                         executeCloning(cloning)
                                                     "
                                                 >
-                                                    <Play
-                                                        class="mr-2 size-4"
-                                                    />
+                                                    <Play class="mr-2 size-4" />
                                                     Run
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
@@ -422,7 +440,7 @@ function resumeCloning(cloning: Cloning) {
                                 class="border-t border-border/60 bg-muted/30 dark:border-border/40 dark:bg-muted/20"
                             >
                                 <td
-                                    colspan="6"
+                                    colspan="7"
                                     class="px-4 py-3 text-xs tracking-wider text-muted-foreground"
                                 >
                                     <Pagination
