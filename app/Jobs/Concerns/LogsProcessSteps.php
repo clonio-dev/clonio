@@ -40,6 +40,11 @@ trait LogsProcessSteps
         $this->log('debug', $event, $message);
     }
 
+    private function logProgress(string $event, string $message, array $data = []): void
+    {
+        $this->log('info', $event, $message, $data);
+    }
+
     private function log(string $level, string $event, string $message, array $data = []): void
     {
         $tableName = property_exists($this, 'tableName') ? $this->tableName : '';
