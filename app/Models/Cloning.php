@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -32,7 +33,7 @@ use Illuminate\Support\Carbon;
  * @property-read DatabaseConnection $sourceConnection
  * @property-read DatabaseConnection $targetConnection
  * @property-read Collection<int, CloningRun> $runs
- * @property-read CloningRun|null $latestRun
+ * @property-read CloningRun|null $lastRun
  *
  * @mixin Model
  */
@@ -118,11 +119,11 @@ class Cloning extends Model
     }
 
     /**
-     * Get the latest run for this cloning.
+     * @return HasOne<CloningRun, Cloning>
      */
-    public function latestRun(): ?CloningRun
+    public function lastRun(): HasOne
     {
-        return $this->runs()->latest('id')->first();
+        return $this->runs()->one()->latest('id');
     }
 
     /**
