@@ -88,6 +88,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
             $query->orderBy($column);
         }
 
+        $totalRowCount = $sourceTable->query()->count();
         $totalRows = 0;
         $failedChunks = 0;
         $maxChunkRetries = 3;
@@ -96,7 +97,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         try {
             $this->logInfo(
                 'data_copy_started',
-                "Starting chunked data copy (chunk size: {$this->chunkSize})"
+                "Starting chunked data copy of {$totalRowCount} rows (chunk size: {$this->chunkSize})"
             );
 
             $query->chunk(
@@ -109,13 +110,12 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     &$totalRows,
                     &$failedChunks,
                     $maxChunkRetries,
-                    $anonymizationService
+                    $anonymizationService,
+                    $totalRowCount
                 ): void {
                     if ($this->batch()?->cancelled()) {
                         return;
                     }
-
-                    $this->logDebug('chunk_processing', "Transferring {$records->count()} records from {$this->tableName} table.");
 
                     $retryCount = 0;
 
@@ -136,9 +136,15 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
                             $totalRows += $records->count();
 
-                            $this->logDebug(
-                                'chunk_processed',
-                                "Processed chunk: {$totalRows} rows total"
+                            $percent = $totalRowCount > 0 ? (int) round(($totalRows / $totalRowCount) * 100) : 100;
+                            $this->logProgress(
+                                'table_transfer_progress',
+                                "Transferred {$totalRows} / {$totalRowCount} rows",
+                                [
+                                    'rows_processed' => $totalRows,
+                                    'total_rows' => $totalRowCount,
+                                    'percent' => $percent,
+                                ]
                             );
 
                             break; // Erfolg, raus aus Retry-Loop
