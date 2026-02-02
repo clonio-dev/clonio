@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CloningController from '@/actions/App/Http/Controllers/CloningController';
 import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +27,7 @@ import {
     PlayCircle,
     Plus,
     Trash2,
+    UserIcon,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 
@@ -34,7 +36,7 @@ const props = defineProps<CloningsIndexProps>();
 const breadcrumbItems: BreadcrumbItem[] = [
     {
         title: 'Clonings',
-        href: '/clonings',
+        href: CloningController.index().url,
     },
 ];
 
@@ -52,7 +54,7 @@ function formatDate(dateString: string): string {
 }
 
 function executeCloning(cloning: Cloning) {
-    router.post(`/clonings/${cloning.id}/execute`);
+    router.post(CloningController.execute(cloning).url);
 }
 
 function deleteCloning(cloning: Cloning) {
@@ -61,16 +63,16 @@ function deleteCloning(cloning: Cloning) {
             `Are you sure you want to delete "${cloning.title}"? This cannot be undone.`,
         )
     ) {
-        router.delete(`/clonings/${cloning.id}`);
+        router.delete(CloningController.destroy(cloning).url);
     }
 }
 
 function pauseCloning(cloning: Cloning) {
-    router.post(`/clonings/${cloning.id}/pause`);
+    router.post(CloningController.pause(cloning).url);
 }
 
 function resumeCloning(cloning: Cloning) {
-    router.post(`/clonings/${cloning.id}/resume`);
+    router.post(CloningController.resume(cloning).url);
 }
 </script>
 
@@ -83,13 +85,6 @@ function resumeCloning(cloning: Cloning) {
             <div class="mb-8 flex items-start justify-between">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
-                        <div
-                            class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/30 dark:from-violet-500/10 dark:to-purple-500/10"
-                        >
-                            <Copy
-                                class="size-5 text-violet-600 dark:text-violet-400"
-                            />
-                        </div>
                         <h1
                             class="text-2xl font-semibold tracking-tight text-foreground"
                         >
@@ -101,11 +96,8 @@ function resumeCloning(cloning: Cloning) {
                     </p>
                 </div>
 
-                <Button
-                    as-child
-                    class="group gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/20 transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-lg hover:shadow-violet-500/30 dark:shadow-violet-500/10 dark:hover:shadow-violet-500/20"
-                >
-                    <Link href="/clonings/create">
+                <Button as-child class="group gap-2">
+                    <Link :href="CloningController.create().url">
                         <Plus
                             class="size-4 transition-transform group-hover:rotate-90"
                         />
@@ -130,20 +122,16 @@ function resumeCloning(cloning: Cloning) {
                 <h2
                     class="mb-2 text-xl font-semibold tracking-tight text-foreground"
                 >
-                    No Cloning Configurations Yet
+                    No Clonings yet
                 </h2>
 
                 <p class="mx-auto mb-8 max-w-md text-sm text-muted-foreground">
-                    Create your first cloning configuration to start anonymizing
-                    and transferring data between your databases.
+                    Create your first cloning to start anonymizing and
+                    transferring data between your databases.
                 </p>
 
-                <Button
-                    as-child
-                    class="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/20 hover:from-violet-500 hover:to-purple-500"
-                >
-                    <Link href="/clonings/create">
-                        <Plus class="size-4" />
+                <Button as-child>
+                    <Link :href="CloningController.create().url">
                         Create First Cloning
                     </Link>
                 </Button>
@@ -167,15 +155,10 @@ function resumeCloning(cloning: Cloning) {
                                 <th
                                     class="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase md:table-cell"
                                 >
-                                    Source
+                                    Source / Target
                                 </th>
                                 <th
-                                    class="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase md:table-cell"
-                                >
-                                    Target
-                                </th>
-                                <th
-                                    class="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase lg:table-cell"
+                                    class="hidden px-4 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase lg:table-cell"
                                 >
                                     Runs
                                 </th>
@@ -203,8 +186,11 @@ function resumeCloning(cloning: Cloning) {
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="flex flex-col">
                                         <Link
-                                            :href="`/clonings/${cloning.id}`"
-                                            class="font-medium text-foreground hover:text-violet-600 dark:hover:text-violet-400"
+                                            :href="
+                                                CloningController.show(cloning)
+                                                    .url
+                                            "
+                                            class="font-medium text-foreground hover:text-primary dark:hover:text-primary"
                                         >
                                             {{ cloning.title }}
                                         </Link>
@@ -217,46 +203,49 @@ function resumeCloning(cloning: Cloning) {
                                     </div>
                                 </td>
 
-                                <!-- Source -->
+                                <!-- Source / Target -->
                                 <td
                                     class="hidden px-4 py-4 whitespace-nowrap md:table-cell"
                                 >
                                     <div class="flex items-center gap-2">
-                                        <Database
-                                            class="size-4 text-muted-foreground/60"
-                                        />
-                                        <span class="text-sm text-foreground">
-                                            {{
-                                                cloning.source_connection
-                                                    ?.name || '-'
-                                            }}
-                                        </span>
-                                    </div>
-                                </td>
+                                        <div class="flex items-center gap-1">
+                                            <Database
+                                                class="size-4 text-muted-foreground/60"
+                                            />
+                                            <span
+                                                class="text-sm text-foreground"
+                                            >
+                                                {{
+                                                    cloning.source_connection
+                                                        ?.name || '-'
+                                                }}
+                                            </span>
+                                        </div>
 
-                                <!-- Target -->
-                                <td
-                                    class="hidden px-4 py-4 whitespace-nowrap md:table-cell"
-                                >
-                                    <div class="flex items-center gap-2">
                                         <ArrowRight
                                             class="size-3 text-muted-foreground/50"
                                         />
-                                        <Database
-                                            class="size-4 text-muted-foreground/60"
-                                        />
-                                        <span class="text-sm text-foreground">
-                                            {{
-                                                cloning.target_connection
-                                                    ?.name || '-'
-                                            }}
-                                        </span>
+
+                                        <!-- Target -->
+                                        <div class="flex items-center gap-1">
+                                            <Database
+                                                class="size-4 text-muted-foreground/60"
+                                            />
+                                            <span
+                                                class="text-sm text-foreground"
+                                            >
+                                                {{
+                                                    cloning.target_connection
+                                                        ?.name || '-'
+                                                }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </td>
 
                                 <!-- Runs -->
                                 <td
-                                    class="hidden px-4 py-4 whitespace-nowrap lg:table-cell"
+                                    class="hidden px-4 py-4 text-right whitespace-nowrap slashed-zero tabular-nums lg:table-cell"
                                 >
                                     {{ cloning.runs_count || 0 }}
                                 </td>
@@ -270,19 +259,23 @@ function resumeCloning(cloning: Cloning) {
                                             cloning.is_scheduled &&
                                             cloning.is_paused
                                         "
-                                        class="flex items-center gap-1.5 text-sm text-amber-600 dark:text-amber-400"
+                                        class="flex flex-col"
                                     >
-                                        <Pause class="size-3.5" />
-                                        Paused
-                                        <span
+                                        <div
+                                            class="flex items-center gap-1.5 text-sm text-amber-600 dark:text-amber-400"
+                                        >
+                                            <Pause class="size-3.5" />
+                                            Paused
+                                        </div>
+                                        <div
                                             v-if="
                                                 cloning.consecutive_failures > 0
                                             "
-                                            class="text-xs text-muted-foreground"
+                                            class="text-xs text-muted-foreground/80"
                                         >
                                             ({{ cloning.consecutive_failures }}
                                             failures)
-                                        </span>
+                                        </div>
                                     </div>
                                     <div
                                         v-else-if="cloning.is_scheduled"
@@ -302,8 +295,9 @@ function resumeCloning(cloning: Cloning) {
                                     </div>
                                     <span
                                         v-else
-                                        class="text-sm text-muted-foreground"
+                                        class="flex items-center gap-1.5 text-sm text-muted-foreground"
                                     >
+                                        <UserIcon class="size-3.5" />
                                         Manual
                                     </span>
                                 </td>
@@ -340,7 +334,11 @@ function resumeCloning(cloning: Cloning) {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem as-child>
                                                     <Link
-                                                        :href="`/clonings/${cloning.id}`"
+                                                        :href="
+                                                            CloningController.show(
+                                                                cloning,
+                                                            ).url
+                                                        "
                                                     >
                                                         <Calendar
                                                             class="mr-2 size-4"
@@ -350,13 +348,28 @@ function resumeCloning(cloning: Cloning) {
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem as-child>
                                                     <Link
-                                                        :href="`/clonings/${cloning.id}/edit`"
+                                                        :href="
+                                                            CloningController.edit(
+                                                                cloning,
+                                                            ).url
+                                                        "
                                                     >
                                                         <Pencil
                                                             class="mr-2 size-4"
                                                         />
                                                         Edit
                                                     </Link>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    @click="
+                                                        executeCloning(cloning)
+                                                    "
+                                                >
+                                                    <Play
+                                                        class="mr-2 size-4"
+                                                    />
+                                                    Run
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     v-if="
@@ -409,7 +422,7 @@ function resumeCloning(cloning: Cloning) {
                                 class="border-t border-border/60 bg-muted/30 dark:border-border/40 dark:bg-muted/20"
                             >
                                 <td
-                                    colspan="7"
+                                    colspan="6"
                                     class="px-4 py-3 text-xs tracking-wider text-muted-foreground"
                                 >
                                     <Pagination
