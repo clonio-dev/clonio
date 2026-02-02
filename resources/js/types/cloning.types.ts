@@ -28,6 +28,9 @@ export interface TableTransferProgressData {
     rows_processed: number;
     total_rows: number;
     percent: number;
+    rows_per_second?: number;
+    elapsed_seconds?: number;
+    estimated_seconds_remaining?: number | null;
 }
 
 /**
