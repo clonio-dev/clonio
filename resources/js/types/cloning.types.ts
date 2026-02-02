@@ -21,6 +21,16 @@ export type CloningRunLogLevel =
     | 'debug';
 
 /**
+ * Progress data for table_transfer_progress events
+ */
+export interface TableTransferProgressData {
+    table: string;
+    rows_processed: number;
+    total_rows: number;
+    percent: number;
+}
+
+/**
  * Cloning Run Log Entry
  */
 export interface CloningRunLog {
@@ -29,7 +39,7 @@ export interface CloningRunLog {
     level: CloningRunLogLevel;
     event_type: string;
     message: string;
-    data: Record<string, unknown>;
+    data: Record<string, unknown> | TableTransferProgressData;
     created_at: string;
 }
 
