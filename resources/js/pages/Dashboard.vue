@@ -1,21 +1,19 @@
 <script setup lang="ts">
+import CloningController from '@/actions/App/Http/Controllers/CloningController';
+import CloningRunController from '@/actions/App/Http/Controllers/CloningRunController';
 import RunCard from '@/components/cloning-runs/RunCard.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import type { DashboardProps } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
-    Activity,
     ArrowRight,
     CheckCircle2,
     Clock,
     Database,
-    FileText,
     Play,
-    Plus,
     RefreshCw,
     Shield,
     XCircle,
@@ -26,7 +24,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard().url,
+        href: CloningRunController.dashboard().url,
     },
 ];
 
@@ -91,13 +89,6 @@ onUnmounted(() => {
             <div class="mb-8 flex items-start justify-between">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
-                        <div
-                            class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/30 dark:from-violet-500/10 dark:to-purple-500/10"
-                        >
-                            <Activity
-                                class="size-5 text-violet-600 dark:text-violet-400"
-                            />
-                        </div>
                         <h1
                             class="text-2xl font-semibold tracking-tight text-foreground"
                         >
@@ -291,32 +282,19 @@ onUnmounted(() => {
                 <h2
                     class="mb-2 text-xl font-semibold tracking-tight text-foreground"
                 >
-                    No Cloning Runs Yet
+                    No Cloning Runs yet
                 </h2>
 
                 <p class="mx-auto mb-8 max-w-md text-sm text-muted-foreground">
-                    Get started by creating your first cloning configuration.
-                    You'll be able to anonymize and transfer data between
-                    databases securely.
+                    Get started by creating your first cloning. You'll be able
+                    to anonymize and transfer data between databases securely.
                 </p>
 
                 <div class="flex flex-col gap-3 sm:flex-row">
-                    <Button
-                        @click="createFirstCloning"
-                        class="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/20 hover:from-violet-500 hover:to-purple-500"
-                    >
-                        <Plus class="size-4" />
-                        Create First Cloning
-                    </Button>
-
-                    <Button
-                        variant="outline"
-                        as="a"
-                        href="/docs/getting-started"
-                        class="gap-2"
-                    >
-                        <FileText class="size-4" />
-                        View Documentation
+                    <Button as-child class="gap-2">
+                        <Link :href="CloningController.create().url">
+                            Create Your First Cloning
+                        </Link>
                     </Button>
                 </div>
 
@@ -433,7 +411,7 @@ onUnmounted(() => {
                             as-child
                             class="gap-2 text-muted-foreground hover:text-foreground"
                         >
-                            <Link href="/cloning-runs">
+                            <Link :href="CloningRunController.index().url">
                                 View Full History
                                 <ArrowRight class="size-4" />
                             </Link>
