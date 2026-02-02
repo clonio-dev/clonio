@@ -104,7 +104,7 @@ const duration = computed(() => {
 <template>
     <Link :href="`/cloning-runs/${run.id}`">
         <Card
-            class="group cursor-pointer border-border/60 transition-all hover:border-border hover:shadow-md dark:border-border/40 dark:hover:border-border/60 h-full"
+            class="group h-full cursor-pointer border-border/60 transition-all hover:border-border hover:shadow-md dark:border-border/40 dark:hover:border-border/60"
             :class="{ 'ring-2 ring-emerald-500/20': isActive }"
         >
             <CardContent class="p-4 py-0">
