@@ -121,7 +121,7 @@ export interface DashboardProps {
  * Clonings Index Page Props
  */
 export interface CloningsIndexProps {
-    clonings: PaginatedData<Cloning>;
+    clonings: PaginatedData<Cloning & { last_run: CloningRun | null }>;
 }
 
 /**
