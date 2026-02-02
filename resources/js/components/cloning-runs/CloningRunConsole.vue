@@ -157,7 +157,7 @@ function formatDuration(seconds: number | null | undefined): string | null {
     if (seconds === null || seconds === undefined || seconds <= 0) return null;
 
     if (seconds < 60) {
-        return `~${seconds}s`;
+        return `~${seconds.toString(10).padStart(2, '0')}s`;
     }
 
     const minutes = Math.floor(seconds / 60);
@@ -165,26 +165,26 @@ function formatDuration(seconds: number | null | undefined): string | null {
 
     if (minutes < 60) {
         return remainingSeconds > 0
-            ? `~${minutes}m ${remainingSeconds}s`
-            : `~${minutes}m`;
+            ? `~${minutes.toString(10).padStart(2, '0')}m ${remainingSeconds.toString(10).padStart(2, '0')}s`
+            : `~${minutes.toString(10).padStart(2, '0')}m`;
     }
 
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
 
     return remainingMinutes > 0
-        ? `~${hours}h ${remainingMinutes}m`
-        : `~${hours}h`;
+        ? `~${hours.toString(10).padStart(2, '0')}h ${remainingMinutes.toString(10).padStart(2, '0')}m`
+        : `~${hours.toString(10).padStart(2, '0')}h`;
 }
 
 function formatSpeed(rowsPerSecond: number | undefined): string | null {
     if (!rowsPerSecond || rowsPerSecond <= 0) return null;
 
     if (rowsPerSecond >= 1000) {
-        return `${(rowsPerSecond / 1000).toFixed(1)}k/s`;
+        return `${(rowsPerSecond / 1000).toFixed(1)}k rows/s`;
     }
 
-    return `${rowsPerSecond}/s`;
+    return `${rowsPerSecond} rows/s`;
 }
 
 function formatTime(dateString: string): string {
