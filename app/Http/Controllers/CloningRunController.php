@@ -125,13 +125,20 @@ class CloningRunController extends Controller
 
     public function auditlog(CloningRun $run, AuditService $auditService): View
     {
-        $run->loadMissing(['cloning', 'logs', 'user']);
+        $run->loadMissing([
+            'cloning',
+            'cloning.sourceConnection',
+            'cloning.targetConnection',
+            'cloning.user',
+            'logs',
+            'user',
+        ]);
         $verification = $auditService->getVerificationDetails($run);
 
         return view('reports.audit-trail', [
             'run' => $run,
             'config' => $run->config_snapshot,
-            'logs' => $run->logs,
+            'logs' => $run->logs->sortBy('id'),
             'verification' => $verification,
         ]);
     }
