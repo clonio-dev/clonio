@@ -5,12 +5,13 @@ import CloningRunStatusBadge from '@/components/cloning-runs/CloningRunStatusBad
 import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { convertDuration } from '@/lib/date';
+import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
 import type { CloningRun, CloningRunsIndexProps } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowRight, Database, Plus, RefreshCw, Send } from 'lucide-vue-next';
+import { ArrowRight, Plus, RefreshCw, Send } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-import { convertDuration } from '@/lib/date';
 
 const props = defineProps<CloningRunsIndexProps>();
 
@@ -48,7 +49,7 @@ function formatDuration(run: CloningRun): string {
     const start = new Date(run.started_at);
     const end = run.finished_at ? new Date(run.finished_at) : new Date();
 
-    return convertDuration(start, end)
+    return convertDuration(start, end);
 }
 
 function refreshPage() {
@@ -305,8 +306,13 @@ onUnmounted(() => {
                                 >
                                     <div class="flex items-center gap-2">
                                         <div class="flex items-center gap-1">
-                                            <Database
-                                                class="size-4 text-muted-foreground/60"
+                                            <ConnectionTypeIcon
+                                                :type="
+                                                    run.cloning
+                                                        ?.source_connection
+                                                        ?.type
+                                                "
+                                                size="4"
                                             />
                                             <span
                                                 class="text-sm text-foreground"
@@ -322,8 +328,13 @@ onUnmounted(() => {
                                             class="size-3 text-muted-foreground/50"
                                         />
                                         <div class="flex items-center gap-1">
-                                            <Database
-                                                class="size-4 text-muted-foreground/60"
+                                            <ConnectionTypeIcon
+                                                :type="
+                                                    run.cloning
+                                                        ?.target_connection
+                                                        ?.type
+                                                "
+                                                size="4"
                                             />
                                             <span
                                                 class="text-sm text-foreground"

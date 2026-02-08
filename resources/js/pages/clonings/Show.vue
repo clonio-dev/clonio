@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import CloningRunController from '@/actions/App/Http/Controllers/CloningRunController';
 import RunCard from '@/components/cloning-runs/RunCard.vue';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
+import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
 import type { CloningRun, CloningShowProps } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -153,18 +154,14 @@ const runsWithCloning = computed(() =>
                                 Connections
                             </CardTitle>
                         </CardHeader>
-                        <CardContent class="space-y-4">
-                            <div class="space-y-2">
-                                <div
-                                    class="text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                >
-                                    Source
-                                </div>
+                        <CardContent class="space-y-2">
+                            <div>
                                 <div
                                     class="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2 dark:bg-muted/20"
                                 >
-                                    <Database
-                                        class="size-4 text-muted-foreground/70"
+                                    <ConnectionTypeIcon
+                                        :type="cloning.source_connection?.type"
+                                        size="4"
                                     />
                                     <span class="font-medium text-foreground">
                                         {{
@@ -172,12 +169,6 @@ const runsWithCloning = computed(() =>
                                             'Unknown'
                                         }}
                                     </span>
-                                    <Badge
-                                        variant="outline"
-                                        class="ml-auto text-xs"
-                                    >
-                                        {{ cloning.source_connection?.type }}
-                                    </Badge>
                                 </div>
                             </div>
 
@@ -187,17 +178,13 @@ const runsWithCloning = computed(() =>
                                 <ArrowRight class="size-4 rotate-90" />
                             </div>
 
-                            <div class="space-y-2">
-                                <div
-                                    class="text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                                >
-                                    Target
-                                </div>
+                            <div>
                                 <div
                                     class="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2 dark:bg-muted/20"
                                 >
-                                    <Database
-                                        class="size-4 text-muted-foreground/70"
+                                    <ConnectionTypeIcon
+                                        :type="cloning.target_connection?.type"
+                                        size="4"
                                     />
                                     <span class="font-medium text-foreground">
                                         {{
@@ -205,12 +192,6 @@ const runsWithCloning = computed(() =>
                                             'Unknown'
                                         }}
                                     </span>
-                                    <Badge
-                                        variant="outline"
-                                        class="ml-auto text-xs"
-                                    >
-                                        {{ cloning.target_connection?.type }}
-                                    </Badge>
                                 </div>
                             </div>
                         </CardContent>
@@ -345,7 +326,7 @@ const runsWithCloning = computed(() =>
                             Recent Runs
                         </h2>
                         <Link
-                            href="/cloning-runs"
+                            :href="CloningRunController.index().url"
                             class="text-sm text-muted-foreground hover:text-foreground"
                         >
                             View All

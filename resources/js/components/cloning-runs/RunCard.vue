@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import CloningRunStatusBadge from '@/components/cloning-runs/CloningRunStatusBadge.vue';
 import { Card, CardContent } from '@/components/ui/card';
+import { convertDuration } from '@/lib/date';
 import type { CloningRun } from '@/types/cloning.types';
 import { Link } from '@inertiajs/vue3';
-import { ArrowRight, Database } from 'lucide-vue-next';
+import { ArrowRight } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -29,17 +30,13 @@ const formattedDate = computed(() => {
 
 const duration = computed(() => {
     if (!props.run.started_at) return '-';
+
     const start = new Date(props.run.started_at);
     const end = props.run.finished_at
         ? new Date(props.run.finished_at)
         : new Date();
-    const diffMs = end.getTime() - start.getTime();
-    const mins = Math.floor(diffMs / 60000);
-    const secs = Math.floor((diffMs % 60000) / 1000);
-    if (mins > 0) {
-        return `${mins}m ${secs}s`;
-    }
-    return `${secs}s`;
+
+    return convertDuration(start, end);
 });
 </script>
 
@@ -53,9 +50,9 @@ const duration = computed(() => {
                 <div class="mb-3 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                         <div
-                            class="flex size-8 items-center justify-center rounded-lg bg-muted/50"
+                            class="flex shrink-0 items-center justify-center rounded-lg"
                         >
-                            <Database class="size-4 text-muted-foreground" />
+                            {{ `#${run.id}` }}
                         </div>
                         <div>
                             <p class="text-sm font-medium text-foreground">
@@ -91,12 +88,8 @@ const duration = computed(() => {
                 <div
                     class="flex items-center justify-between text-xs text-muted-foreground"
                 >
-                    <div class="flex items-center gap-4">
-                        <span
-                            v-if="run.cloning?.source_connection"
-                            class="flex items-center gap-1"
-                        >
-                            <Database class="size-3" />
+                    <div class="flex items-center gap-1">
+                        <span v-if="run.cloning?.source_connection">
                             {{ run.cloning.source_connection.name }}
                         </span>
                         <ArrowRight

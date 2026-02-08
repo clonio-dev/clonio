@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ConnectionsPagination from '@/pages/connections/components/ConnectionsPagination.vue';
+import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
 import type { Cloning, CloningsIndexProps } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -20,7 +21,6 @@ import {
     Calendar,
     Clock,
     Copy,
-    Database,
     MoreHorizontal,
     Pause,
     Pencil,
@@ -215,8 +215,12 @@ function resumeCloning(cloning: Cloning) {
                                 >
                                     <div class="flex items-center gap-2">
                                         <div class="flex items-center gap-1">
-                                            <Database
-                                                class="size-4 text-muted-foreground/60"
+                                            <ConnectionTypeIcon
+                                                :type="
+                                                    cloning.source_connection
+                                                        ?.type
+                                                "
+                                                size="4"
                                             />
                                             <span
                                                 class="text-sm text-foreground"
@@ -234,8 +238,12 @@ function resumeCloning(cloning: Cloning) {
 
                                         <!-- Target -->
                                         <div class="flex items-center gap-1">
-                                            <Database
-                                                class="size-4 text-muted-foreground/60"
+                                            <ConnectionTypeIcon
+                                                :type="
+                                                    cloning.target_connection
+                                                        ?.type
+                                                "
+                                                size="4"
                                             />
                                             <span
                                                 class="text-sm text-foreground"

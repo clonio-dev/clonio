@@ -3,6 +3,8 @@ import CloningRunConsole from '@/components/cloning-runs/CloningRunConsole.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { convertDuration } from '@/lib/date';
+import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
 import { CloningRunShowProps, CloningRunStatus } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -120,18 +122,7 @@ const duration = computed(() => {
         ? new Date(props.run.finished_at)
         : new Date();
 
-    const diffMs = end.getTime() - start.getTime();
-    const hours = Math.floor(diffMs / 3600000);
-    const mins = Math.floor((diffMs % 3600000) / 60000);
-    const secs = Math.floor((diffMs % 60000) / 1000);
-
-    if (hours > 0) {
-        return `${hours}h ${mins}m ${secs}s`;
-    }
-    if (mins > 0) {
-        return `${mins}m ${secs}s`;
-    }
-    return `${secs}s`;
+    return convertDuration(start, end);
 });
 
 function refreshPage() {
@@ -303,49 +294,30 @@ onUnmounted(() => {
             <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <!-- Source -->
                 <div
-                    class="rounded-xl border border-border/60 bg-card p-4 dark:border-border/40"
+                    class="rounded-xl border border-border/60 bg-card p-4 lg:col-span-2 dark:border-border/40"
                 >
                     <div
                         class="mb-2 flex items-center gap-2 text-xs font-medium tracking-wider text-muted-foreground uppercase"
                     >
                         <Database class="size-3.5" />
-                        Source
+                        Source / Target
                     </div>
                     <div class="flex items-center gap-2">
+                        <ConnectionTypeIcon
+                            :type="run.cloning?.source_connection?.type"
+                            size="4"
+                        />
                         <span class="font-medium text-foreground">
                             {{ run.cloning?.source_connection?.name || '-' }}
                         </span>
-                        <Badge
-                            v-if="run.cloning?.source_connection?.type"
-                            variant="secondary"
-                            class="text-xs"
-                        >
-                            {{ run.cloning.source_connection.type }}
-                        </Badge>
-                    </div>
-                </div>
-
-                <!-- Target -->
-                <div
-                    class="rounded-xl border border-border/60 bg-card p-4 dark:border-border/40"
-                >
-                    <div
-                        class="mb-2 flex items-center gap-2 text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                    >
                         <ArrowRight class="size-3.5" />
-                        Target
-                    </div>
-                    <div class="flex items-center gap-2">
+                        <ConnectionTypeIcon
+                            :type="run.cloning?.target_connection?.type"
+                            size="4"
+                        />
                         <span class="font-medium text-foreground">
                             {{ run.cloning?.target_connection?.name || '-' }}
                         </span>
-                        <Badge
-                            v-if="run.cloning?.target_connection?.type"
-                            variant="secondary"
-                            class="text-xs"
-                        >
-                            {{ run.cloning.target_connection.type }}
-                        </Badge>
                     </div>
                 </div>
 
