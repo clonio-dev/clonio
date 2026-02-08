@@ -23,10 +23,22 @@ trait LogsProcessSteps
     private array $lastLoggedPercent = [];
 
     /**
+     * Track the last logged time per table to enable time-based throttling.
+     *
+     * @var array<string, float>
+     */
+    private array $lastLoggedTime = [];
+
+    /**
      * Minimum percentage change required before logging progress again.
      * This prevents excessive database writes during large transfers.
      */
     private int $progressLogThresholdPercent = 5;
+
+    /**
+     * Minimum seconds between progress log writes to the database.
+     */
+    private int $progressLogThresholdSeconds = 10;
 
     private function logInfo(string $event, string $message): void
     {
@@ -58,7 +70,7 @@ trait LogsProcessSteps
      *
      * Progress is only written to the database when:
      * - It's the first progress log for a table
-     * - The percentage has changed by at least $progressLogThresholdPercent
+     * - At least $progressLogThresholdSeconds have elapsed since last write
      * - The transfer is complete (100%)
      *
      * All progress is still logged to Laravel's log file for debugging.
@@ -76,8 +88,9 @@ trait LogsProcessSteps
             return;
         }
 
-        // Update last logged percentage
+        // Update last logged percentage and time
         $this->lastLoggedPercent[$tableName] = $currentPercent;
+        $this->lastLoggedTime[$tableName] = microtime(true);
 
         // Write to database
         if (isset($this->run) && $this->run instanceof CloningRun) {
@@ -95,7 +108,7 @@ trait LogsProcessSteps
      *
      * Returns true for:
      * - First progress log for a table
-     * - Percentage change >= threshold
+     * - At least $progressLogThresholdSeconds have elapsed since last write
      * - Completion (100%)
      */
     private function shouldLogProgressToDatabase(string $tableName, int $currentPercent): bool
@@ -106,14 +119,14 @@ trait LogsProcessSteps
         }
 
         // First log for this table
-        if (! isset($this->lastLoggedPercent[$tableName])) {
+        if (! isset($this->lastLoggedTime[$tableName])) {
             return true;
         }
 
-        $lastPercent = $this->lastLoggedPercent[$tableName];
+        $elapsedSeconds = microtime(true) - $this->lastLoggedTime[$tableName];
 
-        // Log if percentage changed by threshold or more
-        return ($currentPercent - $lastPercent) >= $this->progressLogThresholdPercent;
+        // Log if enough time has elapsed since last write
+        return $elapsedSeconds >= $this->progressLogThresholdSeconds;
     }
 
     private function log(string $level, string $event, string $message, array $data = []): void
