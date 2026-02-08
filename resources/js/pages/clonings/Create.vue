@@ -28,8 +28,18 @@ interface SchemaColumn {
     nullable: boolean;
 }
 
+interface TableSchemaData {
+    columns: SchemaColumn[];
+    primaryKeyColumns: string[];
+    foreignKeys: Array<{
+        columns: string[];
+        referencedTable: string;
+        referencedColumns: string[];
+    }>;
+}
+
 interface SchemaData {
-    [tableName: string]: SchemaColumn[];
+    [tableName: string]: TableSchemaData;
 }
 
 interface ValidatedConnectionsFlash {

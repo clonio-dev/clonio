@@ -32,8 +32,18 @@ interface SchemaColumn {
     nullable: boolean;
 }
 
+interface TableSchemaData {
+    columns: SchemaColumn[];
+    primaryKeyColumns: string[];
+    foreignKeys: Array<{
+        columns: string[];
+        referencedTable: string;
+        referencedColumns: string[];
+    }>;
+}
+
 interface SchemaData {
-    [tableName: string]: SchemaColumn[];
+    [tableName: string]: TableSchemaData;
 }
 
 interface ValidatedConnectionsFlash {
@@ -271,14 +281,14 @@ const selectedSourceName = computed(() => {
     const conn = prodConnections.value.find(
         (c) => c.value === selectedSourceConnection.value,
     );
-    return conn?.label || props.cloning.sourceConnection?.name || '';
+    return conn?.label || props.cloning.source_connection?.name || '';
 });
 
 const selectedTargetName = computed(() => {
     const conn = testConnections.value.find(
         (c) => c.value === selectedTargetConnection.value,
     );
-    return conn?.label || props.cloning.targetConnection?.name || '';
+    return conn?.label || props.cloning.target_connection?.name || '';
 });
 </script>
 
