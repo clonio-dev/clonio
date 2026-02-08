@@ -27,7 +27,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
-import { Form } from '@inertiajs/vue3';
+import { Form, usePage } from '@inertiajs/vue3';
 import {
     AlertTriangle,
     Database,
@@ -44,6 +44,7 @@ interface Props {
 
 interface Emits {
     (e: 'close'): void;
+    (e: 'created', connection: { id: number; name: string; type: string; is_production_stage: boolean }): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -62,6 +63,10 @@ function handleOpenChange(open: boolean) {
 }
 
 function handleSubmitComplete() {
+    const flash = usePage().props.flash as { created_connection?: { id: number; name: string; type: string; is_production_stage: boolean } };
+    if (flash?.created_connection) {
+        emit('created', flash.created_connection);
+    }
     emit('close');
 }
 

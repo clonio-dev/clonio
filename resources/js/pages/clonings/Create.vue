@@ -109,7 +109,6 @@ const anonymizationConfig = ref<string>('');
 // Sheet state for on-the-fly connection creation
 const showSourceConnectionSheet = ref(false);
 const showTargetConnectionSheet = ref(false);
-const pendingConnectionType = ref<'source' | 'target' | null>(null);
 
 // Validation state
 const isValidating = ref(false);
@@ -133,7 +132,6 @@ watch(
     () =>
         page.props.flash as {
             validated_connections?: ValidatedConnectionsFlash;
-            created_connection?: CreatedConnectionFlash;
         },
     (flash) => {
         if (flash?.validated_connections) {
@@ -142,41 +140,23 @@ watch(
             currentStep.value = 2;
             isValidating.value = false;
         }
-
-        if (flash?.created_connection) {
-            const conn = flash.created_connection;
-            const newItem = { value: conn.id, label: conn.name };
-
-            if (
-                pendingConnectionType.value === 'source' &&
-                conn.is_production_stage
-            ) {
-                prodConnections.value = [...prodConnections.value, newItem];
-                selectedSourceConnection.value = conn.id;
-                showSourceConnectionSheet.value = false;
-            } else if (
-                pendingConnectionType.value === 'target' &&
-                !conn.is_production_stage
-            ) {
-                testConnections.value = [...testConnections.value, newItem];
-                selectedTargetConnection.value = conn.id;
-                showTargetConnectionSheet.value = false;
-            }
-            pendingConnectionType.value = null;
-        }
     },
     { immediate: true },
 );
 
-// Open connection sheet
-function openSourceConnectionSheet() {
-    pendingConnectionType.value = 'source';
-    showSourceConnectionSheet.value = true;
+// Handle connection creation from sheets
+function handleSourceConnectionCreated(connection: CreatedConnectionFlash) {
+    const newItem = { value: connection.id, label: connection.name };
+    prodConnections.value = [...prodConnections.value, newItem];
+    selectedSourceConnection.value = connection.id;
+    showSourceConnectionSheet.value = false;
 }
 
-function openTargetConnectionSheet() {
-    pendingConnectionType.value = 'target';
-    showTargetConnectionSheet.value = true;
+function handleTargetConnectionCreated(connection: CreatedConnectionFlash) {
+    const newItem = { value: connection.id, label: connection.name };
+    testConnections.value = [...testConnections.value, newItem];
+    selectedTargetConnection.value = connection.id;
+    showTargetConnectionSheet.value = false;
 }
 
 // Navigate to next step with validation
@@ -434,7 +414,7 @@ function getTargetConnectionType(connectionValue: string | number): string {
                                     <template #footer>
                                         <div
                                             class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                                            @click="sourceCombobox?.closePopover(); openSourceConnectionSheet()"
+                                            @click="sourceCombobox?.closePopover(); showSourceConnectionSheet = true"
                                         >
                                             <Plus class="size-4" />
                                             Add new connection
@@ -502,7 +482,7 @@ function getTargetConnectionType(connectionValue: string | number): string {
                                     <template #footer>
                                         <div
                                             class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                                            @click="targetCombobox?.closePopover(); openTargetConnectionSheet()"
+                                            @click="targetCombobox?.closePopover(); showTargetConnectionSheet = true"
                                         >
                                             <Plus class="size-4" />
                                             Add new connection
@@ -577,19 +557,15 @@ function getTargetConnectionType(connectionValue: string | number): string {
             :open="showSourceConnectionSheet"
             submit-label="Create Source Connection"
             default-production
-            @close="
-                showSourceConnectionSheet = false;
-                pendingConnectionType = null;
-            "
+            @close="showSourceConnectionSheet = false"
+            @created="handleSourceConnectionCreated"
         />
 
         <ConnectionFormSheet
             :open="showTargetConnectionSheet"
             submit-label="Create Target Connection"
-            @close="
-                showTargetConnectionSheet = false;
-                pendingConnectionType = null;
-            "
+            @close="showTargetConnectionSheet = false"
+            @created="handleTargetConnectionCreated"
         />
     </AppLayout>
 </template>
