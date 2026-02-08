@@ -72,10 +72,12 @@ class CloningController extends Controller
             'source_connection' => [
                 'id' => $request->getSourceConnection()->id,
                 'name' => $request->getSourceConnection()->name,
+                'type' => $request->getSourceConnection()->type->value,
             ],
             'target_connection' => [
                 'id' => $request->getTargetConnection()->id,
                 'name' => $request->getTargetConnection()->name,
+                'type' => $request->getTargetConnection()->type->value,
             ],
             'source_schema' => $request->getSourceSchema(),
             'target_schema' => $request->getTargetSchema(),
