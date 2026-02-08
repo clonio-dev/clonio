@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Data\ConnectionData;
+use App\Data\ForeignKeySchema;
 use App\Models\Cloning;
 use App\Models\DatabaseConnection;
 use App\Services\DatabaseInformationRetrievalService;
+use App\Services\SchemaInspector\SchemaInspectorFactory;
 use Illuminate\Database\Connection;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -20,10 +22,10 @@ class ValidateCloningConnectionsRequest extends FormRequest
 
     private ?DatabaseConnection $targetConnection = null;
 
-    /** @var array<string, list<array{name: string, type: string, nullable: bool}>> */
+    /** @var array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>}> */
     private array $sourceSchema = [];
 
-    /** @var array<string, list<array{name: string, type: string, nullable: bool}>> */
+    /** @var array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>}> */
     private array $targetSchema = [];
 
     public function authorize(): bool
@@ -87,7 +89,7 @@ class ValidateCloningConnectionsRequest extends FormRequest
     }
 
     /**
-     * @return array<string, list<array{name: string, type: string, nullable: bool}>>
+     * @return array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>}>
      */
     public function getSourceSchema(): array
     {
@@ -95,7 +97,7 @@ class ValidateCloningConnectionsRequest extends FormRequest
     }
 
     /**
-     * @return array<string, list<array{name: string, type: string, nullable: bool}>>
+     * @return array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>}>
      */
     public function getTargetSchema(): array
     {
@@ -152,23 +154,35 @@ class ValidateCloningConnectionsRequest extends FormRequest
     }
 
     /**
-     * @return array<string, list<array{name: string, type: string, nullable: bool}>>
+     * @return array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>}>
      */
     private function retrieveSchema(DatabaseInformationRetrievalService $service, ConnectionData $connectionData): array
     {
         $tables = $service->getTableNames($connectionData);
         $schema = [];
 
-        foreach ($tables as $tableName) {
-            $connection = $service->getConnection($connectionData);
-            assert($connection instanceof Connection);
+        $connection = $service->getConnection($connectionData);
+        assert($connection instanceof Connection);
 
+        $inspector = SchemaInspectorFactory::create($connection);
+
+        foreach ($tables as $tableName) {
             $columns = $connection->getSchemaBuilder()->getColumns($tableName);
-            $schema[$tableName] = array_map(fn (array $column): array => [
-                'name' => $column['name'],
-                'type' => $column['type'],
-                'nullable' => $column['nullable'],
-            ], $columns);
+            $tableSchema = $inspector->getTableSchema($connection, $tableName);
+
+            $schema[$tableName] = [
+                'columns' => array_map(fn (array $column): array => [
+                    'name' => $column['name'],
+                    'type' => $column['type'],
+                    'nullable' => $column['nullable'],
+                ], $columns),
+                'primaryKeyColumns' => $tableSchema->getPrimaryKey()?->columns ?? [],
+                'foreignKeys' => $tableSchema->getForeignKeys()->map(fn (ForeignKeySchema $fk): array => [
+                    'columns' => $fk->columns,
+                    'referencedTable' => $fk->referencedTable,
+                    'referencedColumns' => $fk->referencedColumns,
+                ])->values()->all(),
+            ];
         }
 
         return $schema;

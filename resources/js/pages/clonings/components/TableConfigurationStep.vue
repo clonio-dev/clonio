@@ -3,6 +3,7 @@ import HeadingSmall from '@/components/HeadingSmall.vue';
 import StepNumber from '@/components/StepNumber.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Collapsible,
     CollapsibleContent,
@@ -18,12 +19,20 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
     ArrowLeft,
     ArrowRight,
     ChevronDown,
     ChevronRight,
     Copy,
     Database,
+    Info,
+    KeyRound,
 } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 
@@ -33,8 +42,24 @@ interface SchemaColumn {
     nullable: boolean;
 }
 
+interface TableSchemaData {
+    columns: SchemaColumn[];
+    primaryKeyColumns: string[];
+    foreignKeys: Array<{
+        columns: string[];
+        referencedTable: string;
+        referencedColumns: string[];
+    }>;
+}
+
 interface SchemaData {
-    [tableName: string]: SchemaColumn[];
+    [tableName: string]: TableSchemaData;
+}
+
+interface RowSelectionConfig {
+    strategy: 'full_table' | 'first_x' | 'last_x';
+    limit: number;
+    sortColumn: string;
 }
 
 interface Props {
@@ -48,6 +73,7 @@ interface Props {
     cloningId?: number;
     mode: 'create' | 'edit';
     initialConfig?: AllTablesConfig;
+    initialKeepUnknownTablesOnTarget?: boolean;
 }
 
 interface Emits {
@@ -98,14 +124,29 @@ const openTableIndex = ref(0);
 // Track table configurations
 const tableConfigs = reactive<AllTablesConfig>({});
 
+// Track row selection per table
+const tableRowSelections = reactive<Record<string, RowSelectionConfig>>({});
+
+// Keep unknown tables on target
+const keepUnknownTablesOnTarget = ref(props.initialKeepUnknownTablesOnTarget ?? true);
+
 // Initialize configs for all tables and columns with default "keep" or from initial config
 function initializeConfigs() {
     for (const tableName of availableTables.value) {
         if (!tableConfigs[tableName]) {
             tableConfigs[tableName] = {};
         }
-        for (const column of props.sourceSchema[tableName] || []) {
+        for (const column of props.sourceSchema[tableName]?.columns || []) {
             if (!tableConfigs[tableName][column.name]) {
+                // Key columns must always use 'keep'
+                if (isKeyColumn(tableName, column.name)) {
+                    tableConfigs[tableName][column.name] = {
+                        strategy: 'keep',
+                        options: {},
+                    };
+                    continue;
+                }
+
                 // Check if there's an initial config for this column
                 const initialConfig =
                     props.initialConfig?.[tableName]?.[column.name];
@@ -138,6 +179,38 @@ initializeConfigs();
 // Watch for schema changes
 watch(() => props.sourceSchema, initializeConfigs, { deep: true });
 
+// Check if a column is a primary key or foreign key column
+function isKeyColumn(tableName: string, columnName: string): boolean {
+    const tableData = props.sourceSchema[tableName];
+    if (!tableData) return false;
+    if (tableData.primaryKeyColumns.includes(columnName)) return true;
+    return tableData.foreignKeys.some((fk) => fk.columns.includes(columnName));
+}
+
+// Check if a table has outgoing foreign keys
+function hasOutgoingForeignKeys(tableName: string): boolean {
+    const tableData = props.sourceSchema[tableName];
+    return (tableData?.foreignKeys?.length ?? 0) > 0;
+}
+
+// Initialize row selections for all tables
+function initializeRowSelections() {
+    for (const tableName of availableTables.value) {
+        if (!tableRowSelections[tableName]) {
+            const firstPk =
+                props.sourceSchema[tableName]?.primaryKeyColumns?.[0] || '';
+            tableRowSelections[tableName] = {
+                strategy: 'full_table',
+                limit: 1000,
+                sortColumn: firstPk,
+            };
+        }
+    }
+}
+
+initializeRowSelections();
+watch(() => props.sourceSchema, initializeRowSelections, { deep: true });
+
 // Strategy display info
 interface StrategyOption {
     value: StrategyType;
@@ -159,7 +232,19 @@ const allStrategyOptions: StrategyOption[] = [
 ];
 
 // Get strategy options for a column, filtering out 'null' for non-nullable columns
-function getStrategyOptionsForColumn(column: SchemaColumn): StrategyOption[] {
+function getStrategyOptionsForColumn(
+    tableName: string,
+    column: SchemaColumn,
+): StrategyOption[] {
+    if (isKeyColumn(tableName, column.name)) {
+        return [
+            {
+                value: 'keep',
+                label: 'Keep identical',
+                description: 'Key column — must remain intact',
+            },
+        ];
+    }
     if (column.nullable) {
         return allStrategyOptions;
     }
@@ -261,7 +346,7 @@ function updateColumnOption<K extends keyof ColumnConfig['options']>(
 
 // Apply "Keep identical" to all columns in a table
 function applyKeepIdenticalToTable(tableName: string) {
-    for (const column of props.sourceSchema[tableName] || []) {
+    for (const column of props.sourceSchema[tableName]?.columns || []) {
         updateColumnStrategy(tableName, column.name, 'keep');
     }
 }
@@ -405,10 +490,11 @@ const configPayload = computed(() => {
             strategy: string;
             options: ColumnConfig['options'];
         }>;
+        rowSelection?: RowSelectionConfig;
     }> = [];
 
     for (const tableName of availableTables.value) {
-        const columns = props.sourceSchema[tableName] || [];
+        const columns = props.sourceSchema[tableName]?.columns || [];
         const columnMutations = columns.map((col) => {
             const config = getColumnConfig(tableName, col.name);
             return {
@@ -418,14 +504,22 @@ const configPayload = computed(() => {
             };
         });
 
-        tables.push({
+        const rowSel = tableRowSelections[tableName];
+        const tableEntry: (typeof tables)[number] = {
             tableName,
             columnMutations,
-        });
+        };
+
+        if (rowSel && rowSel.strategy !== 'full_table') {
+            tableEntry.rowSelection = rowSel;
+        }
+
+        tables.push(tableEntry);
     }
 
     return JSON.stringify({
         tables,
+        keepUnknownTablesOnTarget: keepUnknownTablesOnTarget.value,
         version: '1.0',
     });
 });
@@ -497,6 +591,22 @@ function getTypeColor(type: string): string {
                     <p class="text-sm text-muted-foreground">
                         {{ Object.keys(targetSchema).length }} tables
                     </p>
+                    <div class="mt-3 flex items-center gap-2">
+                        <Checkbox
+                            id="keep-unknown"
+                            :checked="keepUnknownTablesOnTarget"
+                            @update:checked="keepUnknownTablesOnTarget = $event"
+                        />
+                        <label
+                            for="keep-unknown"
+                            class="text-sm text-foreground"
+                        >
+                            Keep unknown tables on target
+                        </label>
+                    </div>
+                    <p class="mt-1 text-xs text-muted-foreground">
+                        Tables on the target that don't exist in source will be preserved
+                    </p>
                 </CardContent>
             </Card>
         </div>
@@ -529,7 +639,7 @@ function getTypeColor(type: string): string {
                             tableName
                         }}</span>
                         <span class="text-xs text-muted-foreground">
-                            ({{ sourceSchema[tableName]?.length || 0 }} columns)
+                            ({{ sourceSchema[tableName]?.columns?.length || 0 }} columns)
                         </span>
                     </div>
                     <Button
@@ -545,6 +655,83 @@ function getTypeColor(type: string): string {
 
                 <CollapsibleContent>
                     <div class="border-t px-4 py-4">
+                        <!-- Row selection -->
+                        <div class="mb-4 rounded-md border bg-muted/30 p-3 dark:bg-muted/10">
+                            <div class="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
+                                Row Selection
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <template v-if="hasOutgoingForeignKeys(tableName)">
+                                    <Select
+                                        model-value="full_table"
+                                        disabled
+                                    >
+                                        <SelectTrigger class="h-8 w-48 text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="full_table">
+                                                Full Table
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger as-child>
+                                                <Info class="size-4 text-muted-foreground" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Row selection is disabled for tables with foreign keys to preserve referential integrity.</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </template>
+                                <template v-else>
+                                    <Select
+                                        :model-value="tableRowSelections[tableName]?.strategy || 'full_table'"
+                                        @update:model-value="(v) => { if (v && tableRowSelections[tableName]) tableRowSelections[tableName].strategy = v as RowSelectionConfig['strategy'] }"
+                                    >
+                                        <SelectTrigger class="h-8 w-48 text-xs">
+                                            <SelectValue placeholder="Select strategy" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="full_table">Full Table</SelectItem>
+                                            <SelectItem value="first_x">First X rows</SelectItem>
+                                            <SelectItem value="last_x">Last X rows</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <template v-if="tableRowSelections[tableName]?.strategy === 'first_x' || tableRowSelections[tableName]?.strategy === 'last_x'">
+                                        <Input
+                                            type="number"
+                                            :model-value="tableRowSelections[tableName]?.limit ?? 1000"
+                                            @update:model-value="(v) => { if (tableRowSelections[tableName]) tableRowSelections[tableName].limit = Math.max(1, Number(v)) }"
+                                            class="h-8 w-24 text-xs"
+                                            min="1"
+                                            placeholder="1000"
+                                        />
+                                        <span class="text-xs text-muted-foreground">sorted by</span>
+                                        <Select
+                                            :model-value="tableRowSelections[tableName]?.sortColumn || sourceSchema[tableName]?.primaryKeyColumns?.[0] || ''"
+                                            @update:model-value="(v) => { if (v && tableRowSelections[tableName]) tableRowSelections[tableName].sortColumn = String(v) }"
+                                        >
+                                            <SelectTrigger class="h-8 w-40 text-xs">
+                                                <SelectValue placeholder="Sort column" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem
+                                                    v-for="pk in sourceSchema[tableName]?.primaryKeyColumns || []"
+                                                    :key="pk"
+                                                    :value="pk"
+                                                >
+                                                    {{ pk }}
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+
                         <!-- Column headers -->
                         <div
                             class="mb-3 grid grid-cols-12 gap-4 border-b pb-2 text-xs font-medium text-muted-foreground"
@@ -559,15 +746,20 @@ function getTypeColor(type: string): string {
                         <!-- Column rows -->
                         <div class="space-y-3">
                             <div
-                                v-for="column in sourceSchema[tableName]"
+                                v-for="column in sourceSchema[tableName]?.columns"
                                 :key="column.name"
                                 class="grid grid-cols-12 items-start gap-4"
                             >
                                 <!-- Column name -->
                                 <div class="col-span-3 flex flex-col gap-0.5">
-                                    <span class="font-mono text-sm">{{
-                                        column.name
-                                    }}</span>
+                                    <span class="flex items-center gap-1.5 font-mono text-sm">
+                                        {{ column.name }}
+                                        <KeyRound
+                                            v-if="isKeyColumn(tableName, column.name)"
+                                            class="size-3.5 text-amber-500 dark:text-amber-400"
+                                            :aria-label="'Key column'"
+                                        />
+                                    </span>
                                     <span
                                         v-if="column.nullable"
                                         class="text-xs text-muted-foreground"
@@ -595,6 +787,7 @@ function getTypeColor(type: string): string {
                                                 column.name,
                                             ).strategy
                                         "
+                                        :disabled="isKeyColumn(tableName, column.name)"
                                         @update:model-value="
                                             (v) =>
                                                 v &&
@@ -615,6 +808,7 @@ function getTypeColor(type: string): string {
                                         <SelectContent>
                                             <SelectItem
                                                 v-for="option in getStrategyOptionsForColumn(
+                                                    tableName,
                                                     column,
                                                 )"
                                                 :key="option.value"
