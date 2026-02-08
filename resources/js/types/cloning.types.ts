@@ -143,6 +143,7 @@ export interface CloningsIndexProps {
 export interface CloningShowProps {
     cloning: Cloning;
     runs: CloningRun[];
+    estimatedDuration?: number | null;
 }
 
 /**
