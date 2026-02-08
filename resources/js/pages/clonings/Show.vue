@@ -22,6 +22,7 @@ import {
     Play,
     PlayCircle,
     Settings,
+    ShieldCheck,
     Trash2,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -92,6 +93,43 @@ const runsWithCloning = computed(() =>
         cloning: props.cloning,
     })),
 );
+
+// PII/GDPR compliance info from anonymization config
+interface ColumnMutation {
+    columnName: string;
+    strategy: string;
+    options?: Record<string, unknown>;
+}
+
+interface TableConfig {
+    tableName: string;
+    columnMutations?: ColumnMutation[];
+}
+
+const anonymizationStats = computed(() => {
+    const config = props.cloning.anonymization_config as { tables?: TableConfig[] } | null;
+    if (!config?.tables) {
+        return null;
+    }
+
+    const allMutations = config.tables.flatMap((t) => t.columnMutations ?? []);
+    const anonymized = allMutations.filter((m) => m.strategy !== 'keep');
+
+    if (anonymized.length === 0) {
+        return null;
+    }
+
+    const strategies = [...new Set(anonymized.map((m) => m.strategy))].sort();
+    const tablesWithTransformations = config.tables.filter((t) =>
+        (t.columnMutations ?? []).some((m) => m.strategy !== 'keep'),
+    ).length;
+
+    return {
+        columnCount: anonymized.length,
+        tableCount: tablesWithTransformations,
+        strategies: strategies.map((s) => s.charAt(0).toUpperCase() + s.slice(1)),
+    };
+});
 </script>
 
 <template>
@@ -337,25 +375,42 @@ const runsWithCloning = computed(() =>
                         </CardContent>
                     </Card>
 
-                    <!-- Anonymization Config -->
+                    <!-- PII/GDPR Compliance -->
                     <Card
-                        v-if="cloning.anonymization_config"
-                        class="border-border/60 bg-card dark:border-border/40"
+                        v-if="anonymizationStats"
+                        class="border-emerald-500/20 bg-emerald-500/5 dark:border-emerald-500/15 dark:bg-emerald-500/5"
                     >
                         <CardHeader class="pb-3">
                             <CardTitle
                                 class="flex items-center gap-2 text-base font-semibold"
                             >
-                                <Settings
-                                    class="size-4 text-muted-foreground"
+                                <ShieldCheck
+                                    class="size-4 text-emerald-600 dark:text-emerald-400"
                                 />
-                                Anonymization
+                                PII / GDPR Compliance
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div class="text-sm text-muted-foreground">
-                                Configuration applied to protect sensitive data
-                            </div>
+                        <CardContent class="space-y-3">
+                            <p class="text-sm text-muted-foreground">
+                                All personally identifiable information is anonymized according to the configured transformation rules.
+                            </p>
+                            <ul class="space-y-1.5 text-sm text-muted-foreground">
+                                <li class="flex items-baseline gap-2">
+                                    <span class="size-1 shrink-0 rounded-full bg-emerald-500 mt-1.5" />
+                                    <span>
+                                        <span class="font-medium text-foreground">{{ anonymizationStats.columnCount }}</span>
+                                        column{{ anonymizationStats.columnCount === 1 ? '' : 's' }} across
+                                        <span class="font-medium text-foreground">{{ anonymizationStats.tableCount }}</span>
+                                        table{{ anonymizationStats.tableCount === 1 ? '' : 's' }} transformed
+                                    </span>
+                                </li>
+                                <li class="flex items-baseline gap-2">
+                                    <span class="size-1 shrink-0 rounded-full bg-emerald-500 mt-1.5" />
+                                    <span>
+                                        Methods: <span class="font-medium text-foreground">{{ anonymizationStats.strategies.join(', ') }}</span>
+                                    </span>
+                                </li>
+                            </ul>
                         </CardContent>
                     </Card>
                 </div>
