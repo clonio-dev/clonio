@@ -47,10 +47,6 @@ function refreshDashboard() {
     });
 }
 
-function createFirstCloning() {
-    router.visit('/clonings/create');
-}
-
 useAutoRefresh(
     refreshDashboard,
     computed(() => props.activeRuns.length > 0),
