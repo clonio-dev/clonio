@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-vue-next'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useSlots, watch } from 'vue'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,16 +16,28 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-import { ComboboxItems } from '@/components/ui/combobox/index';
+import { Separator } from '@/components/ui/separator'
+import type { ComboboxItem, ComboboxItems } from '@/components/ui/combobox/index';
 
 interface Props {
     modelValue?: string|number|null
     items?: ComboboxItems
     class?: string
     required?: boolean
+    placeholder?: string
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    placeholder: 'Select item...',
+});
+
+defineSlots<{
+    selected?(props: { item: ComboboxItem }): unknown
+    item?(props: { item: ComboboxItem; selected: boolean }): unknown
+    footer?(): unknown
+}>();
+
+const slots = useSlots();
 const emits = defineEmits<{
     (e: "update:modelValue", payload: string | number): void
 }>()
@@ -52,6 +64,12 @@ function selectItem(selectedValue: string) {
     open.value = false
     emits('update:modelValue', value.value)
 }
+
+function closePopover() {
+    open.value = false
+}
+
+defineExpose({ closePopover })
 </script>
 
 <template>
@@ -64,7 +82,14 @@ function selectItem(selectedValue: string) {
                 class="w-full justify-between"
                 :class="props.class"
             >
-                {{ selectedItem?.label || "Select item..." }}
+                <template v-if="selectedItem">
+                    <slot name="selected" :item="selectedItem">
+                        {{ selectedItem.label }}
+                    </slot>
+                </template>
+                <template v-else>
+                    {{ placeholder }}
+                </template>
                 <ChevronsUpDownIcon class="opacity-50" />
             </Button>
         </PopoverTrigger>
@@ -80,12 +105,20 @@ function selectItem(selectedValue: string) {
                             :value="item.value"
                             @select="(ev) => { selectItem(ev.detail.value as string) }"
                         >
-                            {{ item.label }}
+                            <slot name="item" :item="item" :selected="value === item.value">
+                                {{ item.label }}
+                            </slot>
                             <CheckIcon
                                 :class="cn('ml-auto', value === item.value ? 'opacity-100' : 'opacity-0',)"
                             />
                         </CommandItem>
                     </CommandGroup>
+                    <template v-if="slots.footer">
+                        <Separator />
+                        <div class="p-1">
+                            <slot name="footer" />
+                        </div>
+                    </template>
                 </CommandList>
             </Command>
         </PopoverContent>
