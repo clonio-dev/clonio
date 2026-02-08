@@ -80,9 +80,6 @@ trait LogsProcessSteps
         $tableName = property_exists($this, 'tableName') ? $this->tableName : '';
         $currentPercent = $data['percent'] ?? 0;
 
-        // Always log to Laravel's log file for debugging
-        Log::info("[Table: {$tableName}] [{$event}] {$message}");
-
         // Check if we should write to database (throttled)
         if (! $this->shouldLogProgressToDatabase($tableName, $currentPercent)) {
             return;
@@ -140,6 +137,8 @@ trait LogsProcessSteps
                 'message' => $message,
                 'batch_id' => $this->batch()?->id,
             ], $level);
+
+            return;
         }
 
         if ($level === 'success') {
@@ -150,11 +149,7 @@ trait LogsProcessSteps
 
     private function logErrorMessage(string $message, Collection $connectionMap): void
     {
-        Log::debug(__METHOD__ . '::before: ' . $message);
-
         $message = strtr($message, $connectionMap->all());
-
-        Log::debug(__METHOD__ . '::after: ' . $message, ['conecctions' => $connectionMap->all()]);
 
         if (isset($this->run) && $this->run instanceof CloningRun) {
             $this->run->update(['error_message' => $message]);
