@@ -92,10 +92,20 @@ const cssClasses = computed(() => {
         }
     );
 });
+
+const isCompact = computed(() => props.size === '4');
 </script>
 
 <template>
     <div
+        v-if="isCompact"
+        class="flex shrink-0 items-center justify-center"
+        :class="cssClasses.square"
+    >
+        <component :is="databaseTypeConfig.icon" :class="cssClasses.icon" />
+    </div>
+    <div
+        v-else
         class="flex shrink-0 items-center justify-center rounded-xl ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-105 dark:ring-white/10"
         :class="cssClasses.square + ' ' + databaseTypeConfig.iconBg"
     >
