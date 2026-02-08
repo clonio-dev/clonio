@@ -18,6 +18,12 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import {
     ArrowLeft,
@@ -27,6 +33,7 @@ import {
     Copy,
     Info,
     KeyRound,
+    ShieldCheck,
     TableIcon,
 } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
@@ -37,6 +44,14 @@ interface SchemaColumn {
     nullable: boolean;
 }
 
+interface PiiMatch {
+    name: string;
+    transformation: {
+        strategy: string;
+        options: Record<string, unknown>;
+    };
+}
+
 interface TableSchemaData {
     columns: SchemaColumn[];
     primaryKeyColumns: string[];
@@ -45,6 +60,7 @@ interface TableSchemaData {
         referencedTable: string;
         referencedColumns: string[];
     }>;
+    piiMatches?: Record<string, PiiMatch>;
 }
 
 interface SchemaData {
@@ -70,6 +86,7 @@ interface Props {
     cloningId?: number;
     mode: 'create' | 'edit';
     initialConfig?: AllTablesConfig;
+    initialRowSelections?: Record<string, RowSelectionConfig>;
     initialKeepUnknownTablesOnTarget?: boolean;
 }
 
@@ -161,12 +178,25 @@ function initializeConfigs() {
                             ...initialConfig,
                         };
                     }
-                } else {
-                    tableConfigs[tableName][column.name] = {
-                        strategy: 'keep',
-                        options: {},
-                    };
+                    continue;
                 }
+
+                // Check for PII match and auto-apply transformation preset
+                const piiMatch =
+                    props.sourceSchema[tableName]?.piiMatches?.[column.name];
+                if (piiMatch) {
+                    tableConfigs[tableName][column.name] = {
+                        strategy: piiMatch.transformation
+                            .strategy as StrategyType,
+                        options: piiMatch.transformation.options,
+                    };
+                    continue;
+                }
+
+                tableConfigs[tableName][column.name] = {
+                    strategy: 'keep',
+                    options: {},
+                };
             }
         }
     }
@@ -186,6 +216,11 @@ function isKeyColumn(tableName: string, columnName: string): boolean {
     return tableData.foreignKeys.some((fk) => fk.columns.includes(columnName));
 }
 
+// Check if a column matches a PII pattern
+function isPiiColumn(tableName: string, columnName: string): PiiMatch | null {
+    return props.sourceSchema[tableName]?.piiMatches?.[columnName] ?? null;
+}
+
 // Check if a table has outgoing foreign keys
 function hasOutgoingForeignKeys(tableName: string): boolean {
     const tableData = props.sourceSchema[tableName];
@@ -196,13 +231,18 @@ function hasOutgoingForeignKeys(tableName: string): boolean {
 function initializeRowSelections() {
     for (const tableName of availableTables.value) {
         if (!tableRowSelections[tableName]) {
-            const firstPk =
-                props.sourceSchema[tableName]?.primaryKeyColumns?.[0] || '';
-            tableRowSelections[tableName] = {
-                strategy: 'full_table',
-                limit: 1000,
-                sortColumn: firstPk,
-            };
+            const initial = props.initialRowSelections?.[tableName];
+            if (initial) {
+                tableRowSelections[tableName] = { ...initial };
+            } else {
+                const firstPk =
+                    props.sourceSchema[tableName]?.primaryKeyColumns?.[0] || '';
+                tableRowSelections[tableName] = {
+                    strategy: 'full_table',
+                    limit: 1000,
+                    sortColumn: firstPk,
+                };
+            }
         }
     }
 }
@@ -858,6 +898,33 @@ function getTypeColor(type: string): string {
                                             class="size-3.5 text-amber-500 dark:text-amber-400"
                                             :aria-label="'Key column'"
                                         />
+                                        <TooltipProvider
+                                            v-if="
+                                                isPiiColumn(
+                                                    tableName,
+                                                    column.name,
+                                                )
+                                            "
+                                        >
+                                            <Tooltip>
+                                                <TooltipTrigger as-child>
+                                                    <ShieldCheck
+                                                        class="size-3.5 text-blue-500 dark:text-blue-400"
+                                                    />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>
+                                                        PII:
+                                                        {{
+                                                            isPiiColumn(
+                                                                tableName,
+                                                                column.name,
+                                                            )?.name
+                                                        }}
+                                                    </p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     </span>
                                     <span
                                         v-if="column.nullable"
