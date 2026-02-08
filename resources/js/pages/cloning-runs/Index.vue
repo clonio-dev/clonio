@@ -10,6 +10,7 @@ import type { CloningRun, CloningRunsIndexProps } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowRight, Database, Plus, RefreshCw, Send } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { convertDuration } from '@/lib/date';
 
 const props = defineProps<CloningRunsIndexProps>();
 
@@ -47,14 +48,7 @@ function formatDuration(run: CloningRun): string {
     const start = new Date(run.started_at);
     const end = run.finished_at ? new Date(run.finished_at) : new Date();
 
-    const diffMs = end.getTime() - start.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffSecs = Math.floor((diffMs % 60000) / 1000);
-
-    if (diffMins > 0) {
-        return `${diffMins}m ${diffSecs}s`;
-    }
-    return `${diffSecs}s`;
+    return convertDuration(start, end)
 }
 
 function refreshPage() {
