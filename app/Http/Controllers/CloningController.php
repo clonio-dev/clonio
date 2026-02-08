@@ -13,6 +13,7 @@ use App\Models\Cloning;
 use App\Models\CloningRun;
 use App\Models\DatabaseConnection;
 use App\Models\User;
+use App\Services\EstimatedDurationCalculator;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Bus;
@@ -120,7 +121,7 @@ class CloningController extends Controller
     /**
      * Display the specified cloning with its runs.
      */
-    public function show(Cloning $cloning): Response
+    public function show(Cloning $cloning, EstimatedDurationCalculator $estimatedDurationCalculator): Response
     {
         Gate::authorize('view', $cloning);
 
@@ -135,6 +136,7 @@ class CloningController extends Controller
         return Inertia::render('clonings/Show', [
             'cloning' => $cloning,
             'runs' => $runs,
+            'estimatedDuration' => $estimatedDurationCalculator->calculate($cloning),
         ]);
     }
 
