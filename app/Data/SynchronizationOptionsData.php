@@ -77,7 +77,7 @@ final readonly class SynchronizationOptionsData
                 );
             }
 
-            if ($columnMutations->isNotEmpty() || $rowSelection !== null) {
+            if ($columnMutations->isNotEmpty() || $rowSelection instanceof TableRowSelectionData) {
                 $tableAnonymizationOptions->push(new TableAnonymizationOptionsData(
                     tableName: $tableConfig['tableName'],
                     columnMutations: $columnMutations,
