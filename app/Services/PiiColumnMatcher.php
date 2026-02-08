@@ -7,7 +7,7 @@ namespace App\Services;
 class PiiColumnMatcher
 {
     /** @var array<int, array{pattern: string, name: string, transformation: array{strategy: string, options: array<string, mixed>}}> */
-    private array $patterns;
+    private readonly array $patterns;
 
     public function __construct()
     {

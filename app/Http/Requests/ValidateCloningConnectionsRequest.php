@@ -166,7 +166,7 @@ class ValidateCloningConnectionsRequest extends FormRequest
         assert($connection instanceof Connection);
 
         $inspector = SchemaInspectorFactory::create($connection);
-        $piiMatcher = app(PiiColumnMatcher::class);
+        $piiMatcher = resolve(PiiColumnMatcher::class);
 
         foreach ($tables as $tableName) {
             $columns = $connection->getSchemaBuilder()->getColumns($tableName);
