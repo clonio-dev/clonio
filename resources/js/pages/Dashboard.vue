@@ -54,6 +54,7 @@ function createFirstCloning() {
 useAutoRefresh(
     refreshDashboard,
     computed(() => props.activeRuns.length > 0),
+    10_000,
 );
 </script>
 

@@ -150,6 +150,7 @@ function cancelRun() {
 useAutoRefresh(
     refreshPage,
     computed(() => props.isActive),
+    10_000,
 );
 </script>
 

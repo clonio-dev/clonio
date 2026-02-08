@@ -67,6 +67,7 @@ function refreshPage() {
 useAutoRefresh(
     refreshPage,
     computed(() => props.hasActiveRuns),
+    10_000,
 );
 </script>
 
