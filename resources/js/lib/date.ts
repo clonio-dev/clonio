@@ -45,16 +45,16 @@ export function convertDuration(start: Date, until?: Date | undefined): string {
     const diff = convertMilliseconds(end.getTime() - start.getTime());
 
     if (diff.d > 0) {
-        return `${diff.d}d ${diff.h}h ${diff.m}m ${diff.s}s`;
+        return `${diff.d}d ${diff.h.toString(10).padStart(2, '0')}h ${diff.m.toString(10).padStart(2, '0')}m ${diff.s.toString(10).padStart(2, '0')}s`;
     }
     if (diff.h > 0) {
-        return `${diff.h}h ${diff.m}m ${diff.s}s`;
+        return `${diff.h.toString(10).padStart(2, '0')}h ${diff.m.toString(10).padStart(2, '0')}m ${diff.s.toString(10).padStart(2, '0')}s`;
     }
     if (diff.m > 0) {
-        return `${diff.m}m ${diff.s}s`;
+        return `${diff.m.toString(10).padStart(2, '0')}m ${diff.s.toString(10).padStart(2, '0')}s`;
     }
     if (diff.s > 0) {
-        return `${diff.s}s`;
+        return `${diff.s.toString(10).padStart(2, '0')}s`;
     }
 
     return diff.total.s.toString();
