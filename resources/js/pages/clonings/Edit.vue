@@ -10,12 +10,14 @@ import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
 import StepNumber from '@/components/StepNumber.vue';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Combobox, ComboboxItems } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import ConnectionFormSheet from '@/pages/connections/components/ConnectionFormSheet.vue';
-import { ArrowRight, Loader2, Plus } from 'lucide-vue-next';
+import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
+import { ArrowRight, Database, Loader2, Plus } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import ScheduleConfigurationStep from './components/ScheduleConfigurationStep.vue';
 import TableConfigurationStep from './components/TableConfigurationStep.vue';
@@ -40,6 +42,16 @@ interface TableSchemaData {
         referencedTable: string;
         referencedColumns: string[];
     }>;
+    piiMatches?: Record<
+        string,
+        {
+            name: string;
+            transformation: {
+                strategy: string;
+                options: Record<string, unknown>;
+            };
+        }
+    >;
 }
 
 interface SchemaData {
@@ -87,6 +99,10 @@ const selectedSourceConnection = ref<string | number | null>(
 const selectedTargetConnection = ref<string | number | null>(
     props.cloning.target_connection_id,
 );
+
+// Combobox refs
+const sourceCombobox = ref<InstanceType<typeof Combobox> | null>(null);
+const targetCombobox = ref<InstanceType<typeof Combobox> | null>(null);
 
 // Title for the cloning - pre-populated
 const cloningTitle = ref(props.cloning.title);
@@ -161,6 +177,58 @@ const initialTableConfig = computed(() => {
     }
 
     return result;
+});
+
+// Parse row selections from existing config
+const initialRowSelections = computed(() => {
+    if (!props.cloning.anonymization_config) {
+        return undefined;
+    }
+
+    const config = props.cloning.anonymization_config as {
+        tables?: Array<{
+            tableName: string;
+            rowSelection?: {
+                strategy: 'full_table' | 'first_x' | 'last_x';
+                limit: number;
+                sortColumn: string;
+            };
+        }>;
+    };
+
+    if (!config.tables) {
+        return undefined;
+    }
+
+    const result: Record<
+        string,
+        {
+            strategy: 'full_table' | 'first_x' | 'last_x';
+            limit: number;
+            sortColumn: string;
+        }
+    > = {};
+
+    for (const table of config.tables) {
+        if (table.rowSelection) {
+            result[table.tableName] = table.rowSelection;
+        }
+    }
+
+    return Object.keys(result).length > 0 ? result : undefined;
+});
+
+// Parse keepUnknownTablesOnTarget from existing config
+const initialKeepUnknownTablesOnTarget = computed(() => {
+    if (!props.cloning.anonymization_config) {
+        return undefined;
+    }
+
+    const config = props.cloning.anonymization_config as {
+        keepUnknownTablesOnTarget?: boolean;
+    };
+
+    return config.keepUnknownTablesOnTarget;
 });
 
 // Watch for flash data from validation
@@ -290,6 +358,31 @@ const selectedTargetName = computed(() => {
     );
     return conn?.label || props.cloning.target_connection?.name || '';
 });
+
+// Get selected connection types for display
+const selectedSourceType = computed(() => {
+    const conn = props.prod_connections.find(
+        (c) => c.value === selectedSourceConnection.value,
+    );
+    return conn?.type || props.cloning.source_connection?.type || '';
+});
+
+const selectedTargetType = computed(() => {
+    const conn = props.test_connections.find(
+        (c) => c.value === selectedTargetConnection.value,
+    );
+    return conn?.type || props.cloning.target_connection?.type || '';
+});
+
+function getSourceConnectionType(connectionValue: string | number): string {
+    const conn = props.prod_connections.find((c) => c.value === connectionValue);
+    return conn?.type || '';
+}
+
+function getTargetConnectionType(connectionValue: string | number): string {
+    const conn = props.test_connections.find((c) => c.value === connectionValue);
+    return conn?.type || '';
+}
 </script>
 
 <template>
@@ -386,84 +479,146 @@ const selectedTargetName = computed(() => {
 
                 <Separator class="my-4" />
 
+                <!-- Connections -->
                 <div class="flex flex-col space-y-6">
                     <div class="flex w-full gap-4">
                         <StepNumber step="2" />
                         <HeadingSmall
-                            title="Select or create your source connection"
-                            description="Your production data that you want to transfer to your test stages."
+                            title="Select your connections"
+                            description="Choose the source (production) and target (test) connections for data transfer."
                         />
                     </div>
                 </div>
 
-                <div class="grid max-w-120 gap-2">
-                    <Label for="source_connection_id">Source</Label>
-                    <div class="flex items-center gap-2">
-                        <Combobox
-                            id="source_connection_id"
-                            :items="prodConnections"
-                            :model-value="selectedSourceConnection"
-                            class="w-96"
-                            @update:modelValue="
-                                selectedSourceConnection = $event;
-                                validationErrors.source_connection_id =
-                                    undefined;
-                            "
-                        />
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            @click="openSourceConnectionSheet"
-                        >
-                            <Plus class="mr-1 size-4" />
-                            New
-                        </Button>
-                    </div>
-                    <InputError
-                        class="mt-2"
-                        :message="validationErrors.source_connection_id"
-                    />
-                </div>
+                <div class="grid gap-6 md:grid-cols-[1fr_auto_1fr]">
+                    <!-- Source Connection Card -->
+                    <Card class="border-emerald-500/20 bg-emerald-500/5 dark:border-emerald-500/15 dark:bg-emerald-500/5">
+                        <CardHeader class="pb-4">
+                            <div class="flex items-center gap-3">
+                                <div v-if="selectedSourceType" class="shrink-0">
+                                    <ConnectionTypeIcon :type="selectedSourceType" size="8" />
+                                </div>
+                                <div v-else class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 ring-1 ring-emerald-500/20 dark:bg-emerald-900/30 dark:ring-emerald-500/15">
+                                    <Database class="size-5 text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                <div>
+                                    <CardTitle class="text-sm font-semibold">Source Connection</CardTitle>
+                                    <p class="text-xs text-muted-foreground">Production database</p>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="grid gap-2">
+                                <Label for="source_connection_id">Connection</Label>
+                                <Combobox
+                                    ref="sourceCombobox"
+                                    id="source_connection_id"
+                                    :items="prodConnections"
+                                    :model-value="selectedSourceConnection"
+                                    placeholder="Select source..."
+                                    class="w-full"
+                                    @update:modelValue="
+                                        selectedSourceConnection = $event;
+                                        validationErrors.source_connection_id = undefined;
+                                    "
+                                >
+                                    <template #selected="{ item }">
+                                        <span class="flex items-center gap-2">
+                                            <ConnectionTypeIcon :type="getSourceConnectionType(item.value)" size="4" />
+                                            <span class="truncate">{{ item.label }}</span>
+                                        </span>
+                                    </template>
+                                    <template #item="{ item }">
+                                        <span class="flex items-center gap-2">
+                                            <ConnectionTypeIcon :type="getSourceConnectionType(item.value)" size="4" />
+                                            <span>{{ item.label }}</span>
+                                        </span>
+                                    </template>
+                                    <template #footer>
+                                        <div
+                                            class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                            @click="sourceCombobox?.closePopover(); openSourceConnectionSheet()"
+                                        >
+                                            <Plus class="size-4" />
+                                            Add new connection
+                                        </div>
+                                    </template>
+                                </Combobox>
+                                <InputError
+                                    class="mt-1"
+                                    :message="validationErrors.source_connection_id"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                <Separator class="my-4" />
-
-                <div class="flex flex-col space-y-6">
-                    <div class="flex w-full gap-4">
-                        <StepNumber step="3" />
-                        <HeadingSmall
-                            title="Select or create your target connection"
-                            description="Your test stage the production data should be transferred to."
-                        />
+                    <!-- Arrow indicator -->
+                    <div class="hidden items-center justify-center md:flex">
+                        <div class="flex size-10 items-center justify-center rounded-full bg-muted">
+                            <ArrowRight class="size-5 text-muted-foreground" />
+                        </div>
                     </div>
-                </div>
 
-                <div class="grid max-w-120 gap-2">
-                    <Label for="target_connection_id">Target</Label>
-                    <div class="flex items-center gap-2">
-                        <Combobox
-                            id="target_connection_id"
-                            :items="testConnections"
-                            :model-value="selectedTargetConnection"
-                            class="w-96"
-                            @update:modelValue="
-                                selectedTargetConnection = $event;
-                                validationErrors.target_connection_id =
-                                    undefined;
-                            "
-                        />
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            @click="openTargetConnectionSheet"
-                        >
-                            <Plus class="mr-1 size-4" />
-                            New
-                        </Button>
-                    </div>
-                    <InputError
-                        class="mt-2"
-                        :message="validationErrors.target_connection_id"
-                    />
+                    <!-- Target Connection Card -->
+                    <Card class="border-blue-500/20 bg-blue-500/5 dark:border-blue-500/15 dark:bg-blue-500/5">
+                        <CardHeader class="pb-4">
+                            <div class="flex items-center gap-3">
+                                <div v-if="selectedTargetType" class="shrink-0">
+                                    <ConnectionTypeIcon :type="selectedTargetType" size="8" />
+                                </div>
+                                <div v-else class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 ring-1 ring-blue-500/20 dark:bg-blue-900/30 dark:ring-blue-500/15">
+                                    <Database class="size-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div>
+                                    <CardTitle class="text-sm font-semibold">Target Connection</CardTitle>
+                                    <p class="text-xs text-muted-foreground">Test database</p>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="grid gap-2">
+                                <Label for="target_connection_id">Connection</Label>
+                                <Combobox
+                                    ref="targetCombobox"
+                                    id="target_connection_id"
+                                    :items="testConnections"
+                                    :model-value="selectedTargetConnection"
+                                    placeholder="Select target..."
+                                    class="w-full"
+                                    @update:modelValue="
+                                        selectedTargetConnection = $event;
+                                        validationErrors.target_connection_id = undefined;
+                                    "
+                                >
+                                    <template #selected="{ item }">
+                                        <span class="flex items-center gap-2">
+                                            <ConnectionTypeIcon :type="getTargetConnectionType(item.value)" size="4" />
+                                            <span class="truncate">{{ item.label }}</span>
+                                        </span>
+                                    </template>
+                                    <template #item="{ item }">
+                                        <span class="flex items-center gap-2">
+                                            <ConnectionTypeIcon :type="getTargetConnectionType(item.value)" size="4" />
+                                            <span>{{ item.label }}</span>
+                                        </span>
+                                    </template>
+                                    <template #footer>
+                                        <div
+                                            class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                            @click="targetCombobox?.closePopover(); openTargetConnectionSheet()"
+                                        >
+                                            <Plus class="size-4" />
+                                            Add new connection
+                                        </div>
+                                    </template>
+                                </Combobox>
+                                <InputError
+                                    class="mt-1"
+                                    :message="validationErrors.target_connection_id"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 <Separator class="my-4" />
@@ -500,9 +655,13 @@ const selectedTargetName = computed(() => {
                 :target-connection-id="selectedTargetConnection!"
                 :source-connection-name="selectedSourceName"
                 :target-connection-name="selectedTargetName"
+                :source-connection-type="selectedSourceType"
+                :target-connection-type="selectedTargetType"
                 :cloning-title="cloningTitle"
                 :cloning-id="cloning.id"
                 :initial-config="initialTableConfig"
+                :initial-row-selections="initialRowSelections"
+                :initial-keep-unknown-tables-on-target="initialKeepUnknownTablesOnTarget"
                 mode="edit"
                 @back="goToStep1"
                 @next="goToStep3"
