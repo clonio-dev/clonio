@@ -449,6 +449,8 @@ const selectedTargetName = computed(() => {
                 :target-connection-id="selectedTargetConnection!"
                 :source-connection-name="selectedSourceName"
                 :target-connection-name="selectedTargetName"
+                :source-connection-type="'mysql'"
+                :target-connection-type="'mysql'"
                 :cloning-title="cloningTitle"
                 mode="create"
                 @back="goToStep1"
