@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CloningController from '@/actions/App/Http/Controllers/CloningController';
 import CloningRunController from '@/actions/App/Http/Controllers/CloningRunController';
 import RunCard from '@/components/cloning-runs/RunCard.vue';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ import {
     Clock,
     Copy,
     Database,
+    Hourglass,
     Pause,
     Pencil,
     Play,
@@ -29,11 +31,11 @@ const props = defineProps<CloningShowProps>();
 const breadcrumbItems = computed<BreadcrumbItem[]>(() => [
     {
         title: 'Clonings',
-        href: '/clonings',
+        href: CloningController.index().url,
     },
     {
         title: props.cloning.title,
-        href: `/clonings/${props.cloning.id}`,
+        href: CloningController.show(props.cloning.id).url,
     },
 ]);
 
@@ -47,8 +49,22 @@ function formatDate(dateString: string): string {
     });
 }
 
+function formatDurationSeconds(totalSeconds: number): string {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    }
+    if (minutes > 0) {
+        return `${minutes}m ${seconds}s`;
+    }
+    return `${seconds}s`;
+}
+
 function executeCloning() {
-    router.post(`/clonings/${props.cloning.id}/execute`);
+    router.visit(CloningController.execute(props.cloning));
 }
 
 function deleteCloning() {
@@ -57,16 +73,16 @@ function deleteCloning() {
             `Are you sure you want to delete "${props.cloning.title}"? This cannot be undone.`,
         )
     ) {
-        router.delete(`/clonings/${props.cloning.id}`);
+        router.visit(CloningController.destroy(props.cloning));
     }
 }
 
 function pauseCloning() {
-    router.post(`/clonings/${props.cloning.id}/pause`);
+    router.visit(CloningController.pause(props.cloning));
 }
 
 function resumeCloning() {
-    router.post(`/clonings/${props.cloning.id}/resume`);
+    router.visit(CloningController.resume(props.cloning));
 }
 
 // Map runs to include cloning data for RunCard compatibility
@@ -291,6 +307,33 @@ const runsWithCloning = computed(() =>
                                     >Manual execution only</span
                                 >
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Estimated Duration -->
+                    <Card
+                        class="border-border/60 bg-card dark:border-border/40"
+                    >
+                        <CardHeader class="pb-3">
+                            <CardTitle
+                                class="flex items-center gap-2 text-base font-semibold"
+                            >
+                                <Hourglass
+                                    class="size-4 text-muted-foreground"
+                                />
+                                Estimated Duration
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div
+                                v-if="estimatedDuration != null"
+                                class="text-2xl font-semibold text-foreground"
+                            >
+                                {{ formatDurationSeconds(estimatedDuration) }}
+                            </div>
+                            <p v-else class="text-sm text-muted-foreground">
+                                No completed runs yet
+                            </p>
                         </CardContent>
                     </Card>
 
