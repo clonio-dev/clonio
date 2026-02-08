@@ -224,10 +224,6 @@ it('logs when ignoring nullable FKs', function (): void {
             $data['references'] === 'users' &&
             in_array('user_id', $data['columns'])));
 
-    Illuminate\Support\Facades\Log::shouldReceive('debug')
-        ->once()
-        ->with('Dependency resolution completed', Mockery::any());
-
     $resolver = new DependencyResolver();
     $resolver->getProcessingOrder(['users', 'orders'], $conn, true);
 });

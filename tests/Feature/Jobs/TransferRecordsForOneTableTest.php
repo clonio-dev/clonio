@@ -537,7 +537,7 @@ it('throttles progress logs to reduce database overhead', function (): void {
     @unlink($targetDb);
 });
 
-it('logs every chunk when percentage changes exceed threshold', function (): void {
+it('throttles progress logs using time-based intervals', function (): void {
     $run = CloningRun::factory()->create();
 
     $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
@@ -561,7 +561,6 @@ it('logs every chunk when percentage changes exceed threshold', function (): voi
     });
 
     // Insert 1000 records - with chunk size 10, this will trigger 100 chunks
-    // Each chunk = 1% progress, so with 5% threshold, we should get ~20 logs
     for ($i = 1; $i <= 1000; $i++) {
         DB::connection('test_source')->table('items')->insert(['name' => "Item {$i}"]);
     }
@@ -595,16 +594,17 @@ it('logs every chunk when percentage changes exceed threshold', function (): voi
     // Verify transfer worked
     expect(DB::connection('test_target')->table('items')->count())->toBe(1000);
 
-    // Count progress logs - with 100 chunks at 1% each, and 5% threshold:
-    // We should get ~21 logs (at 1%, 6%, 11%, 16%, ..., 96%, 100%)
-    // This is a ~80% reduction from 100 logs without throttling
+    // Time-based throttling (10s intervals) means in a fast test we get:
+    // - First log (always logged)
+    // - 100% completion (always logged)
+    // This is significantly fewer than the 100 raw chunks
     $progressLogs = $run->logs()
         ->where('event_type', 'table_transfer_progress')
         ->get();
 
-    // Should be significantly fewer than 100 chunks
-    expect($progressLogs->count())->toBeLessThan(30);
-    expect($progressLogs->count())->toBeGreaterThan(15);
+    // Must have at least 2 logs (first + completion), but far fewer than 100
+    expect($progressLogs->count())->toBeGreaterThanOrEqual(2);
+    expect($progressLogs->count())->toBeLessThan(100);
 
     // Verify completion was logged
     $lastLog = $progressLogs->last();
