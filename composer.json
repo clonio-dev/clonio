@@ -58,9 +58,11 @@
             "npx concurrently -c \"#93c5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,logs,vite --kill-others"
         ],
         "dev:queue": [
+            "Composer\\Config::disableProcessTimeout",
             "php artisan queue:listen --tries=1 --timeout=0"
         ],
         "dev:schedule": [
+            "Composer\\Config::disableProcessTimeout",
             "php artisan schedule:work"
         ],
         "dev:ssr": [
