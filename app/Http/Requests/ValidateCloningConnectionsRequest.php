@@ -9,6 +9,7 @@ use App\Data\ForeignKeySchema;
 use App\Models\Cloning;
 use App\Models\DatabaseConnection;
 use App\Services\DatabaseInformationRetrievalService;
+use App\Services\PiiColumnMatcher;
 use App\Services\SchemaInspector\SchemaInspectorFactory;
 use Illuminate\Database\Connection;
 use Illuminate\Foundation\Http\FormRequest;
@@ -22,10 +23,10 @@ class ValidateCloningConnectionsRequest extends FormRequest
 
     private ?DatabaseConnection $targetConnection = null;
 
-    /** @var array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>}> */
+    /** @var array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>, piiMatches: array<string, array{name: string, transformation: array{strategy: string, options: array<string, mixed>}}>}> */
     private array $sourceSchema = [];
 
-    /** @var array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>}> */
+    /** @var array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>, piiMatches: array<string, array{name: string, transformation: array{strategy: string, options: array<string, mixed>}}>}> */
     private array $targetSchema = [];
 
     public function authorize(): bool
@@ -89,7 +90,7 @@ class ValidateCloningConnectionsRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>}>
+     * @return array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>, piiMatches: array<string, array{name: string, transformation: array{strategy: string, options: array<string, mixed>}}>}>
      */
     public function getSourceSchema(): array
     {
@@ -97,7 +98,7 @@ class ValidateCloningConnectionsRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>}>
+     * @return array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>, piiMatches: array<string, array{name: string, transformation: array{strategy: string, options: array<string, mixed>}}>}>
      */
     public function getTargetSchema(): array
     {
@@ -154,7 +155,7 @@ class ValidateCloningConnectionsRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>}>
+     * @return array<string, array{columns: list<array{name: string, type: string, nullable: bool}>, primaryKeyColumns: list<string>, foreignKeys: list<array{columns: list<string>, referencedTable: string, referencedColumns: list<string>}>, piiMatches: array<string, array{name: string, transformation: array{strategy: string, options: array<string, mixed>}}>}>
      */
     private function retrieveSchema(DatabaseInformationRetrievalService $service, ConnectionData $connectionData): array
     {
@@ -165,23 +166,30 @@ class ValidateCloningConnectionsRequest extends FormRequest
         assert($connection instanceof Connection);
 
         $inspector = SchemaInspectorFactory::create($connection);
+        $piiMatcher = app(PiiColumnMatcher::class);
 
         foreach ($tables as $tableName) {
             $columns = $connection->getSchemaBuilder()->getColumns($tableName);
             $tableSchema = $inspector->getTableSchema($connection, $tableName);
 
+            $mappedColumns = array_map(fn (array $column): array => [
+                'name' => $column['name'],
+                'type' => $column['type'],
+                'nullable' => $column['nullable'],
+            ], $columns);
+
+            $columnNames = array_map(fn (array $col): string => $col['name'], $mappedColumns);
+            $piiMatches = $piiMatcher->matchColumns($columnNames);
+
             $schema[$tableName] = [
-                'columns' => array_map(fn (array $column): array => [
-                    'name' => $column['name'],
-                    'type' => $column['type'],
-                    'nullable' => $column['nullable'],
-                ], $columns),
+                'columns' => $mappedColumns,
                 'primaryKeyColumns' => $tableSchema->getPrimaryKey()?->columns ?? [],
                 'foreignKeys' => $tableSchema->getForeignKeys()->map(fn (ForeignKeySchema $fk): array => [
                     'columns' => $fk->columns,
                     'referencedTable' => $fk->referencedTable,
                     'referencedColumns' => $fk->referencedColumns,
                 ])->values()->all(),
+                'piiMatches' => $piiMatches,
             ];
         }
 
