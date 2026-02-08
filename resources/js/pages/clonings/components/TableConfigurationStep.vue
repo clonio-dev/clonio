@@ -18,21 +18,16 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
+import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import {
     ArrowLeft,
     ArrowRight,
     ChevronDown,
     ChevronRight,
     Copy,
-    Database,
     Info,
     KeyRound,
+    TableIcon,
 } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 
@@ -69,6 +64,8 @@ interface Props {
     targetConnectionId: string | number;
     sourceConnectionName: string;
     targetConnectionName: string;
+    sourceConnectionType: string;
+    targetConnectionType: string;
     cloningTitle: string;
     cloningId?: number;
     mode: 'create' | 'edit';
@@ -128,7 +125,9 @@ const tableConfigs = reactive<AllTablesConfig>({});
 const tableRowSelections = reactive<Record<string, RowSelectionConfig>>({});
 
 // Keep unknown tables on target
-const keepUnknownTablesOnTarget = ref(props.initialKeepUnknownTablesOnTarget ?? true);
+const keepUnknownTablesOnTarget = ref(
+    props.initialKeepUnknownTablesOnTarget ?? true,
+);
 
 // Initialize configs for all tables and columns with default "keep" or from initial config
 function initializeConfigs() {
@@ -561,8 +560,9 @@ function getTypeColor(type: string): string {
                     <CardTitle
                         class="flex items-center gap-2 text-sm font-medium"
                     >
-                        <Database
-                            class="size-4 text-emerald-600 dark:text-emerald-400"
+                        <ConnectionTypeIcon
+                            :type="props.sourceConnectionType"
+                            size="6"
                         />
                         Source
                     </CardTitle>
@@ -580,8 +580,9 @@ function getTypeColor(type: string): string {
                     <CardTitle
                         class="flex items-center gap-2 text-sm font-medium"
                     >
-                        <Database
-                            class="size-4 text-blue-600 dark:text-blue-400"
+                        <ConnectionTypeIcon
+                            :type="props.targetConnectionType"
+                            size="6"
                         />
                         Target
                     </CardTitle>
@@ -605,7 +606,8 @@ function getTypeColor(type: string): string {
                         </label>
                     </div>
                     <p class="mt-1 text-xs text-muted-foreground">
-                        Tables on the target that don't exist in source will be preserved
+                        Tables on the target that don't exist in source will be
+                        preserved
                     </p>
                 </CardContent>
             </Card>
@@ -635,11 +637,15 @@ function getTypeColor(type: string): string {
                             "
                             class="size-4 text-muted-foreground"
                         />
+                        <TableIcon class="size-5 text-muted-foreground" />
                         <span class="font-mono text-sm font-medium">{{
                             tableName
                         }}</span>
                         <span class="text-xs text-muted-foreground">
-                            ({{ sourceSchema[tableName]?.columns?.length || 0 }} columns)
+                            ({{
+                                sourceSchema[tableName]?.columns?.length || 0
+                            }}
+                            columns)
                         </span>
                     </div>
                     <Button
@@ -656,70 +662,157 @@ function getTypeColor(type: string): string {
                 <CollapsibleContent>
                     <div class="border-t px-4 py-4">
                         <!-- Row selection -->
-                        <div class="mb-4 rounded-md border bg-muted/30 p-3 dark:bg-muted/10">
-                            <div class="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
+                        <div
+                            class="mb-4 rounded-md border bg-muted/30 p-3 dark:bg-muted/10"
+                        >
+                            <div
+                                class="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground"
+                            >
                                 Row Selection
                             </div>
                             <div class="flex flex-wrap items-center gap-3">
-                                <template v-if="hasOutgoingForeignKeys(tableName)">
-                                    <Select
-                                        model-value="full_table"
-                                        disabled
-                                    >
-                                        <SelectTrigger class="h-8 w-48 text-xs">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="full_table">
-                                                Full Table
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger as-child>
-                                                <Info class="size-4 text-muted-foreground" />
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Row selection is disabled for tables with foreign keys to preserve referential integrity.</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
+                                <template
+                                    v-if="hasOutgoingForeignKeys(tableName)"
+                                >
+                                    <div class="flex items-center gap-2">
+                                        <Select
+                                            model-value="full_table"
+                                            disabled
+                                        >
+                                            <SelectTrigger
+                                                class="h-8 w-48 text-xs"
+                                            >
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="full_table">
+                                                    Full Table
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+
+                                        <div
+                                            class="flex flex-grow items-center gap-2 text-orange-400"
+                                        >
+                                            <Info class="size-4" />
+                                            <p>
+                                                Row selection is disabled for
+                                                tables with foreign keys to
+                                                preserve referential integrity.
+                                            </p>
+                                        </div>
+                                    </div>
                                 </template>
                                 <template v-else>
                                     <Select
-                                        :model-value="tableRowSelections[tableName]?.strategy || 'full_table'"
-                                        @update:model-value="(v) => { if (v && tableRowSelections[tableName]) tableRowSelections[tableName].strategy = v as RowSelectionConfig['strategy'] }"
+                                        :model-value="
+                                            tableRowSelections[tableName]
+                                                ?.strategy || 'full_table'
+                                        "
+                                        @update:model-value="
+                                            (v) => {
+                                                if (
+                                                    v &&
+                                                    tableRowSelections[
+                                                        tableName
+                                                    ]
+                                                )
+                                                    tableRowSelections[
+                                                        tableName
+                                                    ].strategy =
+                                                        v as RowSelectionConfig['strategy'];
+                                            }
+                                        "
                                     >
                                         <SelectTrigger class="h-8 w-48 text-xs">
-                                            <SelectValue placeholder="Select strategy" />
+                                            <SelectValue
+                                                placeholder="Select strategy"
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="full_table">Full Table</SelectItem>
-                                            <SelectItem value="first_x">First X rows</SelectItem>
-                                            <SelectItem value="last_x">Last X rows</SelectItem>
+                                            <SelectItem value="full_table"
+                                                >Full Table</SelectItem
+                                            >
+                                            <SelectItem value="first_x"
+                                                >First X rows</SelectItem
+                                            >
+                                            <SelectItem value="last_x"
+                                                >Last X rows</SelectItem
+                                            >
                                         </SelectContent>
                                     </Select>
-                                    <template v-if="tableRowSelections[tableName]?.strategy === 'first_x' || tableRowSelections[tableName]?.strategy === 'last_x'">
+                                    <template
+                                        v-if="
+                                            tableRowSelections[tableName]
+                                                ?.strategy === 'first_x' ||
+                                            tableRowSelections[tableName]
+                                                ?.strategy === 'last_x'
+                                        "
+                                    >
                                         <Input
                                             type="number"
-                                            :model-value="tableRowSelections[tableName]?.limit ?? 1000"
-                                            @update:model-value="(v) => { if (tableRowSelections[tableName]) tableRowSelections[tableName].limit = Math.max(1, Number(v)) }"
+                                            :model-value="
+                                                tableRowSelections[tableName]
+                                                    ?.limit ?? 1000
+                                            "
+                                            @update:model-value="
+                                                (v) => {
+                                                    if (
+                                                        tableRowSelections[
+                                                            tableName
+                                                        ]
+                                                    )
+                                                        tableRowSelections[
+                                                            tableName
+                                                        ].limit = Math.max(
+                                                            1,
+                                                            Number(v),
+                                                        );
+                                                }
+                                            "
                                             class="h-8 w-24 text-xs"
                                             min="1"
                                             placeholder="1000"
                                         />
-                                        <span class="text-xs text-muted-foreground">sorted by</span>
-                                        <Select
-                                            :model-value="tableRowSelections[tableName]?.sortColumn || sourceSchema[tableName]?.primaryKeyColumns?.[0] || ''"
-                                            @update:model-value="(v) => { if (v && tableRowSelections[tableName]) tableRowSelections[tableName].sortColumn = String(v) }"
+                                        <span
+                                            class="text-xs text-muted-foreground"
+                                            >sorted by</span
                                         >
-                                            <SelectTrigger class="h-8 w-40 text-xs">
-                                                <SelectValue placeholder="Sort column" />
+                                        <Select
+                                            :model-value="
+                                                tableRowSelections[tableName]
+                                                    ?.sortColumn ||
+                                                sourceSchema[tableName]
+                                                    ?.primaryKeyColumns?.[0] ||
+                                                ''
+                                            "
+                                            @update:model-value="
+                                                (v) => {
+                                                    if (
+                                                        v &&
+                                                        tableRowSelections[
+                                                            tableName
+                                                        ]
+                                                    )
+                                                        tableRowSelections[
+                                                            tableName
+                                                        ].sortColumn =
+                                                            String(v);
+                                                }
+                                            "
+                                        >
+                                            <SelectTrigger
+                                                class="h-8 w-40 text-xs"
+                                            >
+                                                <SelectValue
+                                                    placeholder="Sort column"
+                                                />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem
-                                                    v-for="pk in sourceSchema[tableName]?.primaryKeyColumns || []"
+                                                    v-for="pk in sourceSchema[
+                                                        tableName
+                                                    ]?.primaryKeyColumns || []"
                                                     :key="pk"
                                                     :value="pk"
                                                 >
@@ -746,16 +839,24 @@ function getTypeColor(type: string): string {
                         <!-- Column rows -->
                         <div class="space-y-3">
                             <div
-                                v-for="column in sourceSchema[tableName]?.columns"
+                                v-for="column in sourceSchema[tableName]
+                                    ?.columns"
                                 :key="column.name"
                                 class="grid grid-cols-12 items-start gap-4"
                             >
                                 <!-- Column name -->
                                 <div class="col-span-3 flex flex-col gap-0.5">
-                                    <span class="flex items-center gap-1.5 font-mono text-sm">
+                                    <span
+                                        class="flex items-center gap-1.5 font-mono text-sm"
+                                    >
                                         {{ column.name }}
                                         <KeyRound
-                                            v-if="isKeyColumn(tableName, column.name)"
+                                            v-if="
+                                                isKeyColumn(
+                                                    tableName,
+                                                    column.name,
+                                                )
+                                            "
                                             class="size-3.5 text-amber-500 dark:text-amber-400"
                                             :aria-label="'Key column'"
                                         />
@@ -787,7 +888,9 @@ function getTypeColor(type: string): string {
                                                 column.name,
                                             ).strategy
                                         "
-                                        :disabled="isKeyColumn(tableName, column.name)"
+                                        :disabled="
+                                            isKeyColumn(tableName, column.name)
+                                        "
                                         @update:model-value="
                                             (v) =>
                                                 v &&
