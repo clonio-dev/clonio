@@ -8,7 +8,6 @@ import CloningController from '@/actions/App/Http/Controllers/CloningController'
 import Heading from '@/components/Heading.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
-import StepNumber from '@/components/StepNumber.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Combobox, ComboboxItems } from '@/components/ui/combobox';
@@ -329,15 +328,10 @@ function getTargetConnectionType(connectionValue: string | number): string {
             <!-- Step 1: Connection Selection -->
             <div v-if="currentStep === 1" class="space-y-6">
                 <!-- Title Input -->
-                <div class="flex flex-col space-y-6">
-                    <div class="flex w-full gap-4">
-                        <StepNumber step="1" />
-                        <HeadingSmall
-                            title="Name your cloning configuration"
-                            description="Give your cloning a descriptive name for easy identification."
-                        />
-                    </div>
-                </div>
+                <HeadingSmall
+                    title="Name your cloning configuration"
+                    description="Give your cloning a descriptive name for easy identification."
+                />
 
                 <div class="grid max-w-120 gap-2">
                     <Label for="title">Title</Label>
@@ -357,15 +351,10 @@ function getTargetConnectionType(connectionValue: string | number): string {
                 <Separator class="my-4" />
 
                 <!-- Connections -->
-                <div class="flex flex-col space-y-6">
-                    <div class="flex w-full gap-4">
-                        <StepNumber step="2" />
-                        <HeadingSmall
-                            title="Select your connections"
-                            description="Choose the source (production) and target (test) connections for data transfer."
-                        />
-                    </div>
-                </div>
+                <HeadingSmall
+                    title="Select your connections"
+                    description="Choose the source (production) and target (test) connections for data transfer."
+                />
 
                 <div class="grid gap-6 md:grid-cols-[1fr_auto_1fr]">
                     <!-- Source Connection Card -->
