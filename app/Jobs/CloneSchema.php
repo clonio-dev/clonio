@@ -43,8 +43,6 @@ class CloneSchema implements ShouldBeEncrypted, ShouldQueue
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
         SchemaReplicator $schemaReplicator,
     ): void {
-        $this->logDebug('phase_started', 'Starting clone schema phase');
-
         try {
             /** @var Connection $sourceConnection */
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);

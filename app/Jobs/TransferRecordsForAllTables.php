@@ -41,8 +41,6 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
     public function handle(
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
     ): void {
-        $this->logDebug('phase_started', 'Starting data transfer phase');
-
         try {
             foreach ($this->tables as $tableName) {
                 $this->tableName = $tableName;

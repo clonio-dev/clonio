@@ -46,8 +46,6 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
         AnonymizationService $anonymizationService,
     ): void {
-        $this->logDebug('phase_started', 'Starting data transfer for table ' . $this->tableName);
-
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
 

@@ -41,8 +41,6 @@ class TruncateTargetTables implements ShouldBeEncrypted, ShouldQueue
     public function handle(
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
     ): void {
-        $this->logDebug('phase_started', 'Starting truncating target tables phase');
-
         try {
             /** @var Connection $targetConnection */
             $targetConnection = $dbInformationRetrievalService->getConnection($this->targetConnectionData);
