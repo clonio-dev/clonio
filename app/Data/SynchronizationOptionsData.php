@@ -21,12 +21,18 @@ final readonly class SynchronizationOptionsData
     /**
      * Build SynchronizationOptionsData from the stored anonymization config.
      *
-     * @param  array{tables: array<int, array{tableName: string, columnMutations: array<int, array{columnName: string, strategy: string, options: array<string, mixed>}>}>}|null  $config
+     * @param  array{keepUnknownTablesOnTarget?: bool, tables: array<int, array{tableName: string, columnMutations?: array<int, array{columnName: string, strategy: string, options: array<string, mixed>}>, rowSelection?: array{strategy: string, limit?: int, sortColumn?: string|null}}>}|null  $config
      */
     public static function from(?array $config): self
     {
-        if (! $config || ! isset($config['tables'])) {
+        if (! $config) {
             return new self();
+        }
+
+        if (! isset($config['tables'])) {
+            return new self(
+                keepUnknownTablesOnTarget: $config['keepUnknownTablesOnTarget'] ?? true,
+            );
         }
 
         $tableAnonymizationOptions = new Collection();
@@ -61,15 +67,27 @@ final readonly class SynchronizationOptionsData
                 ));
             }
 
-            if ($columnMutations->isNotEmpty()) {
+            $rowSelection = null;
+            if (isset($tableConfig['rowSelection'])) {
+                $rs = $tableConfig['rowSelection'];
+                $rowSelection = new TableRowSelectionData(
+                    strategy: RowSelectionStrategyEnum::from($rs['strategy']),
+                    limit: $rs['limit'] ?? 1000,
+                    sortColumn: $rs['sortColumn'] ?? null,
+                );
+            }
+
+            if ($columnMutations->isNotEmpty() || $rowSelection !== null) {
                 $tableAnonymizationOptions->push(new TableAnonymizationOptionsData(
                     tableName: $tableConfig['tableName'],
                     columnMutations: $columnMutations,
+                    rowSelection: $rowSelection,
                 ));
             }
         }
 
         return new self(
+            keepUnknownTablesOnTarget: $config['keepUnknownTablesOnTarget'] ?? true,
             tableAnonymizationOptions: $tableAnonymizationOptions->isNotEmpty() ? $tableAnonymizationOptions : null,
         );
     }
