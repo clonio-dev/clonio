@@ -38,6 +38,7 @@ final readonly class AnonymizationService
     private function applyMutation(mixed $value, ColumnMutationData $mutationData): mixed
     {
         return match ($mutationData->strategy) {
+            ColumnMutationStrategyEnum::KEEP => $value,
             ColumnMutationStrategyEnum::FAKE => $this->applyFakeStrategy($mutationData),
             ColumnMutationStrategyEnum::MASK => $this->applyMaskStrategy($value, $mutationData),
             ColumnMutationStrategyEnum::HASH => $this->applyHashStrategy($value, $mutationData),

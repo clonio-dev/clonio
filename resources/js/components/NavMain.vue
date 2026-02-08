@@ -24,7 +24,9 @@ const page = usePage();
             <SidebarMenuItem v-for="item in items" :key="item.title">
                 <SidebarMenuButton
                     as-child
-                    :is-active="urlIsActive(item.href, page.url)"
+                    :is-active="
+                        item.isActive ?? urlIsActive(item.href, page.url)
+                    "
                     :tooltip="item.title"
                 >
                     <Link :href="item.href">

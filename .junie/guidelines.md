@@ -1,4 +1,44 @@
 <laravel-boost-guidelines>
+=== .ai/tailwind-conventions rules ===
+
+## Tailwind Conventions
+
+These guidelines should be respected:
+
+### Use size class when width and height are identical
+
+Use `size-*` instead of `w-* h-*`.
+
+Example:
+
+Replace `w-4 h-4` with `size-4` or `w-5 h-5` with `size-5`.
+
+### Always support dark mode
+
+Always try to support a dark mode by adding text and background color definitions for dark mode to. Use the class-based approach `dark:...`.
+
+### Always support the WCAG 2.0
+
+We try to support the WCAG 2.0 with at least AA standard. So try to keep enough contrast for the used text color on background color.
+
+=== .ai/frontend-requesting-conventions rules ===
+
+## Conventions for requesting backend
+
+Do not use axios or fetch, please stick to Inertia.
+
+So never use axios or fetch, because it may not be configured correctly.
+
+=== .ai/design-conventions rules ===
+
+## Design Conventions
+
+For icons we try to get the most out of the Lucide Icons.
+
+When we need a new icon, then create one as vue component with an svg in it.
+
+Try to use shadcn-vue components in all cases.
+
 === foundation rules ===
 
 # Laravel Boost Guidelines
@@ -8,7 +48,7 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 ## Foundational Context
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.4.16
+- php - 8.4.17
 - inertiajs/inertia-laravel (INERTIA) - v2
 - laravel/fortify (FORTIFY) - v1
 - laravel/framework (LARAVEL) - v12

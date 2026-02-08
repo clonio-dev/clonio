@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import CloningController from '@/actions/App/Http/Controllers/CloningController';
+import CloningRunController from '@/actions/App/Http/Controllers/CloningRunController';
+import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -11,37 +14,46 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, RulerIcon } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import {
+    CopyIcon,
+    DatabaseIcon,
+    LayoutGridIcon,
+    RocketIcon,
+} from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+
+const page = usePage();
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+        href: CloningRunController.dashboard().url,
+        icon: LayoutGridIcon,
+        isActive: page.url.startsWith(CloningRunController.dashboard().url),
     },
     {
-        title: 'Queue',
-        href: '/queue',
-        icon: RulerIcon,
+        title: 'Clones',
+        href: CloningController.index().url,
+        icon: CopyIcon,
+        isActive: page.url.startsWith(CloningController.index().url),
+    },
+    {
+        title: 'Executions',
+        href: CloningRunController.index().url,
+        icon: RocketIcon,
+        isActive: page.url.startsWith(CloningRunController.index().url),
+    },
+    {
+        title: 'Data Sources',
+        href: DatabaseConnectionController.index().url,
+        icon: DatabaseIcon,
+        isActive: page.url.startsWith(DatabaseConnectionController.index().url),
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    // {
-    //     title: 'Github Repo',
-    //     href: 'https://github.com/laravel/vue-starter-kit',
-    //     icon: Folder,
-    // },
-    // {
-    //     title: 'Documentation',
-    //     href: 'https://laravel.com/docs/starter-kits#vue',
-    //     icon: BookOpen,
-    // },
-];
+const footerNavItems: NavItem[] = [];
 </script>
 
 <template>
@@ -50,7 +62,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="CloningRunController.dashboard().url">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>

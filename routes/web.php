@@ -2,15 +2,19 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\CloningRunController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
-Route::get('/', fn () => Inertia::render('Welcome', [
+Route::get('/', fn (): Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View => view('home', [
     'canRegister' => Features::enabled(Features::registration()),
 ]))->name('home');
 
-Route::get('dashboard', fn () => Inertia::render('Dashboard'))->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', [CloningRunController::class, 'dashboard'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/application.php';
+
+require __DIR__ . '/static-pages.php';

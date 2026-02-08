@@ -90,76 +90,148 @@
 }
 
 :root {
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(0 0% 3.9%);
+    /* Light mode - clean white/off-white inspired by design */
+    --background: hsl(210 40% 98%);
+    --foreground: hsl(222 47% 11%);
+
+    /* Cards - pure white with subtle distinction */
     --card: hsl(0 0% 100%);
-    --card-foreground: hsl(0 0% 3.9%);
+    --card-foreground: hsl(222 47% 11%);
+
+    /* Popovers - same as cards */
     --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(0 0% 3.9%);
-    --primary: hsl(0 0% 9%);
-    --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(0 0% 92.1%);
-    --secondary-foreground: hsl(0 0% 9%);
-    --muted: hsl(0 0% 96.1%);
-    --muted-foreground: hsl(0 0% 45.1%);
-    --accent: hsl(0 0% 96.1%);
-    --accent-foreground: hsl(0 0% 9%);
-    --destructive: hsl(0 84.2% 60.2%);
+    --popover-foreground: hsl(222 47% 11%);
+
+    /* Primary accent - cyan/teal from design */
+    --primary: hsl(221 83% 53%);
+    --primary-foreground: hsl(0 0% 100%);
+
+    /* Secondary - light gray surfaces */
+    --secondary: hsl(210 40% 96%);
+    --secondary-foreground: hsl(222 47% 11%);
+
+    /* Muted elements */
+    --muted: hsl(210 40% 96%);
+    --muted-foreground: hsl(215 16% 47%);
+
+    /* Accent for hover states */
+    --accent: hsl(210 40% 96%);
+    --accent-foreground: hsl(222 47% 11%);
+
+    /* Destructive */
+    --destructive: hsl(0 84% 60%);
     --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 92.8%);
-    --input: hsl(0 0% 89.8%);
-    --ring: hsl(0 0% 3.9%);
-    --chart-1: hsl(12 76% 61%);
+
+    /* Borders - light gray */
+    --border: hsl(214 32% 91%);
+    --input: hsl(214 32% 91%);
+    --ring: hsl(221 83% 53%);
+
+    /* Charts */
+    --chart-1: hsl(221 83% 53%);
     --chart-2: hsl(173 58% 39%);
     --chart-3: hsl(197 37% 24%);
     --chart-4: hsl(43 74% 66%);
     --chart-5: hsl(27 87% 67%);
+
     --radius: 0.5rem;
-    --sidebar-background: hsl(0 0% 98%);
-    --sidebar-foreground: hsl(240 5.3% 26.1%);
-    --sidebar-primary: hsl(0 0% 10%);
-    --sidebar-primary-foreground: hsl(0 0% 98%);
-    --sidebar-accent: hsl(0 0% 94%);
-    --sidebar-accent-foreground: hsl(0 0% 30%);
-    --sidebar-border: hsl(0 0% 91%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
-    --sidebar: hsl(0 0% 98%);
+
+    /* Sidebar - white/light with cyan accent */
+    --sidebar-background: hsl(0 0% 100%);
+    --sidebar-foreground: hsl(215 16% 47%);
+    --sidebar-primary: hsl(221 83% 53%);
+    --sidebar-primary-foreground: hsl(221 83% 53%);
+    --sidebar-accent: hsla(220, 83%, 53%, 0.05);
+    --sidebar-accent-foreground: hsl(221 83% 53%);
+    --sidebar-border: hsl(214 32% 91%);
+    --sidebar-ring: hsl(221 83% 53%);
+    --sidebar: hsl(0 0% 100%);
+
+    /* Brand accent colors - centralized for easy theming */
+    /* HSL channels (without hsl wrapper) for composability with opacity */
+    --brand-accent-hsl: 221 83% 53%;
+    --brand-accent: hsl(221 83% 53%);
+    --brand-accent-light: hsl(199 92% 58%);
+    --brand-accent-dark: hsl(200 98% 39%);
+    --brand-accent-muted: hsl(199 90% 94%);
+    --brand-accent-subtle: hsl(199 100% 97%);
+    /* Pre-computed opacity variants for gradients/shadows */
+    --brand-accent-20: hsl(221 83% 53% / 0.2);
+    --brand-accent-15: hsl(221 83% 53% / 0.15);
+    --brand-accent-30: hsl(221 83% 53% / 0.3);
+    --brand-accent-25: hsl(221 83% 53% / 0.25);
+    --brand-accent-35: hsl(221 83% 53% / 0.35);
 }
 
 .dark {
-    --background: hsl(0 0% 3.9%);
-    --foreground: hsl(0 0% 98%);
-    --card: hsl(0 0% 3.9%);
-    --card-foreground: hsl(0 0% 98%);
-    --popover: hsl(0 0% 3.9%);
-    --popover-foreground: hsl(0 0% 98%);
-    --primary: hsl(0 0% 98%);
-    --primary-foreground: hsl(0 0% 9%);
-    --secondary: hsl(0 0% 14.9%);
-    --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(0 0% 16.08%);
-    --muted-foreground: hsl(0 0% 63.9%);
-    --accent: hsl(0 0% 14.9%);
-    --accent-foreground: hsl(0 0% 98%);
-    --destructive: hsl(0 84% 60%);
+    /* Deep navy background - inspired by design */
+    --background: hsl(214 32% 8%);
+    --foreground: hsl(210 29% 93%);
+
+    /* Elevated card surfaces - slightly lighter navy */
+    --card: hsl(215 25% 11%);
+    --card-foreground: hsl(210 29% 93%);
+
+    /* Popovers/dropdowns - same as cards */
+    --popover: hsl(215 25% 11%);
+    --popover-foreground: hsl(210 29% 93%);
+
+    /* Primary accent - cyan/teal from design */
+    --primary: hsl(189 94% 43%);
+    --primary-foreground: hsl(210 40% 10%);
+
+    /* Secondary - subtle dark surface */
+    --secondary: hsl(215 22% 14%);
+    --secondary-foreground: hsl(210 29% 93%);
+
+    /* Muted elements - blue-gray tones */
+    --muted: hsl(215 22% 14%);
+    --muted-foreground: hsl(215 16% 57%);
+
+    /* Accent for hover states */
+    --accent: hsl(215 28% 16%);
+    --accent-foreground: hsl(210 29% 93%);
+
+    /* Destructive - keeping red but slightly adjusted */
+    --destructive: hsl(0 72% 51%);
     --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 14.9%);
-    --input: hsl(0 0% 14.9%);
-    --ring: hsl(0 0% 83.1%);
-    --chart-1: hsl(220 70% 50%);
+
+    /* Borders - subtle dark blue */
+    --border: hsl(215 19% 17%);
+    --input: hsl(215 19% 17%);
+    --ring: hsl(189 94% 43%);
+
+    /* Charts - harmonized with cyan accent */
+    --chart-1: hsl(189 94% 43%);
     --chart-2: hsl(160 60% 45%);
-    --chart-3: hsl(30 80% 55%);
+    --chart-3: hsl(220 70% 50%);
     --chart-4: hsl(280 65% 60%);
     --chart-5: hsl(340 75% 55%);
-    --sidebar-background: hsl(0 0% 7%);
-    --sidebar-foreground: hsl(0 0% 95.9%);
-    --sidebar-primary: hsl(360, 100%, 100%);
-    --sidebar-primary-foreground: hsl(0 0% 100%);
-    --sidebar-accent: hsl(0 0% 15.9%);
-    --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-    --sidebar-border: hsl(0 0% 15.9%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
-    --sidebar: hsl(240 5.9% 10%);
+
+    /* Sidebar - darkest navy */
+    --sidebar-background: hsl(216 28% 7%);
+    --sidebar-foreground: hsl(210 20% 80%);
+    --sidebar-primary: hsl(189 94% 43%);
+    --sidebar-primary-foreground: hsl(210 40% 10%);
+    --sidebar-accent: hsl(215 35% 14%);
+    --sidebar-accent-foreground: hsl(210 29% 93%);
+    --sidebar-border: hsl(215 19% 15%);
+    --sidebar-ring: hsl(189 94% 43%);
+    --sidebar: hsl(216 28% 7%);
+
+    /* Brand accent colors - dark mode */
+    --brand-accent-hsl: 187 92% 50%;
+    --brand-accent: hsl(187 92% 50%);
+    --brand-accent-light: hsl(185 96% 65%);
+    --brand-accent-dark: hsl(189 94% 43%);
+    --brand-accent-muted: hsl(200 40% 18%);
+    --brand-accent-subtle: hsl(200 35% 12%);
+    /* Pre-computed opacity variants for gradients/shadows */
+    --brand-accent-20: hsl(187 92% 50% / 0.2);
+    --brand-accent-15: hsl(187 92% 50% / 0.15);
+    --brand-accent-30: hsl(187 92% 50% / 0.3);
+    --brand-accent-25: hsl(187 92% 50% / 0.25);
+    --brand-accent-35: hsl(187 92% 50% / 0.35);
 }
 
 @layer base {

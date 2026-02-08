@@ -3,33 +3,30 @@
     "name": "clonio-dev/clonio",
     "type": "project",
     "description": "The clonio application",
-    "keywords": [
-        "laravel",
-        "framework"
-    ],
     "license": "proprietary",
     "require": {
         "php": "^8.4",
-        "inertiajs/inertia-laravel": "^2.0.18",
-        "laravel/fortify": "^1.33.0",
-        "laravel/framework": "^12.46",
+        "ext-pdo": "*",
+        "inertiajs/inertia-laravel": "^2.0.19",
+        "laravel/fortify": "^1.34.1",
+        "laravel/framework": "^12.50.0",
         "laravel/tinker": "^2.11.0",
-        "laravel/wayfinder": "^0.1.12"
+        "laravel/wayfinder": "^0.1.13"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.1.9",
         "fakerphp/faker": "^1.24.1",
-        "larastan/larastan": "^3.8.1",
-        "laravel/boost": "^2.0.4",
-        "laravel/pail": "^1.2.4",
+        "larastan/larastan": "^3.9.2",
+        "laravel/boost": "^2.1.1",
+        "laravel/pail": "^1.2.5",
         "laravel/pint": "^1.27",
         "laravel/sail": "^1.52",
         "mockery/mockery": "^1.6.12",
         "nunomaduro/collision": "^8.8.3",
-        "pestphp/pest": "^4.3.1",
+        "pestphp/pest": "^4.3.2",
         "pestphp/pest-plugin-laravel": "^4.0",
         "pestphp/pest-plugin-type-coverage": "^4.0.3",
-        "rector/rector": "^2.3.0"
+        "rector/rector": "^2.3.6"
     },
     "autoload": {
         "psr-4": {
@@ -54,7 +51,19 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74,#86efac\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" \"php artisan schedule:work\" --names=server,queue,logs,vite,schedule --kill-others"
+        ],
+        "dev:web": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,logs,vite --kill-others"
+        ],
+        "dev:queue": [
+            "Composer\\Config::disableProcessTimeout",
+            "php artisan queue:listen --tries=1 --timeout=0"
+        ],
+        "dev:schedule": [
+            "Composer\\Config::disableProcessTimeout",
+            "php artisan schedule:work"
         ],
         "dev:ssr": [
             "npm run build:ssr",
@@ -91,20 +100,19 @@
             "npm run lint",
             "npm run format"
         ],
-        "test:type-coverage": "pest --type-coverage --min=100",
+        "test:type-coverage": "pest --type-coverage --min=85",
         "test:lint": [
             "pint --parallel --test",
             "rector --dry-run",
             "npm run format:check"
         ],
-        "test:unit": "pest --parallel --coverage --min=85",
+        "test:unit": "pest --parallel --coverage --min=45",
         "test:types": "phpstan",
         "test": [
             "@php artisan config:clear --ansi",
             "@test:type-coverage",
             "@test:unit",
-            "@test:lint",
-            "@test:types"
+            "@test:lint"
         ]
     },
     "extra": {

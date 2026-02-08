@@ -5,37 +5,44 @@ declare(strict_types=1);
 use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
 use App\Data\SynchronizationOptionsData;
+use App\Jobs\Middleware\SkipWhenBatchCancelled;
 use App\Jobs\TransferRecordsForAllTables;
 use App\Jobs\TransferRecordsForOneTable;
+use App\Models\CloningRun;
 use App\Services\DatabaseInformationRetrievalService;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 
+uses(RefreshDatabase::class);
+
 it('returns correct middleware', function (): void {
+    $run = CloningRun::factory()->create();
+
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: new ConnectionData('source', new SqliteDriverData()),
         targetConnectionData: new ConnectionData('target', new SqliteDriverData()),
-        options: new SynchronizationOptionsData(
-            chunkSize: 100,
-        ),
+        options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: [],
+        run: $run,
     );
 
     $middleware = $job->middleware();
 
     expect($middleware)
         ->toHaveCount(1)
-        ->and($middleware[0])->toBeInstanceOf(SkipIfBatchCancelled::class);
+        ->and($middleware[0])->toBeInstanceOf(SkipWhenBatchCancelled::class);
 });
 
 it('transfers records from all tables', function (): void {
+    $run = CloningRun::factory()->create();
+
     $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
     @unlink($sourceDb);
     $sourceDb .= '.sqlite';
     touch($sourceDb);
 
-    // Set up source database with multiple tables
     config(['database.connections.test_source' => [
         'driver' => 'sqlite',
         'database' => $sourceDb,
@@ -65,29 +72,28 @@ it('transfers records from all tables', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        options: new SynchronizationOptionsData(
-            chunkSize: 100,
-        ),
+        options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: ['users', 'posts'],
+        run: $run,
     );
     $job->withBatchId($batch->id);
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
-    // Verify TransferRecordsForOneTable jobs were queued for both tables
     Queue::assertPushed(TransferRecordsForOneTable::class, 2);
 
-    // Clean up
     @unlink($sourceDb);
 });
 
-it('skips migration table when specified', function (): void {
+it('transfers all tables including migrations', function (): void {
+    $run = CloningRun::factory()->create();
+
     $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
     @unlink($sourceDb);
     $sourceDb .= '.sqlite';
     touch($sourceDb);
 
-    // Set up source database with multiple tables including migrations
     config(['database.connections.test_source' => [
         'driver' => 'sqlite',
         'database' => $sourceDb,
@@ -116,30 +122,29 @@ it('skips migration table when specified', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        options: new SynchronizationOptionsData(
-            migrationTableName: 'migrations',
-            chunkSize: 100,
-        ),
+        options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: ['users', 'migrations'],
+        run: $run,
     );
     $job->withBatchId($batch->id);
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
-    // Verify only users table job was queued (migrations skipped)
-    Queue::assertPushed(TransferRecordsForOneTable::class, 1);
+    // Both tables should be transferred
+    Queue::assertPushed(TransferRecordsForOneTable::class, 2);
 
-    // Clean up
     @unlink($sourceDb);
 });
 
 it('skips tables with no records', function (): void {
+    $run = CloningRun::factory()->create();
+
     $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
     @unlink($sourceDb);
     $sourceDb .= '.sqlite';
     touch($sourceDb);
 
-    // Set up source database with empty and non-empty tables
     config(['database.connections.test_source' => [
         'driver' => 'sqlite',
         'database' => $sourceDb,
@@ -168,29 +173,28 @@ it('skips tables with no records', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        options: new SynchronizationOptionsData(
-            chunkSize: 100,
-        ),
+        options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: ['users', 'posts'],
+        run: $run,
     );
     $job->withBatchId($batch->id);
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
-    // Verify only users table job was queued (posts skipped because empty)
     Queue::assertPushed(TransferRecordsForOneTable::class, 1);
 
-    // Clean up
     @unlink($sourceDb);
 });
 
 it('passes foreign key constraints flag to child jobs', function (): void {
+    $run = CloningRun::factory()->create();
+
     $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
     @unlink($sourceDb);
     $sourceDb .= '.sqlite';
     touch($sourceDb);
 
-    // Set up source database with a table
     config(['database.connections.test_source' => [
         'driver' => 'sqlite',
         'database' => $sourceDb,
@@ -213,29 +217,28 @@ it('passes foreign key constraints flag to child jobs', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        options: new SynchronizationOptionsData(
-            chunkSize: 100,
-        ),
+        options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: ['users'],
+        run: $run,
     );
     $job->withBatchId($batch->id);
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
-    // Verify the child job has disableForeignKeyConstraints set to true
     Queue::assertPushed(TransferRecordsForOneTable::class, fn ($job): bool => $job->disableForeignKeyConstraints === true);
 
-    // Clean up
     @unlink($sourceDb);
 });
 
 it('passes chunk size to child jobs', function (): void {
+    $run = CloningRun::factory()->create();
+
     $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
     @unlink($sourceDb);
     $sourceDb .= '.sqlite';
     touch($sourceDb);
 
-    // Set up source database with a table
     config(['database.connections.test_source' => [
         'driver' => 'sqlite',
         'database' => $sourceDb,
@@ -258,29 +261,28 @@ it('passes chunk size to child jobs', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        options: new SynchronizationOptionsData(
-            chunkSize: 250,
-        ),
+        options: new SynchronizationOptionsData(chunkSize: 250),
+        tables: ['users'],
+        run: $run,
     );
     $job->withBatchId($batch->id);
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
-    // Verify the child job has correct chunk size
     Queue::assertPushed(TransferRecordsForOneTable::class, fn (TransferRecordsForOneTable $job): bool => $job->chunkSize === 250);
 
-    // Clean up
     @unlink($sourceDb);
 });
 
 it('handles multiple tables with mixed empty and non-empty', function (): void {
+    $run = CloningRun::factory()->create();
+
     $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
     @unlink($sourceDb);
     $sourceDb .= '.sqlite';
     touch($sourceDb);
 
-    // Set up source database with multiple tables, some empty, some with records
     config(['database.connections.test_source' => [
         'driver' => 'sqlite',
         'database' => $sourceDb,
@@ -322,21 +324,16 @@ it('handles multiple tables with mixed empty and non-empty', function (): void {
     $job = new TransferRecordsForAllTables(
         sourceConnectionData: $sourceConnectionData,
         targetConnectionData: $targetConnectionData,
-        options: new SynchronizationOptionsData(
-            chunkSize: 100
-        ),
+        options: new SynchronizationOptionsData(chunkSize: 100),
+        tables: ['users', 'posts', 'comments', 'tags'],
+        run: $run,
     );
     $job->withBatchId($batch->id);
 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $job->handle($dbService);
 
-    // Verify only non-empty tables (users and comments) got jobs
     Queue::assertPushed(TransferRecordsForOneTable::class, 2);
 
-    // Clean up
     @unlink($sourceDb);
 });
-
-// Note: Connection failure test (lines 35-42) would require mocking the final DatabaseInformationRetrievalService class
-// This error path is covered by the RuntimeException checks and integration tests

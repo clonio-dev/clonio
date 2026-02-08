@@ -6,94 +6,105 @@ namespace App\Jobs;
 
 use App\Data\ConnectionData;
 use App\Data\SynchronizationOptionsData;
+use App\Jobs\Concerns\LogsProcessSteps;
+use App\Jobs\Concerns\TransferBatchJob;
+use App\Models\CloningRun;
 use App\Services\DatabaseInformationRetrievalService;
+use App\Services\DependencyResolver;
+use App\Services\SchemaInspector\SchemaInspectorFactory;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, InteractsWithQueue, Queueable;
+    use Batchable, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
 
     public int $tries = 2;
 
-    /**
-     * @param  Collection<int, ConnectionData>  $targetConnectionsData
-     */
+    public string $tableName = '';
+
     public function __construct(
         public readonly SynchronizationOptionsData $options,
         public readonly ConnectionData $sourceConnectionData,
-        public readonly Collection $targetConnectionsData,
-    ) {
-        Log::debug("Creating new job instance for connection {$this->sourceConnectionData->name}.");
-    }
+        public readonly ConnectionData $targetConnectionData,
+        public readonly CloningRun $run,
+    ) {}
 
     public function handle(
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
+        DependencyResolver $dependencyResolver,
     ): void {
-        Log::debug('Synchronizing database');
-
-        // try to connect to source connection
-        Log::debug('Try to connect to source connection');
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
 
             assert($sourceConnection instanceof \Illuminate\Database\Connection);
             $sourceConnection->getSchemaBuilder();
         } catch (Throwable $exception) {
-            Log::error("Failed to connect to database {$this->sourceConnectionData->name}: {$exception->getMessage()}");
+            $this->logError('connection_failed', "Failed to connect to database `{$this->sourceConnectionData->name}`");
+            $this->logErrorMessage($exception->getMessage(), $dbInformationRetrievalService->connectionMap());
             $this->fail($exception);
 
             return;
         }
 
-        // try to connect to target connections
-        Log::debug('Try to connect to target connections');
-        $this->targetConnectionsData->each(
-            function (ConnectionData $targetConnectionData) use ($dbInformationRetrievalService): void {
-                try {
-                    $dbInformationRetrievalService->getConnection($targetConnectionData);
-                } catch (Throwable $exception) {
-                    Log::error("Failed to connect to database {$targetConnectionData->name}: {$exception->getMessage()}");
-                    $this->fail($exception);
+        try {
+            $dbInformationRetrievalService->getConnection($this->targetConnectionData);
+        } catch (Throwable $exception) {
+            $this->logError('connection_failed', "Failed to connect to database `{$this->targetConnectionData->name}`");
+            $this->logErrorMessage($exception->getMessage(), $dbInformationRetrievalService->connectionMap());
+            $this->fail($exception);
 
-                    return;
-                }
+            return;
+        }
 
-                $batch = $this->batch();
-                assert($batch !== null);
-                $batch->add([
-                    new CloneSchemaAndPrepareForData(
-                        sourceConnectionData: $this->sourceConnectionData,
-                        targetConnectionData: $targetConnectionData,
-                        synchronizeTableSchemaEnum: $this->options->synchronizeTableSchema,
-                        keepUnknownTablesOnTarget: $this->options->keepUnknownTablesOnTarget,
-                        migrationTableName: $this->options->migrationTableName,
-                        disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
-                    ),
-                    new TransferRecordsForAllTables(
-                        sourceConnectionData: $this->sourceConnectionData,
-                        targetConnectionData: $targetConnectionData,
-                        options: $this->options,
-                    ),
-                ]);
-            }
+        $batch = $this->batch();
+        assert($batch !== null);
+        $this->logInfo('synchronization_started', 'Starting database synchronization');
+
+        $sourceInspector = SchemaInspectorFactory::create($sourceConnection);
+        $sourceSchema = $sourceInspector->getDatabaseSchema($sourceConnection);
+        $tableNames = $sourceSchema->getTableNames()->all();
+
+        $order = $dependencyResolver->getProcessingOrder($tableNames, $sourceConnection);
+
+        $batch->add([
+            new CloneSchema(
+                sourceConnectionData: $this->sourceConnectionData,
+                targetConnectionData: $this->targetConnectionData,
+                tables: $order['insert_order'],
+                run: $this->run,
+            ),
+            new TruncateTargetTables(
+                sourceConnectionData: $this->sourceConnectionData,
+                targetConnectionData: $this->targetConnectionData,
+                tables: $order['delete_order'],
+                run: $this->run,
+            ),
+        ]);
+
+        if (! $this->options->keepUnknownTablesOnTarget) {
+            $batch->add(
+                new DropUnknownTables(
+                    sourceConnectionData: $this->sourceConnectionData,
+                    targetConnectionData: $this->targetConnectionData,
+                    sourceTables: $order['insert_order'],
+                    run: $this->run,
+                )
+            );
+        }
+
+        $batch->add(
+            new TransferRecordsForAllTables(
+                sourceConnectionData: $this->sourceConnectionData,
+                targetConnectionData: $this->targetConnectionData,
+                options: $this->options,
+                tables: $order['insert_order'],
+                run: $this->run,
+            ),
         );
-    }
-
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return list<object>
-     */
-    public function middleware(): array
-    {
-        return [new SkipIfBatchCancelled];
     }
 }

@@ -54,31 +54,23 @@ it('caches connections and reuses them', function (): void {
     @unlink($db);
 });
 
-it('establishes connection even with invalid path but fails on actual use', function (): void {
+it('fails to establish connection with invalid path', function (): void {
     $connectionData = new ConnectionData('invalid_db', new SqliteDriverData('/invalid/path/to/database.sqlite'));
     $service = resolve(DatabaseInformationRetrievalService::class);
 
-    // Connection is established lazily, so this won't fail
-    $connection = $service->getConnection($connectionData);
-    expect($connection)->toBeInstanceOf(Illuminate\Database\ConnectionInterface::class);
-
-    // But using it will fail
-    expect(fn () => $connection->getSchemaBuilder()->getTableListing())
+    // Laravel now validates SQLite paths immediately on connection
+    expect(fn () => $service->getConnection($connectionData))
         ->toThrow(Exception::class);
 });
 
-it('returns schema builder for non-existent database but fails on use', function (): void {
+it('fails to get schema for non-existent database', function (): void {
     $nonExistentDb = '/tmp/definitely_does_not_exist_' . uniqid() . '.sqlite';
 
     $connectionData = new ConnectionData('nonexistent_db', new SqliteDriverData($nonExistentDb));
     $service = resolve(DatabaseInformationRetrievalService::class);
 
-    // getSchema returns a builder, but using it will fail
-    $schema = $service->getSchema($connectionData);
-    expect($schema)->toBeInstanceOf(Illuminate\Database\Schema\Builder::class);
-
-    // Actual operation fails
-    expect(fn () => $schema->getTableListing())
+    // Laravel now validates SQLite paths immediately on connection
+    expect(fn () => $service->getSchema($connectionData))
         ->toThrow(Exception::class);
 });
 
@@ -255,28 +247,21 @@ it('handles multiple different connections', function (): void {
     @unlink($db2);
 });
 
-it('returns schema builder for empty path but fails on use', function (): void {
+it('fails to get schema for empty path', function (): void {
     $connectionData = new ConnectionData('invalid', new SqliteDriverData(''));
     $service = resolve(DatabaseInformationRetrievalService::class);
 
-    // Schema builder is returned
-    $schema = $service->getSchema($connectionData);
-    expect($schema)->toBeInstanceOf(Illuminate\Database\Schema\Builder::class);
-
-    // But using it will fail
-    expect(fn () => $schema->getTableListing())
+    // Laravel validates SQLite paths immediately
+    expect(fn () => $service->getSchema($connectionData))
         ->toThrow(Exception::class);
 });
 
-it('returns schema builder for invalid path but fails on use', function (): void {
+it('fails to get schema for invalid path', function (): void {
     $connectionData = new ConnectionData('invalid_schema', new SqliteDriverData('/invalid/path.sqlite'));
     $service = resolve(DatabaseInformationRetrievalService::class);
 
-    $schema = $service->getSchema($connectionData);
-    expect($schema)->toBeInstanceOf(Illuminate\Database\Schema\Builder::class);
-
-    // Actual database operation will fail
-    expect(fn () => $schema->hasTable('users'))
+    // Laravel validates SQLite paths immediately
+    expect(fn () => $service->getSchema($connectionData))
         ->toThrow(Exception::class);
 });
 
@@ -292,12 +277,7 @@ it('fails when creating table service for invalid database', function (): void {
     $connectionData = new ConnectionData('invalid_table_service', new SqliteDriverData('/invalid/path.sqlite'));
     $service = resolve(DatabaseInformationRetrievalService::class);
 
-    // Connection is established, but withConnectionForTable itself won't fail
-    // It will only fail when the TableInformationRetrievalService is actually used
-    $tableService = $service->withConnectionForTable($connectionData, 'users');
-    expect($tableService)->toBeInstanceOf(TableInformationRetrievalService::class);
-
-    // But using it will fail
-    expect(fn () => $tableService->recordCount())
+    // Laravel validates SQLite paths immediately when creating connection
+    expect(fn () => $service->withConnectionForTable($connectionData, 'users'))
         ->toThrow(Exception::class);
 });

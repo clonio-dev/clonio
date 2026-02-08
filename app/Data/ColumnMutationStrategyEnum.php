@@ -6,6 +6,7 @@ namespace App\Data;
 
 enum ColumnMutationStrategyEnum: string
 {
+    case KEEP = 'keep';
     case FAKE = 'fake';
     case MASK = 'mask';
     case HASH = 'hash';
