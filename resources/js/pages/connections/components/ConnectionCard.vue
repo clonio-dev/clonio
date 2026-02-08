@@ -1,12 +1,5 @@
 <script setup lang="ts">
 import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
-import {
-    MariadbIcon,
-    MysqlIcon,
-    PostgresqlIcon,
-    SqliteIcon,
-    SqlserverIcon,
-} from '@/components/icons/databases';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +10,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { Connection } from '@/pages/connections/types';
 import { router } from '@inertiajs/vue3';
 import {
@@ -27,7 +21,7 @@ import {
     Trash2,
     User,
 } from 'lucide-vue-next';
-import { computed, ref, type Component } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Props {
     connection: Connection;
@@ -39,35 +33,23 @@ const copied = ref(false);
 
 interface DatabaseTypeConfig {
     label: string;
-    icon: Component;
-    iconBg: string;
 }
 
 const databaseTypeConfigs: Record<string, DatabaseTypeConfig> = {
     mysql: {
         label: 'MySQL',
-        icon: MysqlIcon,
-        iconBg: 'bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30',
     },
     mariadb: {
         label: 'MariaDB',
-        icon: MariadbIcon,
-        iconBg: 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30',
     },
     pgsql: {
         label: 'PostgreSQL',
-        icon: PostgresqlIcon,
-        iconBg: 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30',
     },
     sqlserver: {
         label: 'SQL Server',
-        icon: SqlserverIcon,
-        iconBg: 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30',
     },
     sqlite: {
         label: 'SQLite',
-        icon: SqliteIcon,
-        iconBg: 'bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-950/30 dark:to-blue-950/30',
     },
 };
 
@@ -75,8 +57,6 @@ const databaseTypeConfig = computed(() => {
     return (
         databaseTypeConfigs[props.connection.type] || {
             label: props.connection.type,
-            icon: Database,
-            iconBg: 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-950/30 dark:to-slate-950/30',
         }
     );
 });
@@ -97,12 +77,7 @@ const deleteConnection = () => {
         <CardHeader>
             <div class="flex items-start gap-4">
                 <!-- Database icon -->
-                <div
-                    class="flex size-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-105 dark:ring-white/10"
-                    :class="databaseTypeConfig.iconBg"
-                >
-                    <component :is="databaseTypeConfig.icon" class="size-6" />
-                </div>
+                <ConnectionTypeIcon :type="props.connection.type" size="10" />
 
                 <div class="min-w-0 flex-1 space-y-1.5">
                     <div class="flex items-start justify-between gap-2">
