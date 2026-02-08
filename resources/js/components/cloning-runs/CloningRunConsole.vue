@@ -32,7 +32,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const consoleRef = ref<HTMLDivElement | null>(null);
 const autoScroll = ref(true);
-const verbose = ref(false);
 
 const levelConfig: Record<string, { icon: typeof Info; class: string }> = {
     info: {
@@ -75,10 +74,6 @@ interface DisplayLog {
 
 const sortedLogs = computed(() => {
     return [...props.logs]
-        .filter(
-            ({ level }: CloningRunLog) =>
-                verbose.value || !['debug'].includes(level),
-        )
         .sort(
             (a: CloningRunLog, b: CloningRunLog) =>
                 new Date(a.created_at).getTime() -
@@ -236,16 +231,7 @@ defineExpose({
                 <span class="font-medium text-foreground">Execution Log</span>
                 <Badge variant="secondary" class="text-xs">
                     {{ logs.length }} entries
-                    <template v-if="logs.length !== sortedLogs.length">
-                        ({{ sortedLogs.length }} filtered)
-                    </template>
                 </Badge>
-            </div>
-            <div class="flex items-center gap-1 text-xs text-muted-foreground">
-                <Checkbox v-model="verbose" id="verbose_output" />
-                <label for="verbose_output" class="text-muted-foreground"
-                    >Include verbose messages</label
-                >
             </div>
             <div
                 v-if="isActive"
