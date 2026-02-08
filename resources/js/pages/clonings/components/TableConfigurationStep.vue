@@ -642,9 +642,7 @@ function getTypeColor(type: string): string {
                             tableName
                         }}</span>
                         <span class="text-xs text-muted-foreground">
-                            ({{
-                                sourceSchema[tableName]?.columns?.length || 0
-                            }}
+                            ({{ sourceSchema[tableName]?.columns?.length || 0 }}
                             columns)
                         </span>
                     </div>
