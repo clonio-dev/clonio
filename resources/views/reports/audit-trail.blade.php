@@ -698,7 +698,7 @@
                 </div>
                 <div class="connection-arrow">&rarr;</div>
                 <div class="connection-card">
-                    <div class="connection-label connection-label-target">Target (Test)</div>
+                    <div class="connection-label connection-label-target">Target</div>
                     <div class="connection-name">{{ $run->cloning->targetConnection->name ?? 'N/A' }}</div>
                     <div class="connection-detail"><span>Type:</span> {{ $run->cloning->targetConnection->type?->getLabel() ?? 'N/A' }}</div>
                     <div class="connection-detail"><span>Host:</span> {{ $run->cloning->targetConnection->host ?? 'N/A' }}:{{ $run->cloning->targetConnection->port ?? 'N/A' }}</div>
