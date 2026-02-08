@@ -151,8 +151,8 @@ export interface CloningShowProps {
  */
 export interface CloningFormProps {
     cloning?: Cloning;
-    prod_connections: { value: number; label: string }[];
-    test_connections: { value: number; label: string }[];
+    prod_connections: { value: number; label: string; type: string }[];
+    test_connections: { value: number; label: string; type: string }[];
 }
 
 /**

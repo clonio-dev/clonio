@@ -48,14 +48,14 @@ class CloningController extends Controller
         $prodConnections = DatabaseConnection::query()
             ->forUser(auth()->id())
             ->prodDatabases()
-            ->get(['id', 'name'])
-            ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name]);
+            ->get(['id', 'name', 'type'])
+            ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name, 'type' => $c->type->value]);
 
         $testConnections = DatabaseConnection::query()
             ->forUser(auth()->id())
             ->testDatabases()
-            ->get(['id', 'name'])
-            ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name]);
+            ->get(['id', 'name', 'type'])
+            ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name, 'type' => $c->type->value]);
 
         return Inertia::render('clonings/Create', [
             'prod_connections' => $prodConnections,
@@ -152,14 +152,14 @@ class CloningController extends Controller
         $prodConnections = DatabaseConnection::query()
             ->forUser(auth()->id())
             ->prodDatabases()
-            ->get(['id', 'name'])
-            ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name]);
+            ->get(['id', 'name', 'type'])
+            ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name, 'type' => $c->type->value]);
 
         $testConnections = DatabaseConnection::query()
             ->forUser(auth()->id())
             ->testDatabases()
-            ->get(['id', 'name'])
-            ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name]);
+            ->get(['id', 'name', 'type'])
+            ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name, 'type' => $c->type->value]);
 
         return Inertia::render('clonings/Edit', [
             'cloning' => $cloning,
