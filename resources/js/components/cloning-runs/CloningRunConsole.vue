@@ -315,7 +315,7 @@ defineExpose({
                     </template>
 
                     <!-- Latest progress log -->
-                    <div class="group flex gap-3 rounded bg-slate-900/50 px-1 py-0.5">
+                    <div class="group flex gap-3 rounded bg-slate-900/50">
                         <span class="shrink-0 text-slate-500 tabular-nums">
                             {{ formatTime(displayLog.log.created_at) }}
                         </span>
