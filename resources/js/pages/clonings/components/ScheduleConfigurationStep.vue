@@ -2,7 +2,6 @@
 import CloningController from '@/actions/App/Http/Controllers/CloningController';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
-import StepNumber from '@/components/StepNumber.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -63,15 +62,10 @@ const formSchedule = computed(() => {
 <template>
     <div class="space-y-6">
         <!-- Step header -->
-        <div class="flex flex-col space-y-6">
-            <div class="flex w-full gap-4">
-                <StepNumber step="5" />
-                <HeadingSmall
-                    title="Configure execution"
-                    description="Choose when to run this cloning - immediately and/or on a schedule."
-                />
-            </div>
-        </div>
+        <HeadingSmall
+            title="Configure execution"
+            description="Choose when to run this cloning - immediately and/or on a schedule."
+        />
 
         <!-- Execution options -->
         <div class="space-y-6">
