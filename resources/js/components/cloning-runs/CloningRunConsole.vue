@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import type {
     CloningRunLog,
@@ -73,12 +72,10 @@ interface DisplayLog {
 }
 
 const sortedLogs = computed(() => {
-    return [...props.logs]
-        .sort(
-            (a: CloningRunLog, b: CloningRunLog) =>
-                new Date(a.created_at).getTime() -
-                new Date(b.created_at).getTime(),
-        );
+    return [...props.logs].sort(
+        (a: CloningRunLog, b: CloningRunLog) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
 });
 
 const displayLogs = computed((): DisplayLog[] => {
@@ -255,18 +252,21 @@ defineExpose({
                 <p class="text-slate-500">No log entries yet...</p>
             </div>
 
-            <template v-for="displayLog in displayLogs" :key="displayLog.log.id">
+            <template
+                v-for="displayLog in displayLogs"
+                :key="displayLog.log.id"
+            >
                 <!-- Progress log with collapsed history -->
-                <div
-                    v-if="isProgressLog(displayLog.log)"
-                    class="mb-2"
-                >
+                <div v-if="isProgressLog(displayLog.log)" class="mb-2">
                     <!-- Collapsed history (when expanded) -->
                     <template
                         v-if="
                             displayLog.collapsedCount > 0 &&
                             expandedProgressTables.has(
-                                (displayLog.log.data as TableTransferProgressData).table,
+                                (
+                                    displayLog.log
+                                        .data as TableTransferProgressData
+                                ).table,
                             )
                         "
                     >
@@ -279,7 +279,10 @@ defineExpose({
                                 {{ formatTime(collapsedLog.created_at) }}
                             </span>
                             <component
-                                :is="levelConfig[collapsedLog.level]?.icon || Info"
+                                :is="
+                                    levelConfig[collapsedLog.level]?.icon ||
+                                    Info
+                                "
                                 class="mt-0.5 size-4 shrink-0"
                                 :class="
                                     levelConfig[collapsedLog.level]?.class ||
@@ -292,7 +295,8 @@ defineExpose({
                                 </span>
                                 <Progress
                                     :model-value="
-                                        getProgressData(collapsedLog)?.percent ?? 0
+                                        getProgressData(collapsedLog)
+                                            ?.percent ?? 0
                                     "
                                     class="h-1.5 w-16 bg-slate-700"
                                 />
@@ -306,7 +310,9 @@ defineExpose({
                             {{ formatTime(displayLog.log.created_at) }}
                         </span>
                         <component
-                            :is="levelConfig[displayLog.log.level]?.icon || Info"
+                            :is="
+                                levelConfig[displayLog.log.level]?.icon || Info
+                            "
                             class="mt-0.5 size-4 shrink-0"
                             :class="
                                 levelConfig[displayLog.log.level]?.class ||
@@ -319,7 +325,10 @@ defineExpose({
                                 v-if="displayLog.collapsedCount > 0"
                                 @click="
                                     toggleProgressExpand(
-                                        (displayLog.log.data as TableTransferProgressData).table,
+                                        (
+                                            displayLog.log
+                                                .data as TableTransferProgressData
+                                        ).table,
                                     )
                                 "
                                 class="shrink-0 text-slate-500 hover:text-slate-300"
@@ -327,7 +336,10 @@ defineExpose({
                                 <ChevronDownIcon
                                     v-if="
                                         expandedProgressTables.has(
-                                            (displayLog.log.data as TableTransferProgressData).table,
+                                            (
+                                                displayLog.log
+                                                    .data as TableTransferProgressData
+                                            ).table,
                                         )
                                     "
                                     class="size-4"
@@ -339,7 +351,8 @@ defineExpose({
                             </span>
                             <Progress
                                 :model-value="
-                                    getProgressData(displayLog.log)?.percent ?? 0
+                                    getProgressData(displayLog.log)?.percent ??
+                                    0
                                 "
                                 class="h-1.5 w-16 bg-slate-700"
                             />
@@ -400,10 +413,7 @@ defineExpose({
                 </div>
 
                 <!-- Regular log entry -->
-                <div
-                    v-else
-                    class="group mb-2 flex gap-3"
-                >
+                <div v-else class="group mb-2 flex gap-3">
                     <!-- Timestamp -->
                     <span class="shrink-0 text-slate-500 tabular-nums">
                         {{ formatTime(displayLog.log.created_at) }}
@@ -424,10 +434,14 @@ defineExpose({
                         <span
                             class="text-slate-200"
                             :class="{
-                                'text-red-400': displayLog.log.level === 'error',
-                                'text-amber-500': displayLog.log.level === 'warning',
-                                'text-blue-400': displayLog.log.level === 'info',
-                                'text-green-400': displayLog.log.level === 'success',
+                                'text-red-400':
+                                    displayLog.log.level === 'error',
+                                'text-amber-500':
+                                    displayLog.log.level === 'warning',
+                                'text-blue-400':
+                                    displayLog.log.level === 'info',
+                                'text-green-400':
+                                    displayLog.log.level === 'success',
                             }"
                         >
                             {{
@@ -459,11 +473,14 @@ defineExpose({
                         <div
                             v-if="
                                 displayLog.log.message.length >
-                                    props.lineLength && openedLog[displayLog.log.id]
+                                    props.lineLength &&
+                                openedLog[displayLog.log.id]
                             "
                         >
                             {{
-                                displayLog.log.message.substring(props.lineLength)
+                                displayLog.log.message.substring(
+                                    props.lineLength,
+                                )
                             }}
                         </div>
                     </div>
