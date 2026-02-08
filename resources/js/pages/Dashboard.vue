@@ -4,6 +4,7 @@ import CloningRunController from '@/actions/App/Http/Controllers/CloningRunContr
 import RunCard from '@/components/cloning-runs/RunCard.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAutoRefresh } from '@/composables/useAutoRefresh';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import type { DashboardProps } from '@/types/cloning.types';
@@ -19,7 +20,7 @@ import {
     XCircle,
     Zap,
 } from 'lucide-vue-next';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,8 +34,6 @@ const props = defineProps<DashboardProps>();
 const isRefreshing = ref(false);
 
 const hasAnyRuns = computed(() => props.recentRuns.length > 0);
-
-let refreshInterval: number | null = null;
 
 function refreshDashboard() {
     isRefreshing.value = true;
@@ -52,32 +51,10 @@ function createFirstCloning() {
     router.visit('/clonings/create');
 }
 
-function setupAutoRefresh() {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-        refreshInterval = null;
-    }
-    if (props.activeRuns.length > 0) {
-        refreshInterval = window.setInterval(refreshDashboard, 1000);
-    }
-}
-
-watch(
-    () => props.activeRuns.length,
-    () => {
-        setupAutoRefresh();
-    },
+useAutoRefresh(
+    refreshDashboard,
+    computed(() => props.activeRuns.length > 0),
 );
-
-onMounted(() => {
-    setupAutoRefresh();
-});
-
-onUnmounted(() => {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-    }
-});
 </script>
 
 <template>

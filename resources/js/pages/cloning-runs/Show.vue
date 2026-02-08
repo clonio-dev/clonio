@@ -2,6 +2,7 @@
 import CloningRunConsole from '@/components/cloning-runs/CloningRunConsole.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useAutoRefresh } from '@/composables/useAutoRefresh';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { convertDuration } from '@/lib/date';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
@@ -23,7 +24,7 @@ import {
     Timer,
     XCircle,
 } from 'lucide-vue-next';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<CloningRunShowProps>();
 
@@ -44,7 +45,6 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => [
 
 const isRefreshing = ref(false);
 const consoleRef = ref<InstanceType<typeof CloningRunConsole> | null>(null);
-let refreshInterval: number | null = null;
 
 const statusConfig: Record<
     CloningRunStatus,
@@ -137,16 +137,6 @@ function refreshPage() {
     });
 }
 
-function setupAutoRefresh() {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-        refreshInterval = null;
-    }
-    if (props.isActive) {
-        refreshInterval = window.setInterval(refreshPage, 1000);
-    }
-}
-
 function exportLogs() {
     window.location.href = `/cloning-runs/${props.run.id}/logs/export`;
 }
@@ -157,27 +147,10 @@ function cancelRun() {
     }
 }
 
-watch(
-    () => props.isActive,
-    (isActive) => {
-        if (!isActive && refreshInterval) {
-            clearInterval(refreshInterval);
-            refreshInterval = null;
-        } else if (isActive) {
-            setupAutoRefresh();
-        }
-    },
+useAutoRefresh(
+    refreshPage,
+    computed(() => props.isActive),
 );
-
-onMounted(() => {
-    setupAutoRefresh();
-});
-
-onUnmounted(() => {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-    }
-});
 </script>
 
 <template>

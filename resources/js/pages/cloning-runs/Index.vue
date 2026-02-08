@@ -4,6 +4,7 @@ import CloningRunController from '@/actions/App/Http/Controllers/CloningRunContr
 import CloningRunStatusBadge from '@/components/cloning-runs/CloningRunStatusBadge.vue';
 import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
+import { useAutoRefresh } from '@/composables/useAutoRefresh';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { convertDuration } from '@/lib/date';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
@@ -11,7 +12,7 @@ import type { BreadcrumbItem } from '@/types';
 import type { CloningRun, CloningRunsIndexProps } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowRight, Plus, RefreshCw, Send } from 'lucide-vue-next';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<CloningRunsIndexProps>();
 
@@ -23,7 +24,6 @@ const breadcrumbItems: BreadcrumbItem[] = [
 ];
 
 const isRefreshing = ref(false);
-let refreshInterval: number | null = null;
 
 const hasRuns = computed(() => props.runs.data.length > 0);
 const totalRuns = computed(() => props.runs.total);
@@ -64,32 +64,10 @@ function refreshPage() {
     });
 }
 
-function setupAutoRefresh() {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-        refreshInterval = null;
-    }
-    if (props.hasActiveRuns) {
-        refreshInterval = window.setInterval(refreshPage, 1000);
-    }
-}
-
-watch(
-    () => props.hasActiveRuns,
-    () => {
-        setupAutoRefresh();
-    },
+useAutoRefresh(
+    refreshPage,
+    computed(() => props.hasActiveRuns),
 );
-
-onMounted(() => {
-    setupAutoRefresh();
-});
-
-onUnmounted(() => {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-    }
-});
 </script>
 
 <template>
