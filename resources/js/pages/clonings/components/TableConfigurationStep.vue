@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import StepNumber from '@/components/StepNumber.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -581,15 +580,10 @@ function getTypeColor(type: string): string {
 <template>
     <div class="space-y-6">
         <!-- Step header -->
-        <div class="flex flex-col space-y-6">
-            <div class="flex w-full gap-4">
-                <StepNumber step="4" />
-                <HeadingSmall
-                    title="Configure transformation rules"
-                    description="Define how each column should be transformed during transfer."
-                />
-            </div>
-        </div>
+        <HeadingSmall
+            title="Configure transformation rules"
+            description="Define how each column should be transformed during transfer."
+        />
 
         <!-- Connection info cards -->
         <div class="grid gap-4 md:grid-cols-2">
