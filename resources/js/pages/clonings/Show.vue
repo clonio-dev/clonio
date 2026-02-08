@@ -107,7 +107,9 @@ interface TableConfig {
 }
 
 const anonymizationStats = computed(() => {
-    const config = props.cloning.anonymization_config as { tables?: TableConfig[] } | null;
+    const config = props.cloning.anonymization_config as {
+        tables?: TableConfig[];
+    } | null;
     if (!config?.tables) {
         return null;
     }
@@ -127,7 +129,9 @@ const anonymizationStats = computed(() => {
     return {
         columnCount: anonymized.length,
         tableCount: tablesWithTransformations,
-        strategies: strategies.map((s) => s.charAt(0).toUpperCase() + s.slice(1)),
+        strategies: strategies.map(
+            (s) => s.charAt(0).toUpperCase() + s.slice(1),
+        ),
     };
 });
 </script>
@@ -392,22 +396,58 @@ const anonymizationStats = computed(() => {
                         </CardHeader>
                         <CardContent class="space-y-3">
                             <p class="text-sm text-muted-foreground">
-                                All personally identifiable information is anonymized according to the configured transformation rules.
+                                All personally identifiable information is
+                                anonymized according to the configured
+                                transformation rules.
                             </p>
-                            <ul class="space-y-1.5 text-sm text-muted-foreground">
+                            <ul
+                                class="space-y-1.5 text-sm text-muted-foreground"
+                            >
                                 <li class="flex items-baseline gap-2">
-                                    <span class="size-1 shrink-0 rounded-full bg-emerald-500 mt-1.5" />
+                                    <span
+                                        class="mt-1.5 size-1 shrink-0 rounded-full bg-emerald-500"
+                                    />
                                     <span>
-                                        <span class="font-medium text-foreground">{{ anonymizationStats.columnCount }}</span>
-                                        column{{ anonymizationStats.columnCount === 1 ? '' : 's' }} across
-                                        <span class="font-medium text-foreground">{{ anonymizationStats.tableCount }}</span>
-                                        table{{ anonymizationStats.tableCount === 1 ? '' : 's' }} transformed
+                                        <span
+                                            class="font-medium text-foreground"
+                                            >{{
+                                                anonymizationStats.columnCount
+                                            }}</span
+                                        >
+                                        column{{
+                                            anonymizationStats.columnCount === 1
+                                                ? ''
+                                                : 's'
+                                        }}
+                                        across
+                                        <span
+                                            class="font-medium text-foreground"
+                                            >{{
+                                                anonymizationStats.tableCount
+                                            }}</span
+                                        >
+                                        table{{
+                                            anonymizationStats.tableCount === 1
+                                                ? ''
+                                                : 's'
+                                        }}
+                                        transformed
                                     </span>
                                 </li>
                                 <li class="flex items-baseline gap-2">
-                                    <span class="size-1 shrink-0 rounded-full bg-emerald-500 mt-1.5" />
+                                    <span
+                                        class="mt-1.5 size-1 shrink-0 rounded-full bg-emerald-500"
+                                    />
                                     <span>
-                                        Methods: <span class="font-medium text-foreground">{{ anonymizationStats.strategies.join(', ') }}</span>
+                                        Methods:
+                                        <span
+                                            class="font-medium text-foreground"
+                                            >{{
+                                                anonymizationStats.strategies.join(
+                                                    ', ',
+                                                )
+                                            }}</span
+                                        >
                                     </span>
                                 </li>
                             </ul>

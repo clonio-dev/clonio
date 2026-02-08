@@ -251,12 +251,16 @@ const selectedTargetType = computed(() => {
 });
 
 function getSourceConnectionType(connectionValue: string | number): string {
-    const conn = props.prod_connections.find((c) => c.value === connectionValue);
+    const conn = props.prod_connections.find(
+        (c) => c.value === connectionValue,
+    );
     return conn?.type || '';
 }
 
 function getTargetConnectionType(connectionValue: string | number): string {
-    const conn = props.test_connections.find((c) => c.value === connectionValue);
+    const conn = props.test_connections.find(
+        (c) => c.value === connectionValue,
+    );
     return conn?.type || '';
 }
 </script>
@@ -358,24 +362,40 @@ function getTargetConnectionType(connectionValue: string | number): string {
 
                 <div class="grid gap-6 md:grid-cols-[1fr_auto_1fr]">
                     <!-- Source Connection Card -->
-                    <Card class="border-emerald-500/20 bg-emerald-500/5 dark:border-emerald-500/15 dark:bg-emerald-500/5">
+                    <Card
+                        class="border-emerald-500/20 bg-emerald-500/5 dark:border-emerald-500/15 dark:bg-emerald-500/5"
+                    >
                         <CardHeader class="pb-4">
                             <div class="flex items-center gap-3">
                                 <div v-if="selectedSourceType" class="shrink-0">
-                                    <ConnectionTypeIcon :type="selectedSourceType" size="8" />
+                                    <ConnectionTypeIcon
+                                        :type="selectedSourceType"
+                                        size="8"
+                                    />
                                 </div>
-                                <div v-else class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 ring-1 ring-emerald-500/20 dark:bg-emerald-900/30 dark:ring-emerald-500/15">
-                                    <Database class="size-5 text-emerald-600 dark:text-emerald-400" />
+                                <div
+                                    v-else
+                                    class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 ring-1 ring-emerald-500/20 dark:bg-emerald-900/30 dark:ring-emerald-500/15"
+                                >
+                                    <Database
+                                        class="size-5 text-emerald-600 dark:text-emerald-400"
+                                    />
                                 </div>
                                 <div>
-                                    <CardTitle class="text-sm font-semibold">Source Connection</CardTitle>
-                                    <p class="text-xs text-muted-foreground">Production database</p>
+                                    <CardTitle class="text-sm font-semibold"
+                                        >Source Connection</CardTitle
+                                    >
+                                    <p class="text-xs text-muted-foreground">
+                                        Production database
+                                    </p>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent>
                             <div class="grid gap-2">
-                                <Label for="source_connection_id">Connection</Label>
+                                <Label for="source_connection_id"
+                                    >Connection</Label
+                                >
                                 <Combobox
                                     ref="sourceCombobox"
                                     id="source_connection_id"
@@ -385,25 +405,45 @@ function getTargetConnectionType(connectionValue: string | number): string {
                                     class="w-full"
                                     @update:modelValue="
                                         selectedSourceConnection = $event;
-                                        validationErrors.source_connection_id = undefined;
+                                        validationErrors.source_connection_id =
+                                            undefined;
                                     "
                                 >
                                     <template #selected="{ item }">
                                         <span class="flex items-center gap-2">
-                                            <ConnectionTypeIcon :type="getSourceConnectionType(item.value)" size="4" />
-                                            <span class="truncate">{{ item.label }}</span>
+                                            <ConnectionTypeIcon
+                                                :type="
+                                                    getSourceConnectionType(
+                                                        item.value,
+                                                    )
+                                                "
+                                                size="4"
+                                            />
+                                            <span class="truncate">{{
+                                                item.label
+                                            }}</span>
                                         </span>
                                     </template>
                                     <template #item="{ item }">
                                         <span class="flex items-center gap-2">
-                                            <ConnectionTypeIcon :type="getSourceConnectionType(item.value)" size="4" />
+                                            <ConnectionTypeIcon
+                                                :type="
+                                                    getSourceConnectionType(
+                                                        item.value,
+                                                    )
+                                                "
+                                                size="4"
+                                            />
                                             <span>{{ item.label }}</span>
                                         </span>
                                     </template>
                                     <template #footer>
                                         <div
                                             class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                                            @click="sourceCombobox?.closePopover(); showSourceConnectionSheet = true"
+                                            @click="
+                                                sourceCombobox?.closePopover();
+                                                showSourceConnectionSheet = true;
+                                            "
                                         >
                                             <Plus class="size-4" />
                                             Add new connection
@@ -412,7 +452,9 @@ function getTargetConnectionType(connectionValue: string | number): string {
                                 </Combobox>
                                 <InputError
                                     class="mt-1"
-                                    :message="validationErrors.source_connection_id"
+                                    :message="
+                                        validationErrors.source_connection_id
+                                    "
                                 />
                             </div>
                         </CardContent>
@@ -420,30 +462,48 @@ function getTargetConnectionType(connectionValue: string | number): string {
 
                     <!-- Arrow indicator -->
                     <div class="hidden items-center justify-center md:flex">
-                        <div class="flex size-10 items-center justify-center rounded-full bg-muted">
+                        <div
+                            class="flex size-10 items-center justify-center rounded-full bg-muted"
+                        >
                             <ArrowRight class="size-5 text-muted-foreground" />
                         </div>
                     </div>
 
                     <!-- Target Connection Card -->
-                    <Card class="border-blue-500/20 bg-blue-500/5 dark:border-blue-500/15 dark:bg-blue-500/5">
+                    <Card
+                        class="border-blue-500/20 bg-blue-500/5 dark:border-blue-500/15 dark:bg-blue-500/5"
+                    >
                         <CardHeader class="pb-4">
                             <div class="flex items-center gap-3">
                                 <div v-if="selectedTargetType" class="shrink-0">
-                                    <ConnectionTypeIcon :type="selectedTargetType" size="8" />
+                                    <ConnectionTypeIcon
+                                        :type="selectedTargetType"
+                                        size="8"
+                                    />
                                 </div>
-                                <div v-else class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 ring-1 ring-blue-500/20 dark:bg-blue-900/30 dark:ring-blue-500/15">
-                                    <Database class="size-5 text-blue-600 dark:text-blue-400" />
+                                <div
+                                    v-else
+                                    class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 ring-1 ring-blue-500/20 dark:bg-blue-900/30 dark:ring-blue-500/15"
+                                >
+                                    <Database
+                                        class="size-5 text-blue-600 dark:text-blue-400"
+                                    />
                                 </div>
                                 <div>
-                                    <CardTitle class="text-sm font-semibold">Target Connection</CardTitle>
-                                    <p class="text-xs text-muted-foreground">Test database</p>
+                                    <CardTitle class="text-sm font-semibold"
+                                        >Target Connection</CardTitle
+                                    >
+                                    <p class="text-xs text-muted-foreground">
+                                        Test database
+                                    </p>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent>
                             <div class="grid gap-2">
-                                <Label for="target_connection_id">Connection</Label>
+                                <Label for="target_connection_id"
+                                    >Connection</Label
+                                >
                                 <Combobox
                                     ref="targetCombobox"
                                     id="target_connection_id"
@@ -453,25 +513,45 @@ function getTargetConnectionType(connectionValue: string | number): string {
                                     class="w-full"
                                     @update:modelValue="
                                         selectedTargetConnection = $event;
-                                        validationErrors.target_connection_id = undefined;
+                                        validationErrors.target_connection_id =
+                                            undefined;
                                     "
                                 >
                                     <template #selected="{ item }">
                                         <span class="flex items-center gap-2">
-                                            <ConnectionTypeIcon :type="getTargetConnectionType(item.value)" size="4" />
-                                            <span class="truncate">{{ item.label }}</span>
+                                            <ConnectionTypeIcon
+                                                :type="
+                                                    getTargetConnectionType(
+                                                        item.value,
+                                                    )
+                                                "
+                                                size="4"
+                                            />
+                                            <span class="truncate">{{
+                                                item.label
+                                            }}</span>
                                         </span>
                                     </template>
                                     <template #item="{ item }">
                                         <span class="flex items-center gap-2">
-                                            <ConnectionTypeIcon :type="getTargetConnectionType(item.value)" size="4" />
+                                            <ConnectionTypeIcon
+                                                :type="
+                                                    getTargetConnectionType(
+                                                        item.value,
+                                                    )
+                                                "
+                                                size="4"
+                                            />
                                             <span>{{ item.label }}</span>
                                         </span>
                                     </template>
                                     <template #footer>
                                         <div
                                             class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                                            @click="targetCombobox?.closePopover(); showTargetConnectionSheet = true"
+                                            @click="
+                                                targetCombobox?.closePopover();
+                                                showTargetConnectionSheet = true;
+                                            "
                                         >
                                             <Plus class="size-4" />
                                             Add new connection
@@ -480,7 +560,9 @@ function getTargetConnectionType(connectionValue: string | number): string {
                                 </Combobox>
                                 <InputError
                                     class="mt-1"
-                                    :message="validationErrors.target_connection_id"
+                                    :message="
+                                        validationErrors.target_connection_id
+                                    "
                                 />
                             </div>
                         </CardContent>
