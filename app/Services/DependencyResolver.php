@@ -41,13 +41,6 @@ class DependencyResolver
         // 4. Calculate dependency levels for visualization
         $levels = $this->calculateLevels($dependencies);
 
-        Log::debug('Dependency resolution completed', [
-            'tables' => count($tables),
-            'insert_order' => $insertOrder,
-            'delete_order' => $deleteOrder,
-            'levels' => $levels,
-        ]);
-
         return [
             'insert_order' => $insertOrder,
             'delete_order' => $deleteOrder,
