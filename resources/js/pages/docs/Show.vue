@@ -4,23 +4,65 @@ import type { DocShowProps } from '@/types/docs';
 import { Head, Link } from '@inertiajs/vue3';
 import hljs from 'highlight.js';
 import { ArrowLeft, ArrowRight } from 'lucide-vue-next';
-import { nextTick, onMounted, watch } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<DocShowProps>();
 
-function highlightCode() {
+const copiedSlug = ref<string | null>(null);
+let copiedTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function enhanceContent() {
     nextTick(() => {
         document
             .querySelectorAll('.docs-content pre code:not(.hljs)')
             .forEach((block) => {
                 hljs.highlightElement(block as HTMLElement);
             });
+
+        document
+            .querySelectorAll('.docs-content h2[id], .docs-content h3[id]')
+            .forEach((heading) => {
+                if (heading.querySelector('.heading-anchor')) {
+                    return;
+                }
+
+                heading.classList.add('heading-linkable');
+
+                const anchor = document.createElement('a');
+                anchor.href = `#${heading.id}`;
+                anchor.className = 'heading-anchor';
+                anchor.setAttribute('aria-label', 'Copy link to section');
+                anchor.setAttribute('title', 'Copy link to section');
+                anchor.innerHTML =
+                    '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>';
+
+                anchor.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const url =
+                        window.location.origin +
+                        window.location.pathname +
+                        `#${heading.id}`;
+                    navigator.clipboard.writeText(url);
+                    history.replaceState(null, '', `#${heading.id}`);
+
+                    copiedSlug.value = heading.id;
+                    if (copiedTimeout) {
+                        clearTimeout(copiedTimeout);
+                    }
+                    copiedTimeout = setTimeout(
+                        () => (copiedSlug.value = null),
+                        2000,
+                    );
+                });
+
+                heading.appendChild(anchor);
+            });
     });
 }
 
-onMounted(highlightCode);
+onMounted(enhanceContent);
 
-watch(() => props.page.htmlContent, highlightCode);
+watch(() => props.page.htmlContent, enhanceContent);
 </script>
 
 <template>
@@ -51,6 +93,23 @@ watch(() => props.page.htmlContent, highlightCode);
                 class="prose prose-slate dark:prose-invert prose-headings:scroll-mt-20 prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-normal prose-code:before:content-none prose-code:after:content-none prose-pre:bg-slate-900 prose-pre:dark:bg-slate-950 prose-img:rounded-lg max-w-none"
                 v-html="page.htmlContent"
             />
+
+            <!-- Copied toast -->
+            <Transition
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="translate-y-2 opacity-0"
+                enter-to-class="translate-y-0 opacity-100"
+                leave-active-class="transition duration-150 ease-in"
+                leave-from-class="translate-y-0 opacity-100"
+                leave-to-class="translate-y-2 opacity-0"
+            >
+                <div
+                    v-if="copiedSlug"
+                    class="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-lg"
+                >
+                    Link copied to clipboard
+                </div>
+            </Transition>
 
             <!-- Previous / Next navigation -->
             <nav
@@ -103,6 +162,30 @@ watch(() => props.page.htmlContent, highlightCode);
 </template>
 
 <style>
+/* Heading anchor links */
+.heading-linkable {
+    position: relative;
+    cursor: pointer;
+}
+
+.heading-anchor {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.4rem;
+    color: var(--muted-foreground);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    vertical-align: middle;
+}
+
+.heading-linkable:hover .heading-anchor {
+    opacity: 1;
+}
+
+.heading-anchor:hover {
+    color: var(--primary);
+}
+
 /* highlight.js light theme */
 @import 'highlight.js/styles/github.css';
 
