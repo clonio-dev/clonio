@@ -66,7 +66,7 @@ watch(() => props.page.htmlContent, highlightCode);
                         class="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-x-0.5"
                     />
                     <div class="min-w-0">
-                        <div class="text-xs text-muted-foreground">
+                        <div class="text-xs text-muted-foreground sr-only">
                             Previous
                         </div>
                         <div
@@ -86,7 +86,7 @@ watch(() => props.page.htmlContent, highlightCode);
                     :class="{ 'ml-3': page.previousPage }"
                 >
                     <div class="min-w-0 text-right">
-                        <div class="text-xs text-muted-foreground">Next</div>
+                        <div class="text-xs text-muted-foreground sr-only">Next</div>
                         <div
                             class="truncate text-sm font-medium text-foreground"
                         >
