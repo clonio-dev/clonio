@@ -17,4 +17,5 @@ Route::get('dashboard', [CloningRunController::class, 'dashboard'])
 require __DIR__ . '/settings.php';
 require __DIR__ . '/application.php';
 
+require __DIR__ . '/docs.php';
 require __DIR__ . '/static-pages.php';
