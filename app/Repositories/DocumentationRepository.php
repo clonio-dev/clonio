@@ -10,7 +10,7 @@ use App\Services\StaticPageFileService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-final class DocumentationRepository
+final readonly class DocumentationRepository
 {
     public function __construct(
         private StaticPageFileService $fileService,
@@ -117,15 +117,7 @@ final class DocumentationRepository
                 ];
             }
         }
-
-        $currentIndex = null;
-
-        foreach ($flatPages as $index => $entry) {
-            if ($entry['chapter'] === $chapterSlug && $entry['page'] === $pageSlug) {
-                $currentIndex = $index;
-                break;
-            }
-        }
+        $currentIndex = array_find_key($flatPages, fn ($entry): bool => $entry['chapter'] === $chapterSlug && $entry['page'] === $pageSlug);
 
         return [
             'previous' => $currentIndex !== null && $currentIndex > 0

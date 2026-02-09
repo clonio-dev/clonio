@@ -90,7 +90,7 @@ watch(() => props.page.htmlContent, enhanceContent);
             </header>
 
             <div
-                class="prose prose-slate dark:prose-invert prose-headings:scroll-mt-20 prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-normal prose-code:before:content-none prose-code:after:content-none prose-pre:bg-slate-900 prose-pre:dark:bg-slate-950 prose-img:rounded-lg max-w-none"
+                class="prose max-w-none prose-slate dark:prose-invert prose-headings:scroll-mt-20 prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-normal prose-code:before:content-none prose-code:after:content-none prose-pre:bg-slate-900 prose-pre:dark:bg-slate-950 prose-img:rounded-lg"
                 v-html="page.htmlContent"
             />
 
@@ -125,7 +125,7 @@ watch(() => props.page.htmlContent, enhanceContent);
                         class="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-x-0.5"
                     />
                     <div class="min-w-0">
-                        <div class="text-xs text-muted-foreground sr-only">
+                        <div class="sr-only text-xs text-muted-foreground">
                             Previous
                         </div>
                         <div
@@ -145,7 +145,9 @@ watch(() => props.page.htmlContent, enhanceContent);
                     :class="{ 'ml-3': page.previousPage }"
                 >
                     <div class="min-w-0 text-right">
-                        <div class="text-xs text-muted-foreground sr-only">Next</div>
+                        <div class="sr-only text-xs text-muted-foreground">
+                            Next
+                        </div>
                         <div
                             class="truncate text-sm font-medium text-foreground"
                         >

@@ -10,7 +10,7 @@ use App\Repositories\DocumentationRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-final class DocumentationService
+final readonly class DocumentationService
 {
     public function __construct(
         private DocumentationRepository $repository,
@@ -42,7 +42,7 @@ final class DocumentationService
     {
         $docPage = $this->repository->getPage($chapter, $page);
 
-        if ($docPage === null) {
+        if (! $docPage instanceof \App\Data\DocPage) {
             return null;
         }
 

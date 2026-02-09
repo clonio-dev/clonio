@@ -11,7 +11,7 @@ beforeEach(function (): void {
 });
 
 it('returns chapters ordered by number prefix', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
     $chapters = $repository->getChapters();
 
     expect($chapters)->toHaveCount(2)
@@ -23,7 +23,7 @@ it('returns chapters ordered by number prefix', function (): void {
 });
 
 it('returns pages within chapters ordered by number prefix', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
     $chapters = $repository->getChapters();
 
     $gettingStarted = $chapters->first();
@@ -33,7 +33,7 @@ it('returns pages within chapters ordered by number prefix', function (): void {
 });
 
 it('returns a specific page by chapter and page slug', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
     $page = $repository->getPage('getting-started', 'introduction');
 
     expect($page)->toBeInstanceOf(DocPage::class)
@@ -44,19 +44,19 @@ it('returns a specific page by chapter and page slug', function (): void {
 });
 
 it('returns null for non-existent chapter', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
 
     expect($repository->getPage('non-existent', 'page'))->toBeNull();
 });
 
 it('returns null for non-existent page', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
 
     expect($repository->getPage('getting-started', 'non-existent'))->toBeNull();
 });
 
 it('searches across pages', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
     $results = $repository->search('anonymization');
 
     expect($results)->not->toBeEmpty()
@@ -64,13 +64,13 @@ it('searches across pages', function (): void {
 });
 
 it('returns empty collection for no search matches', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
 
     expect($repository->search('xyznonexistent123'))->toBeEmpty();
 });
 
 it('returns first page slugs', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
     $first = $repository->getFirstPage();
 
     expect($first)->toBe([
@@ -80,7 +80,7 @@ it('returns first page slugs', function (): void {
 });
 
 it('returns no previous page for the first page', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
     $adjacent = $repository->getAdjacentPages('getting-started', 'introduction');
 
     expect($adjacent['previous'])->toBeNull()
@@ -89,7 +89,7 @@ it('returns no previous page for the first page', function (): void {
 });
 
 it('returns no next page for the last page', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
     $adjacent = $repository->getAdjacentPages('essentials', 'anonymization');
 
     expect($adjacent['next'])->toBeNull()
@@ -98,7 +98,7 @@ it('returns no next page for the last page', function (): void {
 });
 
 it('returns both previous and next for a middle page', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
     $adjacent = $repository->getAdjacentPages('getting-started', 'installation');
 
     expect($adjacent['previous'])->not->toBeNull()
@@ -110,7 +110,7 @@ it('returns both previous and next for a middle page', function (): void {
 });
 
 it('crosses chapter boundaries for adjacent pages', function (): void {
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
     $adjacent = $repository->getAdjacentPages('essentials', 'configuration');
 
     expect($adjacent['previous'])->not->toBeNull()
@@ -124,7 +124,7 @@ it('crosses chapter boundaries for adjacent pages', function (): void {
 it('returns empty collection when docs path does not exist', function (): void {
     config(['docs.path' => '/nonexistent/path']);
 
-    $repository = app(DocumentationRepository::class);
+    $repository = resolve(DocumentationRepository::class);
 
     expect($repository->getChapters())->toBeEmpty()
         ->and($repository->getFirstPage())->toBeNull();

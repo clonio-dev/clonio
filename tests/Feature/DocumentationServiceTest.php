@@ -10,7 +10,7 @@ beforeEach(function (): void {
 });
 
 it('returns navigation with chapters and pages', function (): void {
-    $service = app(DocumentationService::class);
+    $service = resolve(DocumentationService::class);
     $navigation = $service->getNavigation();
 
     expect($navigation)->toHaveCount(2)
@@ -20,7 +20,7 @@ it('returns navigation with chapters and pages', function (): void {
 });
 
 it('navigation does not include raw markdown content', function (): void {
-    $service = app(DocumentationService::class);
+    $service = resolve(DocumentationService::class);
     $navigation = $service->getNavigation();
 
     $firstPage = $navigation->first()['pages'][0];
@@ -30,7 +30,7 @@ it('navigation does not include raw markdown content', function (): void {
 });
 
 it('returns page data with HTML content and headings', function (): void {
-    $service = app(DocumentationService::class);
+    $service = resolve(DocumentationService::class);
     $page = $service->getPage('getting-started', 'introduction');
 
     expect($page)->not->toBeNull()
@@ -41,7 +41,7 @@ it('returns page data with HTML content and headings', function (): void {
 });
 
 it('adds IDs to h2 and h3 headings', function (): void {
-    $service = app(DocumentationService::class);
+    $service = resolve(DocumentationService::class);
     $page = $service->getPage('getting-started', 'introduction');
 
     expect($page['htmlContent'])->toContain('id="why-clonio"')
@@ -49,10 +49,10 @@ it('adds IDs to h2 and h3 headings', function (): void {
 });
 
 it('extracts headings for table of contents', function (): void {
-    $service = app(DocumentationService::class);
+    $service = resolve(DocumentationService::class);
     $page = $service->getPage('getting-started', 'introduction');
 
-    $headingSlugs = array_map(fn (DocHeading $h) => $h->slug, $page['headings']);
+    $headingSlugs = array_map(fn (DocHeading $h): string => $h->slug, $page['headings']);
 
     expect($headingSlugs)->toContain('why-clonio')
         ->and($headingSlugs)->toContain('how-it-works')
@@ -60,13 +60,13 @@ it('extracts headings for table of contents', function (): void {
 });
 
 it('returns null for non-existent page', function (): void {
-    $service = app(DocumentationService::class);
+    $service = resolve(DocumentationService::class);
 
     expect($service->getPage('nonexistent', 'page'))->toBeNull();
 });
 
 it('strips the first h1 from HTML content', function (): void {
-    $service = app(DocumentationService::class);
+    $service = resolve(DocumentationService::class);
     $page = $service->getPage('getting-started', 'introduction');
 
     expect($page['htmlContent'])->not->toContain('<h1>')
@@ -74,7 +74,7 @@ it('strips the first h1 from HTML content', function (): void {
 });
 
 it('includes previous and next page navigation data', function (): void {
-    $service = app(DocumentationService::class);
+    $service = resolve(DocumentationService::class);
     $page = $service->getPage('getting-started', 'installation');
 
     expect($page)->toHaveKeys(['previousPage', 'nextPage'])
@@ -87,7 +87,7 @@ it('includes previous and next page navigation data', function (): void {
 });
 
 it('returns null previousPage for the first page', function (): void {
-    $service = app(DocumentationService::class);
+    $service = resolve(DocumentationService::class);
     $page = $service->getPage('getting-started', 'introduction');
 
     expect($page['previousPage'])->toBeNull()
@@ -95,7 +95,7 @@ it('returns null previousPage for the first page', function (): void {
 });
 
 it('searches documentation and includes URLs', function (): void {
-    $service = app(DocumentationService::class);
+    $service = resolve(DocumentationService::class);
     $results = $service->search('installation');
 
     expect($results)->not->toBeEmpty()

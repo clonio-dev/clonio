@@ -161,9 +161,7 @@ defineExpose({ open });
                 Type to search through documentation pages
             </DialogDescription>
             <div class="flex items-center border-b border-border px-4">
-                <Search
-                    class="mr-2 size-4 shrink-0 text-muted-foreground"
-                />
+                <Search class="mr-2 size-4 shrink-0 text-muted-foreground" />
                 <input
                     v-model="query"
                     type="text"
@@ -202,9 +200,7 @@ defineExpose({ open });
                             class="mt-0.5 size-4 shrink-0 text-muted-foreground"
                         />
                         <div class="min-w-0 flex-1">
-                            <div
-                                class="text-sm font-medium text-foreground"
-                            >
+                            <div class="text-sm font-medium text-foreground">
                                 {{ result.title }}
                             </div>
                             <div

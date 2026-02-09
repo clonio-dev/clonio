@@ -16,8 +16,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class DocumentationController extends Controller
 {
     public function __construct(
-        private DocumentationService $service,
-        private DocumentationRepository $repository,
+        private readonly DocumentationService $service,
+        private readonly DocumentationRepository $repository,
     ) {}
 
     /**
@@ -27,9 +27,7 @@ class DocumentationController extends Controller
     {
         $firstPage = $this->service->getFirstPage();
 
-        if ($firstPage === null) {
-            abort(404);
-        }
+        abort_if($firstPage === null, 404);
 
         return to_route('docs.show', $firstPage);
     }
@@ -41,9 +39,7 @@ class DocumentationController extends Controller
     {
         $pageData = $this->service->getPage($chapter, $page);
 
-        if ($pageData === null) {
-            abort(404);
-        }
+        abort_if($pageData === null, 404);
 
         return Inertia::render('docs/Show', [
             'page' => $pageData,
@@ -86,23 +82,17 @@ class DocumentationController extends Controller
     {
         $filePath = $this->repository->resolveFilePath($path);
 
-        if ($filePath === null) {
-            abort(404);
-        }
+        abort_if($filePath === null, 404);
 
         $docsPath = (string) realpath(config('docs.path'));
         $realFilePath = (string) realpath($filePath);
 
-        if (! str_starts_with($realFilePath, $docsPath)) {
-            abort(404);
-        }
+        abort_unless(str_starts_with($realFilePath, $docsPath), 404);
 
         $allowedExtensions = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'mp4', 'webm', 'ogg'];
         $extension = mb_strtolower(pathinfo($realFilePath, PATHINFO_EXTENSION));
 
-        if (! in_array($extension, $allowedExtensions, true)) {
-            abort(404);
-        }
+        abort_unless(in_array($extension, $allowedExtensions, true), 404);
 
         return response()->file($realFilePath);
     }

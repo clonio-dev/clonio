@@ -52,7 +52,7 @@ const props = defineProps<Props>();
                 class="flex w-full max-w-[335px] flex-col-reverse overflow-hidden rounded-lg p-4 lg:max-w-4xl lg:flex-row dark:bg-gray-800"
             >
                 <div
-                    class="prose dark:prose-invert mt-6 w-full overflow-hidden sm:max-w-2xl"
+                    class="prose mt-6 w-full overflow-hidden sm:max-w-2xl dark:prose-invert"
                     v-html="props.content"
                 />
             </main>
