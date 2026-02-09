@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Repositories\DocumentationRepository;
 use App\Services\DocumentationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,7 @@ class DocumentationController extends Controller
 {
     public function __construct(
         private DocumentationService $service,
+        private DocumentationRepository $repository,
     ) {}
 
     /**
@@ -78,28 +80,30 @@ class DocumentationController extends Controller
     }
 
     /**
-     * Serve an image from the docs directory.
+     * Serve a media file from the docs directory.
      */
     public function image(string $path): BinaryFileResponse
     {
-        $docsPath = config('docs.path');
-        $filePath = realpath($docsPath . '/' . $path);
+        $filePath = $this->repository->resolveFilePath($path);
 
-        if (
-            $filePath === false
-            || ! str_starts_with($filePath, (string) realpath($docsPath))
-            || ! file_exists($filePath)
-        ) {
+        if ($filePath === null) {
             abort(404);
         }
 
-        $allowedExtensions = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'];
-        $extension = mb_strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $docsPath = (string) realpath(config('docs.path'));
+        $realFilePath = (string) realpath($filePath);
+
+        if (! str_starts_with($realFilePath, $docsPath)) {
+            abort(404);
+        }
+
+        $allowedExtensions = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'mp4', 'webm', 'ogg'];
+        $extension = mb_strtolower(pathinfo($realFilePath, PATHINFO_EXTENSION));
 
         if (! in_array($extension, $allowedExtensions, true)) {
             abort(404);
         }
 
-        return response()->file($filePath);
+        return response()->file($realFilePath);
     }
 }

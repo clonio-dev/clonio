@@ -165,6 +165,31 @@ final class DocumentationRepository
     }
 
     /**
+     * Resolve a slug-based file path to the real filesystem path.
+     *
+     * Converts "getting-started/cloning-flow.svg" to "/full/path/docs/0-getting-started/cloning-flow.svg".
+     */
+    public function resolveFilePath(string $relativePath): ?string
+    {
+        $docsPath = config('docs.path');
+        $parts = explode('/', $relativePath, 2);
+
+        if (count($parts) < 2) {
+            return null;
+        }
+
+        $chapterDir = $this->findDirectoryBySlug($docsPath, $parts[0]);
+
+        if ($chapterDir === null) {
+            return null;
+        }
+
+        $filePath = $chapterDir . '/' . $parts[1];
+
+        return file_exists($filePath) ? $filePath : null;
+    }
+
+    /**
      * Get pages for a chapter directory, ordered by number prefix.
      *
      * @return Collection<int, DocPage>

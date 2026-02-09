@@ -48,12 +48,13 @@ final class DocumentationService
 
         $html = Str::markdown($docPage->content, [
             'allow_unsafe_links' => false,
+            'html_input' => 'allow',
         ]);
 
         $html = preg_replace('/<h1>.*?<\/h1>/s', '', $html, 1);
 
         $html = $this->addHeadingIds($html);
-        $html = $this->fixImagePaths($html, $chapter);
+        $html = $this->fixMediaPaths($html, $chapter);
         $headings = $this->extractHeadings($html);
 
         $adjacent = $this->repository->getAdjacentPages($chapter, $page);
@@ -121,12 +122,12 @@ final class DocumentationService
     }
 
     /**
-     * Fix relative image paths to use the docs image route.
+     * Fix relative src paths in img and source tags to use the docs media route.
      */
-    private function fixImagePaths(string $html, string $chapterSlug): string
+    private function fixMediaPaths(string $html, string $chapterSlug): string
     {
         return (string) preg_replace_callback(
-            '/<img\s([^>]*?)src="([^"]*?)"([^>]*?)>/s',
+            '/(<(?:img|source)\s[^>]*?)src="([^"]*?)"([^>]*?>)/i',
             function (array $matches) use ($chapterSlug): string {
                 $src = $matches[2];
 
@@ -136,7 +137,7 @@ final class DocumentationService
 
                 $newSrc = route('docs.image', ['path' => $chapterSlug . '/' . $src]);
 
-                return '<img ' . $matches[1] . 'src="' . $newSrc . '"' . $matches[3] . '>';
+                return $matches[1] . 'src="' . $newSrc . '"' . $matches[3];
             },
             $html,
         );
