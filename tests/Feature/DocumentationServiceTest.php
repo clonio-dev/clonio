@@ -1,0 +1,104 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Data\DocHeading;
+use App\Services\DocumentationService;
+
+beforeEach(function (): void {
+    config(['docs.path' => base_path('docs')]);
+});
+
+it('returns navigation with chapters and pages', function (): void {
+    $service = app(DocumentationService::class);
+    $navigation = $service->getNavigation();
+
+    expect($navigation)->toHaveCount(2)
+        ->and($navigation->first())->toHaveKeys(['title', 'slug', 'pages'])
+        ->and($navigation->first()['pages'])->not->toBeEmpty()
+        ->and($navigation->first()['pages'][0])->toHaveKeys(['title', 'slug']);
+});
+
+it('navigation does not include raw markdown content', function (): void {
+    $service = app(DocumentationService::class);
+    $navigation = $service->getNavigation();
+
+    $firstPage = $navigation->first()['pages'][0];
+
+    expect($firstPage)->not->toHaveKey('content')
+        ->and($firstPage)->not->toHaveKey('introduction');
+});
+
+it('returns page data with HTML content and headings', function (): void {
+    $service = app(DocumentationService::class);
+    $page = $service->getPage('getting-started', 'introduction');
+
+    expect($page)->not->toBeNull()
+        ->and($page['title'])->toBe('Introduction')
+        ->and($page['htmlContent'])->not->toContain('<h1>')
+        ->and($page['headings'])->not->toBeEmpty()
+        ->and($page['headings'][0])->toBeInstanceOf(DocHeading::class);
+});
+
+it('adds IDs to h2 and h3 headings', function (): void {
+    $service = app(DocumentationService::class);
+    $page = $service->getPage('getting-started', 'introduction');
+
+    expect($page['htmlContent'])->toContain('id="why-clonio"')
+        ->and($page['htmlContent'])->toContain('id="how-it-works"');
+});
+
+it('extracts headings for table of contents', function (): void {
+    $service = app(DocumentationService::class);
+    $page = $service->getPage('getting-started', 'introduction');
+
+    $headingSlugs = array_map(fn (DocHeading $h) => $h->slug, $page['headings']);
+
+    expect($headingSlugs)->toContain('why-clonio')
+        ->and($headingSlugs)->toContain('how-it-works')
+        ->and($headingSlugs)->toContain('architecture-overview');
+});
+
+it('returns null for non-existent page', function (): void {
+    $service = app(DocumentationService::class);
+
+    expect($service->getPage('nonexistent', 'page'))->toBeNull();
+});
+
+it('strips the first h1 from HTML content', function (): void {
+    $service = app(DocumentationService::class);
+    $page = $service->getPage('getting-started', 'introduction');
+
+    expect($page['htmlContent'])->not->toContain('<h1>')
+        ->and($page['htmlContent'])->toContain('<h2');
+});
+
+it('includes previous and next page navigation data', function (): void {
+    $service = app(DocumentationService::class);
+    $page = $service->getPage('getting-started', 'installation');
+
+    expect($page)->toHaveKeys(['previousPage', 'nextPage'])
+        ->and($page['previousPage'])->not->toBeNull()
+        ->and($page['previousPage'])->toHaveKeys(['title', 'url'])
+        ->and($page['previousPage']['url'])->toContain('/docs/getting-started/introduction')
+        ->and($page['nextPage'])->not->toBeNull()
+        ->and($page['nextPage'])->toHaveKeys(['title', 'url'])
+        ->and($page['nextPage']['url'])->toContain('/docs/essentials/configuration');
+});
+
+it('returns null previousPage for the first page', function (): void {
+    $service = app(DocumentationService::class);
+    $page = $service->getPage('getting-started', 'introduction');
+
+    expect($page['previousPage'])->toBeNull()
+        ->and($page['nextPage'])->not->toBeNull();
+});
+
+it('searches documentation and includes URLs', function (): void {
+    $service = app(DocumentationService::class);
+    $results = $service->search('installation');
+
+    expect($results)->not->toBeEmpty()
+        ->and($results->first())->toHaveKeys(['title', 'introduction', 'url', 'chapter', 'page'])
+        ->and($results->first()['url'])->toContain('/docs/');
+});
