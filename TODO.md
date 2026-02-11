@@ -16,6 +16,7 @@
 - [ ] listen to all sql queries and log them to Log::debug() so I can check the processing of a cloning run
 - [ ] Webhook calls should be visible on the cloning-run detail page - not in the execution log, but below as separate information: "Webhook for failure/success gets triggered" (or similar) and displayed with success or error if the webhook could be called or not
 - [ ] Clonings Table is not scrollable horizontically on small screens
+- [ ] Toggling light and dark theme: application has a mechanic which should be taken over to the /docs layout. So it stays the same on opening the docs page from the app
 
 ## GitHub
 - [ ] GitHub Profile Page anlegen
