@@ -33,6 +33,7 @@ class CloningRunFactory extends Factory
             'total_steps' => 3,
             'progress_percent' => 0,
             'error_message' => null,
+            'public_token' => null,
         ];
     }
 
