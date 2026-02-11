@@ -23,6 +23,8 @@ use Illuminate\Support\Carbon;
  * @property int $target_connection_id
  * @property array<string, mixed>|null $anonymization_config
  * @property string|null $schedule
+ * @property array<string, mixed>|null $trigger_config
+ * @property string|null $api_trigger_token
  * @property bool $is_scheduled
  * @property bool $is_paused
  * @property int $consecutive_failures
@@ -51,6 +53,8 @@ class Cloning extends Model
         'target_connection_id',
         'anonymization_config',
         'schedule',
+        'trigger_config',
+        'api_trigger_token',
         'is_scheduled',
         'is_paused',
         'consecutive_failures',
@@ -79,6 +83,7 @@ class Cloning extends Model
     {
         return [
             'anonymization_config' => 'array',
+            'trigger_config' => 'array',
             'is_scheduled' => 'boolean',
             'is_paused' => 'boolean',
             'consecutive_failures' => 'integer',
