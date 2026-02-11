@@ -66,6 +66,8 @@ export interface Cloning {
     target_connection_id: number;
     anonymization_config: Record<string, unknown> | null;
     schedule: string | null;
+    trigger_config: Record<string, unknown> | null;
+    api_trigger_token: string | null;
     is_scheduled: boolean;
     is_paused: boolean;
     consecutive_failures: number;
