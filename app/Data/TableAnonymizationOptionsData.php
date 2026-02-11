@@ -15,6 +15,7 @@ final readonly class TableAnonymizationOptionsData
         public string $tableName,
         public Collection $columnMutations,
         public ?TableRowSelectionData $rowSelection = null,
+        public bool $enforceColumnTypes = false,
     ) {}
 
     /**
