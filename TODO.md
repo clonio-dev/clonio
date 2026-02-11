@@ -10,3 +10,5 @@
 - [ ] Add a button to delete all Failed runs within the cloning runs (/cloning-runs) -> this should delete all failed runs
 - [ ] Support the update of a connection within the connection management (/connections) - as form sheet like on the creation of it
 - [ ] add documentation content
+- [ ] change the input field colors: in light theme there should be a white background of the input field
+- [ ] listen to all sql queries and log them to Log::debug() so I can check the processing of a cloning run
