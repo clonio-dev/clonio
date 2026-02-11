@@ -20,7 +20,6 @@ import {
     Loader2,
     RefreshCw,
     StopCircle,
-    Terminal,
     Timer,
     XCircle,
 } from 'lucide-vue-next';
@@ -162,13 +161,7 @@ useAutoRefresh(
             <!-- Back Button & Header -->
             <div class="mb-6">
                 <div class="flex flex-wrap items-start justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br ring-1 ring-black/5 dark:ring-white/10"
-                            :class="currentStatus.bgClass"
-                        >
-                            <Terminal class="size-6 text-foreground/80" />
-                        </div>
+                    <div class="flex items-center gap-3">
                         <div>
                             <div class="flex items-center gap-3">
                                 <h1
@@ -195,12 +188,6 @@ useAutoRefresh(
                                     </span>
                                 </Badge>
                             </div>
-                            <p
-                                v-if="run.cloning"
-                                class="mt-1 text-sm text-muted-foreground"
-                            >
-                                {{ run.cloning.title }}
-                            </p>
                         </div>
                     </div>
 

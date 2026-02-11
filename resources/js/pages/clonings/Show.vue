@@ -2,6 +2,7 @@
 import CloningController from '@/actions/App/Http/Controllers/CloningController';
 import CloningRunController from '@/actions/App/Http/Controllers/CloningRunController';
 import RunCard from '@/components/cloning-runs/RunCard.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -14,7 +15,6 @@ import {
     ArrowRight,
     Calendar,
     Clock,
-    Copy,
     Database,
     Hourglass,
     Pause,
@@ -145,23 +145,16 @@ const anonymizationStats = computed(() => {
             <div class="mb-8 flex items-start justify-between">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
-                        <div
-                            class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/30 dark:from-violet-500/10 dark:to-purple-500/10"
+                        <h1
+                            class="text-2xl font-semibold tracking-tight text-foreground"
                         >
-                            <Copy
-                                class="size-5 text-violet-600 dark:text-violet-400"
-                            />
-                        </div>
-                        <div>
-                            <h1
-                                class="text-2xl font-semibold tracking-tight text-foreground"
-                            >
-                                {{ cloning.title }}
-                            </h1>
-                            <p class="text-sm text-muted-foreground">
+                            {{ cloning.title }}
+                        </h1>
+                        <Badge variant="outline">
+                            <p class="text-muted-foreground">
                                 Created {{ formatDate(cloning.created_at) }}
                             </p>
-                        </div>
+                        </Badge>
                     </div>
                 </div>
 
