@@ -871,7 +871,7 @@
                             <tr>
                                 <td class="log-time">
                                     @if($run->started_at && $log->created_at)
-                                        +{{ $run->started_at->diffInSeconds($log->created_at) }}s
+                                        +{{ gmdate('H:i:s', $run->started_at->diffInSeconds($log->created_at)) }}
                                     @else
                                         {{ $log->created_at?->format('H:i:s') ?? 'N/A' }}
                                     @endif
@@ -879,7 +879,7 @@
                                 <td>
                                     <span class="log-level-badge log-level-{{ $log->level->value }}">{{ $log->level->value }}</span>
                                 </td>
-                                <td class="log-event">{{ $log->event_type }}</td>
+                                <td class="log-event">{{ str_replace('_', ' ', $log->event_type) }}</td>
                                 <td class="log-message">{{ $log->message }}</td>
                             </tr>
                         @endforeach
