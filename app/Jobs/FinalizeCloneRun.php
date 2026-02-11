@@ -47,6 +47,8 @@ class FinalizeCloneRun implements ShouldQueue
                         'level' => CloningRunLogLevel::WARNING,
                     ]);
                 }
+
+                $this->dispatchWebhook($run, 'failure');
             }
 
             return;
@@ -65,8 +67,29 @@ class FinalizeCloneRun implements ShouldQueue
 
             try {
                 $auditService->signRun($run);
+                $run->updateQuietly(['public_token' => bin2hex(random_bytes(32))]);
             } catch (Exception) {
             }
+
+            $this->dispatchWebhook($run, 'success');
         }
+    }
+
+    private function dispatchWebhook(CloningRun $run, string $event): void
+    {
+        $triggerConfig = $run->cloning?->trigger_config;
+
+        if (! $triggerConfig) {
+            return;
+        }
+
+        $webhookKey = $event === 'success' ? 'webhook_on_success' : 'webhook_on_failure';
+        $webhookConfig = $triggerConfig[$webhookKey] ?? null;
+
+        if (! $webhookConfig || ! ($webhookConfig['enabled'] ?? false) || empty($webhookConfig['url'])) {
+            return;
+        }
+
+        dispatch(new DispatchWebhook($run, $webhookConfig, $event));
     }
 }
