@@ -87,6 +87,7 @@ interface Props {
     initialConfig?: AllTablesConfig;
     initialRowSelections?: Record<string, RowSelectionConfig>;
     initialKeepUnknownTablesOnTarget?: boolean;
+    initialEnforceColumnTypes?: Record<string, boolean>;
 }
 
 interface Emits {
@@ -139,6 +140,22 @@ const tableConfigs = reactive<AllTablesConfig>({});
 
 // Track row selection per table
 const tableRowSelections = reactive<Record<string, RowSelectionConfig>>({});
+
+// Track enforceColumnTypes per table
+const tableEnforceColumnTypes = reactive<Record<string, boolean>>({});
+
+// Initialize enforceColumnTypes
+function initializeEnforceColumnTypes() {
+    for (const tableName of availableTables.value) {
+        if (tableEnforceColumnTypes[tableName] === undefined) {
+            tableEnforceColumnTypes[tableName] =
+                props.initialEnforceColumnTypes?.[tableName] ?? false;
+        }
+    }
+}
+
+initializeEnforceColumnTypes();
+watch(() => props.sourceSchema, initializeEnforceColumnTypes, { deep: true });
 
 // Keep unknown tables on target
 const keepUnknownTablesOnTarget = ref(
@@ -529,6 +546,7 @@ const configPayload = computed(() => {
             options: ColumnConfig['options'];
         }>;
         rowSelection?: RowSelectionConfig;
+        enforceColumnTypes?: boolean;
     }> = [];
 
     for (const tableName of availableTables.value) {
@@ -545,6 +563,7 @@ const configPayload = computed(() => {
             .filter((m) => m.strategy !== 'keep');
 
         const rowSel = tableRowSelections[tableName];
+        const enforceTypes = tableEnforceColumnTypes[tableName] ?? false;
         const tableEntry: (typeof tables)[number] = {
             tableName,
             columnMutations,
@@ -554,10 +573,15 @@ const configPayload = computed(() => {
             tableEntry.rowSelection = rowSel;
         }
 
-        // Only include table if it has mutations, row selection, or other config
+        if (enforceTypes) {
+            tableEntry.enforceColumnTypes = true;
+        }
+
+        // Only include table if it has mutations, row selection, or enforceColumnTypes
         if (
             columnMutations.length > 0 ||
-            tableEntry.rowSelection
+            tableEntry.rowSelection ||
+            tableEntry.enforceColumnTypes
         ) {
             tables.push(tableEntry);
         }
@@ -862,6 +886,47 @@ function getTypeColor(type: string): string {
                                         </Select>
                                     </template>
                                 </template>
+                            </div>
+
+                            <!-- Enforce column types checkbox -->
+                            <div
+                                class="mt-3 flex items-center gap-2 border-t border-border/50 pt-3"
+                            >
+                                <Checkbox
+                                    :id="`enforce-types-${tableName}`"
+                                    :checked="
+                                        tableEnforceColumnTypes[tableName] ??
+                                        false
+                                    "
+                                    @update:checked="
+                                        tableEnforceColumnTypes[tableName] =
+                                            $event
+                                    "
+                                />
+                                <label
+                                    :for="`enforce-types-${tableName}`"
+                                    class="text-xs text-foreground"
+                                >
+                                    Enforce column types
+                                </label>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger as-child>
+                                            <Info
+                                                class="size-3.5 text-muted-foreground"
+                                            />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p class="max-w-xs text-xs">
+                                                When enabled, column types on
+                                                the target will be checked and
+                                                modified to match the source. By
+                                                default, only column existence
+                                                is checked.
+                                            </p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </div>
                         </div>
 
