@@ -14,6 +14,9 @@ Route::get('dashboard', [CloningRunController::class, 'dashboard'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('/audit/{token}', [CloningRunController::class, 'publicAuditLog'])
+    ->name('public.audit-log');
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/application.php';
 
