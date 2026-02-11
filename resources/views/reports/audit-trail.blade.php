@@ -660,6 +660,7 @@
                 </div>
                 @php
                     $isScheduled = $logs->contains(fn ($log) => $log->event_type === 'scheduled_cloning_run_created');
+                    $isApiTriggered = $logs->contains(fn ($log) => $log->event_type === 'api_triggered');
                     $userInitiatedLog = $logs->firstWhere('event_type', 'user_initiated');
                 @endphp
                 <div class="summary-item">
@@ -667,6 +668,8 @@
                     <div class="summary-value">
                         @if($isScheduled)
                             Cron / Scheduled
+                        @elseif($isApiTriggered)
+                            API Trigger
                         @elseif($userInitiatedLog && !empty($userInitiatedLog->data['name']))
                             {{ $userInitiatedLog->data['name'] }} ({{ $userInitiatedLog->data['email'] ?? 'N/A' }})
                         @else
