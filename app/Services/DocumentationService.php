@@ -171,7 +171,7 @@ final readonly class DocumentationService
      *
      * Processes all `<code>` tags with a class attribute and appends the "not-prose" class to them.
      *
-     * @param string $html The HTML content to process.
+     * @param  string  $html  The HTML content to process.
      * @return string The modified HTML with updated code block classes.
      */
     private function addNoProseToCodeBlocks(string $html): string
