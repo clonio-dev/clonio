@@ -92,8 +92,17 @@ class CloningController extends Controller
         $anonymizationConfigJson = $request->validated('anonymization_config');
         $anonymizationConfig = $anonymizationConfigJson ? json_decode((string) $anonymizationConfigJson, true) : null;
 
+        $triggerConfigJson = $request->validated('trigger_config');
+        $triggerConfig = $triggerConfigJson ? json_decode((string) $triggerConfigJson, true) : null;
+
         $isScheduled = $request->boolean('is_scheduled', false);
         $schedule = $isScheduled ? $request->validated('schedule') : null;
+
+        // Generate API trigger token if API trigger is enabled
+        $apiTriggerToken = null;
+        if ($triggerConfig && ($triggerConfig['api_trigger']['enabled'] ?? false)) {
+            $apiTriggerToken = bin2hex(random_bytes(32));
+        }
 
         /** @var Cloning $cloning */
         $cloning = Cloning::query()->create([
@@ -103,6 +112,8 @@ class CloningController extends Controller
             'target_connection_id' => $request->validated('target_connection_id'),
             'anonymization_config' => $anonymizationConfig,
             'schedule' => $schedule,
+            'trigger_config' => $triggerConfig,
+            'api_trigger_token' => $apiTriggerToken,
             'is_scheduled' => $isScheduled,
             'next_run_at' => Cloning::calculateNextRunAt($schedule),
         ]);
@@ -163,10 +174,15 @@ class CloningController extends Controller
             ->get(['id', 'name', 'type'])
             ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name, 'type' => $c->type->value]);
 
+        $apiTriggerUrl = $cloning->api_trigger_token
+            ? url('/api/trigger/' . $cloning->api_trigger_token)
+            : null;
+
         return Inertia::render('clonings/Edit', [
             'cloning' => $cloning,
             'prod_connections' => $prodConnections,
             'test_connections' => $testConnections,
+            'api_trigger_url' => $apiTriggerUrl,
         ]);
     }
 
@@ -180,8 +196,21 @@ class CloningController extends Controller
         $anonymizationConfigJson = $request->validated('anonymization_config');
         $anonymizationConfig = $anonymizationConfigJson ? json_decode((string) $anonymizationConfigJson, true) : null;
 
+        $triggerConfigJson = $request->validated('trigger_config');
+        $triggerConfig = $triggerConfigJson ? json_decode((string) $triggerConfigJson, true) : null;
+
         $isScheduled = $request->boolean('is_scheduled', false);
         $schedule = $isScheduled ? $request->validated('schedule') : null;
+
+        // Manage API trigger token
+        $apiTriggerEnabled = $triggerConfig && ($triggerConfig['api_trigger']['enabled'] ?? false);
+        $apiTriggerToken = $cloning->api_trigger_token;
+
+        if ($apiTriggerEnabled && ! $apiTriggerToken) {
+            $apiTriggerToken = bin2hex(random_bytes(32));
+        } elseif (! $apiTriggerEnabled) {
+            $apiTriggerToken = null;
+        }
 
         $cloning->update([
             'title' => $request->validated('title'),
@@ -189,6 +218,8 @@ class CloningController extends Controller
             'target_connection_id' => $request->validated('target_connection_id'),
             'anonymization_config' => $anonymizationConfig,
             'schedule' => $schedule,
+            'trigger_config' => $triggerConfig,
+            'api_trigger_token' => $apiTriggerToken,
             'is_scheduled' => $isScheduled,
             'next_run_at' => Cloning::calculateNextRunAt($schedule),
         ]);
