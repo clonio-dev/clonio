@@ -36,6 +36,7 @@ class StoreCloningRequest extends FormRequest
             'is_scheduled' => ['nullable', 'boolean'],
             'schedule' => ['nullable', 'string', 'max:100'],
             'execute_now' => ['nullable', 'boolean'],
+            'trigger_config' => ['nullable', 'string'],
         ];
     }
 

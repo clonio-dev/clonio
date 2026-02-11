@@ -34,6 +34,7 @@ class UpdateCloningRequest extends FormRequest
             'anonymization_config' => ['nullable', 'string'],
             'is_scheduled' => ['nullable', 'boolean'],
             'schedule' => ['nullable', 'string', 'max:100'],
+            'trigger_config' => ['nullable', 'string'],
         ];
     }
 
