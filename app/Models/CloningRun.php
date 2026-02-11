@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $audit_hash
  * @property string|null $audit_signature
  * @property Carbon|null $audit_signed_at
+ * @property string|null $public_token
  * @property-read User $user
  * @property-read Cloning|null $cloning
  * @property-read ?Batch $batch
@@ -62,6 +63,7 @@ class CloningRun extends Model
         'audit_hash',
         'audit_signature',
         'audit_signed_at',
+        'public_token',
     ];
 
     public function casts(): array
@@ -194,6 +196,7 @@ class CloningRun extends Model
         return match ($eventType) {
             'cloning_run_created' => 'Cloning run created',
             'scheduled_cloning_run_created' => 'Run was initiated by a schedule',
+            'api_triggered' => 'Run was initiated by an API trigger',
             'batch_started' => "Batch started with {$data['total_jobs']} jobs",
             'table_started' => "Processing table: {$data['table']}",
             'table_completed' => "Table {$data['table']} completed: {$data['rows_processed']} rows",
