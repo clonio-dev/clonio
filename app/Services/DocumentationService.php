@@ -55,6 +55,7 @@ final readonly class DocumentationService
 
         $html = $this->addHeadingIds($html);
         $html = $this->fixMediaPaths($html, $chapter);
+        $html = $this->addNoProseToCodeBlocks($html);
         $headings = $this->extractHeadings($html);
 
         $adjacent = $this->repository->getAdjacentPages($chapter, $page);
@@ -163,5 +164,24 @@ final readonly class DocumentationService
         }
 
         return $headings;
+    }
+
+    /**
+     * Adds the "not-prose" class to all code block elements within the provided HTML.
+     *
+     * Processes all `<code>` tags with a class attribute and appends the "not-prose" class to them.
+     *
+     * @param string $html The HTML content to process.
+     * @return string The modified HTML with updated code block classes.
+     */
+    private function addNoProseToCodeBlocks(string $html): string
+    {
+        preg_match_all('/<code class="([^"]*)">/s', $html, $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $match) {
+            $html = str_replace($match[0], '<code class="' . $match[1] . ' not-prose">', $html);
+        }
+
+        return $html;
     }
 }
