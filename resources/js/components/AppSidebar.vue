@@ -2,6 +2,7 @@
 import CloningController from '@/actions/App/Http/Controllers/CloningController';
 import CloningRunController from '@/actions/App/Http/Controllers/CloningRunController';
 import DatabaseConnectionController from '@/actions/App/Http/Controllers/DatabaseConnectionController';
+import DocumentationController from '@/actions/App/Http/Controllers/DocumentationController';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -24,7 +25,6 @@ import {
     RocketIcon,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-import DocumentationController from '@/actions/App/Http/Controllers/DocumentationController';
 
 const page = usePage();
 
