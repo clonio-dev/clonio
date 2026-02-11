@@ -83,9 +83,17 @@ const breadcrumbItems: BreadcrumbItem[] = [
 // Step state
 const currentStep = ref(1);
 
-// Connection selection state
-const selectedSourceConnection = ref<string | number | null>(null);
-const selectedTargetConnection = ref<string | number | null>(null);
+// Connection selection state — pre-select if only one connection available
+const selectedSourceConnection = ref<string | number | null>(
+    props.prod_connections.length === 1
+        ? props.prod_connections[0].value
+        : null,
+);
+const selectedTargetConnection = ref<string | number | null>(
+    props.test_connections.length === 1
+        ? props.test_connections[0].value
+        : null,
+);
 
 // Combobox refs
 const sourceCombobox = ref<InstanceType<typeof Combobox> | null>(null);
