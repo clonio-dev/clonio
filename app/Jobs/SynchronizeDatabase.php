@@ -71,12 +71,22 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
 
         $order = $dependencyResolver->getProcessingOrder($tableNames, $sourceConnection);
 
+        $enforceColumnTypesMap = [];
+        if ($this->options->tableAnonymizationOptions instanceof \Illuminate\Support\Collection) {
+            foreach ($this->options->tableAnonymizationOptions as $tableOption) {
+                if ($tableOption->enforceColumnTypes) {
+                    $enforceColumnTypesMap[$tableOption->tableName] = true;
+                }
+            }
+        }
+
         $batch->add([
             new CloneSchema(
                 sourceConnectionData: $this->sourceConnectionData,
                 targetConnectionData: $this->targetConnectionData,
                 tables: $order['insert_order'],
                 run: $this->run,
+                enforceColumnTypesMap: $enforceColumnTypesMap,
             ),
             new TruncateTargetTables(
                 sourceConnectionData: $this->sourceConnectionData,
