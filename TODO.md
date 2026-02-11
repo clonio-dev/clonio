@@ -12,3 +12,7 @@
 - [ ] add documentation content
 - [ ] change the input field colors: in light theme there should be a white background of the input field
 - [ ] listen to all sql queries and log them to Log::debug() so I can check the processing of a cloning run
+- [ ] Webhook calls should be visible on the cloning-run detail page - not in the execution log, but below as separate information: "Webhook for failure/success gets triggered" (or similar) and displayed with success or error if the webhook could be called or not
+
+## GitHub
+- [ ] GitHub Profile Page anlegen
