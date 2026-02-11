@@ -533,14 +533,16 @@ const configPayload = computed(() => {
 
     for (const tableName of availableTables.value) {
         const columns = props.sourceSchema[tableName]?.columns || [];
-        const columnMutations = columns.map((col) => {
-            const config = getColumnConfig(tableName, col.name);
-            return {
-                columnName: col.name,
-                strategy: config.strategy,
-                options: config.options,
-            };
-        });
+        const columnMutations = columns
+            .map((col) => {
+                const config = getColumnConfig(tableName, col.name);
+                return {
+                    columnName: col.name,
+                    strategy: config.strategy,
+                    options: config.options,
+                };
+            })
+            .filter((m) => m.strategy !== 'keep');
 
         const rowSel = tableRowSelections[tableName];
         const tableEntry: (typeof tables)[number] = {
@@ -552,7 +554,13 @@ const configPayload = computed(() => {
             tableEntry.rowSelection = rowSel;
         }
 
-        tables.push(tableEntry);
+        // Only include table if it has mutations, row selection, or other config
+        if (
+            columnMutations.length > 0 ||
+            tableEntry.rowSelection
+        ) {
+            tables.push(tableEntry);
+        }
     }
 
     return JSON.stringify({
