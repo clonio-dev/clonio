@@ -17,12 +17,14 @@ import {
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
+    BookOpenIcon,
     CopyIcon,
     DatabaseIcon,
     LayoutGridIcon,
     RocketIcon,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+import DocumentationController from '@/actions/App/Http/Controllers/DocumentationController';
 
 const page = usePage();
 
@@ -53,7 +55,13 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [];
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Documentation',
+        href: DocumentationController.index().url,
+        icon: BookOpenIcon,
+    },
+];
 </script>
 
 <template>
