@@ -14,12 +14,14 @@ it('returns chapters ordered by number prefix', function (): void {
     $repository = resolve(DocumentationRepository::class);
     $chapters = $repository->getChapters();
 
-    expect($chapters)->toHaveCount(2)
+    expect($chapters)->toHaveCount(5)
         ->and($chapters->first())->toBeInstanceOf(DocChapter::class)
         ->and($chapters->first()->slug)->toBe('getting-started')
         ->and($chapters->first()->title)->toBe('Getting Started')
-        ->and($chapters->last()->slug)->toBe('essentials')
-        ->and($chapters->last()->title)->toBe('Essentials');
+        ->and($chapters->get(1)->slug)->toBe('connections')
+        ->and($chapters->get(2)->slug)->toBe('clonings')
+        ->and($chapters->get(3)->slug)->toBe('cloning-runs')
+        ->and($chapters->last()->slug)->toBe('settings');
 });
 
 it('returns pages within chapters ordered by number prefix', function (): void {
@@ -90,11 +92,10 @@ it('returns no previous page for the first page', function (): void {
 
 it('returns no next page for the last page', function (): void {
     $repository = resolve(DocumentationRepository::class);
-    $adjacent = $repository->getAdjacentPages('essentials', 'anonymization');
+    $adjacent = $repository->getAdjacentPages('settings', 'profile-and-security');
 
     expect($adjacent['next'])->toBeNull()
-        ->and($adjacent['previous'])->not->toBeNull()
-        ->and($adjacent['previous']['page'])->toBe('configuration');
+        ->and($adjacent['previous'])->not->toBeNull();
 });
 
 it('returns both previous and next for a middle page', function (): void {
@@ -105,20 +106,20 @@ it('returns both previous and next for a middle page', function (): void {
         ->and($adjacent['previous']['page'])->toBe('introduction')
         ->and($adjacent['previous']['chapter'])->toBe('getting-started')
         ->and($adjacent['next'])->not->toBeNull()
-        ->and($adjacent['next']['page'])->toBe('configuration')
-        ->and($adjacent['next']['chapter'])->toBe('essentials');
+        ->and($adjacent['next']['page'])->toBe('managing-connections')
+        ->and($adjacent['next']['chapter'])->toBe('connections');
 });
 
 it('crosses chapter boundaries for adjacent pages', function (): void {
     $repository = resolve(DocumentationRepository::class);
-    $adjacent = $repository->getAdjacentPages('essentials', 'configuration');
+    $adjacent = $repository->getAdjacentPages('connections', 'managing-connections');
 
     expect($adjacent['previous'])->not->toBeNull()
         ->and($adjacent['previous']['chapter'])->toBe('getting-started')
         ->and($adjacent['previous']['page'])->toBe('installation')
         ->and($adjacent['next'])->not->toBeNull()
-        ->and($adjacent['next']['chapter'])->toBe('essentials')
-        ->and($adjacent['next']['page'])->toBe('anonymization');
+        ->and($adjacent['next']['chapter'])->toBe('connections')
+        ->and($adjacent['next']['page'])->toBe('supported-databases');
 });
 
 it('returns empty collection when docs path does not exist', function (): void {

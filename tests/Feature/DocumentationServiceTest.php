@@ -13,7 +13,7 @@ it('returns navigation with chapters and pages', function (): void {
     $service = resolve(DocumentationService::class);
     $navigation = $service->getNavigation();
 
-    expect($navigation)->toHaveCount(2)
+    expect($navigation)->toHaveCount(5)
         ->and($navigation->first())->toHaveKeys(['title', 'slug', 'pages'])
         ->and($navigation->first()['pages'])->not->toBeEmpty()
         ->and($navigation->first()['pages'][0])->toHaveKeys(['title', 'slug']);
@@ -44,8 +44,8 @@ it('adds IDs to h2 and h3 headings', function (): void {
     $service = resolve(DocumentationService::class);
     $page = $service->getPage('getting-started', 'introduction');
 
-    expect($page['htmlContent'])->toContain('id="why-clonio"')
-        ->and($page['htmlContent'])->toContain('id="how-it-works"');
+    expect($page['htmlContent'])->toContain('id="the-problem"')
+        ->and($page['htmlContent'])->toContain('id="what-clonio-does"');
 });
 
 it('extracts headings for table of contents', function (): void {
@@ -54,9 +54,9 @@ it('extracts headings for table of contents', function (): void {
 
     $headingSlugs = array_map(fn (DocHeading $h): string => $h->slug, $page['headings']);
 
-    expect($headingSlugs)->toContain('why-clonio')
-        ->and($headingSlugs)->toContain('how-it-works')
-        ->and($headingSlugs)->toContain('architecture-overview');
+    expect($headingSlugs)->toContain('the-problem')
+        ->and($headingSlugs)->toContain('what-clonio-does')
+        ->and($headingSlugs)->toContain('how-it-works');
 });
 
 it('returns null for non-existent page', function (): void {
@@ -83,7 +83,7 @@ it('includes previous and next page navigation data', function (): void {
         ->and($page['previousPage']['url'])->toContain('/docs/getting-started/introduction')
         ->and($page['nextPage'])->not->toBeNull()
         ->and($page['nextPage'])->toHaveKeys(['title', 'url'])
-        ->and($page['nextPage']['url'])->toContain('/docs/essentials/configuration');
+        ->and($page['nextPage']['url'])->toContain('/docs/connections/managing-connections');
 });
 
 it('returns null previousPage for the first page', function (): void {
