@@ -27,6 +27,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
+import type { Connection } from '@/pages/connections/types';
 import { Form, usePage } from '@inertiajs/vue3';
 import {
     AlertTriangle,
@@ -34,10 +35,11 @@ import {
     Loader2,
     ShieldCheckIcon,
 } from 'lucide-vue-next';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 interface Props {
     open: boolean;
+    connection?: Connection | null;
     submitLabel?: string;
     defaultProduction?: boolean;
 }
@@ -57,10 +59,27 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
     open: false,
-    submitLabel: 'Create Connection',
+    connection: null,
+    submitLabel: undefined,
     defaultProduction: false,
 });
 const emit = defineEmits<Emits>();
+
+const isEditing = computed(() => !!props.connection);
+
+const resolvedSubmitLabel = computed(() => {
+    if (props.submitLabel) {
+        return props.submitLabel;
+    }
+    return isEditing.value ? 'Update Connection' : 'Create Connection';
+});
+
+const formBinding = computed(() => {
+    if (isEditing.value && props.connection) {
+        return DatabaseConnectionController.update.form(props.connection.id);
+    }
+    return DatabaseConnectionController.store.form();
+});
 
 const isProduction = ref(false);
 
@@ -71,16 +90,18 @@ function handleOpenChange(open: boolean) {
 }
 
 function handleSubmitComplete() {
-    const flash = usePage().props.flash as {
-        created_connection?: {
-            id: number;
-            name: string;
-            type: string;
-            is_production_stage: boolean;
+    if (!isEditing.value) {
+        const flash = usePage().props.flash as {
+            created_connection?: {
+                id: number;
+                name: string;
+                type: string;
+                is_production_stage: boolean;
+            };
         };
-    };
-    if (flash?.created_connection) {
-        emit('created', flash.created_connection);
+        if (flash?.created_connection) {
+            emit('created', flash.created_connection);
+        }
     }
     emit('close');
 }
@@ -89,10 +110,10 @@ watch(
     () => props.open,
     (newVal) => {
         if (newVal) {
-            // Set default production state when opening
-            isProduction.value = props.defaultProduction;
+            isProduction.value = props.connection
+                ? props.connection.is_production_stage
+                : props.defaultProduction;
         } else {
-            // Reset when closing
             isProduction.value = false;
         }
     },
@@ -112,9 +133,19 @@ watch(
                         />
                     </div>
                     <div>
-                        <SheetTitle class="text-lg">New Connection</SheetTitle>
+                        <SheetTitle class="text-lg">
+                            {{
+                                isEditing
+                                    ? 'Edit Connection'
+                                    : 'New Connection'
+                            }}
+                        </SheetTitle>
                         <SheetDescription class="text-xs">
-                            Configure a database connection for data transfers
+                            {{
+                                isEditing
+                                    ? 'Update the database connection settings'
+                                    : 'Configure a database connection for data transfers'
+                            }}
                         </SheetDescription>
                     </div>
                 </div>
@@ -123,7 +154,7 @@ watch(
             <Separator class="-mt-4" />
 
             <Form
-                v-bind="DatabaseConnectionController.store.form()"
+                v-bind="formBinding"
                 class="flex flex-1 flex-col gap-5 overflow-y-auto p-4 pt-0"
                 v-slot="{ errors, processing, recentlySuccessful }"
                 :reset-on-error="['username', 'password']"
@@ -145,6 +176,7 @@ watch(
                                 'border-destructive focus-visible:ring-destructive/30':
                                     errors.name,
                             }"
+                            :default-value="connection?.name"
                         />
                         <InputError :message="errors.name" />
                     </div>
@@ -156,7 +188,10 @@ watch(
                                 class="text-xs text-muted-foreground"
                                 >Database Type</Label
                             >
-                            <Select name="type" default-value="mysql">
+                            <Select
+                                name="type"
+                                :default-value="connection?.type ?? 'mysql'"
+                            >
                                 <SelectTrigger id="type" class="h-9">
                                     <SelectValue />
                                 </SelectTrigger>
@@ -244,6 +279,7 @@ watch(
                                     'border-destructive focus-visible:ring-destructive/30':
                                         errors.host,
                                 }"
+                                :default-value="connection?.host"
                             />
                             <InputError :message="errors.host" />
                         </div>
@@ -264,6 +300,9 @@ watch(
                                     'border-destructive focus-visible:ring-destructive/30':
                                         errors.port,
                                 }"
+                                :default-value="
+                                    connection?.port?.toString()
+                                "
                             />
                             <InputError :message="errors.port" />
                         </div>
@@ -285,6 +324,7 @@ watch(
                                 'border-destructive focus-visible:ring-destructive/30':
                                     errors.database,
                             }"
+                            :default-value="connection?.database"
                         />
                         <InputError :message="errors.database" />
                     </div>
@@ -311,6 +351,7 @@ watch(
                                 'border-destructive focus-visible:ring-destructive/30':
                                     errors.username,
                             }"
+                            :default-value="connection?.username"
                         />
                         <InputError :message="errors.username" />
                     </div>
@@ -325,7 +366,11 @@ watch(
                             id="password"
                             name="password"
                             type="password"
-                            placeholder="••••••••"
+                            :placeholder="
+                                isEditing
+                                    ? 'Leave blank to keep current'
+                                    : '••••••••'
+                            "
                             autocomplete="new-password"
                             class="h-9"
                             :class="{
@@ -354,7 +399,13 @@ watch(
                             class="size-4 animate-spin"
                         />
                         <Database v-else class="size-4" />
-                        {{ processing ? 'Creating...' : props.submitLabel }}
+                        {{
+                            processing
+                                ? isEditing
+                                    ? 'Updating...'
+                                    : 'Creating...'
+                                : resolvedSubmitLabel
+                        }}
                     </Button>
                 </div>
             </Form>
