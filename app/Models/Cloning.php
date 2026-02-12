@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Data\TriggerConfigData;
 use Exception;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,7 +24,7 @@ use Illuminate\Support\Carbon;
  * @property int $target_connection_id
  * @property array<string, mixed>|null $anonymization_config
  * @property string|null $schedule
- * @property array<string, mixed>|null $trigger_config
+ * @property TriggerConfigData|null $trigger_config
  * @property string|null $api_trigger_token
  * @property bool $is_scheduled
  * @property bool $is_paused
@@ -83,7 +84,7 @@ class Cloning extends Model
     {
         return [
             'anonymization_config' => 'array',
-            'trigger_config' => 'array',
+            'trigger_config' => TriggerConfigData::class,
             'is_scheduled' => 'boolean',
             'is_paused' => 'boolean',
             'consecutive_failures' => 'integer',
