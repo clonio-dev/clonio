@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDatabaseConnectionRequest;
+use App\Http\Requests\UpdateDatabaseConnectionRequest;
 use App\Jobs\TestConnection;
 use App\Models\DatabaseConnection;
 use App\Models\User;
@@ -94,6 +95,18 @@ class DatabaseConnectionController extends Controller
             });
 
         return back();
+    }
+
+    public function update(UpdateDatabaseConnectionRequest $request, DatabaseConnection $connection): RedirectResponse
+    {
+        $data = collect($request->validated())
+            ->when(! $request->filled('password'), fn ($collection) => $collection->except('password'))
+            ->put('is_production_stage', $request->boolean('is_production_stage'))
+            ->all();
+
+        $connection->update($data);
+
+        return to_route('connections.index');
     }
 
     public function destroy(DatabaseConnection $connection): RedirectResponse
