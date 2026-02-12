@@ -107,11 +107,11 @@ function handleSubmitComplete() {
 }
 
 watch(
-    () => props.open,
-    (newVal) => {
-        if (newVal) {
-            isProduction.value = props.connection
-                ? props.connection.is_production_stage
+    [() => props.open, () => props.connection],
+    ([newOpen, newConnection]) => {
+        if (newOpen) {
+            isProduction.value = newConnection
+                ? Boolean(newConnection.is_production_stage)
                 : props.defaultProduction;
         } else {
             isProduction.value = false;
@@ -236,10 +236,15 @@ watch(
                                         isProduction,
                                 }"
                             >
+                                <input
+                                    type="hidden"
+                                    name="is_production_stage"
+                                    :value="isProduction ? '1' : '0'"
+                                />
                                 <Checkbox
                                     id="is_production_stage"
-                                    name="is_production_stage"
                                     :checked="isProduction"
+                                    :modelValue="isProduction"
                                     @update:checked="isProduction = $event"
                                     class="data-[state=checked]:border-amber-500 data-[state=checked]:bg-amber-500"
                                 />

@@ -33,7 +33,7 @@ class UpdateDatabaseConnectionRequest extends FormRequest
             'database' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255'],
             'password' => ['nullable', 'string', 'max:255'],
-            'is_production_stage' => ['sometimes', 'accepted'],
+            'is_production_stage' => ['sometimes', 'boolean'],
         ];
     }
 }

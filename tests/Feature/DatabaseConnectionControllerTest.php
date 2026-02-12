@@ -109,7 +109,7 @@ describe('update', function (): void {
                 'port' => $connection->port,
                 'database' => $connection->database,
                 'username' => $connection->username,
-                'is_production_stage' => 'on',
+                'is_production_stage' => true,
             ]);
 
         $connection->refresh();
