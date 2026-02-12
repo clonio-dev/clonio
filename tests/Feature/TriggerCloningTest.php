@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Clonio\ExecuteCloning;
+use App\Data\TriggerConfigData;
 use App\Models\Cloning;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -117,9 +118,9 @@ describe('trigger config storage', function (): void {
         $response->assertRedirect();
 
         $cloning = Cloning::query()->latest('id')->first();
-        expect($cloning->trigger_config)->toBeArray();
-        expect($cloning->trigger_config['webhook_on_success']['enabled'])->toBeTrue();
-        expect($cloning->trigger_config['api_trigger']['enabled'])->toBeTrue();
+        expect($cloning->trigger_config)->toBeInstanceOf(TriggerConfigData::class);
+        expect($cloning->trigger_config->webhookOnSuccess->enabled)->toBeTrue();
+        expect($cloning->trigger_config->apiTrigger->enabled)->toBeTrue();
         expect($cloning->api_trigger_token)->not->toBeNull();
         expect(mb_strlen((string) $cloning->api_trigger_token))->toBe(64);
     });

@@ -19,8 +19,7 @@ class TriggerCloningController extends Controller
 
         abort_unless($cloning, 404);
 
-        $triggerConfig = $cloning->trigger_config;
-        $apiTriggerEnabled = $triggerConfig['api_trigger']['enabled'] ?? false;
+        $apiTriggerEnabled = $cloning->trigger_config?->apiTrigger->enabled ?? false;
 
         if (! $apiTriggerEnabled) {
             return response()->json(['message' => 'API trigger is not enabled for this cloning.'], 403);
