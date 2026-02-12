@@ -10,6 +10,8 @@ export type CloningRunStatus =
     | 'failed'
     | 'cancelled';
 
+export type CloningRunInitiator = 'user' | 'api' | 'scheduler' | 'manual';
+
 /**
  * Log Level Types
  */
@@ -91,6 +93,7 @@ export interface CloningRun {
     cloning_id: number | null;
     batch_id: string | null;
     status: CloningRunStatus;
+    initiator: CloningRunInitiator;
     started_at: string | null;
     finished_at: string | null;
     current_step: number;
@@ -142,10 +145,30 @@ export interface CloningsIndexProps {
 /**
  * Cloning Show Page Props
  */
+export interface TriggerConfig {
+    apiTrigger: { enabled: boolean };
+    webhookOnSuccess: {
+        enabled: boolean;
+        url: string;
+        method: string;
+        headers: Record<string, string>;
+        secret: string;
+    };
+    webhookOnFailure: {
+        enabled: boolean;
+        url: string;
+        method: string;
+        headers: Record<string, string>;
+        secret: string;
+    };
+}
+
 export interface CloningShowProps {
     cloning: Cloning;
     runs: CloningRun[];
     estimatedDuration?: number | null;
+    api_trigger_url: string | null;
+    lastAuditLogUrl: string | null;
 }
 
 /**
