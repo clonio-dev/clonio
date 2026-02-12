@@ -1,79 +1,91 @@
 ---
 title: Installation
-introduction: Step-by-step guide to installing and configuring Clonio in your Laravel application.
+introduction: Set up Clonio using Docker and Laravel Sail, configure your environment, and log in for the first time.
 ---
 
 # Installation
 
-This guide will walk you through installing Clonio and getting your first database clone running.
+Clonio is a self-hosted Laravel application. The recommended way to run it is with Docker via Laravel Sail.
 
 ## Requirements
 
-Before installing Clonio, make sure your environment meets the following requirements:
+- Docker Desktop (or Docker Engine + Docker Compose on Linux)
+- Git
 
-- PHP 8.4 or higher
-- Laravel 12.x
-- One of the supported database drivers: MySQL, PostgreSQL, or SQLite
-- Composer
+## Quick Start
 
-## Install via Composer
-
-Install Clonio using Composer:
+Clone the repository and start the application:
 
 ```bash
-composer require clonio-dev/clonio
+git clone <repository-url> clonio
+cd clonio
 ```
 
-## Configuration
-
-After installation, publish the configuration file:
+Copy the example environment file and generate an application key:
 
 ```bash
-php artisan vendor:publish --tag=clonio-config
+cp .env.example .env
 ```
 
-This will create a `config/clonio.php` file where you can configure your source and target database connections.
+Install dependencies and start the Docker environment:
 
-### Database Connections
+```bash
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    laravelsail/php84-composer:latest \
+    composer install --ignore-platform-reqs
 
-Clonio requires two database connections: a **source** (where data comes from) and a **target** (where data goes). Configure these in your `.env` file:
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run build
+```
+
+## Environment Configuration
+
+The `.env` file controls the application's behavior. Key settings:
 
 ```env
-CLONIO_SOURCE_CONNECTION=mysql
-CLONIO_TARGET_CONNECTION=mysql_staging
+APP_NAME=Clonio
+APP_URL=http://localhost
+
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=clonio
+DB_USERNAME=sail
+DB_PASSWORD=password
 ```
 
-Then add the target connection in your `config/database.php`:
+The application database stores Clonio's own data (users, clonings, connections, run logs). The source and target databases for cloning are configured separately through the web interface.
 
-```php
-'mysql_staging' => [
-    'driver' => 'mysql',
-    'host' => env('DB_STAGING_HOST', '127.0.0.1'),
-    'port' => env('DB_STAGING_PORT', '3306'),
-    'database' => env('DB_STAGING_DATABASE', 'staging'),
-    'username' => env('DB_STAGING_USERNAME', 'root'),
-    'password' => env('DB_STAGING_PASSWORD', ''),
-],
-```
+### Queue Worker
 
-## Running Migrations
-
-Run the migrations to create the necessary tables:
+Clonio uses queued jobs for cloning execution. Make sure the queue worker is running:
 
 ```bash
-php artisan migrate
+./vendor/bin/sail artisan queue:work
 ```
 
-## Verify Installation
+For production, configure a process manager like Supervisor to keep the worker running.
 
-Verify that Clonio is installed correctly by running:
+### Scheduler
+
+If you plan to use scheduled clonings (cron-based triggers), make sure Laravel's scheduler is running:
 
 ```bash
-php artisan clonio:status
+./vendor/bin/sail artisan schedule:work
 ```
 
-You should see output confirming the source and target connections are configured.
+## First Login
+
+After installation, create your user account by visiting the application in your browser. The registration page is available on first access.
+
+Once registered, you will see the Dashboard showing an overview of active runs, completed runs, failed runs, and recent activity.
 
 ## Next Steps
 
-With Clonio installed, head to [Configuration](/docs/1-essentials/01-configuration) to learn how to set up your first cloning profile.
+With Clonio running, proceed to [Managing Connections](/docs/1-connections/01-managing-connections) to add your first database connections.
