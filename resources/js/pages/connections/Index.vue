@@ -27,16 +27,24 @@ const breadcrumbItems: BreadcrumbItem[] = [
 ];
 
 const sheetOpen = ref(false);
+const editingConnection = ref<Connection | null>(null);
 
 const hasConnections = computed(() => props.connections.data.length > 0);
 const totalConnections = computed(() => props.connections.total);
 
 function openCreateSheet() {
+    editingConnection.value = null;
+    sheetOpen.value = true;
+}
+
+function openEditSheet(connection: Connection) {
+    editingConnection.value = connection;
     sheetOpen.value = true;
 }
 
 function closeSheet() {
     sheetOpen.value = false;
+    editingConnection.value = null;
 }
 </script>
 
@@ -108,6 +116,7 @@ function closeSheet() {
                         :connection="connection"
                         :style="{ animationDelay: `${index * 50}ms` }"
                         class="animate-in fade-in-0 fill-mode-both slide-in-from-bottom-4"
+                        @edit="openEditSheet"
                     />
                 </div>
 
@@ -135,6 +144,10 @@ function closeSheet() {
             </div>
         </div>
 
-        <ConnectionFormSheet :open="sheetOpen" @close="closeSheet" />
+        <ConnectionFormSheet
+            :open="sheetOpen"
+            :connection="editingConnection"
+            @close="closeSheet"
+        />
     </AppLayout>
 </template>
