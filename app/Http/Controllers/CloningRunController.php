@@ -77,12 +77,25 @@ class CloningRunController extends Controller
     }
 
     /**
+     * Delete all failed runs for the authenticated user.
+     */
+    public function destroyFailed(): RedirectResponse
+    {
+        $deleted = CloningRun::query()
+            ->where('user_id', auth()->id())
+            ->failed()
+            ->delete();
+
+        return back()->with('success', "{$deleted} failed run(s) deleted");
+    }
+
+    /**
      * Display a listing of runs (optional, can filter by cloning).
      */
     public function index(): Response
     {
         $runs = CloningRun::query()
-            ->with(['cloning:id,title,source_connection_id,target_connection_id', 'cloning.sourceConnection:id,name,type', 'cloning.targetConnection:id,name,type'])
+            ->with(['cloning:id,title,source_connection_id,target_connection_id', 'cloning.sourceConnection:id,name,type', 'cloning.targetConnection:id,name,type', 'firstLog'])
             ->where('user_id', auth()->id())
             ->latest('id')
             ->paginate(10);
