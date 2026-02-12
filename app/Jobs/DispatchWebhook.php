@@ -64,9 +64,22 @@ class DispatchWebhook implements ShouldQueue
                     'run_id' => $this->run->id,
                 ]);
 
+                $this->run->log('webhook_failed', [
+                    'event' => $this->event,
+                    'url' => $url,
+                    'http_status' => $response->status(),
+                    'attempt' => $this->attempts(),
+                ], 'error', "Webhook for {$this->event} failed (HTTP {$response->status()})");
+
                 if ($this->attempts() < $this->tries) {
                     $this->release($this->backoff);
                 }
+            } else {
+                $this->run->log('webhook_dispatched', [
+                    'event' => $this->event,
+                    'url' => $url,
+                    'http_status' => $response->status(),
+                ], 'success', "Webhook for {$this->event} dispatched successfully");
             }
         } catch (Throwable $e) {
             Log::error('Webhook dispatch error', [
@@ -74,6 +87,13 @@ class DispatchWebhook implements ShouldQueue
                 'error' => $e->getMessage(),
                 'run_id' => $this->run->id,
             ]);
+
+            $this->run->log('webhook_failed', [
+                'event' => $this->event,
+                'url' => $url,
+                'error' => $e->getMessage(),
+                'attempt' => $this->attempts(),
+            ], 'error', "Webhook for {$this->event} failed: {$e->getMessage()}");
 
             if ($this->attempts() < $this->tries) {
                 $this->release($this->backoff);

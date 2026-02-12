@@ -36,7 +36,7 @@ it('dispatches webhook with correct payload', function (): void {
     $job = new DispatchWebhook($run, $webhookConfig, 'success');
     $job->handle();
 
-    Http::assertSent(fn (array $request): bool => $request->url() === 'https://example.com/webhook'
+    Http::assertSent(fn ($request): bool => $request->url() === 'https://example.com/webhook'
         && $request->method() === 'POST'
         && $request['event'] === 'success'
         && $request['run_id'] === $run->id
@@ -71,7 +71,7 @@ it('includes audit_log_url in payload when public_token exists', function (): vo
     $job = new DispatchWebhook($run, $webhookConfig, 'success');
     $job->handle();
 
-    Http::assertSent(fn (array $request): bool => $request['audit_log_url'] === url('/audit/' . $publicToken));
+    Http::assertSent(fn ($request): bool => $request['audit_log_url'] === url('/audit/' . $publicToken));
 });
 
 it('adds HMAC signature header when secret is provided', function (): void {
@@ -118,7 +118,14 @@ it('dispatches webhook on cloning run finalization', function (): void {
 
     // Test that the finalize logic would dispatch webhooks by directly testing the job dispatch
     // We can verify by checking that DispatchWebhook can be dispatched
-    dispatch(new DispatchWebhook($run, $cloning->trigger_config['webhook_on_success'], 'success'));
+    $webhookOnSuccess = $cloning->trigger_config->webhookOnSuccess;
+    dispatch(new DispatchWebhook($run, [
+        'enabled' => $webhookOnSuccess->enabled,
+        'url' => $webhookOnSuccess->url,
+        'method' => $webhookOnSuccess->method,
+        'headers' => $webhookOnSuccess->headers,
+        'secret' => $webhookOnSuccess->secret,
+    ], 'success'));
 
     Queue::assertPushed(DispatchWebhook::class, fn ($job): bool => $job->event === 'success');
 });
