@@ -83,12 +83,19 @@ class FinalizeCloneRun implements ShouldQueue
             return;
         }
 
-        $webhookKey = $event === 'success' ? 'webhook_on_success' : 'webhook_on_failure';
-        $webhookConfig = $triggerConfig[$webhookKey] ?? null;
+        $webhook = $event === 'success' ? $triggerConfig->webhookOnSuccess : $triggerConfig->webhookOnFailure;
 
-        if (! $webhookConfig || ! ($webhookConfig['enabled'] ?? false) || empty($webhookConfig['url'])) {
+        if (! $webhook->enabled || empty($webhook->url)) {
             return;
         }
+
+        $webhookConfig = [
+            'enabled' => $webhook->enabled,
+            'url' => $webhook->url,
+            'method' => $webhook->method,
+            'headers' => $webhook->headers,
+            'secret' => $webhook->secret,
+        ];
 
         dispatch(new DispatchWebhook($run, $webhookConfig, $event));
     }
