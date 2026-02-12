@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -38,6 +39,8 @@ use Illuminate\Support\Carbon;
  * @property-read ?Batch $batch
  * @property-read Collection<int, CloningRunLog> $logs
  * @property-read int|null $duration
+ * @property-read string $initiator
+ * @property-read CloningRunLog|null $firstLog
  *
  * @mixin Model
  */
@@ -47,6 +50,10 @@ class CloningRun extends Model
     use HasFactory;
 
     protected $table = 'cloning_runs';
+
+    protected $appends = ['initiator'];
+
+    protected $hidden = ['firstLog'];
 
     protected $fillable = [
         'user_id',
@@ -112,6 +119,14 @@ class CloningRun extends Model
         return $this->hasMany(CloningRunLog::class, 'run_id');
     }
 
+    /**
+     * @return HasOne<CloningRunLog, CloningRun>
+     */
+    public function firstLog(): HasOne
+    {
+        return $this->hasOne(CloningRunLog::class, 'run_id')->oldestOfMany();
+    }
+
     public function log(string $eventType, array $data = [], string|CloningRunLogLevel $level = CloningRunLogLevel::INFO, ?string $message = null): CloningRunLog
     {
         return $this->logs()->create([
@@ -126,6 +141,22 @@ class CloningRun extends Model
     /**
      * Accessors
      */
+    protected function getInitiatorAttribute(): string
+    {
+        $firstLog = $this->firstLog;
+
+        if (! $firstLog) {
+            return 'manual';
+        }
+
+        return match ($firstLog->event_type) {
+            'user_initiated' => 'user',
+            'api_triggered' => 'api',
+            'scheduled_cloning_run_created' => 'scheduler',
+            default => 'manual',
+        };
+    }
+
     protected function getDurationAttribute(): ?int
     {
         if (! $this->finished_at || ! $this->started_at) {
