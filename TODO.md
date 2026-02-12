@@ -24,5 +24,5 @@
         - Target group for reading the documentation is normal users with technical background. Document it like a journey for the user reading it
     - [ ] Copy any necessary images or files into the chapter folder and give feedback if you want me to shot a necessary image (what should be shown on the image)
 
-## GitHub
-- [ ] GitHub Profile Page anlegen
+## GitHub (Tasks für Robert)
+- [ ] GitHub Profile Page anlegen mit eigenem Repository
