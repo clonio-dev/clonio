@@ -27,11 +27,8 @@ const isMobileMenuOpen = ref(false);
 const searchDialog = ref<InstanceType<typeof DocsSearchDialog> | null>(null);
 
 function toggleTheme() {
-    if (appearance.value === 'dark') {
-        updateAppearance('light');
-    } else {
-        updateAppearance('dark');
-    }
+    const isDark = document.documentElement.classList.contains('dark');
+    updateAppearance(isDark ? 'light' : 'dark');
 }
 
 function openSearch() {
