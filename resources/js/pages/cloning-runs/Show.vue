@@ -9,6 +9,7 @@ import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIco
 import type { BreadcrumbItem } from '@/types';
 import { CloningRunShowProps, CloningRunStatus } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
+import type { CloningRunLog } from '@/types/cloning.types';
 import {
     AlertCircle,
     ArrowRight,
@@ -21,6 +22,7 @@ import {
     RefreshCw,
     StopCircle,
     Timer,
+    Webhook,
     XCircle,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -145,6 +147,14 @@ function cancelRun() {
         router.post(`/cloning-runs/${props.run.id}/cancel`);
     }
 }
+
+const webhookLogs = computed(() =>
+    props.logs.filter(
+        (log: CloningRunLog) =>
+            log.event_type === 'webhook_dispatched' ||
+            log.event_type === 'webhook_failed',
+    ),
+);
 
 useAutoRefresh(
     refreshPage,
@@ -369,6 +379,57 @@ useAutoRefresh(
                 :is-active="isActive"
                 :finished-at="run.finished_at"
             />
+
+            <!-- Webhook Notifications -->
+            <div v-if="webhookLogs.length > 0" class="mt-6">
+                <h3
+                    class="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground"
+                >
+                    <Webhook class="size-4 text-muted-foreground" />
+                    Webhook Notifications
+                </h3>
+                <div class="space-y-2">
+                    <div
+                        v-for="log in webhookLogs"
+                        :key="log.id"
+                        class="flex items-center gap-3 rounded-lg border px-4 py-3"
+                        :class="
+                            log.event_type === 'webhook_dispatched'
+                                ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30'
+                                : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30'
+                        "
+                    >
+                        <CheckCircle2
+                            v-if="log.event_type === 'webhook_dispatched'"
+                            class="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+                        />
+                        <XCircle
+                            v-else
+                            class="size-4 shrink-0 text-red-600 dark:text-red-400"
+                        />
+                        <div class="min-w-0 flex-1">
+                            <p
+                                class="text-sm font-medium"
+                                :class="
+                                    log.event_type === 'webhook_dispatched'
+                                        ? 'text-emerald-800 dark:text-emerald-300'
+                                        : 'text-red-800 dark:text-red-300'
+                                "
+                            >
+                                {{ log.message }}
+                            </p>
+                            <p
+                                v-if="(log.data as Record<string, unknown>)?.url"
+                                class="mt-0.5 truncate font-mono text-xs text-muted-foreground"
+                            >
+                                {{
+                                    (log.data as Record<string, unknown>).url
+                                }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </AppLayout>
 </template>
