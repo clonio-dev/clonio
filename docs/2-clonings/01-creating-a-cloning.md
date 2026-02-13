@@ -136,9 +136,42 @@ provided content was sent by Clonio.
 
 ![Step 4 - Webhooks configured](cloning-create-4-02.png)
 
+#### Example Webhook
+
+Header: 
+```text
+X-Webhook-Signature: 47160d3fc1fb6b180bf5ad559b6a5b59be1dec7f46d65cb12e120ffa07f8cf30
+```
+
+Body:
+```json
+{
+  "event": "success",
+  "cloning_id": 6,
+  "run_id": 276,
+  "status": "completed",
+  "started_at": "2026-02-11T18:08:18+00:00",
+  "finished_at": "2026-02-11T18:08:21+00:00"
+}
+```
+
 ### Webhook on Failure
 
 Same configuration as the success webhook, but triggered after a failed cloning run. Useful for alerting systems like PagerDuty or Slack.
+
+#### Example Webhook
+
+Body:
+```json
+{
+  "event": "failure",
+  "cloning_id": 6,
+  "run_id": 274,
+  "status": "failed",
+  "started_at": "2026-02-11T18:04:12+00:00",
+  "finished_at": "2026-02-11T18:04:15+00:00"
+}
+```
 
 ### Incoming API Trigger
 
@@ -152,9 +185,23 @@ The trigger URL is displayed after saving, along with ready-to-use `curl` and `w
 curl -X POST http://your-clonio-instance/api/trigger/<token>
 ```
 
+```bash
+wget --method=POST http://your-clonio-instance/api/trigger/<token>
+```
+
 Keep this URL secret — anyone with the URL can trigger a cloning run.
 
 ![Step 4 - API trigger with URL](cloning-create-4-04.png)
+
+The response will look like this:
+```json
+{
+  "message": "Cloning execution started.",
+  "run_id": 274
+}
+```
+
+The `run_id` is the same value as you will get in the webhook body.
 
 ### Saving
 
