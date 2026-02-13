@@ -52,7 +52,7 @@ describe('CloningRun initiator accessor', function (): void {
         expect($run->initiator)->toBe('manual');
     });
 
-    it('returns "manual" when first log has an unrecognized event type', function (): void {
+    it('returns "manual" when only non-initiator logs exist', function (): void {
         $run = CloningRun::factory()->for($this->cloning)->for($this->user)->create();
 
         CloningRunLog::factory()->for($run, 'run')->create([
@@ -62,18 +62,36 @@ describe('CloningRun initiator accessor', function (): void {
         expect($run->initiator)->toBe('manual');
     });
 
-    it('uses the first log by id to determine initiator', function (): void {
+    it('finds initiator log even when cloning_run_created is the first log', function (): void {
         $run = CloningRun::factory()->for($this->cloning)->for($this->user)->create();
+
+        CloningRunLog::factory()->for($run, 'run')->create([
+            'event_type' => 'cloning_run_created',
+        ]);
 
         CloningRunLog::factory()->for($run, 'run')->create([
             'event_type' => 'api_triggered',
         ]);
 
-        CloningRunLog::factory()->for($run, 'run')->create([
-            'event_type' => 'batch_started',
-        ]);
+        $run->unsetRelation('initiatorLog');
 
         expect($run->initiator)->toBe('api');
+    });
+
+    it('finds scheduler initiator after cloning_run_created log', function (): void {
+        $run = CloningRun::factory()->for($this->cloning)->for($this->user)->create();
+
+        CloningRunLog::factory()->for($run, 'run')->create([
+            'event_type' => 'cloning_run_created',
+        ]);
+
+        CloningRunLog::factory()->for($run, 'run')->create([
+            'event_type' => 'scheduled_cloning_run_created',
+        ]);
+
+        $run->unsetRelation('initiatorLog');
+
+        expect($run->initiator)->toBe('scheduler');
     });
 });
 
