@@ -23,8 +23,8 @@ Give your cloning a descriptive name that identifies the purpose, such as "Produ
 
 Select the source (production) and target (test) database connections from the dropdowns. These must be configured beforehand in **Data Sources**.
 
-- **Source Connection** -- The database data is read from. Clonio only performs `SELECT` queries on the source.
-- **Target Connection** -- The database data is written to. Existing data on the target is replaced.
+- **Source Connection** — The database data is read from. Clonio only performs `SELECT` queries on the source.
+- **Target Connection** — The database data is written to. Existing data on the target is replaced.
 
 Click **Next** to proceed.
 
@@ -38,8 +38,8 @@ This step lets you configure transformation rules for each table in the source d
 
 At the top you see the source and target database names with their table counts. The **"Keep unknown tables on target"** checkbox controls what happens to tables that exist on the target but not on the source:
 
-- **Checked** -- Extra tables on the target are preserved (not dropped)
-- **Unchecked** -- Extra tables on the target are removed during cloning
+- **Checked** — Extra tables on the target are preserved (not dropped)
+- **Unchecked** — Extra tables on the target are removed during cloning
 
 ### Table List
 
@@ -53,9 +53,9 @@ For each table you can configure:
 
 Choose how many rows to copy:
 
-- **Full Table** -- Copy all rows (default)
-- **First X** -- Copy only the first X rows ordered by primary key
-- **Last X** -- Copy only the last X rows ordered by primary key descending
+- **Full Table** — Copy all rows (default)
+- **First X** — Copy only the first X rows ordered by primary key
+- **Last X** — Copy only the last X rows ordered by primary key descending
 
 Row selection is automatically disabled for tables that have foreign key dependencies on other tables, to preserve referential integrity.
 
@@ -127,9 +127,9 @@ Configure webhooks and API triggers for integration with external systems.
 
 When enabled, Clonio sends an HTTP request to the configured URL after every successful cloning run. Configure:
 
-- **URL** -- The endpoint to call (e.g., `https://example.com/webhook`)
-- **HTTP Method** -- POST (default) or other methods
-- **Signing Secret** -- An optional HMAC secret for verifying webhook authenticity
+- **URL** — The endpoint to call (e.g., `https://example.com/webhook`)
+- **HTTP Method** — POST (default) or other methods
+- **Signing Secret** — An optional HMAC secret for verifying webhook authenticity
 
 ![Step 4 - Webhooks configured](cloning-create-4-02.png)
 
@@ -149,7 +149,7 @@ The trigger URL is displayed after saving, along with ready-to-use `curl` and `w
 curl -X POST http://your-clonio-instance/api/trigger/<token>
 ```
 
-Keep this URL secret -- anyone with the URL can trigger a cloning run.
+Keep this URL secret — anyone with the URL can trigger a cloning run.
 
 ![Step 4 - API trigger with URL](cloning-create-4-04.png)
 
