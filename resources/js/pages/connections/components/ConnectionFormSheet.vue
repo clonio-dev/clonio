@@ -243,9 +243,8 @@ watch(
                                 />
                                 <Checkbox
                                     id="is_production_stage"
-                                    :checked="isProduction"
-                                    :modelValue="isProduction"
-                                    @update:checked="isProduction = $event"
+                                    :model-value="isProduction"
+                                    @update:model-value="isProduction = !!$event"
                                     class="data-[state=checked]:border-amber-500 data-[state=checked]:bg-amber-500"
                                 />
                                 <Label
