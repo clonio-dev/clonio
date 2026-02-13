@@ -68,7 +68,7 @@ export interface Cloning {
     target_connection_id: number;
     anonymization_config: Record<string, unknown> | null;
     schedule: string | null;
-    trigger_config: Record<string, unknown> | null;
+    trigger_config: TriggerConfig | null;
     api_trigger_token: string | null;
     is_scheduled: boolean;
     is_paused: boolean;
@@ -82,6 +82,20 @@ export interface Cloning {
     target_connection?: DatabaseConnectionPartial;
     runs?: CloningRun[];
     runs_count?: number;
+}
+
+/**
+ * Webhook Result Entry (stored on cloning_runs.webhook_results)
+ */
+export interface WebhookResult {
+    status: 'success' | 'failed';
+    event: string;
+    url: string;
+    http_status?: number;
+    error?: string;
+    attempt?: number;
+    message: string;
+    timestamp: string;
 }
 
 /**
@@ -100,6 +114,7 @@ export interface CloningRun {
     total_steps: number;
     progress_percent: number;
     error_message: string | null;
+    webhook_results: WebhookResult[] | null;
     created_at: string;
     updated_at: string;
 
