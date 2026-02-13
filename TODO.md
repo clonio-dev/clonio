@@ -2,9 +2,9 @@
 
 ERRORS:
 
-- [ ] Change the clonings index page (/clonings) table column "Schedule" to "Trigger" and display the schedule, manual and api trigger - Manual just when no other trigger is possible -> starting by schedule or api will not be displayed correct, it always says Manual
-- [ ] Webhook calls should be visible on the cloning-run detail page - not in the execution log, but below as separate information: "Webhook for failure/success gets triggered" (or similar) and displayed with success or error if the webhook could be called or not -> the problem is, that you implemented it using the run log. that lead to an failed signed log, because the audit log gets sealed after the transformation process ends. please log that information for webhhoks interaction separately, so the auditlog is signed again and displays that accordingly
-- [ ] Checkbox on updating a database connection is checked technically, but not visually. So the missing modelValue in the Checkbox lead to unchecked form display. Please update the checkbox behaviour, that it just works
+- [x] Change the clonings index page (/clonings) table column "Schedule" to "Trigger" and display the schedule, manual and api trigger - Manual just when no other trigger is possible -> starting by schedule or api will not be displayed correct, it always says Manual
+- [x] Webhook calls should be visible on the cloning-run detail page - not in the execution log, but below as separate information: "Webhook for failure/success gets triggered" (or similar) and displayed with success or error if the webhook could be called or not -> the problem is, that you implemented it using the run log. that lead to an failed signed log, because the audit log gets sealed after the transformation process ends. please log that information for webhhoks interaction separately, so the auditlog is signed again and displays that accordingly
+- [x] Checkbox on updating a database connection is checked technically, but not visually. So the missing modelValue in the Checkbox lead to unchecked form display. Please update the checkbox behaviour, that it just works
 
 
 ## GitHub (Tasks für Robert)
