@@ -19,6 +19,8 @@ Regulations like the GDPR require that personal data is handled with care. A sin
 
 Clonio sits between your production database and your non-production environments. It reads from the source, applies transformation rules you define, and writes the anonymized data to the target.
 
+![Clonio Cloning Flow](cloning-flow.svg)
+
 <span class="text-orange-400">**⚠** *You are responsible to define the anonymizing function for the fields that contain such data.*</span>
 
 **Core capabilities:**
