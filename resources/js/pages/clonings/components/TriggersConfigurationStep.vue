@@ -33,15 +33,15 @@ import type { ScheduleData } from './ScheduleConfigurationStep.vue';
 interface WebhookConfig {
     enabled: boolean;
     url: string;
-    method: string;
+    method: 'POST' | 'PUT' | 'PATCH';
     headers: Record<string, string>;
     secret: string;
 }
 
 interface TriggerConfig {
-    webhook_on_success: WebhookConfig;
-    webhook_on_failure: WebhookConfig;
-    api_trigger: { enabled: boolean };
+    webhookOnSuccess: WebhookConfig;
+    webhookOnFailure: WebhookConfig;
+    apiTrigger: { enabled: boolean };
 }
 
 interface Props {
@@ -75,36 +75,36 @@ function defaultWebhookConfig(): WebhookConfig {
 
 // Webhook on success
 const webhookOnSuccess = ref<WebhookConfig>(
-    props.initialTriggerConfig?.webhook_on_success
-        ? { ...props.initialTriggerConfig.webhook_on_success }
+    props.initialTriggerConfig?.webhookOnSuccess
+        ? { ...props.initialTriggerConfig.webhookOnSuccess }
         : defaultWebhookConfig(),
 );
 
 // Webhook on failure
 const webhookOnFailure = ref<WebhookConfig>(
-    props.initialTriggerConfig?.webhook_on_failure
-        ? { ...props.initialTriggerConfig.webhook_on_failure }
+    props.initialTriggerConfig?.webhookOnFailure
+        ? { ...props.initialTriggerConfig.webhookOnFailure }
         : defaultWebhookConfig(),
 );
 
 // API trigger
 const apiTriggerEnabled = ref(
-    props.initialTriggerConfig?.api_trigger?.enabled ?? false,
+    props.initialTriggerConfig?.apiTrigger?.enabled ?? false,
 );
 
 // Compute trigger config JSON
 const triggerConfigPayload = computed(() => {
     const config: TriggerConfig = {
-        webhook_on_success: webhookOnSuccess.value,
-        webhook_on_failure: webhookOnFailure.value,
-        api_trigger: { enabled: apiTriggerEnabled.value },
+        webhookOnSuccess: webhookOnSuccess.value,
+        webhookOnFailure: webhookOnFailure.value,
+        apiTrigger: { enabled: apiTriggerEnabled.value },
     };
 
     // Only include trigger config if anything is enabled
     const hasEnabledTrigger =
-        config.webhook_on_success.enabled ||
-        config.webhook_on_failure.enabled ||
-        config.api_trigger.enabled;
+        config.webhookOnSuccess.enabled ||
+        config.webhookOnFailure.enabled ||
+        config.apiTrigger.enabled;
 
     return hasEnabledTrigger ? JSON.stringify(config) : '';
 });
@@ -180,8 +180,8 @@ function copyApiUrl() {
                     <div class="flex items-center gap-3">
                         <Checkbox
                             id="webhook_success_checkbox"
-                            :checked="webhookOnSuccess.enabled"
-                            @update:checked="webhookOnSuccess.enabled = $event"
+                            :model-value="webhookOnSuccess.enabled"
+                            @update:model-value="webhookOnSuccess.enabled = !!$event"
                         />
                         <Label
                             for="webhook_success_checkbox"
@@ -212,7 +212,7 @@ function copyApiUrl() {
                                     :model-value="webhookOnSuccess.method"
                                     @update:model-value="
                                         webhookOnSuccess.method =
-                                            $event ?? 'POST'
+                                            String($event ?? 'POST')
                                     "
                                 >
                                     <SelectTrigger id="success_method">
@@ -257,8 +257,8 @@ function copyApiUrl() {
                     <div class="flex items-center gap-3">
                         <Checkbox
                             id="webhook_failure_checkbox"
-                            :checked="webhookOnFailure.enabled"
-                            @update:checked="webhookOnFailure.enabled = $event"
+                            :model-value="webhookOnFailure.enabled"
+                            @update:model-value="webhookOnFailure.enabled = !!$event"
                         />
                         <Label
                             for="webhook_failure_checkbox"
@@ -289,7 +289,7 @@ function copyApiUrl() {
                                     :model-value="webhookOnFailure.method"
                                     @update:model-value="
                                         webhookOnFailure.method =
-                                            $event ?? 'POST'
+                                            String($event ?? 'POST')
                                     "
                                 >
                                     <SelectTrigger id="failure_method">
@@ -334,8 +334,8 @@ function copyApiUrl() {
                     <div class="flex items-center gap-3">
                         <Checkbox
                             id="api_trigger_checkbox"
-                            :checked="apiTriggerEnabled"
-                            @update:checked="apiTriggerEnabled = $event"
+                            :model-value="apiTriggerEnabled"
+                            @update:model-value="apiTriggerEnabled = !!$event"
                         />
                         <Label
                             for="api_trigger_checkbox"

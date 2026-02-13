@@ -95,8 +95,8 @@ function handleNext() {
                     <div class="flex items-center gap-3">
                         <Checkbox
                             id="is_scheduled_checkbox"
-                            :checked="isScheduled"
-                            @update:checked="isScheduled = $event"
+                            :model-value="isScheduled"
+                            @update:model-value="isScheduled = !!$event"
                         />
                         <Label
                             for="is_scheduled_checkbox"
