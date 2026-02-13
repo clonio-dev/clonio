@@ -47,7 +47,7 @@ Faker values are generated fresh for each row, so no two rows will have the same
 
 ### Hash
 
-Replaces the value with a hashed version. Useful when you need consistent anonymization -- the same input always produces the same hash -- but the original value should not be recoverable.
+Replaces the value with a hashed version. Useful when you need consistent anonymization — the same input always produces the same hash — but the original value should not be recoverable.
 
 ### Mask
 
@@ -56,36 +56,6 @@ Partially obscures the value while keeping its general format recognizable. For 
 ### Null
 
 Sets the column value to `NULL`. Only works on nullable columns. Useful for columns that are not needed in test environments (e.g., free-text notes, internal comments).
-
-## Configuration Example
-
-A typical anonymization configuration in JSON format:
-
-```json
-{
-    "tables": [
-        {
-            "tableName": "users",
-            "columnMutations": [
-                {"column": "email", "strategy": "fake", "options": {"fakerMethod": "email"}},
-                {"column": "name", "strategy": "fake", "options": {"fakerMethod": "name"}},
-                {"column": "phone", "strategy": "fake", "options": {"fakerMethod": "phone"}},
-                {"column": "notes", "strategy": "null"}
-            ]
-        },
-        {
-            "tableName": "orders",
-            "columnMutations": [],
-            "rowSelection": {
-                "strategy": "LastX",
-                "count": 1000
-            }
-        }
-    ],
-    "keepUnknownTablesOnTarget": false,
-    "version": 1
-}
-```
 
 ## Row Selection and Referential Integrity
 
@@ -107,11 +77,11 @@ This information is also included in the audit trail report for each cloning run
 
 ## Best Practices
 
-1. **Anonymize all PII columns** -- Email, name, phone, address, social security numbers, and any other personally identifiable information.
-2. **Use fake data for realistic testing** -- Faker-generated values preserve data format, helping catch bugs that depend on email syntax, name length, etc.
-3. **Review your configuration regularly** -- As your database schema evolves, new PII columns may be added. Update transformation rules accordingly.
-4. **Start with a small test run** -- Use row selection to clone a small subset first and verify that transformations produce the expected output.
-5. **Use the audit trail** -- After each run, review the audit report to confirm that all sensitive columns were transformed.
+1. **Anonymize all PII columns** — Email, name, phone, address, social security numbers, and any other personally identifiable information.
+2. **Use fake data for realistic testing** — Faker-generated values preserve data format, helping catch bugs that depend on email syntax, name length, etc.
+3. **Review your configuration regularly** — As your database schema evolves, new PII columns may be added. Update transformation rules accordingly.
+4. **Start with a small test run** — Use row selection to clone a small subset first and verify that transformations produce the expected output.
+5. **Use the audit trail** — After each run, review the audit report to confirm that all sensitive columns were transformed.
 
 ## Next Steps
 
