@@ -7,6 +7,8 @@ introduction: Set up Clonio using Docker and Laravel Sail, configure your enviro
 
 Clonio is a self-hosted Laravel application. The recommended way to run it is with Docker via Laravel Sail.
 
+<span class="text-orange-400 text-2xl border rounded block p-4 border-orange-400">**⚠** *This page is subject to change.*</span>
+
 ## Requirements
 
 - Docker Desktop (or Docker Engine + Docker Compose on Linux)
@@ -49,7 +51,6 @@ docker run --rm \
 The `.env` file controls the application's behavior. Key settings:
 
 ```env
-APP_NAME=Clonio
 APP_URL=http://localhost
 
 DB_CONNECTION=mysql
@@ -58,9 +59,15 @@ DB_PORT=3306
 DB_DATABASE=clonio
 DB_USERNAME=sail
 DB_PASSWORD=password
+
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=2525
+MAIL_USERNAME=
+MAIL_PASSWORD=
 ```
 
-The application database stores Clonio's own data (users, clonings, connections, run logs). The source and target databases for cloning are configured separately through the web interface.
+The application database stores Clonio's own data (users, clonings, connections, run logs). The source and target databases for cloning are configured separately through the web interface. The mail service configuration is for sending user verification mails to get just verified users.
 
 ### Queue Worker
 
