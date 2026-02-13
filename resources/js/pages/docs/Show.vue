@@ -164,6 +164,19 @@ watch(() => props.page.htmlContent, enhanceContent);
 </template>
 
 <style>
+/* Themed documentation images (class-based dark mode) */
+.docs-img-dark {
+    display: none;
+}
+
+.dark .docs-img-light {
+    display: none;
+}
+
+.dark .docs-img-dark {
+    display: block;
+}
+
 /* Heading anchor links */
 .heading-linkable {
     position: relative;
