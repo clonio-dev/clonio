@@ -129,7 +129,10 @@ When enabled, Clonio sends an HTTP request to the configured URL after every suc
 
 - **URL** — The endpoint to call (e.g., `https://example.com/webhook`)
 - **HTTP Method** — POST (default) or other methods
-- **Signing Secret** — An optional HMAC secret for verifying webhook authenticity
+- **Signing Secret** — An optional HMAC secret for verifying webhook authenticity (hashed with `sha256`)
+
+The signed secret will be posted as Header `X-Webhook-Signature` for signing the sent payload. So you can check if the
+provided content was sent by Clonio.
 
 ![Step 4 - Webhooks configured](cloning-create-4-02.png)
 
