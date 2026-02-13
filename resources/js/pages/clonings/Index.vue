@@ -297,7 +297,7 @@ function resumeCloning(cloning: Cloning) {
                                     <div
                                         v-else-if="
                                             cloning.is_scheduled ||
-                                            cloning.trigger_config?.api_trigger
+                                            cloning.trigger_config?.apiTrigger
                                                 ?.enabled
                                         "
                                         class="flex flex-col gap-1"
@@ -314,7 +314,7 @@ function resumeCloning(cloning: Cloning) {
                                         <div
                                             v-if="
                                                 cloning.trigger_config
-                                                    ?.api_trigger?.enabled
+                                                    ?.apiTrigger?.enabled
                                             "
                                             class="flex items-center gap-1.5 text-sm text-muted-foreground"
                                         >
