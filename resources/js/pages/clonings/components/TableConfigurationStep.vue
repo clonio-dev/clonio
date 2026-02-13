@@ -661,8 +661,8 @@ function getTypeColor(type: string): string {
                     <div class="mt-3 flex items-center gap-2">
                         <Checkbox
                             id="keep-unknown"
-                            :checked="keepUnknownTablesOnTarget"
-                            @update:checked="keepUnknownTablesOnTarget = $event"
+                            :model-value="keepUnknownTablesOnTarget"
+                            @update:model-value="keepUnknownTablesOnTarget = !!$event"
                         />
                         <label
                             for="keep-unknown"
@@ -894,13 +894,13 @@ function getTypeColor(type: string): string {
                             >
                                 <Checkbox
                                     :id="`enforce-types-${tableName}`"
-                                    :checked="
+                                    :model-value="
                                         tableEnforceColumnTypes[tableName] ??
                                         false
                                     "
-                                    @update:checked="
+                                    @update:model-value="
                                         tableEnforceColumnTypes[tableName] =
-                                            $event
+                                            !!$event
                                     "
                                 />
                                 <label

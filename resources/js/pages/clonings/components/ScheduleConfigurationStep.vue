@@ -66,8 +66,8 @@ function handleNext() {
                     <div class="flex items-center gap-3">
                         <Checkbox
                             id="execute_now_checkbox"
-                            :checked="executeNow"
-                            @update:checked="executeNow = $event"
+                            :model-value="executeNow"
+                            @update:model-value="executeNow = !!$event"
                         />
                         <Label
                             for="execute_now_checkbox"
