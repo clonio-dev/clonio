@@ -5,7 +5,7 @@ introduction: Database engines supported by Clonio, their versions, and specific
 
 # Supported Databases
 
-Clonio supports four database engines as both source and target connections. Cross-engine cloning is supported -- for example, cloning from MySQL to PostgreSQL.
+Clonio supports four database engines as both source and target connections. Cross-engine cloning is supported — for example, cloning from MySQL to PostgreSQL.
 
 ## MySQL
 
