@@ -95,7 +95,7 @@ class CloningRunController extends Controller
     public function index(): Response
     {
         $runs = CloningRun::query()
-            ->with(['cloning:id,title,source_connection_id,target_connection_id', 'cloning.sourceConnection:id,name,type', 'cloning.targetConnection:id,name,type', 'firstLog'])
+            ->with(['cloning:id,title,source_connection_id,target_connection_id', 'cloning.sourceConnection:id,name,type', 'cloning.targetConnection:id,name,type', 'initiatorLog'])
             ->where('user_id', auth()->id())
             ->latest('id')
             ->paginate(10);
