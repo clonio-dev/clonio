@@ -5,7 +5,7 @@ introduction: Learn what Clonio is, why it exists, and how it helps teams safely
 
 # Introduction
 
-Clonio is a database cloning tool that creates safe, anonymized copies of production databases for development, testing, and staging environments. It provides a web-based interface for configuring connections, defining anonymization rules, scheduling cloning runs, and monitoring execution in real time.
+Clonio is a database cloning tool that creates safe, anonymized copies of production databases for development, testing, and staging environments. It provides a web-based interface for configuring connections, defining anonymization rules, scheduling cloning runs, and monitoring execution in real time. For data protection auditors there is a signed audit log to prove the transferred data settings and log entries.
 
 ![Clonio Dashboard](dashboard.png)
 
