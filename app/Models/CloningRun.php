@@ -33,6 +33,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $audit_hash
  * @property string|null $audit_signature
  * @property Carbon|null $audit_signed_at
+ * @property array<int, array<string, mixed>>|null $webhook_results
  * @property string|null $public_token
  * @property-read User $user
  * @property-read Cloning|null $cloning
@@ -53,7 +54,7 @@ class CloningRun extends Model
 
     protected $appends = ['initiator'];
 
-    protected $hidden = ['firstLog'];
+    protected $hidden = ['firstLog', 'initiatorLog'];
 
     protected $fillable = [
         'user_id',
@@ -70,6 +71,7 @@ class CloningRun extends Model
         'audit_hash',
         'audit_signature',
         'audit_signed_at',
+        'webhook_results',
         'public_token',
     ];
 
@@ -84,6 +86,7 @@ class CloningRun extends Model
             'progress_percent' => 'integer',
             'config_snapshot' => 'array',
             'audit_signed_at' => 'datetime',
+            'webhook_results' => 'array',
         ];
     }
 
@@ -127,6 +130,28 @@ class CloningRun extends Model
         return $this->hasOne(CloningRunLog::class, 'run_id')->oldestOfMany();
     }
 
+    /**
+     * @return HasOne<CloningRunLog, CloningRun>
+     */
+    public function initiatorLog(): HasOne
+    {
+        return $this->hasOne(CloningRunLog::class, 'run_id')
+            ->ofMany(['id' => 'min'], function ($query): void {
+                $query->whereIn('event_type', ['user_initiated', 'api_triggered', 'scheduled_cloning_run_created']);
+            });
+    }
+
+    /**
+     * @param  array<string, mixed>  $result
+     */
+    public function addWebhookResult(array $result): void
+    {
+        $results = $this->webhook_results ?? [];
+        $results[] = array_merge($result, ['timestamp' => now()->toIso8601String()]);
+
+        $this->updateQuietly(['webhook_results' => $results]);
+    }
+
     public function log(string $eventType, array $data = [], string|CloningRunLogLevel $level = CloningRunLogLevel::INFO, ?string $message = null): CloningRunLog
     {
         return $this->logs()->create([
@@ -143,13 +168,13 @@ class CloningRun extends Model
      */
     protected function getInitiatorAttribute(): string
     {
-        $firstLog = $this->firstLog;
+        $log = $this->initiatorLog;
 
-        if (! $firstLog) {
+        if (! $log) {
             return 'manual';
         }
 
-        return match ($firstLog->event_type) {
+        return match ($log->event_type) {
             'user_initiated' => 'user',
             'api_triggered' => 'api',
             'scheduled_cloning_run_created' => 'scheduler',
