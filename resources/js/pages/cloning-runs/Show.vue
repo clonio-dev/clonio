@@ -7,9 +7,11 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { convertDuration } from '@/lib/date';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
-import { CloningRunShowProps, CloningRunStatus } from '@/types/cloning.types';
+import {
+    CloningRunShowProps,
+    CloningRunStatus,
+} from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
-import type { CloningRunLog } from '@/types/cloning.types';
 import {
     AlertCircle,
     ArrowRight,
@@ -148,13 +150,7 @@ function cancelRun() {
     }
 }
 
-const webhookLogs = computed(() =>
-    props.logs.filter(
-        (log: CloningRunLog) =>
-            log.event_type === 'webhook_dispatched' ||
-            log.event_type === 'webhook_failed',
-    ),
-);
+const webhookResults = computed(() => props.run.webhook_results ?? []);
 
 useAutoRefresh(
     refreshPage,
@@ -381,7 +377,7 @@ useAutoRefresh(
             />
 
             <!-- Webhook Notifications -->
-            <div v-if="webhookLogs.length > 0" class="mt-6">
+            <div v-if="webhookResults.length > 0" class="mt-6">
                 <h3
                     class="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground"
                 >
@@ -390,17 +386,17 @@ useAutoRefresh(
                 </h3>
                 <div class="space-y-2">
                     <div
-                        v-for="log in webhookLogs"
-                        :key="log.id"
+                        v-for="(result, index) in webhookResults"
+                        :key="index"
                         class="flex items-center gap-3 rounded-lg border px-4 py-3"
                         :class="
-                            log.event_type === 'webhook_dispatched'
+                            result.status === 'success'
                                 ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30'
                                 : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30'
                         "
                     >
                         <CheckCircle2
-                            v-if="log.event_type === 'webhook_dispatched'"
+                            v-if="result.status === 'success'"
                             class="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
                         />
                         <XCircle
@@ -411,20 +407,18 @@ useAutoRefresh(
                             <p
                                 class="text-sm font-medium"
                                 :class="
-                                    log.event_type === 'webhook_dispatched'
+                                    result.status === 'success'
                                         ? 'text-emerald-800 dark:text-emerald-300'
                                         : 'text-red-800 dark:text-red-300'
                                 "
                             >
-                                {{ log.message }}
+                                {{ result.message }}
                             </p>
                             <p
-                                v-if="(log.data as Record<string, unknown>)?.url"
+                                v-if="result.url"
                                 class="mt-0.5 truncate font-mono text-xs text-muted-foreground"
                             >
-                                {{
-                                    (log.data as Record<string, unknown>).url
-                                }}
+                                {{ result.url }}
                             </p>
                         </div>
                     </div>
