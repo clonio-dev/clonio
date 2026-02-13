@@ -157,6 +157,29 @@ final readonly class DocumentationRepository
     }
 
     /**
+     * Check for dark/light themed image variants in a chapter directory.
+     *
+     * @return array{hasDark: bool, hasLight: bool}
+     */
+    public function resolveThemedImageVariants(string $chapterSlug, string $filename): array
+    {
+        $docsPath = config('docs.path');
+        $chapterDir = $this->findDirectoryBySlug($docsPath, $chapterSlug);
+
+        if ($chapterDir === null) {
+            return ['hasDark' => false, 'hasLight' => false];
+        }
+
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        $name = pathinfo($filename, PATHINFO_FILENAME);
+
+        return [
+            'hasDark' => file_exists($chapterDir . '/' . $name . '.dark.' . $extension),
+            'hasLight' => file_exists($chapterDir . '/' . $name . '.light.' . $extension),
+        ];
+    }
+
+    /**
      * Resolve a slug-based file path to the real filesystem path.
      *
      * Converts "getting-started/cloning-flow.svg" to "/full/path/docs/0-getting-started/cloning-flow.svg".

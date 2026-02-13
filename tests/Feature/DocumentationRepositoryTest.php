@@ -122,6 +122,27 @@ it('crosses chapter boundaries for adjacent pages', function (): void {
         ->and($adjacent['next']['page'])->toBe('supported-databases');
 });
 
+it('detects dark themed image variant when it exists', function (): void {
+    $repository = resolve(DocumentationRepository::class);
+    $result = $repository->resolveThemedImageVariants('getting-started', 'dashboard.png');
+
+    expect($result)->toBe(['hasDark' => true, 'hasLight' => false]);
+});
+
+it('returns no variants for images without themed files', function (): void {
+    $repository = resolve(DocumentationRepository::class);
+    $result = $repository->resolveThemedImageVariants('getting-started', 'cloning-flow.svg');
+
+    expect($result)->toBe(['hasDark' => false, 'hasLight' => false]);
+});
+
+it('returns no variants for non-existent chapter', function (): void {
+    $repository = resolve(DocumentationRepository::class);
+    $result = $repository->resolveThemedImageVariants('nonexistent', 'dashboard.png');
+
+    expect($result)->toBe(['hasDark' => false, 'hasLight' => false]);
+});
+
 it('returns empty collection when docs path does not exist', function (): void {
     config(['docs.path' => '/nonexistent/path']);
 
