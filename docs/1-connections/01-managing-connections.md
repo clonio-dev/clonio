@@ -16,7 +16,7 @@ Navigate to **Data Sources** in the sidebar to see all configured connections. E
 - Database name
 - Username
 - Health status with last check timestamp
-- Source/Target badge (if tagged)
+- Source badge for all production databases
 
 ![Connection Management](connections.png)
 
