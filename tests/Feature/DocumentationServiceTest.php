@@ -94,6 +94,23 @@ it('returns null previousPage for the first page', function (): void {
         ->and($page['nextPage'])->not->toBeNull();
 });
 
+it('emits themed image tags when dark variant exists', function (): void {
+    $service = resolve(DocumentationService::class);
+    $page = $service->getPage('getting-started', 'introduction');
+
+    expect($page['htmlContent'])->toContain('class="docs-img-light"')
+        ->and($page['htmlContent'])->toContain('class="docs-img-dark"')
+        ->and($page['htmlContent'])->toContain('dashboard.dark.png');
+});
+
+it('emits single image tag when no themed variants exist', function (): void {
+    $service = resolve(DocumentationService::class);
+    $page = $service->getPage('getting-started', 'introduction');
+
+    expect($page['htmlContent'])->not->toContain('cloning-flow.light.')
+        ->and($page['htmlContent'])->not->toContain('cloning-flow.dark.');
+});
+
 it('searches documentation and includes URLs', function (): void {
     $service = resolve(DocumentationService::class);
     $results = $service->search('installation');

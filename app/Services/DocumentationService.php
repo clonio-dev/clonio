@@ -136,12 +136,46 @@ final readonly class DocumentationService
                     return $matches[0];
                 }
 
+                $tag = mb_strtolower(mb_substr($matches[1], 1, 3));
+                if ($tag === 'img') {
+                    $variants = $this->repository->resolveThemedImageVariants($chapterSlug, $src);
+
+                    if ($variants['hasDark'] || $variants['hasLight']) {
+                        return $this->buildThemedImages($matches, $chapterSlug, $src, $variants);
+                    }
+                }
+
                 $newSrc = route('docs.image', ['path' => $chapterSlug . '/' . $src]);
 
                 return $matches[1] . 'src="' . $newSrc . '"' . $matches[3];
             },
             $html,
         );
+    }
+
+    /**
+     * Build two <img> tags for themed image variants.
+     *
+     * @param  array<int, string>  $matches
+     * @param  array{hasDark: bool, hasLight: bool}  $variants
+     */
+    private function buildThemedImages(array $matches, string $chapterSlug, string $src, array $variants): string
+    {
+        $extension = pathinfo($src, PATHINFO_EXTENSION);
+        $name = pathinfo($src, PATHINFO_FILENAME);
+
+        $lightSrc = $variants['hasLight']
+            ? route('docs.image', ['path' => $chapterSlug . '/' . $name . '.light.' . $extension])
+            : route('docs.image', ['path' => $chapterSlug . '/' . $src]);
+
+        $darkSrc = $variants['hasDark']
+            ? route('docs.image', ['path' => $chapterSlug . '/' . $name . '.dark.' . $extension])
+            : route('docs.image', ['path' => $chapterSlug . '/' . $src]);
+
+        $lightTag = $matches[1] . 'src="' . $lightSrc . '"' . ' class="docs-img-light"' . $matches[3];
+        $darkTag = $matches[1] . 'src="' . $darkSrc . '"' . ' class="docs-img-dark"' . $matches[3];
+
+        return $lightTag . $darkTag;
     }
 
     /**
