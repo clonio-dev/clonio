@@ -31,7 +31,7 @@
     },
     "dependencies": {
         "@inertiajs/vue3": "^2.3.13",
-        "@vueuse/core": "^14.2.0",
+        "@vueuse/core": "^14.2.1",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "laravel-vite-plugin": "^2.1.0",
