@@ -306,9 +306,7 @@ function resumeCloning(cloning: Cloning) {
                                             v-if="cloning.is_scheduled"
                                             class="flex items-center gap-1.5 text-sm text-muted-foreground"
                                         >
-                                            <Clock
-                                                class="size-3.5 shrink-0"
-                                            />
+                                            <Clock class="size-3.5 shrink-0" />
                                             {{ cloning.schedule }}
                                         </div>
                                         <div

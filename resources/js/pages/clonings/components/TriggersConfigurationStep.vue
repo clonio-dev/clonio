@@ -181,7 +181,9 @@ function copyApiUrl() {
                         <Checkbox
                             id="webhook_success_checkbox"
                             :model-value="webhookOnSuccess.enabled"
-                            @update:model-value="webhookOnSuccess.enabled = !!$event"
+                            @update:model-value="
+                                webhookOnSuccess.enabled = !!$event
+                            "
                         />
                         <Label
                             for="webhook_success_checkbox"
@@ -211,8 +213,9 @@ function copyApiUrl() {
                                 <Select
                                     :model-value="webhookOnSuccess.method"
                                     @update:model-value="
-                                        webhookOnSuccess.method =
-                                            String($event ?? 'POST')
+                                        webhookOnSuccess.method = String(
+                                            $event ?? 'POST',
+                                        )
                                     "
                                 >
                                     <SelectTrigger id="success_method">
@@ -258,7 +261,9 @@ function copyApiUrl() {
                         <Checkbox
                             id="webhook_failure_checkbox"
                             :model-value="webhookOnFailure.enabled"
-                            @update:model-value="webhookOnFailure.enabled = !!$event"
+                            @update:model-value="
+                                webhookOnFailure.enabled = !!$event
+                            "
                         />
                         <Label
                             for="webhook_failure_checkbox"
@@ -288,8 +293,9 @@ function copyApiUrl() {
                                 <Select
                                     :model-value="webhookOnFailure.method"
                                     @update:model-value="
-                                        webhookOnFailure.method =
-                                            String($event ?? 'POST')
+                                        webhookOnFailure.method = String(
+                                            $event ?? 'POST',
+                                        )
                                     "
                                 >
                                     <SelectTrigger id="failure_method">

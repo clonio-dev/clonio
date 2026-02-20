@@ -662,7 +662,9 @@ function getTypeColor(type: string): string {
                         <Checkbox
                             id="keep-unknown"
                             :model-value="keepUnknownTablesOnTarget"
-                            @update:model-value="keepUnknownTablesOnTarget = !!$event"
+                            @update:model-value="
+                                keepUnknownTablesOnTarget = !!$event
+                            "
                         />
                         <label
                             for="keep-unknown"

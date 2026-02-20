@@ -135,9 +135,7 @@ watch(
                     <div>
                         <SheetTitle class="text-lg">
                             {{
-                                isEditing
-                                    ? 'Edit Connection'
-                                    : 'New Connection'
+                                isEditing ? 'Edit Connection' : 'New Connection'
                             }}
                         </SheetTitle>
                         <SheetDescription class="text-xs">
@@ -244,7 +242,9 @@ watch(
                                 <Checkbox
                                     id="is_production_stage"
                                     :model-value="isProduction"
-                                    @update:model-value="isProduction = !!$event"
+                                    @update:model-value="
+                                        isProduction = !!$event
+                                    "
                                     class="data-[state=checked]:border-amber-500 data-[state=checked]:bg-amber-500"
                                 />
                                 <Label
@@ -304,9 +304,7 @@ watch(
                                     'border-destructive focus-visible:ring-destructive/30':
                                         errors.port,
                                 }"
-                                :default-value="
-                                    connection?.port?.toString()
-                                "
+                                :default-value="connection?.port?.toString()"
                             />
                             <InputError :message="errors.port" />
                         </div>

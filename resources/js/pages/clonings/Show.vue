@@ -141,9 +141,7 @@ function deleteFailedRuns() {
             'Are you sure you want to delete all failed runs for this cloning? This cannot be undone.',
         )
     ) {
-        router.delete(
-            CloningController.destroyFailedRuns(props.cloning).url,
-        );
+        router.delete(CloningController.destroyFailedRuns(props.cloning).url);
     }
 }
 
@@ -324,10 +322,7 @@ const anonymizationStats = computed(() => {
                                 </div>
 
                                 <!-- Paused state -->
-                                <div
-                                    v-if="cloning.is_paused"
-                                    class="space-y-2"
-                                >
+                                <div v-if="cloning.is_paused" class="space-y-2">
                                     <div
                                         class="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
                                     >
@@ -337,9 +332,7 @@ const anonymizationStats = computed(() => {
                                         </span>
                                     </div>
                                     <p
-                                        v-if="
-                                            cloning.consecutive_failures > 0
-                                        "
+                                        v-if="cloning.consecutive_failures > 0"
                                         class="text-xs text-muted-foreground"
                                     >
                                         Auto-paused after
@@ -484,17 +477,13 @@ const anonymizationStats = computed(() => {
                             <CardTitle
                                 class="flex items-center gap-2 text-base font-semibold"
                             >
-                                <Webhook
-                                    class="size-4 text-muted-foreground"
-                                />
+                                <Webhook class="size-4 text-muted-foreground" />
                                 Webhooks
                             </CardTitle>
                         </CardHeader>
                         <CardContent class="space-y-3">
                             <div
-                                v-if="
-                                    triggerConfig?.webhookOnSuccess?.enabled
-                                "
+                                v-if="triggerConfig?.webhookOnSuccess?.enabled"
                                 class="space-y-1"
                             >
                                 <div
@@ -506,15 +495,11 @@ const anonymizationStats = computed(() => {
                                 <p
                                     class="truncate pl-5.5 text-xs text-muted-foreground"
                                 >
-                                    {{
-                                        triggerConfig.webhookOnSuccess.url
-                                    }}
+                                    {{ triggerConfig.webhookOnSuccess.url }}
                                 </p>
                             </div>
                             <div
-                                v-if="
-                                    triggerConfig?.webhookOnFailure?.enabled
-                                "
+                                v-if="triggerConfig?.webhookOnFailure?.enabled"
                                 class="space-y-1"
                             >
                                 <div
@@ -526,9 +511,7 @@ const anonymizationStats = computed(() => {
                                 <p
                                     class="truncate pl-5.5 text-xs text-muted-foreground"
                                 >
-                                    {{
-                                        triggerConfig.webhookOnFailure.url
-                                    }}
+                                    {{ triggerConfig.webhookOnFailure.url }}
                                 </p>
                             </div>
                         </CardContent>

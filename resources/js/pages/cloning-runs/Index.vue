@@ -15,9 +15,22 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { convertDuration } from '@/lib/date';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
-import type { CloningRun, CloningRunInitiator, CloningRunsIndexProps } from '@/types/cloning.types';
+import type {
+    CloningRun,
+    CloningRunInitiator,
+    CloningRunsIndexProps,
+} from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowRight, Clock, Plus, RefreshCw, Send, Trash2, User, Zap } from 'lucide-vue-next';
+import {
+    ArrowRight,
+    Clock,
+    Plus,
+    RefreshCw,
+    Send,
+    Trash2,
+    User,
+    Zap,
+} from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const props = defineProps<CloningRunsIndexProps>();

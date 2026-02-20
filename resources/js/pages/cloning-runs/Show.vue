@@ -7,10 +7,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { convertDuration, formatDate } from '@/lib/date';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
-import {
-    CloningRunShowProps,
-    CloningRunStatus,
-} from '@/types/cloning.types';
+import { CloningRunShowProps, CloningRunStatus } from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     AlertCircle,
@@ -412,7 +409,10 @@ useAutoRefresh(
                                 class="mt-0.5 truncate font-mono text-xs text-muted-foreground"
                             >
                                 {{ result.url }}
-                                (<span class="text-xs">{{ formatDate(result.timestamp) }}</span>)
+                                (<span class="text-xs">{{
+                                    formatDate(result.timestamp)
+                                }}</span
+                                >)
                             </p>
                         </div>
                     </div>
