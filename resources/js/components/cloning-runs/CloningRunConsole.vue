@@ -430,7 +430,7 @@ defineExpose({
                     />
 
                     <!-- Message -->
-                    <div class="flex-1">
+                    <div class="flex-1 text-slate-200/80">
                         <span
                             class="text-slate-200"
                             :class="{
