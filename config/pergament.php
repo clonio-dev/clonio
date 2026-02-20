@@ -91,7 +91,7 @@ return [
     */
 
     'blog' => [
-        'enabled' => true,
+        'enabled' => false,
         'path' => 'blog',
         'url_prefix' => 'blog',
         'title' => 'Blog',
@@ -113,7 +113,7 @@ return [
     */
 
     'pages' => [
-        'enabled' => true,
+        'enabled' => false,
         'path' => 'pages',
     ],
 
