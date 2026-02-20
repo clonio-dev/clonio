@@ -13,6 +13,7 @@ use App\Data\TableSchema;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
 use stdClass;
+use Throwable;
 
 /**
  * PostgreSQL SchemaInspector
@@ -53,16 +54,30 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
 
     public function getDatabaseMetadata(Connection $connection): array
     {
-        $version = $connection->selectOne('SELECT version() as version');
-
-        return [
-            // phpstan-ignore-next-line
-            'version' => $version->version ?? null,
-            // phpstan-ignore property.nonObject
-            'encoding' => $connection->selectOne('SHOW server_encoding')->server_encoding ?? null,
-            // phpstan-ignore-next-line
-            'collation' => $connection->selectOne('SHOW lc_collate')->lc_collate ?? null,
+        $metadata = [
+            'version' => null,
+            'encoding' => null,
+            'collation' => null,
         ];
+
+        try {
+            $metadata['version'] = $connection->selectOne('SHOW server_version')->server_version ?? null;
+        } catch (Throwable) {
+        }
+
+        try {
+            /** @var object{version: string} $version */
+            $metadata['encoding'] = $connection->selectOne('SHOW server_encoding')->server_encoding ?? null;
+        } catch (Throwable) {
+        }
+
+        try {
+            /** @var object{version: string} $version */
+            $metadata['collation'] = $connection->selectOne('SHOW lc_collate')->lc_collate ?? null;
+        } catch (Throwable) {
+        }
+
+        return $metadata;
     }
 
     protected function getColumns(Connection $connection, string $tableName): Collection

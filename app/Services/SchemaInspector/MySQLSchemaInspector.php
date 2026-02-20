@@ -12,6 +12,7 @@ use App\Data\TableMetricsData;
 use App\Data\TableSchema;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
+use Throwable;
 
 class MySQLSchemaInspector extends AbstractSchemaInspector
 {
@@ -51,14 +52,23 @@ class MySQLSchemaInspector extends AbstractSchemaInspector
 
     public function getDatabaseMetadata(Connection $connection): array
     {
-        $result = $connection->selectOne('
-            SELECT
-                VERSION() as version,
-                DEFAULT_CHARACTER_SET_NAME as charset,
-                DEFAULT_COLLATION_NAME as collation
-            FROM INFORMATION_SCHEMA.SCHEMATA
-            WHERE SCHEMA_NAME = ?
-        ', [$connection->getDatabaseName()]);
+        try {
+            $result = $connection->selectOne(
+                'SELECT
+                    VERSION() as version,
+                    DEFAULT_CHARACTER_SET_NAME as charset,
+                    DEFAULT_COLLATION_NAME as collation
+                FROM INFORMATION_SCHEMA.SCHEMATA
+                WHERE SCHEMA_NAME = ?',
+                [$connection->getDatabaseName()]
+            );
+        } catch (Throwable) {
+            return [
+                'version' => null,
+                'charset' => null,
+                'collation' => null,
+            ];
+        }
 
         // @phpstan-ignore return.type
         return [

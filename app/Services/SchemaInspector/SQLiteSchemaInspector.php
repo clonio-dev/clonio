@@ -13,6 +13,7 @@ use App\Data\TableSchema;
 use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
+use Throwable;
 
 /**
  * SQLite SchemaInspector
@@ -49,12 +50,22 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
 
     public function getDatabaseMetadata(Connection $connection): array
     {
-        $version = $connection->selectOne('SELECT sqlite_version() as version');
-
-        return [
-            'version' => $version->version ?? null,
-            'encoding' => $connection->selectOne('PRAGMA encoding')->encoding ?? null,
+        $metadata = [
+            'version' => null,
+            'encoding' => null,
         ];
+
+        try {
+            $metadata['version'] = $connection->selectOne('SELECT sqlite_version() as version')->version ?? null;
+        } catch (Throwable) {
+        }
+
+        try {
+            $metadata['encoding'] = $connection->selectOne('PRAGMA encoding')->encoding ?? null;
+        } catch (Throwable) {
+        }
+
+        return $metadata;
     }
 
     protected function getColumns(Connection $connection, string $tableName): Collection
