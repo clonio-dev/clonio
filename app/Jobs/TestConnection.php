@@ -20,7 +20,10 @@ use RuntimeException;
 
 class TestConnection implements ShouldQueue
 {
-    use Batchable, LogsProcessSteps, Queueable, TransferBatchJob;
+    use Batchable;
+    use LogsProcessSteps;
+    use Queueable;
+    use TransferBatchJob;
 
     public int $tries = 2;
 
@@ -68,9 +71,9 @@ class TestConnection implements ShouldQueue
             $metadata = $inspector->getDatabaseMetadata($connection);
 
             return $metadata['version'] ?? null;
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             // If we can't get the version, that's okay - connection still works
-            Log::warning('Could not retrieve DBMS version: ' . $e->getMessage());
+            Log::warning('Could not retrieve DBMS version: ' . $exception->getMessage());
 
             return null;
         }

@@ -21,7 +21,12 @@ use Throwable;
 
 class DropUnknownTables implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, HandlesExceptions, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
+    use Batchable;
+    use HandlesExceptions;
+    use InteractsWithQueue;
+    use LogsProcessSteps;
+    use Queueable;
+    use TransferBatchJob;
 
     public int $tries = 2;
 
@@ -49,7 +54,7 @@ class DropUnknownTables implements ShouldBeEncrypted, ShouldQueue
             foreach ($unknownTableNames as $unknownTableName) {
                 $this->tableName = $unknownTableName;
                 $targetSchema->drop($unknownTableName);
-                $this->logSuccess('table_dropped', "Dropped table {$unknownTableName} from target database");
+                $this->logSuccess('table_dropped', sprintf('Dropped table %s from target database', $unknownTableName));
             }
         } catch (QueryException $e) {
             $this->handleQueryException($e);

@@ -42,12 +42,18 @@ Route::prefix('clonings')
 
         Route::post('/{cloning}/resume', [CloningController::class, 'resume'])
             ->name('resume');
+
+        Route::delete('/{cloning}/failed-runs', [CloningController::class, 'destroyFailedRuns'])
+            ->name('destroy-failed-runs');
     });
 
 // Cloning runs
 Route::prefix('cloning-runs')
     ->name('cloning-runs.')
     ->group(function (): void {
+        Route::delete('/failed', [CloningRunController::class, 'destroyFailed'])
+            ->name('destroy-failed');
+
         Route::get('/', [CloningRunController::class, 'index'])
             ->name('index');
 

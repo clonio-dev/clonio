@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\CloningRunLogLevel;
 use App\Enums\CloningRunStatus;
+use Database\Factories\CloningRunFactory;
 use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -32,20 +34,28 @@ use Illuminate\Support\Carbon;
  * @property string|null $audit_hash
  * @property string|null $audit_signature
  * @property Carbon|null $audit_signed_at
+ * @property array<int, array<string, mixed>>|null $webhook_results
+ * @property string|null $public_token
  * @property-read User $user
  * @property-read Cloning|null $cloning
  * @property-read ?Batch $batch
  * @property-read Collection<int, CloningRunLog> $logs
  * @property-read int|null $duration
+ * @property-read string $initiator
+ * @property-read CloningRunLog|null $firstLog
  *
  * @mixin Model
  */
 class CloningRun extends Model
 {
-    /** @use HasFactory<\Database\Factories\CloningRunFactory> */
+    /** @use HasFactory<CloningRunFactory> */
     use HasFactory;
 
     protected $table = 'cloning_runs';
+
+    protected $appends = ['initiator'];
+
+    protected $hidden = ['firstLog', 'initiatorLog'];
 
     protected $fillable = [
         'user_id',
@@ -62,6 +72,8 @@ class CloningRun extends Model
         'audit_hash',
         'audit_signature',
         'audit_signed_at',
+        'webhook_results',
+        'public_token',
     ];
 
     public function casts(): array
@@ -75,6 +87,7 @@ class CloningRun extends Model
             'progress_percent' => 'integer',
             'config_snapshot' => 'array',
             'audit_signed_at' => 'datetime',
+            'webhook_results' => 'array',
         ];
     }
 
@@ -110,6 +123,36 @@ class CloningRun extends Model
         return $this->hasMany(CloningRunLog::class, 'run_id');
     }
 
+    /**
+     * @return HasOne<CloningRunLog, CloningRun>
+     */
+    public function firstLog(): HasOne
+    {
+        return $this->hasOne(CloningRunLog::class, 'run_id')->oldestOfMany();
+    }
+
+    /**
+     * @return HasOne<CloningRunLog, CloningRun>
+     */
+    public function initiatorLog(): HasOne
+    {
+        return $this->hasOne(CloningRunLog::class, 'run_id')
+            ->ofMany(['id' => 'min'], function ($query): void {
+                $query->whereIn('event_type', ['user_initiated', 'api_triggered', 'scheduled_cloning_run_created']);
+            });
+    }
+
+    /**
+     * @param  array<string, mixed>  $result
+     */
+    public function addWebhookResult(array $result): void
+    {
+        $results = $this->webhook_results ?? [];
+        $results[] = array_merge($result, ['timestamp' => now()->toIso8601String()]);
+
+        $this->updateQuietly(['webhook_results' => $results]);
+    }
+
     public function log(string $eventType, array $data = [], string|CloningRunLogLevel $level = CloningRunLogLevel::INFO, ?string $message = null): CloningRunLog
     {
         return $this->logs()->create([
@@ -124,6 +167,22 @@ class CloningRun extends Model
     /**
      * Accessors
      */
+    protected function getInitiatorAttribute(): string
+    {
+        $log = $this->initiatorLog;
+
+        if (! $log) {
+            return 'manual';
+        }
+
+        return match ($log->event_type) {
+            'user_initiated' => 'user',
+            'api_triggered' => 'api',
+            'scheduled_cloning_run_created' => 'scheduler',
+            default => 'manual',
+        };
+    }
+
     protected function getDurationAttribute(): ?int
     {
         if (! $this->finished_at || ! $this->started_at) {
@@ -194,12 +253,13 @@ class CloningRun extends Model
         return match ($eventType) {
             'cloning_run_created' => 'Cloning run created',
             'scheduled_cloning_run_created' => 'Run was initiated by a schedule',
-            'batch_started' => "Batch started with {$data['total_jobs']} jobs",
-            'table_started' => "Processing table: {$data['table']}",
-            'table_completed' => "Table {$data['table']} completed: {$data['rows_processed']} rows",
-            'table_failed' => "Table {$data['table']} failed: {$data['error']}",
-            'batch_completed' => "Batch completed in {$data['duration']}s",
-            'batch_failed' => "Batch failed: {$data['error']}",
+            'api_triggered' => 'Run was initiated by an API trigger',
+            'batch_started' => sprintf('Batch started with %d jobs', $data['total_jobs']),
+            'table_started' => 'Processing table: ' . $data['table'],
+            'table_completed' => sprintf('Table %s completed: %d rows', $data['table'], $data['rows_processed']),
+            'table_failed' => sprintf('Table %s failed: %s', $data['table'], $data['error']),
+            'batch_completed' => sprintf('Batch completed in %ds', $data['duration']),
+            'batch_failed' => 'Batch failed: ' . $data['error'],
             'batch_cancelled' => 'Cloning run was cancelled',
             default => $eventType,
         };

@@ -11,6 +11,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | SQL Query Logging
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, all SQL queries will be logged to Log::debug() with
+    | their bindings and execution time. Useful for debugging.
+    |
+    */
+
+    'log_sql_queries' => env('LOG_SQL_QUERIES', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Log Channel
     |--------------------------------------------------------------------------
     |

@@ -27,8 +27,8 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
         // Add primary key
         $primaryKey = $table->getPrimaryKey();
         if ($primaryKey instanceof IndexSchema) {
-            $columnList = implode(', ', array_map(fn (string $c): string => "`{$c}`", $primaryKey->columns));
-            $columns[] = "PRIMARY KEY ({$columnList})";
+            $columnList = implode(', ', array_map(fn (string $c): string => sprintf('`%s`', $c), $primaryKey->columns));
+            $columns[] = sprintf('PRIMARY KEY (%s)', $columnList);
         }
 
         $sql = "CREATE TABLE `{$table->name}` (\n";
@@ -37,13 +37,15 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
 
         // Add table metadata
         if (isset($table->metadata['engine'])) {
-            $sql .= " ENGINE={$table->metadata['engine']}";
+            $sql .= ' ENGINE=' . $table->metadata['engine'];
         }
+
         if (isset($table->metadata['charset'])) {
-            $sql .= " DEFAULT CHARSET={$table->metadata['charset']}";
+            $sql .= ' DEFAULT CHARSET=' . $table->metadata['charset'];
         }
+
         if (isset($table->metadata['collation'])) {
-            $sql .= " COLLATE={$table->metadata['collation']}";
+            $sql .= ' COLLATE=' . $table->metadata['collation'];
         }
 
         return $sql;
@@ -51,7 +53,7 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildCreateIndex(string $tableName, IndexSchema $index): string
     {
-        $columnList = implode(', ', array_map(fn (string $c): string => "`{$c}`", $index->columns));
+        $columnList = implode(', ', array_map(fn (string $c): string => sprintf('`%s`', $c), $index->columns));
 
         $type = match ($index->type) {
             'unique' => 'UNIQUE INDEX',
@@ -60,35 +62,35 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
             default => 'INDEX',
         };
 
-        return "CREATE {$type} `{$index->name}` ON `{$tableName}` ({$columnList})";
+        return sprintf('CREATE %s `%s` ON `%s` (%s)', $type, $index->name, $tableName, $columnList);
     }
 
     public function buildAddForeignKey(string $tableName, ForeignKeySchema $fk): string
     {
-        $columns = implode(', ', array_map(fn (string $c): string => "`{$c}`", $fk->columns));
-        $refColumns = implode(', ', array_map(fn (string $c): string => "`{$c}`", $fk->referencedColumns));
+        $columns = implode(', ', array_map(fn (string $c): string => sprintf('`%s`', $c), $fk->columns));
+        $refColumns = implode(', ', array_map(fn (string $c): string => sprintf('`%s`', $c), $fk->referencedColumns));
 
-        return "ALTER TABLE `{$tableName}` " .
-            "ADD CONSTRAINT `{$fk->name}` " .
-            "FOREIGN KEY ({$columns}) " .
-            "REFERENCES `{$fk->referencedTable}` ({$refColumns}) " .
-            "ON UPDATE {$fk->onUpdate} " .
-            "ON DELETE {$fk->onDelete}";
+        return sprintf('ALTER TABLE `%s` ', $tableName) .
+            sprintf('ADD CONSTRAINT `%s` ', $fk->name) .
+            sprintf('FOREIGN KEY (%s) ', $columns) .
+            sprintf('REFERENCES `%s` (%s) ', $fk->referencedTable, $refColumns) .
+            sprintf('ON UPDATE %s ', $fk->onUpdate) .
+            ('ON DELETE ' . $fk->onDelete);
     }
 
     public function buildAddColumn(string $tableName, ColumnSchema $column): string
     {
-        return "ALTER TABLE `{$tableName}` ADD COLUMN " . $this->buildColumnDefinition($column);
+        return sprintf('ALTER TABLE `%s` ADD COLUMN ', $tableName) . $this->buildColumnDefinition($column);
     }
 
     public function buildModifyColumn(string $tableName, ColumnSchema $column): string
     {
-        return "ALTER TABLE `{$tableName}` MODIFY COLUMN " . $this->buildColumnDefinition($column);
+        return sprintf('ALTER TABLE `%s` MODIFY COLUMN ', $tableName) . $this->buildColumnDefinition($column);
     }
 
     public function buildColumnDefinition(ColumnSchema $column): string
     {
-        $def = "`{$column->name}` " . $this->buildDataType($column);
+        $def = sprintf('`%s` ', $column->name) . $this->buildDataType($column);
 
         if (! $column->nullable) {
             $def .= ' NOT NULL';
@@ -121,9 +123,9 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
 
         if ($column->length !== null) {
             if ($column->scale !== null) {
-                $type .= "({$column->length},{$column->scale})";
+                $type .= sprintf('(%s,%s)', $column->length, $column->scale);
             } else {
-                $type .= "({$column->length})";
+                $type .= sprintf('(%s)', $column->length);
             }
         }
 
@@ -143,6 +145,7 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
         if (is_string($value)) {
             return $this->quote($value);
         }
+
         if (is_numeric($value)) {
             return (string) $value;
         }

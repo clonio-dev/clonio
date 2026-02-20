@@ -77,12 +77,25 @@ class CloningRunController extends Controller
     }
 
     /**
+     * Delete all failed runs for the authenticated user.
+     */
+    public function destroyFailed(): RedirectResponse
+    {
+        $deleted = CloningRun::query()
+            ->where('user_id', auth()->id())
+            ->failed()
+            ->delete();
+
+        return back()->with('success', $deleted . ' failed run(s) deleted');
+    }
+
+    /**
      * Display a listing of runs (optional, can filter by cloning).
      */
     public function index(): Response
     {
         $runs = CloningRun::query()
-            ->with(['cloning:id,title,source_connection_id,target_connection_id', 'cloning.sourceConnection:id,name,type', 'cloning.targetConnection:id,name,type'])
+            ->with(['cloning:id,title,source_connection_id,target_connection_id', 'cloning.sourceConnection:id,name,type', 'cloning.targetConnection:id,name,type', 'initiatorLog'])
             ->where('user_id', auth()->id())
             ->latest('id')
             ->paginate(10);
@@ -123,24 +136,16 @@ class CloningRunController extends Controller
         ]);
     }
 
+    public function publicAuditLog(string $token, AuditService $auditService): View
+    {
+        $run = CloningRun::query()->where('public_token', $token)->firstOrFail();
+
+        return $this->renderAuditTrail($run, $auditService);
+    }
+
     public function auditlog(CloningRun $run, AuditService $auditService): View
     {
-        $run->loadMissing([
-            'cloning',
-            'cloning.sourceConnection',
-            'cloning.targetConnection',
-            'cloning.user',
-            'logs',
-            'user',
-        ]);
-        $verification = $auditService->getVerificationDetails($run);
-
-        return view('reports.audit-trail', [
-            'run' => $run,
-            'config' => $run->config_snapshot,
-            'logs' => $run->logs->sortBy('id'),
-            'verification' => $verification,
-        ]);
+        return $this->renderAuditTrail($run, $auditService);
     }
 
     /**
@@ -184,7 +189,7 @@ class CloningRunController extends Controller
 
         $logs = $run->logs()->oldest()->get();
 
-        $filename = "cloning-run-{$run->id}-logs.json";
+        $filename = sprintf('cloning-run-%d-logs.json', $run->id);
 
         return response()->streamDownload(function () use ($run, $logs): void {
             echo json_encode([
@@ -200,6 +205,26 @@ class CloningRunController extends Controller
             ], JSON_PRETTY_PRINT);
         }, $filename, [
             'Content-Type' => 'application/json',
+        ]);
+    }
+
+    private function renderAuditTrail(CloningRun $run, AuditService $auditService): View
+    {
+        $run->loadMissing([
+            'cloning',
+            'cloning.sourceConnection',
+            'cloning.targetConnection',
+            'cloning.user',
+            'logs',
+            'user',
+        ]);
+        $verification = $auditService->getVerificationDetails($run);
+
+        return view('reports.audit-trail', [
+            'run' => $run,
+            'config' => $run->config_snapshot,
+            'logs' => $run->logs->sortBy('id'),
+            'verification' => $verification,
         ]);
     }
 

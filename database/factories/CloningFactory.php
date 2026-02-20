@@ -28,6 +28,8 @@ class CloningFactory extends Factory
             'target_connection_id' => DatabaseConnection::factory()->sqlite()->testDatabase(),
             'anonymization_config' => null,
             'schedule' => null,
+            'trigger_config' => null,
+            'api_trigger_token' => null,
             'is_scheduled' => false,
             'is_paused' => false,
             'consecutive_failures' => 0,
@@ -78,6 +80,35 @@ class CloningFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'is_paused' => true,
+        ]);
+    }
+
+    /**
+     * State: With API trigger enabled
+     */
+    public function withApiTrigger(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'trigger_config' => [
+                'webhook_on_success' => ['enabled' => false, 'url' => '', 'method' => 'POST', 'headers' => [], 'secret' => ''],
+                'webhook_on_failure' => ['enabled' => false, 'url' => '', 'method' => 'POST', 'headers' => [], 'secret' => ''],
+                'api_trigger' => ['enabled' => true],
+            ],
+            'api_trigger_token' => bin2hex(random_bytes(32)),
+        ]);
+    }
+
+    /**
+     * State: With webhooks enabled
+     */
+    public function withWebhooks(string $successUrl = 'https://example.com/success', string $failureUrl = 'https://example.com/failure'): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'trigger_config' => [
+                'webhook_on_success' => ['enabled' => true, 'url' => $successUrl, 'method' => 'POST', 'headers' => [], 'secret' => ''],
+                'webhook_on_failure' => ['enabled' => true, 'url' => $failureUrl, 'method' => 'POST', 'headers' => [], 'secret' => ''],
+                'api_trigger' => ['enabled' => false],
+            ],
         ]);
     }
 

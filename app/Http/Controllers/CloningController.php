@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\Clonio\ExecuteCloning;
+use App\Data\TriggerConfigData;
 use App\Enums\CloningRunStatus;
 use App\Http\Requests\StoreCloningRequest;
 use App\Http\Requests\UpdateCloningRequest;
@@ -92,8 +93,18 @@ class CloningController extends Controller
         $anonymizationConfigJson = $request->validated('anonymization_config');
         $anonymizationConfig = $anonymizationConfigJson ? json_decode((string) $anonymizationConfigJson, true) : null;
 
+        $triggerConfigJson = $request->validated('trigger_config');
+        $triggerConfig = $triggerConfigJson ? json_decode((string) $triggerConfigJson, true) : null;
+        $triggerConfigData = TriggerConfigData::from($triggerConfig);
+
         $isScheduled = $request->boolean('is_scheduled', false);
         $schedule = $isScheduled ? $request->validated('schedule') : null;
+
+        // Generate API trigger token if API trigger is enabled
+        $apiTriggerToken = null;
+        if ($triggerConfigData->apiTrigger->enabled) {
+            $apiTriggerToken = bin2hex(random_bytes(32));
+        }
 
         /** @var Cloning $cloning */
         $cloning = Cloning::query()->create([
@@ -103,6 +114,8 @@ class CloningController extends Controller
             'target_connection_id' => $request->validated('target_connection_id'),
             'anonymization_config' => $anonymizationConfig,
             'schedule' => $schedule,
+            'trigger_config' => $triggerConfig,
+            'api_trigger_token' => $apiTriggerToken,
             'is_scheduled' => $isScheduled,
             'next_run_at' => Cloning::calculateNextRunAt($schedule),
         ]);
@@ -135,10 +148,21 @@ class CloningController extends Controller
             ->get()
             ->map(fn (CloningRun $run): CloningRun => $this->enrichRunWithBatchProgress($run));
 
+        $apiTriggerUrl = $cloning->api_trigger_token
+            ? url('/api/trigger/' . $cloning->api_trigger_token)
+            : null;
+
+        $lastSuccessfulRun = $cloning->runs()->completed()->whereNotNull('public_token')->latest('id')->first();
+        $lastAuditLogUrl = $lastSuccessfulRun
+            ? url('/audit/' . $lastSuccessfulRun->public_token)
+            : null;
+
         return Inertia::render('clonings/Show', [
             'cloning' => $cloning,
             'runs' => $runs,
             'estimatedDuration' => $estimatedDurationCalculator->calculate($cloning),
+            'api_trigger_url' => $apiTriggerUrl,
+            'lastAuditLogUrl' => $lastAuditLogUrl,
         ]);
     }
 
@@ -163,10 +187,15 @@ class CloningController extends Controller
             ->get(['id', 'name', 'type'])
             ->map(fn ($c): array => ['value' => $c->id, 'label' => $c->name, 'type' => $c->type->value]);
 
+        $apiTriggerUrl = $cloning->api_trigger_token
+            ? url('/api/trigger/' . $cloning->api_trigger_token)
+            : null;
+
         return Inertia::render('clonings/Edit', [
             'cloning' => $cloning,
             'prod_connections' => $prodConnections,
             'test_connections' => $testConnections,
+            'api_trigger_url' => $apiTriggerUrl,
         ]);
     }
 
@@ -180,8 +209,22 @@ class CloningController extends Controller
         $anonymizationConfigJson = $request->validated('anonymization_config');
         $anonymizationConfig = $anonymizationConfigJson ? json_decode((string) $anonymizationConfigJson, true) : null;
 
+        $triggerConfigJson = $request->validated('trigger_config');
+        $triggerConfig = $triggerConfigJson ? json_decode((string) $triggerConfigJson, true) : null;
+        $triggerConfigData = TriggerConfigData::from($triggerConfig);
+
         $isScheduled = $request->boolean('is_scheduled', false);
         $schedule = $isScheduled ? $request->validated('schedule') : null;
+
+        // Manage API trigger token
+        $apiTriggerEnabled = $triggerConfigData->apiTrigger->enabled;
+        $apiTriggerToken = $cloning->api_trigger_token;
+
+        if ($apiTriggerEnabled && ! $apiTriggerToken) {
+            $apiTriggerToken = bin2hex(random_bytes(32));
+        } elseif (! $apiTriggerEnabled) {
+            $apiTriggerToken = null;
+        }
 
         $cloning->update([
             'title' => $request->validated('title'),
@@ -189,6 +232,8 @@ class CloningController extends Controller
             'target_connection_id' => $request->validated('target_connection_id'),
             'anonymization_config' => $anonymizationConfig,
             'schedule' => $schedule,
+            'trigger_config' => $triggerConfig,
+            'api_trigger_token' => $apiTriggerToken,
             'is_scheduled' => $isScheduled,
             'next_run_at' => Cloning::calculateNextRunAt($schedule),
         ]);
@@ -246,6 +291,18 @@ class CloningController extends Controller
         $cloning->resume();
 
         return back()->with('success', 'Cloning resumed');
+    }
+
+    /**
+     * Delete all failed runs for the specified cloning.
+     */
+    public function destroyFailedRuns(Cloning $cloning): RedirectResponse
+    {
+        Gate::authorize('delete', $cloning);
+
+        $deleted = $cloning->runs()->failed()->delete();
+
+        return back()->with('success', $deleted . ' failed run(s) deleted');
     }
 
     /**

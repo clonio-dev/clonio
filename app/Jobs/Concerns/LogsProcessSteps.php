@@ -144,7 +144,8 @@ trait LogsProcessSteps
         if ($level === 'success') {
             $level = 'info';
         }
-        Log::{$level}("[Table: {$tableName}] [{$event}] {$message}");
+
+        Log::{$level}(sprintf('[Table: %s] [%s] %s', $tableName, $event, $message));
     }
 
     private function logErrorMessage(string $message, Collection $connectionMap): void

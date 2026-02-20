@@ -31,7 +31,13 @@ use Throwable;
 
 class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, ClassifiesError, HandlesExceptions, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
+    use Batchable;
+    use ClassifiesError;
+    use HandlesExceptions;
+    use InteractsWithQueue;
+    use LogsProcessSteps;
+    use Queueable;
+    use TransferBatchJob;
 
     public int $tries = 1;
 
@@ -53,7 +59,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
         AnonymizationService $anonymizationService,
     ): void {
-        $this->logInfo('table_started', "Starting table copy process for {$this->tableName} table");
+        $this->logInfo('table_started', sprintf('Starting table copy process for %s table', $this->tableName));
 
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
@@ -77,7 +83,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         if (! $sourceConnection->getSchemaBuilder()->hasTable($this->tableName)
             || ! $targetConnection->getSchemaBuilder()->hasTable($this->tableName)
         ) {
-            $exception = new RuntimeException("Table {$this->tableName} does not exist in source or target database.");
+            $exception = new RuntimeException(sprintf('Table %s does not exist in source or target database.', $this->tableName));
             $this->fail($exception);
             throw $exception;
         }
@@ -90,7 +96,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         $query = $sourceTable->query();
 
         $orderColumns = $sourceTable->orderColumns();
-        $this->logDebug('order_columns', "Order columns for table {$this->tableName}: " . implode(', ', $orderColumns));
+        $this->logDebug('order_columns', sprintf('Order columns for table %s: ', $this->tableName) . implode(', ', $orderColumns));
         foreach ($orderColumns as $column) {
             $query->orderBy($column);
         }
@@ -100,6 +106,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
             foreach ($this->foreignKeyFilters as $filter) {
                 $query->whereIn($filter['column'], $filter['values']);
             }
+
             $this->logDebug('fk_filters', 'Applied ' . count($this->foreignKeyFilters) . ' FK filter(s)');
         }
 
@@ -115,8 +122,9 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                 $direction = $rowSelection->strategy === RowSelectionStrategyEnum::FirstX ? 'asc' : 'desc';
                 $query->orderBy($sortColumn, $direction);
             }
+
             $query->limit($rowSelection->limit);
-            $this->logDebug('row_selection', "Applying {$rowSelection->strategy->value}: {$rowSelection->limit} rows ordered by {$sortColumn}");
+            $this->logDebug('row_selection', sprintf('Applying %s: %d rows ordered by %s', $rowSelection->strategy->value, $rowSelection->limit, $sortColumn));
         }
 
         $totalRows = 0;
@@ -132,7 +140,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
                 $this->logInfo(
                     'data_copy_started',
-                    "Starting data copy of {$totalRowCount} rows with row selection (chunk size: {$this->chunkSize})"
+                    sprintf('Starting data copy of %d rows with row selection (chunk size: %d)', $totalRowCount, $this->chunkSize)
                 );
 
                 $page = 0;
@@ -152,12 +160,13 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     foreach ($this->foreignKeyFilters as $filter) {
                         $countQuery->whereIn($filter['column'], $filter['values']);
                     }
+
                     $totalRowCount = $countQuery->count();
                 }
 
                 $this->logInfo(
                     'data_copy_started',
-                    "Starting chunked data copy of {$totalRowCount} rows (chunk size: {$this->chunkSize})"
+                    sprintf('Starting chunked data copy of %d rows (chunk size: %d)', $totalRowCount, $this->chunkSize)
                 );
 
                 $query->chunk(
@@ -184,7 +193,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
             $this->logSuccess(
                 'data_copy_completed',
-                "Data copy completed. Total rows: {$totalRows}, Failed chunks: {$failedChunks}",
+                sprintf('Data copy completed. Total rows: %d, Failed chunks: %d', $totalRows, $failedChunks),
                 data: [
                     'rows_processed' => $totalRows,
                     'failed_chunks' => $failedChunks,
@@ -193,29 +202,29 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
             );
 
             return;
-        } catch (QueryException $e) {
-            if ($this->isPermissionError($e)) {
+        } catch (QueryException $queryException) {
+            if ($this->isPermissionError($queryException)) {
                 $this->logError(
                     'data_read_permission_denied',
-                    "Insufficient permissions to read from {$this->tableName}: {$e->getMessage()}"
+                    sprintf('Insufficient permissions to read from %s: %s', $this->tableName, $queryException->getMessage())
                 );
 
-                throw new RuntimeException("Insufficient permissions to read from table {$this->tableName}. " .
-                    'Please grant SELECT privilege to the database user.', $e->getCode(), previous: $e);
+                throw new RuntimeException(sprintf('Insufficient permissions to read from table %s. ', $this->tableName) .
+                    'Please grant SELECT privilege to the database user.', $queryException->getCode(), previous: $queryException);
             }
 
             // Tabelle existiert nicht
-            if ($this->isTableNotFoundError($e)) {
+            if ($this->isTableNotFoundError($queryException)) {
                 $this->logError(
                     'table_not_found',
-                    "Table {$this->tableName} does not exist in source database: {$e->getMessage()}"
+                    sprintf('Table %s does not exist in source database: %s', $this->tableName, $queryException->getMessage())
                 );
 
-                throw new RuntimeException("Table {$this->tableName} does not exist in source database. " .
-                    'Please check the table name in your configuration.', $e->getCode(), previous: $e);
+                throw new RuntimeException(sprintf('Table %s does not exist in source database. ', $this->tableName) .
+                    'Please check the table name in your configuration.', $queryException->getCode(), previous: $queryException);
             }
 
-            throw $e;
+            throw $queryException;
         } finally {
             if ($this->disableForeignKeyConstraints) {
                 $this->logDebug('foreign_keys', 'Enabling foreign key constraints on target database');
@@ -267,7 +276,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
                 $this->logProgress(
                     'table_transfer_progress',
-                    "Transferred {$totalRows} / {$totalRowCount} rows",
+                    sprintf('Transferred %d / %d rows', $totalRows, $totalRowCount),
                     [
                         'rows_processed' => $totalRows,
                         'total_rows' => $totalRowCount,
@@ -286,7 +295,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                 if ($this->isTemporaryError($e) && $retryCount < $maxChunkRetries) {
                     $this->logWarning(
                         'chunk_retry',
-                        "Chunk failed (attempt {$retryCount}/{$maxChunkRetries}), retrying: {$e->getMessage()}"
+                        sprintf('Chunk failed (attempt %d/%d), retrying: %s', $retryCount, $maxChunkRetries, $e->getMessage())
                     );
 
                     Sleep::sleep(2 * $retryCount);
@@ -298,7 +307,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
                 $this->logError(
                     'chunk_failed',
-                    "Chunk permanently failed after {$retryCount} retries: {$e->getMessage()}"
+                    sprintf('Chunk permanently failed after %d retries: %s', $retryCount, $e->getMessage())
                 );
 
                 throw $e;

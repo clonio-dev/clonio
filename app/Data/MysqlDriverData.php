@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use PDO;
+use Pdo\Mysql;
 
 final readonly class MysqlDriverData implements ConnectionDriverData
 {
@@ -44,7 +45,7 @@ final readonly class MysqlDriverData implements ConnectionDriverData
             'strict' => $this->strict,
             'engine' => $this->engine,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => $this->ssl,
+                (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => $this->ssl,
             ]) : [],
         ];
     }

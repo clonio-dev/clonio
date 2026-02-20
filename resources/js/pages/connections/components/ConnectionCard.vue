@@ -16,6 +16,7 @@ import { router } from '@inertiajs/vue3';
 import {
     Check,
     Database,
+    Pencil,
     RotateCw,
     Server,
     Trash2,
@@ -27,7 +28,12 @@ interface Props {
     connection: Connection;
 }
 
+interface Emits {
+    (e: 'edit', connection: Connection): void;
+}
+
 const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
 
 const copied = ref(false);
 
@@ -208,6 +214,15 @@ const deleteConnection = () => {
                 </div>
             </div>
             <div class="flex gap-1">
+                <Button
+                    variant="ghost"
+                    title="Edit"
+                    class="text-accent-foreground/50 group-hover:text-accent-foreground"
+                    @click="emit('edit', props.connection)"
+                >
+                    <span class="sr-only">edit</span>
+                    <Pencil />
+                </Button>
                 <Button
                     variant="ghost"
                     title="Refresh"

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Services\DependencyResolver;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(function (): void {
     // Setup in-memory SQLite for testing
@@ -13,7 +14,7 @@ beforeEach(function (): void {
 });
 
 it('resolves simple dependency chain', function (): void {
-    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
+    $conn = DB::connection('test_deps');
 
     // Create tables with FK chain: users -> orders -> order_items
     $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
@@ -43,7 +44,7 @@ it('resolves simple dependency chain', function (): void {
 });
 
 it('handles multiple parents correctly', function (): void {
-    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
+    $conn = DB::connection('test_deps');
 
     // Create schema: users + products (no deps) -> orders -> order_items
     $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
@@ -74,11 +75,11 @@ it('handles multiple parents correctly', function (): void {
     $insertOrder = $order['insert_order'];
 
     // Both users and products must come before orders
-    expect(array_search('users', $insertOrder))->toBeLessThan(array_search('orders', $insertOrder));
-    expect(array_search('products', $insertOrder))->toBeLessThan(array_search('orders', $insertOrder));
+    expect(array_search('users', $insertOrder, true))->toBeLessThan(array_search('orders', $insertOrder, true));
+    expect(array_search('products', $insertOrder, true))->toBeLessThan(array_search('orders', $insertOrder, true));
 
     // orders must come before order_items
-    expect(array_search('orders', $insertOrder))->toBeLessThan(array_search('order_items', $insertOrder));
+    expect(array_search('orders', $insertOrder, true))->toBeLessThan(array_search('order_items', $insertOrder, true));
 
     // order_items should be last (depends on both orders and products)
     expect($insertOrder[count($insertOrder) - 1])->toBe('order_items');
@@ -99,7 +100,7 @@ it('detects circular dependencies', function (): void {
 });
 
 it('handles tables with no dependencies', function (): void {
-    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
+    $conn = DB::connection('test_deps');
 
     // Create independent tables
     $conn->statement('CREATE TABLE categories (id INTEGER PRIMARY KEY)');
@@ -118,7 +119,7 @@ it('handles tables with no dependencies', function (): void {
 });
 
 it('calculates dependency levels correctly', function (): void {
-    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
+    $conn = DB::connection('test_deps');
 
     $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
     $conn->statement('CREATE TABLE products (id INTEGER PRIMARY KEY)');
@@ -159,7 +160,7 @@ it('calculates dependency levels correctly', function (): void {
 });
 
 it('handles self-referencing tables', function (): void {
-    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
+    $conn = DB::connection('test_deps');
 
     // Create self-referencing table (employees with manager_id)
     $conn->statement('
@@ -180,7 +181,7 @@ it('handles self-referencing tables', function (): void {
 });
 
 it('ignores foreign keys to tables not in the list', function (): void {
-    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
+    $conn = DB::connection('test_deps');
 
     // Create tables where some FKs reference tables not in our list
     $conn->statement('CREATE TABLE external_table (id INTEGER PRIMARY KEY)');
@@ -210,7 +211,7 @@ it('ignores foreign keys to tables not in the list', function (): void {
 });
 
 it('formats dependency analysis for display', function (): void {
-    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
+    $conn = DB::connection('test_deps');
 
     $conn->statement('CREATE TABLE users (id INTEGER PRIMARY KEY)');
     $conn->statement('
@@ -236,7 +237,7 @@ it('formats dependency analysis for display', function (): void {
 });
 
 it('handles complex multi-level dependencies', function (): void {
-    $conn = Illuminate\Support\Facades\DB::connection('test_deps');
+    $conn = DB::connection('test_deps');
 
     // Create 4-level deep dependency chain
     $conn->statement('CREATE TABLE countries (id INTEGER PRIMARY KEY)');
@@ -309,12 +310,12 @@ it('correctly resolves the exact scenario from issue', function (): void {
 
     // Assert the critical ordering constraints:
     // 1. second_dep MUST come before source
-    $secondDepIndex = array_search('second_dep', $result);
-    $sourceIndex = array_search('source', $result);
+    $secondDepIndex = array_search('second_dep', $result, true);
+    $sourceIndex = array_search('source', $result, true);
     expect($secondDepIndex)->toBeLessThan($sourceIndex);
 
     // 2. source MUST come before one_dep
-    $oneDepIndex = array_search('one_dep', $result);
+    $oneDepIndex = array_search('one_dep', $result, true);
     expect($sourceIndex)->toBeLessThan($oneDepIndex);
 
     // 3. no_deps can be anywhere but is typically first (level 0)
@@ -343,11 +344,11 @@ it('handles complex multi-level chain correctly', function (): void {
     $result = $resolver->topologicalSort($dependencies);
 
     // Critical constraints:
-    $level0aIndex = array_search('level_0a', $result);
-    $level0bIndex = array_search('level_0b', $result);
-    $level1Index = array_search('level_1', $result);
-    $level2Index = array_search('level_2', $result);
-    $level3Index = array_search('level_3', $result);
+    $level0aIndex = array_search('level_0a', $result, true);
+    $level0bIndex = array_search('level_0b', $result, true);
+    $level1Index = array_search('level_1', $result, true);
+    $level2Index = array_search('level_2', $result, true);
+    $level3Index = array_search('level_3', $result, true);
 
     // level_0a must come before level_1
     expect($level0aIndex)->toBeLessThan($level1Index);
@@ -383,10 +384,10 @@ it('handles diamond dependency correctly', function (): void {
     $resolver = new DependencyResolver();
     $result = $resolver->topologicalSort($dependencies);
 
-    $aIndex = array_search('A', $result);
-    $bIndex = array_search('B', $result);
-    $cIndex = array_search('C', $result);
-    $dIndex = array_search('D', $result);
+    $aIndex = array_search('A', $result, true);
+    $bIndex = array_search('B', $result, true);
+    $cIndex = array_search('C', $result, true);
+    $dIndex = array_search('D', $result, true);
 
     // A must come before B and C
     expect($aIndex)->toBeLessThan($bIndex);
@@ -416,10 +417,10 @@ it('verifies INSERT order matches schema creation requirements', function (): vo
     $result = $resolver->topologicalSort($dependencies);
 
     // Users and products must come first (can be in any order)
-    $usersIndex = array_search('users', $result);
-    $productsIndex = array_search('products', $result);
-    $ordersIndex = array_search('orders', $result);
-    $orderItemsIndex = array_search('order_items', $result);
+    $usersIndex = array_search('users', $result, true);
+    $productsIndex = array_search('products', $result, true);
+    $ordersIndex = array_search('orders', $result, true);
+    $orderItemsIndex = array_search('order_items', $result, true);
 
     // users must come before orders
     expect($usersIndex)->toBeLessThan($ordersIndex);

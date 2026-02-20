@@ -34,7 +34,7 @@ class SchemaInspectorFactory
             'sqlite' => new SQLiteSchemaInspector(),
             'sqlsrv' => new SQLServerSchemaInspector(),
             default => throw new InvalidArgumentException(
-                "Unsupported database driver: {$driver}. " .
+                sprintf('Unsupported database driver: %s. ', $driver) .
                 'Supported drivers are: mysql, pgsql, sqlite, sqlsrv'
             ),
         };

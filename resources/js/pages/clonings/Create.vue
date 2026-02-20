@@ -18,8 +18,10 @@ import ConnectionFormSheet from '@/pages/connections/components/ConnectionFormSh
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import { ArrowRight, Database, Loader2, Plus } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
+import type { ScheduleData } from './components/ScheduleConfigurationStep.vue';
 import ScheduleConfigurationStep from './components/ScheduleConfigurationStep.vue';
 import TableConfigurationStep from './components/TableConfigurationStep.vue';
+import TriggersConfigurationStep from './components/TriggersConfigurationStep.vue';
 
 const props = defineProps<CloningFormProps>();
 
@@ -83,9 +85,17 @@ const breadcrumbItems: BreadcrumbItem[] = [
 // Step state
 const currentStep = ref(1);
 
-// Connection selection state
-const selectedSourceConnection = ref<string | number | null>(null);
-const selectedTargetConnection = ref<string | number | null>(null);
+// Connection selection state — pre-select if only one connection available
+const selectedSourceConnection = ref<string | number | null>(
+    props.prod_connections.length === 1
+        ? props.prod_connections[0].value
+        : null,
+);
+const selectedTargetConnection = ref<string | number | null>(
+    props.test_connections.length === 1
+        ? props.test_connections[0].value
+        : null,
+);
 
 // Combobox refs
 const sourceCombobox = ref<InstanceType<typeof Combobox> | null>(null);
@@ -104,6 +114,13 @@ const targetSchema = ref<SchemaData | null>(null);
 
 // Anonymization config from step 2
 const anonymizationConfig = ref<string>('');
+
+// Schedule data from step 3
+const scheduleData = ref<ScheduleData>({
+    executeNow: true,
+    isScheduled: false,
+    schedule: '',
+});
 
 // Sheet state for on-the-fly connection creation
 const showSourceConnectionSheet = ref(false);
@@ -220,6 +237,17 @@ function goToStep2FromStep3() {
     currentStep.value = 2;
 }
 
+// Go to step 4 with schedule data
+function goToStep4(data: ScheduleData) {
+    scheduleData.value = data;
+    currentStep.value = 4;
+}
+
+// Go back to step 3
+function goToStep3FromStep4() {
+    currentStep.value = 3;
+}
+
 // Get selected connection names for display
 const selectedSourceName = computed(() => {
     const conn = prodConnections.value.find(
@@ -326,6 +354,23 @@ function getTargetConnectionType(connectionValue: string | number): string {
                         3
                     </div>
                     <span class="text-sm font-medium">Schedule</span>
+                </div>
+                <div class="h-px w-8 bg-border" />
+                <div
+                    class="flex items-center gap-2"
+                    :class="{ 'opacity-50': currentStep !== 4 }"
+                >
+                    <div
+                        class="flex size-8 items-center justify-center rounded-full text-sm font-medium"
+                        :class="
+                            currentStep >= 4
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground'
+                        "
+                    >
+                        4
+                    </div>
+                    <span class="text-sm font-medium">Triggers</span>
                 </div>
             </div>
 
@@ -614,12 +659,21 @@ function getTargetConnectionType(connectionValue: string | number): string {
             <!-- Step 3: Schedule Configuration -->
             <ScheduleConfigurationStep
                 v-if="currentStep === 3"
+                mode="create"
+                @back="goToStep2FromStep3"
+                @next="goToStep4"
+            />
+
+            <!-- Step 4: Triggers Configuration -->
+            <TriggersConfigurationStep
+                v-if="currentStep === 4"
                 :source-connection-id="selectedSourceConnection!"
                 :target-connection-id="selectedTargetConnection!"
                 :cloning-title="cloningTitle"
                 :anonymization-config="anonymizationConfig"
+                :schedule-data="scheduleData"
                 mode="create"
-                @back="goToStep2FromStep3"
+                @back="goToStep3FromStep4"
             />
         </div>
 

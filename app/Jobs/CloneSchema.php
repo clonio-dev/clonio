@@ -23,7 +23,12 @@ use Throwable;
 
 class CloneSchema implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, HandlesExceptions, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
+    use Batchable;
+    use HandlesExceptions;
+    use InteractsWithQueue;
+    use LogsProcessSteps;
+    use Queueable;
+    use TransferBatchJob;
 
     public int $tries = 2;
 
@@ -31,12 +36,14 @@ class CloneSchema implements ShouldBeEncrypted, ShouldQueue
 
     /**
      * @param  array<int, string>  $tables  table names
+     * @param  array<string, bool>  $enforceColumnTypesMap  table name => enforce column types
      */
     public function __construct(
         public readonly ConnectionData $sourceConnectionData,
         public readonly ConnectionData $targetConnectionData,
         public readonly array $tables,
         public readonly CloningRun $run,
+        public readonly array $enforceColumnTypesMap = [],
     ) {}
 
     public function handle(
@@ -57,6 +64,7 @@ class CloneSchema implements ShouldBeEncrypted, ShouldQueue
                     $this->tableName = $tableName;
                     $this->log($level, $event, $message);
                 },
+                enforceColumnTypesMap: $this->enforceColumnTypesMap,
             );
         } catch (QueryException $e) {
             $this->handleQueryException($e);

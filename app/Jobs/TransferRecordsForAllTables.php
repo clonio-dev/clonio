@@ -26,7 +26,12 @@ use Throwable;
 
 class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, HandlesExceptions, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
+    use Batchable;
+    use HandlesExceptions;
+    use InteractsWithQueue;
+    use LogsProcessSteps;
+    use Queueable;
+    use TransferBatchJob;
 
     public int $tries = 2;
 
@@ -55,7 +60,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
                     ->recordCount();
 
                 if ($recordCount <= 0) {
-                    $this->logSuccess('table_done', "Skipped table {$tableName} because it has no records.");
+                    $this->logSuccess('table_done', sprintf('Skipped table %s because it has no records.', $tableName));
 
                     continue;
                 }
@@ -118,6 +123,7 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
             if (! $parentOptions?->rowSelection instanceof TableRowSelectionData) {
                 continue;
             }
+
             if ($parentOptions->rowSelection->strategy === RowSelectionStrategyEnum::FullTable) {
                 continue;
             }

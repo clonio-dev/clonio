@@ -26,8 +26,10 @@ class SchemaReplicator
 
     /**
      * Replicate entire database schema
+     *
+     * @param  array<string, bool>  $enforceColumnTypesMap  Table name => whether to enforce column types
      */
-    public function replicateDatabase(Connection $source, Connection $target, array $tables = [], ?callable $visitor = null): void
+    public function replicateDatabase(Connection $source, Connection $target, array $tables = [], ?callable $visitor = null, array $enforceColumnTypesMap = []): void
     {
         if ($tables === []) {
             $tables = $this->resolveTables($source);
@@ -35,14 +37,16 @@ class SchemaReplicator
 
         // Replicate tables
         foreach ($tables as $sourceTable) {
-            $this->replicateTable($source, $target, $sourceTable, $visitor);
+            $tableName = is_string($sourceTable) ? $sourceTable : $sourceTable->name;
+            $enforceColumnTypes = $enforceColumnTypesMap[$tableName] ?? false;
+            $this->replicateTable($source, $target, $sourceTable, $visitor, $enforceColumnTypes);
         }
     }
 
     /**
      * Replicate a single table
      */
-    public function replicateTable(Connection $source, Connection $target, TableSchema|string $table, ?callable $visitor = null): void
+    public function replicateTable(Connection $source, Connection $target, TableSchema|string $table, ?callable $visitor = null, bool $enforceColumnTypes = false): void
     {
         // Get table schema if string provided
         if (is_string($table)) {
@@ -57,11 +61,13 @@ class SchemaReplicator
             if ($visitor !== null) {
                 $visitor($table->name, 'replicating_table', 'Updating existing table');
             }
-            $this->updateTable($target, $table, $visitor);
+
+            $this->updateTable($target, $table, $visitor, $enforceColumnTypes);
         } else {
             if ($visitor !== null) {
                 $visitor($table->name, 'replicating_table', 'Creating new table');
             }
+
             $this->createTable($target, $table, $visitor);
         }
     }
@@ -190,19 +196,21 @@ class SchemaReplicator
 
     /**
      * Update existing table structure
+     *
+     * By default, only checks column existence and adds missing columns.
+     * When $enforceColumnTypes is true, also checks and modifies column types.
      */
-    protected function updateTable(Connection $target, TableSchema $table, ?callable $visitor = null): void
+    protected function updateTable(Connection $target, TableSchema $table, ?callable $visitor = null, bool $enforceColumnTypes = false): void
     {
         $inspector = SchemaInspectorFactory::create($target);
         $currentTable = $inspector->getTableSchema($target, $table->name);
 
         $diff = $this->getTableDiff($table, $currentTable);
 
-        if (
-            empty($diff['missing_columns'])
-            && empty($diff['modified_columns'])
-            && empty($diff['extra_columns'])
-        ) {
+        $hasMissingColumns = ! empty($diff['missing_columns']);
+        $hasModifiedColumns = $enforceColumnTypes && ! empty($diff['modified_columns']);
+
+        if (! $hasMissingColumns && ! $hasModifiedColumns) {
             if ($visitor !== null) {
                 $visitor($table->name, 'replicating_table', 'No changes necessary', 'success');
             }
@@ -224,14 +232,16 @@ class SchemaReplicator
             }
         }
 
-        // Modify changed columns
-        foreach (array_keys($diff['modified_columns']) as $columnName) {
-            $column = $table->getColumn($columnName);
-            $sql = $builder->buildModifyColumn($table->name, $column);
-            $target->statement($sql);
+        // Modify changed columns (only when enforceColumnTypes is enabled)
+        if ($enforceColumnTypes) {
+            foreach (array_keys($diff['modified_columns']) as $columnName) {
+                $column = $table->getColumn($columnName);
+                $sql = $builder->buildModifyColumn($table->name, $column);
+                $target->statement($sql);
 
-            if ($visitor !== null) {
-                $visitor($table->name, 'replicating_table', 'Modified an existing column: ' . $columnName, 'success');
+                if ($visitor !== null) {
+                    $visitor($table->name, 'replicating_table', 'Modified an existing column: ' . $columnName, 'success');
+                }
             }
         }
 

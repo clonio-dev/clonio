@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200">
+  <defs>
+    <style>
+      text { font-family: system-ui, sans-serif; font-size: 14px; fill: #334155; }
+      .label { font-weight: 600; }
+      .arrow { fill: none; stroke: #94a3b8; stroke-width: 2; marker-end: url(#arrowhead); }
+      .box { rx: 8; ry: 8; stroke-width: 1.5; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <!-- Source DB -->
+  <rect class="box" x="20" y="60" width="140" height="80" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="90" y="95" text-anchor="middle" class="label">Source DB</text>
+  <text x="90" y="115" text-anchor="middle" font-size="12" fill="#64748b">Production</text>
+  <!-- Arrow 1 -->
+  <line class="arrow" x1="160" y1="100" x2="210" y2="100"/>
+  <!-- Schema Inspect -->
+  <rect class="box" x="210" y="60" width="140" height="80" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="280" y="95" text-anchor="middle" class="label">Inspect</text>
+  <text x="280" y="115" text-anchor="middle" font-size="12" fill="#64748b">Schema</text>
+  <!-- Arrow 2 -->
+  <line class="arrow" x1="350" y1="100" x2="400" y2="100"/>
+  <!-- Clonio -->
+  <rect class="box" x="400" y="50" width="140" height="100" fill="#faf5ff" stroke="#c4b5fd"/>
+  <text x="470" y="90" text-anchor="middle" class="label" font-size="16">Clonio</text>
+  <text x="470" y="112" text-anchor="middle" font-size="12" fill="#64748b">Anonymize</text>
+  <text x="470" y="128" text-anchor="middle" font-size="12" fill="#64748b">&amp; Transfer</text>
+  <!-- Arrow 3 -->
+  <line class="arrow" x1="540" y1="100" x2="590" y2="100"/>
+  <!-- Target DB -->
+  <rect class="box" x="590" y="60" width="110" height="80" fill="#fff7ed" stroke="#fdba74"/>
+  <text x="645" y="95" text-anchor="middle" class="label">Target DB</text>
+  <text x="645" y="115" text-anchor="middle" font-size="12" fill="#64748b">Staging</text>
+</svg>

@@ -10,6 +10,8 @@ export type CloningRunStatus =
     | 'failed'
     | 'cancelled';
 
+export type CloningRunInitiator = 'user' | 'api' | 'scheduler' | 'manual';
+
 /**
  * Log Level Types
  */
@@ -66,6 +68,8 @@ export interface Cloning {
     target_connection_id: number;
     anonymization_config: Record<string, unknown> | null;
     schedule: string | null;
+    trigger_config: TriggerConfig | null;
+    api_trigger_token: string | null;
     is_scheduled: boolean;
     is_paused: boolean;
     consecutive_failures: number;
@@ -81,6 +85,20 @@ export interface Cloning {
 }
 
 /**
+ * Webhook Result Entry (stored on cloning_runs.webhook_results)
+ */
+export interface WebhookResult {
+    status: 'success' | 'failed';
+    event: string;
+    url: string;
+    http_status?: number;
+    error?: string;
+    attempt?: number;
+    message: string;
+    timestamp: string;
+}
+
+/**
  * Cloning Run Model
  */
 export interface CloningRun {
@@ -89,12 +107,14 @@ export interface CloningRun {
     cloning_id: number | null;
     batch_id: string | null;
     status: CloningRunStatus;
+    initiator: CloningRunInitiator;
     started_at: string | null;
     finished_at: string | null;
     current_step: number;
     total_steps: number;
     progress_percent: number;
     error_message: string | null;
+    webhook_results: WebhookResult[] | null;
     created_at: string;
     updated_at: string;
 
@@ -140,10 +160,30 @@ export interface CloningsIndexProps {
 /**
  * Cloning Show Page Props
  */
+export interface TriggerConfig {
+    apiTrigger: { enabled: boolean };
+    webhookOnSuccess: {
+        enabled: boolean;
+        url: string;
+        method: string;
+        headers: Record<string, string>;
+        secret: string;
+    };
+    webhookOnFailure: {
+        enabled: boolean;
+        url: string;
+        method: string;
+        headers: Record<string, string>;
+        secret: string;
+    };
+}
+
 export interface CloningShowProps {
     cloning: Cloning;
     runs: CloningRun[];
     estimatedDuration?: number | null;
+    api_trigger_url: string | null;
+    lastAuditLogUrl: string | null;
 }
 
 /**

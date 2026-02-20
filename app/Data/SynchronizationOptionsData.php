@@ -45,6 +45,7 @@ final readonly class SynchronizationOptionsData
                 if (! $strategy) {
                     continue;
                 }
+
                 if ($strategy === ColumnMutationStrategyEnum::KEEP) {
                     continue;
                 }
@@ -77,11 +78,14 @@ final readonly class SynchronizationOptionsData
                 );
             }
 
-            if ($columnMutations->isNotEmpty() || $rowSelection instanceof TableRowSelectionData) {
+            $enforceColumnTypes = $tableConfig['enforceColumnTypes'] ?? false;
+
+            if ($columnMutations->isNotEmpty() || $rowSelection instanceof TableRowSelectionData || $enforceColumnTypes) {
                 $tableAnonymizationOptions->push(new TableAnonymizationOptionsData(
                     tableName: $tableConfig['tableName'],
                     columnMutations: $columnMutations,
                     rowSelection: $rowSelection,
+                    enforceColumnTypes: $enforceColumnTypes,
                 ));
             }
         }

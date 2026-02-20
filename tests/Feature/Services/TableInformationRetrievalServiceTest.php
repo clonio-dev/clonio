@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Services\TableInformationRetrievalService;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 it('returns record count for a table', function (): void {
@@ -58,7 +59,7 @@ it('returns query builder for a table', function (): void {
         'posts'
     );
 
-    expect($service->query())->toBeInstanceOf(Illuminate\Database\Query\Builder::class);
+    expect($service->query())->toBeInstanceOf(Builder::class);
     expect($service->query()->count())->toBe(0);
 
     @unlink($db);

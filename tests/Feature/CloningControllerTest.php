@@ -135,7 +135,7 @@ describe('show', function (): void {
         $cloning = Cloning::factory()->for($this->user)->create();
 
         $response = $this->actingAs($this->user)
-            ->get("/clonings/{$cloning->id}");
+            ->get('/clonings/' . $cloning->id);
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
@@ -148,7 +148,7 @@ describe('show', function (): void {
         $cloning = Cloning::factory()->create();
 
         $response = $this->actingAs($this->user)
-            ->get("/clonings/{$cloning->id}");
+            ->get('/clonings/' . $cloning->id);
 
         $response->assertForbidden();
     });
@@ -159,7 +159,7 @@ describe('edit', function (): void {
         $cloning = Cloning::factory()->for($this->user)->create();
 
         $response = $this->actingAs($this->user)
-            ->get("/clonings/{$cloning->id}/edit");
+            ->get(sprintf('/clonings/%d/edit', $cloning->id));
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
@@ -173,7 +173,7 @@ describe('edit', function (): void {
         $cloning = Cloning::factory()->create();
 
         $response = $this->actingAs($this->user)
-            ->get("/clonings/{$cloning->id}/edit");
+            ->get(sprintf('/clonings/%d/edit', $cloning->id));
 
         $response->assertForbidden();
     });
@@ -191,7 +191,7 @@ describe('update', function (): void {
         ]);
 
         $response = $this->actingAs($this->user)
-            ->put("/clonings/{$cloning->id}", [
+            ->put('/clonings/' . $cloning->id, [
                 'title' => 'Updated Title',
                 'source_connection_id' => $source->id,
                 'target_connection_id' => $target->id,
@@ -214,7 +214,7 @@ describe('update', function (): void {
         $cloning = Cloning::factory()->create();
 
         $response = $this->actingAs($this->user)
-            ->put("/clonings/{$cloning->id}", [
+            ->put('/clonings/' . $cloning->id, [
                 'title' => 'Hacked',
                 'source_connection_id' => $source->id,
                 'target_connection_id' => $target->id,
@@ -229,7 +229,7 @@ describe('destroy', function (): void {
         $cloning = Cloning::factory()->for($this->user)->create();
 
         $response = $this->actingAs($this->user)
-            ->delete("/clonings/{$cloning->id}");
+            ->delete('/clonings/' . $cloning->id);
 
         $response->assertRedirect('/clonings');
         $this->assertDatabaseMissing('clonings', ['id' => $cloning->id]);
@@ -239,7 +239,7 @@ describe('destroy', function (): void {
         $cloning = Cloning::factory()->create();
 
         $response = $this->actingAs($this->user)
-            ->delete("/clonings/{$cloning->id}");
+            ->delete('/clonings/' . $cloning->id);
 
         $response->assertForbidden();
     });
@@ -250,7 +250,7 @@ describe('execute', function (): void {
         $cloning = Cloning::factory()->for($this->user)->create();
 
         $response = $this->actingAs($this->user)
-            ->post("/clonings/{$cloning->id}/execute");
+            ->post(sprintf('/clonings/%d/execute', $cloning->id));
 
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Cloning execution started');
@@ -265,7 +265,7 @@ describe('execute', function (): void {
         $cloning = Cloning::factory()->create();
 
         $response = $this->actingAs($this->user)
-            ->post("/clonings/{$cloning->id}/execute");
+            ->post(sprintf('/clonings/%d/execute', $cloning->id));
 
         $response->assertForbidden();
     });
@@ -276,7 +276,7 @@ describe('pause', function (): void {
         $cloning = Cloning::factory()->for($this->user)->scheduled()->create();
 
         $response = $this->actingAs($this->user)
-            ->post("/clonings/{$cloning->id}/pause");
+            ->post(sprintf('/clonings/%d/pause', $cloning->id));
 
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Cloning paused');
@@ -288,7 +288,7 @@ describe('pause', function (): void {
         $cloning = Cloning::factory()->scheduled()->create();
 
         $response = $this->actingAs($this->user)
-            ->post("/clonings/{$cloning->id}/pause");
+            ->post(sprintf('/clonings/%d/pause', $cloning->id));
 
         $response->assertForbidden();
     });
@@ -304,7 +304,7 @@ describe('resume', function (): void {
             ->create();
 
         $response = $this->actingAs($this->user)
-            ->post("/clonings/{$cloning->id}/resume");
+            ->post(sprintf('/clonings/%d/resume', $cloning->id));
 
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Cloning resumed');
@@ -318,7 +318,7 @@ describe('resume', function (): void {
         $cloning = Cloning::factory()->scheduled()->paused()->create();
 
         $response = $this->actingAs($this->user)
-            ->post("/clonings/{$cloning->id}/resume");
+            ->post(sprintf('/clonings/%d/resume', $cloning->id));
 
         $response->assertForbidden();
     });

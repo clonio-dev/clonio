@@ -1,12 +1,15 @@
 {
     "agents": [
-        "claude_code"
+        "claude_code",
+        "junie"
     ],
     "guidelines": true,
     "herd_mcp": false,
     "mcp": true,
+    "nightwatch_mcp": false,
     "packages": [
-        "laravel/fortify"
+        "laravel/fortify",
+        "rokde/laravel-pergament"
     ],
     "sail": false,
     "skills": [
@@ -15,6 +18,8 @@
         "inertia-vue-development",
         "tailwindcss-development",
         "developing-with-fortify",
+        "pergament-content-authoring",
+        "pergament-customization",
         "frontend-design",
         "laravel-inertia-isolated-plugin-architect"
     ]

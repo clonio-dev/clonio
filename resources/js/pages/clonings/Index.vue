@@ -29,6 +29,7 @@ import {
     Plus,
     Trash2,
     UserIcon,
+    Zap,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 
@@ -141,9 +142,9 @@ function resumeCloning(cloning: Cloning) {
             <!-- Table -->
             <div v-else class="space-y-6">
                 <div
-                    class="overflow-hidden rounded-xl border border-border/60 bg-card dark:border-border/40"
+                    class="overflow-x-auto rounded-xl border border-border/60 bg-card dark:border-border/40"
                 >
-                    <table class="w-full">
+                    <table class="w-full min-w-[640px]">
                         <thead>
                             <tr
                                 class="border-b border-border/60 bg-muted/30 dark:border-border/40 dark:bg-muted/20"
@@ -166,7 +167,7 @@ function resumeCloning(cloning: Cloning) {
                                 <th
                                     class="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase lg:table-cell"
                                 >
-                                    Schedule
+                                    Trigger
                                 </th>
                                 <th
                                     class="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase lg:table-cell"
@@ -264,10 +265,11 @@ function resumeCloning(cloning: Cloning) {
                                     {{ cloning.runs_count || 0 }}
                                 </td>
 
-                                <!-- Schedule -->
+                                <!-- Trigger -->
                                 <td
                                     class="hidden px-4 py-4 whitespace-nowrap lg:table-cell"
                                 >
+                                    <!-- Paused state -->
                                     <div
                                         v-if="
                                             cloning.is_scheduled &&
@@ -291,22 +293,38 @@ function resumeCloning(cloning: Cloning) {
                                             failures)
                                         </div>
                                     </div>
+                                    <!-- Active triggers -->
                                     <div
-                                        v-else-if="cloning.is_scheduled"
-                                        class="flex items-center gap-1.5 text-sm text-muted-foreground"
+                                        v-else-if="
+                                            cloning.is_scheduled ||
+                                            cloning.trigger_config?.apiTrigger
+                                                ?.enabled
+                                        "
+                                        class="flex flex-col gap-1"
                                     >
-                                        <Clock class="size-3.5" />
-                                        {{ cloning.schedule }}
-                                        {{
-                                            cloning.next_run_at
-                                                ? ' (next run at ' +
-                                                  formatDate(
-                                                      cloning.next_run_at,
-                                                  ) +
-                                                  ')'
-                                                : ''
-                                        }}
+                                        <div
+                                            v-if="cloning.is_scheduled"
+                                            class="flex items-center gap-1.5 text-sm text-muted-foreground"
+                                        >
+                                            <Clock class="size-3.5 shrink-0" />
+                                            {{ cloning.schedule }}
+                                        </div>
+                                        <div
+                                            v-if="
+                                                cloning.trigger_config
+                                                    ?.apiTrigger?.enabled
+                                            "
+                                            class="flex items-center gap-1.5 text-sm text-muted-foreground"
+                                        >
+                                            <Zap class="size-3.5 shrink-0" />
+                                            <span
+                                                class="rounded bg-violet-100 px-1.5 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-500/20 dark:text-violet-300"
+                                            >
+                                                API
+                                            </span>
+                                        </div>
                                     </div>
+                                    <!-- Manual only -->
                                     <span
                                         v-else
                                         class="flex items-center gap-1.5 text-sm text-muted-foreground"

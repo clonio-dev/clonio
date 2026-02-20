@@ -1,37 +1,33 @@
 # Open todos
 
-## Overview
-Add some more details to a tested database connection. Add a schedule form on a Clone. Anonymize options have to be improved. Improve UI.
+ERRORS:
 
-## Implementation Checklist
+- [x] Change the clonings index page (/clonings) table column "Schedule" to "Trigger" and display the schedule, manual and api trigger - Manual just when no other trigger is possible -> starting by schedule or api will not be displayed correct, it always says Manual
+- [x] Webhook calls should be visible on the cloning-run detail page - not in the execution log, but below as separate information: "Webhook for failure/success gets triggered" (or similar) and displayed with success or error if the webhook could be called or not -> the problem is, that you implemented it using the run log. that lead to an failed signed log, because the audit log gets sealed after the transformation process ends. please log that information for webhhoks interaction separately, so the auditlog is signed again and displays that accordingly
+- [x] Checkbox on updating a database connection is checked technically, but not visually. So the missing modelValue in the Checkbox lead to unchecked form display. Please update the checkbox behaviour, that it just works
 
-### Phase 1: The easy things
 
-- [x] /clonings/create and edit: Do not provide "Set to NULL" for columns which are not nullable
+## GitHub (Tasks für Robert)
+- [ ] GitHub Profile Page anlegen mit eigenem Repository
 
-### Phase 2: improve
+## Done
 
-- [x] Testing a database connection should also check the database management system and the version.
-- [x] The database type should by updated in case of mysql or mariadb, because they relate together and a user could configure that wrong. So on retrieving the version there will by "MariaDB" within the version string. so the type should be updated accordingly (vice-versa)
-  - [x] the version of the dbms is a new property. so add migration and all the necessary stuff to make that an optional nullable string
-- [x] Creating/Editing a Cloning should get a schedule configuration on the new third step
-  - [x] support a new third step: the immediate execution should be there as a checkbox and there should be the schedule section be added with an easy to use interface for a user - so provide some help for the possible selection of cronjob-like schedules.
-  - [x] create a console command or scheduler call that finds all the runs requested via schedule and execute it so we can have automatically running cloning-runs.
-
----
-
-## Current Progress
-
-Started: 2026-01-25
-Last Updated: 2026-01-25
-
-### Completed This Session
-- Phase 1: Filter "Set to NULL" option from non-nullable columns in TableConfigurationStep
-- Phase 2: Added DBMS version detection to TestConnection job with MySQL/MariaDB auto-correction
-- Phase 2: Added schedule configuration step (Step 3) to Create/Edit cloning wizard
-- Phase 2: Created `clonings:run-scheduled` console command with scheduler registration
-
-### Notes
-- Run `php artisan migrate` to add the `dbms_version` column to database_connections
-- The scheduler runs `clonings:run-scheduled` every minute to check for due clonings
-- Make sure to run `php artisan schedule:work` or set up cron for the scheduler 
+- [x] app/Models/Cloning.php - Make the trigger_config a structured DTO
+- [x] Trigger via API should be displayed on cloning detail page as a replacement for the Schedule Card. The new card should display the title "Trigger" and then it displays schedule, api trigger and the manual trigger
+- [x] Add a card with the link to the latest audit log (last successful run has one) at the cloning detail page
+- [x] Incoming API Trigger URL has to be displayed on the detail page of a cloning
+- [x] Webhooks has to be displayed on the detail page of a cloning
+- [x] Improve the design layout of a cloning detail page
+- [x] Change the clonings index page (/clonings) table column "Schedule" to "Trigger" and display the schedule, manual and api trigger - Manual just when no other trigger is possible
+- [x] Add the information of the initiator of the run to the started column on page /cloning-runs: by user, api, scheduler - maybe just with an icon to show it
+- [x] Add a button to delete all Failed runs within the cloning detail page -> this should delete all failed runs for this cloning
+- [x] Add a button to delete all Failed runs within the cloning runs (/cloning-runs) -> this should delete all failed runs
+- [x] Support the update of a connection within the connection management (/connections) - as form sheet like on the creation of it
+- [x] change the input field colors: in light theme there should be a white background of the input field
+- [x] listen to all sql queries and log them to Log::debug() so I can check the processing of a cloning run
+- [x] Webhook calls should be visible on the cloning-run detail page - not in the execution log, but below as separate information: "Webhook for failure/success gets triggered" (or similar) and displayed with success or error if the webhook could be called or not
+- [x] Clonings Table is not scrollable horizontically on small screens
+- [x] Toggling light and dark theme: application has a mechanic which should be taken over to the /docs layout. So it stays the same on opening the docs page from the app
+- [x] add documentation content: screenshots are available in /docs-screenshots and in /docs-files is a json export of a cloning run
+    - [x] Structure the whole documentation new from groundup
+    - [x] Copy any necessary images or files into the chapter folder

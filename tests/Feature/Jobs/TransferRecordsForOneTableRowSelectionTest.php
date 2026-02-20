@@ -18,35 +18,35 @@ uses(RefreshDatabase::class);
 
 function createTestDatabases(string $prefix = 'rowsel'): array
 {
-    $sourceDb = tempnam(sys_get_temp_dir(), "source_{$prefix}_");
+    $sourceDb = tempnam(sys_get_temp_dir(), sprintf('source_%s_', $prefix));
     @unlink($sourceDb);
     $sourceDb .= '.sqlite';
     touch($sourceDb);
 
-    $targetDb = tempnam(sys_get_temp_dir(), "target_{$prefix}_");
+    $targetDb = tempnam(sys_get_temp_dir(), sprintf('target_%s_', $prefix));
     @unlink($targetDb);
     $targetDb .= '.sqlite';
     touch($targetDb);
 
-    config(["database.connections.test_source_{$prefix}" => [
+    config(['database.connections.test_source_' . $prefix => [
         'driver' => 'sqlite',
         'database' => $sourceDb,
     ]]);
-    DB::purge("test_source_{$prefix}");
+    DB::purge('test_source_' . $prefix);
 
-    config(["database.connections.test_target_{$prefix}" => [
+    config(['database.connections.test_target_' . $prefix => [
         'driver' => 'sqlite',
         'database' => $targetDb,
     ]]);
-    DB::purge("test_target_{$prefix}");
+    DB::purge('test_target_' . $prefix);
 
     return [
         'sourceDb' => $sourceDb,
         'targetDb' => $targetDb,
-        'sourceConn' => "test_source_{$prefix}",
-        'targetConn' => "test_target_{$prefix}",
-        'sourceConnectionData' => new ConnectionData("test_source_{$prefix}", new SqliteDriverData($sourceDb)),
-        'targetConnectionData' => new ConnectionData("test_target_{$prefix}", new SqliteDriverData($targetDb)),
+        'sourceConn' => 'test_source_' . $prefix,
+        'targetConn' => 'test_target_' . $prefix,
+        'sourceConnectionData' => new ConnectionData('test_source_' . $prefix, new SqliteDriverData($sourceDb)),
+        'targetConnectionData' => new ConnectionData('test_target_' . $prefix, new SqliteDriverData($targetDb)),
     ];
 }
 
@@ -66,7 +66,7 @@ it('transfers first X rows ordered ascending', function (): void {
     });
 
     for ($i = 1; $i <= 10; $i++) {
-        DB::connection($dbs['sourceConn'])->table('posts')->insert(['title' => "Post {$i}"]);
+        DB::connection($dbs['sourceConn'])->table('posts')->insert(['title' => 'Post ' . $i]);
     }
 
     DB::connection($dbs['targetConn'])->getSchemaBuilder()->create('posts', function ($table): void {
@@ -113,7 +113,7 @@ it('transfers last X rows ordered descending', function (): void {
     });
 
     for ($i = 1; $i <= 10; $i++) {
-        DB::connection($dbs['sourceConn'])->table('posts')->insert(['title' => "Post {$i}"]);
+        DB::connection($dbs['sourceConn'])->table('posts')->insert(['title' => 'Post ' . $i]);
     }
 
     DB::connection($dbs['targetConn'])->getSchemaBuilder()->create('posts', function ($table): void {
@@ -161,7 +161,7 @@ it('transfers all rows when strategy is full table', function (): void {
     });
 
     for ($i = 1; $i <= 5; $i++) {
-        DB::connection($dbs['sourceConn'])->table('posts')->insert(['title' => "Post {$i}"]);
+        DB::connection($dbs['sourceConn'])->table('posts')->insert(['title' => 'Post ' . $i]);
     }
 
     DB::connection($dbs['targetConn'])->getSchemaBuilder()->create('posts', function ($table): void {
@@ -255,7 +255,7 @@ it('handles row selection with chunked data correctly', function (): void {
     });
 
     for ($i = 1; $i <= 20; $i++) {
-        DB::connection($dbs['sourceConn'])->table('items')->insert(['name' => "Item {$i}"]);
+        DB::connection($dbs['sourceConn'])->table('items')->insert(['name' => 'Item ' . $i]);
     }
 
     DB::connection($dbs['targetConn'])->getSchemaBuilder()->create('items', function ($table): void {

@@ -2,20 +2,29 @@
 import CloningController from '@/actions/App/Http/Controllers/CloningController';
 import CloningRunController from '@/actions/App/Http/Controllers/CloningRunController';
 import RunCard from '@/components/cloning-runs/RunCard.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
-import type { CloningRun, CloningShowProps } from '@/types/cloning.types';
+import type {
+    CloningRun,
+    CloningShowProps,
+    TriggerConfig,
+} from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     AlertTriangle,
     ArrowRight,
     Calendar,
+    Check,
     Clock,
     Copy,
     Database,
+    ExternalLink,
+    FileText,
+    Globe,
     Hourglass,
     Pause,
     Pencil,
@@ -24,8 +33,10 @@ import {
     Settings,
     ShieldCheck,
     Trash2,
+    Webhook,
+    Zap,
 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<CloningShowProps>();
 
@@ -39,6 +50,32 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => [
         href: CloningController.show(props.cloning.id).url,
     },
 ]);
+
+const triggerConfig = computed<TriggerConfig | null>(
+    () => props.cloning.trigger_config as TriggerConfig | null,
+);
+
+const hasWebhooks = computed(() => {
+    if (!triggerConfig.value) {
+        return false;
+    }
+    return (
+        triggerConfig.value.webhookOnSuccess?.enabled ||
+        triggerConfig.value.webhookOnFailure?.enabled
+    );
+});
+
+const copied = ref(false);
+
+function copyApiUrl() {
+    if (props.api_trigger_url) {
+        navigator.clipboard.writeText(props.api_trigger_url);
+        copied.value = true;
+        setTimeout(() => {
+            copied.value = false;
+        }, 2000);
+    }
+}
 
 function formatDate(dateString: string): string {
     return new Date(dateString).toLocaleString('de-DE', {
@@ -94,6 +131,20 @@ const runsWithCloning = computed(() =>
     })),
 );
 
+const hasFailedRuns = computed(() =>
+    props.runs.some((run: CloningRun) => run.status === 'failed'),
+);
+
+function deleteFailedRuns() {
+    if (
+        confirm(
+            'Are you sure you want to delete all failed runs for this cloning? This cannot be undone.',
+        )
+    ) {
+        router.delete(CloningController.destroyFailedRuns(props.cloning).url);
+    }
+}
+
 // PII/GDPR compliance info from anonymization config
 interface ColumnMutation {
     columnName: string;
@@ -145,23 +196,16 @@ const anonymizationStats = computed(() => {
             <div class="mb-8 flex items-start justify-between">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
-                        <div
-                            class="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 ring-1 ring-violet-500/30 dark:from-violet-500/10 dark:to-purple-500/10"
+                        <h1
+                            class="text-2xl font-semibold tracking-tight text-foreground"
                         >
-                            <Copy
-                                class="size-5 text-violet-600 dark:text-violet-400"
-                            />
-                        </div>
-                        <div>
-                            <h1
-                                class="text-2xl font-semibold tracking-tight text-foreground"
-                            >
-                                {{ cloning.title }}
-                            </h1>
-                            <p class="text-sm text-muted-foreground">
+                            {{ cloning.title }}
+                        </h1>
+                        <Badge variant="outline">
+                            <p class="text-muted-foreground">
                                 Created {{ formatDate(cloning.created_at) }}
                             </p>
-                        </div>
+                        </Badge>
                     </div>
                 </div>
 
@@ -255,7 +299,7 @@ const anonymizationStats = computed(() => {
                         </CardContent>
                     </Card>
 
-                    <!-- Schedule Info -->
+                    <!-- Trigger Card -->
                     <Card
                         class="border-border/60 bg-card dark:border-border/40"
                     >
@@ -263,91 +307,212 @@ const anonymizationStats = computed(() => {
                             <CardTitle
                                 class="flex items-center gap-2 text-base font-semibold"
                             >
-                                <Clock class="size-4 text-muted-foreground" />
-                                Schedule
+                                <Zap class="size-4 text-muted-foreground" />
+                                Triggers
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <!-- Paused state -->
-                            <div
-                                v-if="cloning.is_scheduled && cloning.is_paused"
-                                class="space-y-3"
-                            >
+                        <CardContent class="space-y-4">
+                            <!-- Schedule trigger section -->
+                            <div v-if="cloning.is_scheduled">
                                 <div
-                                    class="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
+                                    class="mb-2 flex items-center gap-2 text-sm font-medium text-foreground"
                                 >
-                                    <AlertTriangle class="size-4" />
-                                    <span class="text-sm font-medium">
-                                        Schedule Paused
-                                    </span>
+                                    <Clock class="size-3.5" />
+                                    Schedule
                                 </div>
-                                <p
-                                    v-if="cloning.consecutive_failures > 0"
-                                    class="text-sm text-muted-foreground"
+
+                                <!-- Paused state -->
+                                <div v-if="cloning.is_paused" class="space-y-2">
+                                    <div
+                                        class="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
+                                    >
+                                        <AlertTriangle class="size-4" />
+                                        <span class="text-sm font-medium">
+                                            Paused
+                                        </span>
+                                    </div>
+                                    <p
+                                        v-if="cloning.consecutive_failures > 0"
+                                        class="text-xs text-muted-foreground"
+                                    >
+                                        Auto-paused after
+                                        {{ cloning.consecutive_failures }}
+                                        consecutive failure{{
+                                            cloning.consecutive_failures === 1
+                                                ? ''
+                                                : 's'
+                                        }}.
+                                    </p>
+                                    <p class="text-xs text-muted-foreground">
+                                        Cron:
+                                        <span class="font-mono">{{
+                                            cloning.schedule
+                                        }}</span>
+                                    </p>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        @click="resumeCloning"
+                                        class="w-full gap-2"
+                                    >
+                                        <PlayCircle class="size-4" />
+                                        Resume Schedule
+                                    </Button>
+                                </div>
+
+                                <!-- Active scheduled state -->
+                                <div v-else class="space-y-2">
+                                    <div
+                                        class="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
+                                    >
+                                        <Calendar class="size-4" />
+                                        <span class="font-mono text-sm">
+                                            {{ cloning.schedule }}
+                                        </span>
+                                    </div>
+                                    <p
+                                        v-if="cloning.next_run_at"
+                                        class="text-xs text-muted-foreground"
+                                    >
+                                        Next run:
+                                        {{ formatDate(cloning.next_run_at) }}
+                                    </p>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        @click="pauseCloning"
+                                        class="w-full gap-2"
+                                    >
+                                        <Pause class="size-4" />
+                                        Pause Schedule
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <!-- Divider between sections -->
+                            <div
+                                v-if="cloning.is_scheduled"
+                                class="border-t border-border/60 dark:border-border/40"
+                            />
+
+                            <!-- API trigger section -->
+                            <div>
+                                <div
+                                    class="mb-2 flex items-center gap-2 text-sm font-medium text-foreground"
                                 >
-                                    Auto-paused after
-                                    {{ cloning.consecutive_failures }}
-                                    consecutive failure{{
-                                        cloning.consecutive_failures === 1
-                                            ? ''
-                                            : 's'
-                                    }}.
-                                </p>
+                                    <Globe class="size-3.5" />
+                                    API Trigger
+                                </div>
+
+                                <div
+                                    v-if="
+                                        triggerConfig?.apiTrigger?.enabled &&
+                                        api_trigger_url
+                                    "
+                                >
+                                    <div
+                                        class="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2 dark:bg-muted/20"
+                                    >
+                                        <code
+                                            class="min-w-0 flex-1 truncate text-xs text-foreground"
+                                            >{{ api_trigger_url }}</code
+                                        >
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            class="size-7 shrink-0 p-0"
+                                            @click="copyApiUrl"
+                                        >
+                                            <Check
+                                                v-if="copied"
+                                                class="size-3.5 text-emerald-600 dark:text-emerald-400"
+                                            />
+                                            <Copy
+                                                v-else
+                                                class="size-3.5 text-muted-foreground"
+                                            />
+                                        </Button>
+                                    </div>
+                                    <p
+                                        class="mt-1 text-xs text-muted-foreground"
+                                    >
+                                        POST request to trigger a cloning run.
+                                    </p>
+                                </div>
+
+                                <div
+                                    v-else
+                                    class="flex items-center gap-2 text-muted-foreground"
+                                >
+                                    <span class="text-sm">Not configured</span>
+                                </div>
+                            </div>
+
+                            <!-- Divider -->
+                            <div
+                                class="border-t border-border/60 dark:border-border/40"
+                            />
+
+                            <!-- Manual trigger section -->
+                            <div>
+                                <div
+                                    class="mb-2 flex items-center gap-2 text-sm font-medium text-foreground"
+                                >
+                                    <Settings class="size-3.5" />
+                                    Manual
+                                </div>
                                 <p class="text-sm text-muted-foreground">
-                                    Schedule:
-                                    <span class="font-mono">{{
-                                        cloning.schedule
-                                    }}</span>
+                                    Always available via the "Run Now" button.
                                 </p>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    @click="resumeCloning"
-                                    class="w-full gap-2"
-                                >
-                                    <PlayCircle class="size-4" />
-                                    Resume Schedule
-                                </Button>
                             </div>
-                            <!-- Active scheduled state -->
+                        </CardContent>
+                    </Card>
+
+                    <!-- Webhooks Card -->
+                    <Card
+                        v-if="hasWebhooks"
+                        class="border-border/60 bg-card dark:border-border/40"
+                    >
+                        <CardHeader class="pb-3">
+                            <CardTitle
+                                class="flex items-center gap-2 text-base font-semibold"
+                            >
+                                <Webhook class="size-4 text-muted-foreground" />
+                                Webhooks
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent class="space-y-3">
                             <div
-                                v-else-if="cloning.is_scheduled"
-                                class="space-y-3"
+                                v-if="triggerConfig?.webhookOnSuccess?.enabled"
+                                class="space-y-1"
                             >
                                 <div
-                                    class="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
+                                    class="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400"
                                 >
-                                    <Calendar class="size-4" />
-                                    <span class="font-mono text-sm">
-                                        {{ cloning.schedule }}
-                                    </span>
+                                    <Check class="size-3.5" />
+                                    On Success
                                 </div>
                                 <p
-                                    v-if="cloning.next_run_at"
-                                    class="text-sm text-muted-foreground"
+                                    class="truncate pl-5.5 text-xs text-muted-foreground"
                                 >
-                                    Next run:
-                                    {{ formatDate(cloning.next_run_at) }}
+                                    {{ triggerConfig.webhookOnSuccess.url }}
                                 </p>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    @click="pauseCloning"
-                                    class="w-full gap-2"
-                                >
-                                    <Pause class="size-4" />
-                                    Pause Schedule
-                                </Button>
                             </div>
-                            <!-- Manual only -->
                             <div
-                                v-else
-                                class="flex items-center gap-2 text-muted-foreground"
+                                v-if="triggerConfig?.webhookOnFailure?.enabled"
+                                class="space-y-1"
                             >
-                                <Settings class="size-4" />
-                                <span class="text-sm"
-                                    >Manual execution only</span
+                                <div
+                                    class="flex items-center gap-2 text-sm font-medium text-red-700 dark:text-red-400"
                                 >
+                                    <AlertTriangle class="size-3.5" />
+                                    On Failure
+                                </div>
+                                <p
+                                    class="truncate pl-5.5 text-xs text-muted-foreground"
+                                >
+                                    {{ triggerConfig.webhookOnFailure.url }}
+                                </p>
                             </div>
                         </CardContent>
                     </Card>
@@ -376,6 +541,37 @@ const anonymizationStats = computed(() => {
                             <p v-else class="text-sm text-muted-foreground">
                                 No completed runs yet
                             </p>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Audit Log Card -->
+                    <Card
+                        v-if="lastAuditLogUrl"
+                        class="border-border/60 bg-card dark:border-border/40"
+                    >
+                        <CardHeader class="pb-3">
+                            <CardTitle
+                                class="flex items-center gap-2 text-base font-semibold"
+                            >
+                                <FileText
+                                    class="size-4 text-muted-foreground"
+                                />
+                                Audit Log
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p class="mb-3 text-sm text-muted-foreground">
+                                Public audit log from the latest successful run.
+                            </p>
+                            <a
+                                :href="lastAuditLogUrl"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-2 text-sm font-medium text-foreground underline-offset-4 hover:underline"
+                            >
+                                <ExternalLink class="size-3.5" />
+                                View Audit Log
+                            </a>
                         </CardContent>
                     </Card>
 
@@ -463,12 +659,24 @@ const anonymizationStats = computed(() => {
                         >
                             Recent Runs
                         </h2>
-                        <Link
-                            :href="CloningRunController.index().url"
-                            class="text-sm text-muted-foreground hover:text-foreground"
-                        >
-                            View All
-                        </Link>
+                        <div class="flex items-center gap-3">
+                            <Button
+                                v-if="hasFailedRuns"
+                                variant="outline"
+                                size="sm"
+                                @click="deleteFailedRuns"
+                                class="gap-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                            >
+                                <Trash2 class="size-4" />
+                                Delete Failed Runs
+                            </Button>
+                            <Link
+                                :href="CloningRunController.index().url"
+                                class="text-sm text-muted-foreground hover:text-foreground"
+                            >
+                                View All
+                            </Link>
+                        </div>
                     </div>
 
                     <div

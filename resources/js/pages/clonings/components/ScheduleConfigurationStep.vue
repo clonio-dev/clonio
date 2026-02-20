@@ -1,62 +1,47 @@
 <script setup lang="ts">
-import CloningController from '@/actions/App/Http/Controllers/CloningController';
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CronInput } from '@/components/ui/cron-input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Form } from '@inertiajs/vue3';
-import {
-    ArrowLeft,
-    ArrowRight,
-    Calendar,
-    Clock,
-    Loader2,
-} from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { ArrowLeft, ArrowRight, Calendar, Clock } from 'lucide-vue-next';
+import { ref } from 'vue';
+
+export interface ScheduleData {
+    executeNow: boolean;
+    isScheduled: boolean;
+    schedule: string;
+}
 
 interface Props {
-    sourceConnectionId: string | number;
-    targetConnectionId: string | number;
-    cloningTitle: string;
-    anonymizationConfig: string;
-    cloningId?: number;
     mode: 'create' | 'edit';
     initialSchedule?: string | null;
     initialIsScheduled?: boolean;
+    initialExecuteNow?: boolean;
 }
 
 interface Emits {
     (e: 'back'): void;
+    (e: 'next', data: ScheduleData): void;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 // Schedule state
-const executeNow = ref(props.mode === 'create');
+const executeNow = ref(props.initialExecuteNow ?? props.mode === 'create');
 const isScheduled = ref(props.initialIsScheduled ?? false);
 const schedule = ref(props.initialSchedule ?? '0 0 * * *');
 
-// Form action based on mode
-const formAction = computed(() => {
-    if (props.mode === 'edit' && props.cloningId) {
-        return CloningController.update(props.cloningId).url;
-    }
-    return CloningController.store().url;
-});
-
-const formMethod = computed(() => {
-    return props.mode === 'edit' ? 'put' : 'post';
-});
-
-// Computed schedule value for form
-const formSchedule = computed(() => {
-    return isScheduled.value ? schedule.value : '';
-});
+function handleNext() {
+    emit('next', {
+        executeNow: executeNow.value && props.mode === 'create',
+        isScheduled: isScheduled.value,
+        schedule: isScheduled.value ? schedule.value : '',
+    });
+}
 </script>
 
 <template>
@@ -81,8 +66,8 @@ const formSchedule = computed(() => {
                     <div class="flex items-center gap-3">
                         <Checkbox
                             id="execute_now_checkbox"
-                            :checked="executeNow"
-                            @update:checked="executeNow = $event"
+                            :model-value="executeNow"
+                            @update:model-value="executeNow = !!$event"
                         />
                         <Label
                             for="execute_now_checkbox"
@@ -110,8 +95,8 @@ const formSchedule = computed(() => {
                     <div class="flex items-center gap-3">
                         <Checkbox
                             id="is_scheduled_checkbox"
-                            :checked="isScheduled"
-                            @update:checked="isScheduled = $event"
+                            :model-value="isScheduled"
+                            @update:model-value="isScheduled = !!$event"
                         />
                         <Label
                             for="is_scheduled_checkbox"
@@ -136,73 +121,17 @@ const formSchedule = computed(() => {
 
         <Separator />
 
-        <!-- Form submission -->
-        <Form
-            :action="formAction"
-            :method="formMethod"
-            v-slot="{ errors, processing }"
-            class="space-y-4"
-        >
-            <input type="hidden" name="title" :value="cloningTitle" />
-            <input
-                type="hidden"
-                name="source_connection_id"
-                :value="sourceConnectionId"
-            />
-            <input
-                type="hidden"
-                name="target_connection_id"
-                :value="targetConnectionId"
-            />
-            <input
-                type="hidden"
-                name="anonymization_config"
-                :value="anonymizationConfig"
-            />
-            <input
-                type="hidden"
-                name="execute_now"
-                :value="executeNow && mode === 'create' ? '1' : '0'"
-            />
-            <input
-                type="hidden"
-                name="is_scheduled"
-                :value="isScheduled ? '1' : '0'"
-            />
-            <input type="hidden" name="schedule" :value="formSchedule" />
+        <!-- Navigation buttons -->
+        <div class="flex items-center justify-between">
+            <Button type="button" variant="outline" @click="emit('back')">
+                <ArrowLeft class="mr-2 size-4" />
+                Back
+            </Button>
 
-            <InputError :message="errors.title" />
-            <InputError :message="errors.source_connection_id" />
-            <InputError :message="errors.target_connection_id" />
-            <InputError :message="errors.anonymization_config" />
-            <InputError :message="errors.schedule" />
-
-            <div class="flex items-center justify-between">
-                <Button
-                    type="button"
-                    variant="outline"
-                    @click="emit('back')"
-                    :disabled="processing"
-                >
-                    <ArrowLeft class="mr-2 size-4" />
-                    Back
-                </Button>
-
-                <Button type="submit" :disabled="processing">
-                    <Loader2
-                        v-if="processing"
-                        class="mr-2 size-4 animate-spin"
-                    />
-                    <template v-else>
-                        {{
-                            mode === 'create'
-                                ? 'Save Cloning'
-                                : 'Update Cloning'
-                        }}
-                        <ArrowRight class="ml-2 size-4" />
-                    </template>
-                </Button>
-            </div>
-        </Form>
+            <Button @click="handleNext">
+                Next
+                <ArrowRight class="ml-2 size-4" />
+            </Button>
+        </div>
     </div>
 </template>

@@ -6,6 +6,7 @@ namespace App\Http\Requests;
 
 use App\Enums\DatabaseConnectionTypes;
 use App\Models\DatabaseConnection;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,7 +23,7 @@ class StoreDatabaseConnectionRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -34,7 +35,7 @@ class StoreDatabaseConnectionRequest extends FormRequest
             'database' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255'],
             'password' => ['nullable', 'string', 'max:255'],
-            'is_production_stage' => ['sometimes', 'accepted'],
+            'is_production_stage' => ['sometimes', 'boolean'],
         ];
     }
 }

@@ -4,14 +4,33 @@ import CloningRunController from '@/actions/App/Http/Controllers/CloningRunContr
 import CloningRunStatusBadge from '@/components/cloning-runs/CloningRunStatusBadge.vue';
 import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useAutoRefresh } from '@/composables/useAutoRefresh';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { convertDuration } from '@/lib/date';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
-import type { CloningRun, CloningRunsIndexProps } from '@/types/cloning.types';
+import type {
+    CloningRun,
+    CloningRunInitiator,
+    CloningRunsIndexProps,
+} from '@/types/cloning.types';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowRight, Plus, RefreshCw, Send } from 'lucide-vue-next';
+import {
+    ArrowRight,
+    Clock,
+    Plus,
+    RefreshCw,
+    Send,
+    Trash2,
+    User,
+    Zap,
+} from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const props = defineProps<CloningRunsIndexProps>();
@@ -69,6 +88,27 @@ useAutoRefresh(
     computed(() => props.hasActiveRuns),
     10_000,
 );
+
+const initiatorLabels: Record<CloningRunInitiator, string> = {
+    user: 'Started by user',
+    api: 'Triggered via API',
+    scheduler: 'Scheduled run',
+    manual: 'Manual run',
+};
+
+const hasFailedRuns = computed(() =>
+    props.runs.data.some((run) => run.status === 'failed'),
+);
+
+function deleteFailedRuns() {
+    if (
+        confirm(
+            'Are you sure you want to delete all failed runs? This cannot be undone.',
+        )
+    ) {
+        router.delete(CloningRunController.destroyFailed().url);
+    }
+}
 </script>
 
 <template>
@@ -102,6 +142,17 @@ useAutoRefresh(
                         />
                         <span>Live</span>
                     </div>
+
+                    <Button
+                        v-if="hasFailedRuns"
+                        variant="outline"
+                        size="sm"
+                        @click="deleteFailedRuns"
+                        class="gap-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                    >
+                        <Trash2 class="size-4" />
+                        Delete Failed Runs
+                    </Button>
 
                     <Button
                         variant="outline"
@@ -332,7 +383,49 @@ useAutoRefresh(
                                 <td
                                     class="hidden px-4 py-4 text-sm whitespace-nowrap text-muted-foreground lg:table-cell"
                                 >
-                                    {{ formatDate(run.started_at) }}
+                                    <div class="flex items-center gap-2">
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger as-child>
+                                                    <User
+                                                        v-if="
+                                                            run.initiator ===
+                                                                'user' ||
+                                                            run.initiator ===
+                                                                'manual'
+                                                        "
+                                                        class="size-3.5 text-muted-foreground"
+                                                    />
+                                                    <Zap
+                                                        v-else-if="
+                                                            run.initiator ===
+                                                            'api'
+                                                        "
+                                                        class="size-3.5 text-amber-500 dark:text-amber-400"
+                                                    />
+                                                    <Clock
+                                                        v-else-if="
+                                                            run.initiator ===
+                                                            'scheduler'
+                                                        "
+                                                        class="size-3.5 text-blue-500 dark:text-blue-400"
+                                                    />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p class="text-xs">
+                                                        {{
+                                                            initiatorLabels[
+                                                                run.initiator
+                                                            ]
+                                                        }}
+                                                    </p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                        <span>{{
+                                            formatDate(run.started_at)
+                                        }}</span>
+                                    </div>
                                 </td>
 
                                 <!-- Duration -->

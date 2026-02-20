@@ -22,7 +22,12 @@ use Throwable;
 
 class TruncateTargetTables implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, HandlesExceptions, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
+    use Batchable;
+    use HandlesExceptions;
+    use InteractsWithQueue;
+    use LogsProcessSteps;
+    use Queueable;
+    use TransferBatchJob;
 
     public int $tries = 2;
 
@@ -48,7 +53,7 @@ class TruncateTargetTables implements ShouldBeEncrypted, ShouldQueue
             foreach ($this->tables as $tableName) {
                 $this->tableName = $tableName;
                 $targetConnection->table($tableName)->delete();
-                $this->logSuccess('table_emptied', "All rows on table {$tableName} deleted on target database");
+                $this->logSuccess('table_emptied', sprintf('All rows on table %s deleted on target database', $tableName));
             }
         } catch (QueryException $e) {
             $this->handleQueryException($e);

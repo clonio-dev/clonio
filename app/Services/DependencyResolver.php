@@ -136,7 +136,7 @@ class DependencyResolver
 
         // Show levels
         foreach ($order['dependency_levels'] as $level => $tables) {
-            $output .= "Level {$level}";
+            $output .= 'Level ' . $level;
 
             if ($level === 0) {
                 $output .= " (Parent Tables - no dependencies):\n";
@@ -148,9 +148,9 @@ class DependencyResolver
                 $deps = $order['dependency_graph'][$table] ?? [];
 
                 if (empty($deps)) {
-                    $output .= "  • {$table}\n";
+                    $output .= sprintf('  • %s%s', $table, PHP_EOL);
                 } else {
-                    $output .= "  • {$table} → depends on [" . implode(', ', $deps) . "]\n";
+                    $output .= sprintf('  • %s → depends on [', $table) . implode(', ', $deps) . "]\n";
                 }
             }
 

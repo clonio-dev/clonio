@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Services\DependencyResolver;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 beforeEach(function (): void {
     config([
@@ -138,8 +139,8 @@ it('correctly identifies nullable vs non-nullable FKs', function (): void {
     // Expected order: users can be anywhere (no deps), orders before order_items
     $insertOrder = $order['insert_order'];
 
-    expect(array_search('orders', $insertOrder))
-        ->toBeLessThan(array_search('order_items', $insertOrder));
+    expect(array_search('orders', $insertOrder, true))
+        ->toBeLessThan(array_search('order_items', $insertOrder, true));
 });
 
 it('handles mixed nullable and non-nullable FKs in same table', function (): void {
@@ -218,7 +219,7 @@ it('logs when ignoring nullable FKs', function (): void {
     ');
 
     // Capture logs
-    Illuminate\Support\Facades\Log::shouldReceive('debug')
+    Log::shouldReceive('debug')
         ->once()
         ->with('Ignoring nullable FK for dependency graph', Mockery::on(fn (array $data): bool => $data['table'] === 'orders' &&
             $data['references'] === 'users' &&

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAutoRefresh } from '@/composables/useAutoRefresh';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { convertDuration } from '@/lib/date';
+import { convertDuration, formatDate } from '@/lib/date';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
 import { CloningRunShowProps, CloningRunStatus } from '@/types/cloning.types';
@@ -20,8 +20,8 @@ import {
     Loader2,
     RefreshCw,
     StopCircle,
-    Terminal,
     Timer,
+    Webhook,
     XCircle,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -104,14 +104,7 @@ const currentStatus = computed(
 
 const formattedStartedAt = computed(() => {
     if (!props.run.started_at) return 'Not started';
-    return new Date(props.run.started_at).toLocaleString('de-DE', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    });
+    return formatDate(props.run.started_at);
 });
 
 const duration = computed(() => {
@@ -147,6 +140,8 @@ function cancelRun() {
     }
 }
 
+const webhookResults = computed(() => props.run.webhook_results ?? []);
+
 useAutoRefresh(
     refreshPage,
     computed(() => props.isActive),
@@ -162,13 +157,7 @@ useAutoRefresh(
             <!-- Back Button & Header -->
             <div class="mb-6">
                 <div class="flex flex-wrap items-start justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br ring-1 ring-black/5 dark:ring-white/10"
-                            :class="currentStatus.bgClass"
-                        >
-                            <Terminal class="size-6 text-foreground/80" />
-                        </div>
+                    <div class="flex items-center gap-3">
                         <div>
                             <div class="flex items-center gap-3">
                                 <h1
@@ -195,12 +184,6 @@ useAutoRefresh(
                                     </span>
                                 </Badge>
                             </div>
-                            <p
-                                v-if="run.cloning"
-                                class="mt-1 text-sm text-muted-foreground"
-                            >
-                                {{ run.cloning.title }}
-                            </p>
                         </div>
                     </div>
 
@@ -382,6 +365,59 @@ useAutoRefresh(
                 :is-active="isActive"
                 :finished-at="run.finished_at"
             />
+
+            <!-- Webhook Notifications -->
+            <div v-if="webhookResults.length > 0" class="mt-6">
+                <h3
+                    class="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground"
+                >
+                    <Webhook class="size-4 text-muted-foreground" />
+                    Webhook Notifications
+                </h3>
+                <div class="space-y-2">
+                    <div
+                        v-for="(result, index) in webhookResults"
+                        :key="index"
+                        class="flex items-center gap-3 rounded-lg border px-4 py-3"
+                        :class="
+                            result.status === 'success'
+                                ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30'
+                                : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30'
+                        "
+                    >
+                        <CheckCircle2
+                            v-if="result.status === 'success'"
+                            class="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+                        />
+                        <XCircle
+                            v-else
+                            class="size-4 shrink-0 text-red-600 dark:text-red-400"
+                        />
+                        <div class="min-w-0 flex-1">
+                            <p
+                                class="text-sm font-medium"
+                                :class="
+                                    result.status === 'success'
+                                        ? 'text-emerald-800 dark:text-emerald-300'
+                                        : 'text-red-800 dark:text-red-300'
+                                "
+                            >
+                                {{ result.message }}
+                            </p>
+                            <p
+                                v-if="result.url"
+                                class="mt-0.5 truncate font-mono text-xs text-muted-foreground"
+                            >
+                                {{ result.url }}
+                                (<span class="text-xs">{{
+                                    formatDate(result.timestamp)
+                                }}</span
+                                >)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </AppLayout>
 </template>

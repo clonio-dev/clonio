@@ -18,11 +18,14 @@ import ConnectionFormSheet from '@/pages/connections/components/ConnectionFormSh
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import { ArrowRight, Database, Loader2, Plus } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
+import type { ScheduleData } from './components/ScheduleConfigurationStep.vue';
 import ScheduleConfigurationStep from './components/ScheduleConfigurationStep.vue';
 import TableConfigurationStep from './components/TableConfigurationStep.vue';
+import TriggersConfigurationStep from './components/TriggersConfigurationStep.vue';
 
 interface EditProps extends CloningFormProps {
     cloning: Cloning;
+    api_trigger_url?: string | null;
 }
 
 const props = defineProps<EditProps>();
@@ -117,6 +120,13 @@ const targetSchema = ref<SchemaData | null>(null);
 // Anonymization config from step 2
 const anonymizationConfig = ref<string>('');
 
+// Schedule data from step 3
+const scheduleData = ref<ScheduleData>({
+    executeNow: false,
+    isScheduled: props.cloning.is_scheduled,
+    schedule: props.cloning.schedule ?? '',
+});
+
 // Sheet state for on-the-fly connection creation
 const showSourceConnectionSheet = ref(false);
 const showTargetConnectionSheet = ref(false);
@@ -210,6 +220,34 @@ const initialRowSelections = computed(() => {
     for (const table of config.tables) {
         if (table.rowSelection) {
             result[table.tableName] = table.rowSelection;
+        }
+    }
+
+    return Object.keys(result).length > 0 ? result : undefined;
+});
+
+// Parse enforceColumnTypes from existing config
+const initialEnforceColumnTypes = computed(() => {
+    if (!props.cloning.anonymization_config) {
+        return undefined;
+    }
+
+    const config = props.cloning.anonymization_config as {
+        tables?: Array<{
+            tableName: string;
+            enforceColumnTypes?: boolean;
+        }>;
+    };
+
+    if (!config.tables) {
+        return undefined;
+    }
+
+    const result: Record<string, boolean> = {};
+
+    for (const table of config.tables) {
+        if (table.enforceColumnTypes) {
+            result[table.tableName] = true;
         }
     }
 
@@ -323,6 +361,17 @@ function goToStep2FromStep3() {
     currentStep.value = 2;
 }
 
+// Go to step 4 with schedule data
+function goToStep4(data: ScheduleData) {
+    scheduleData.value = data;
+    currentStep.value = 4;
+}
+
+// Go back to step 3
+function goToStep3FromStep4() {
+    currentStep.value = 3;
+}
+
 // Get selected connection names for display
 const selectedSourceName = computed(() => {
     const conn = prodConnections.value.find(
@@ -429,6 +478,23 @@ function getTargetConnectionType(connectionValue: string | number): string {
                         3
                     </div>
                     <span class="text-sm font-medium">Schedule</span>
+                </div>
+                <div class="h-px w-8 bg-border" />
+                <div
+                    class="flex items-center gap-2"
+                    :class="{ 'opacity-50': currentStep !== 4 }"
+                >
+                    <div
+                        class="flex size-8 items-center justify-center rounded-full text-sm font-medium"
+                        :class="
+                            currentStep >= 4
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground'
+                        "
+                    >
+                        4
+                    </div>
+                    <span class="text-sm font-medium">Triggers</span>
                 </div>
             </div>
 
@@ -715,6 +781,7 @@ function getTargetConnectionType(connectionValue: string | number): string {
                 :initial-keep-unknown-tables-on-target="
                     initialKeepUnknownTablesOnTarget
                 "
+                :initial-enforce-column-types="initialEnforceColumnTypes"
                 mode="edit"
                 @back="goToStep1"
                 @next="goToStep3"
@@ -723,15 +790,26 @@ function getTargetConnectionType(connectionValue: string | number): string {
             <!-- Step 3: Schedule Configuration -->
             <ScheduleConfigurationStep
                 v-if="currentStep === 3"
-                :source-connection-id="selectedSourceConnection!"
-                :target-connection-id="selectedTargetConnection!"
-                :cloning-title="cloningTitle"
-                :anonymization-config="anonymizationConfig"
-                :cloning-id="cloning.id"
                 :initial-schedule="cloning.schedule"
                 :initial-is-scheduled="cloning.is_scheduled"
                 mode="edit"
                 @back="goToStep2FromStep3"
+                @next="goToStep4"
+            />
+
+            <!-- Step 4: Triggers Configuration -->
+            <TriggersConfigurationStep
+                v-if="currentStep === 4"
+                :source-connection-id="selectedSourceConnection!"
+                :target-connection-id="selectedTargetConnection!"
+                :cloning-title="cloningTitle"
+                :anonymization-config="anonymizationConfig"
+                :schedule-data="scheduleData"
+                :cloning-id="cloning.id"
+                :initial-trigger-config="cloning.trigger_config"
+                :api-trigger-url="api_trigger_url"
+                mode="edit"
+                @back="goToStep3FromStep4"
             />
         </div>
 

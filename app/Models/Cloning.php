@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Data\TriggerConfigData;
+use Cron\CronExpression;
+use Database\Factories\CloningFactory;
 use Exception;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 
 /**
  * @property int $id
@@ -23,6 +27,8 @@ use Illuminate\Support\Carbon;
  * @property int $target_connection_id
  * @property array<string, mixed>|null $anonymization_config
  * @property string|null $schedule
+ * @property TriggerConfigData|null $trigger_config
+ * @property string|null $api_trigger_token
  * @property bool $is_scheduled
  * @property bool $is_paused
  * @property int $consecutive_failures
@@ -39,7 +45,7 @@ use Illuminate\Support\Carbon;
  */
 class Cloning extends Model
 {
-    /** @use HasFactory<\Database\Factories\CloningFactory> */
+    /** @use HasFactory<CloningFactory> */
     use HasFactory;
 
     protected $table = 'clonings';
@@ -51,6 +57,8 @@ class Cloning extends Model
         'target_connection_id',
         'anonymization_config',
         'schedule',
+        'trigger_config',
+        'api_trigger_token',
         'is_scheduled',
         'is_paused',
         'consecutive_failures',
@@ -67,9 +75,9 @@ class Cloning extends Model
         }
 
         try {
-            $cron = new \Cron\CronExpression($cronExpression);
+            $cron = new CronExpression($cronExpression);
 
-            return \Illuminate\Support\Facades\Date::instance($cron->getNextRunDate());
+            return Date::instance($cron->getNextRunDate());
         } catch (Exception) {
             return null;
         }
@@ -79,6 +87,7 @@ class Cloning extends Model
     {
         return [
             'anonymization_config' => 'array',
+            'trigger_config' => TriggerConfigData::class,
             'is_scheduled' => 'boolean',
             'is_paused' => 'boolean',
             'consecutive_failures' => 'integer',

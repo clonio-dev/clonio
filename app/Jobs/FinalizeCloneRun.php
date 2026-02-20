@@ -19,7 +19,10 @@ use Illuminate\Support\Facades\Log;
 
 class FinalizeCloneRun implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public function __construct(public readonly string $batchId, public readonly int $runId) {}
 
@@ -47,6 +50,8 @@ class FinalizeCloneRun implements ShouldQueue
                         'level' => CloningRunLogLevel::WARNING,
                     ]);
                 }
+
+                $this->dispatchWebhook($run, 'failure');
             }
 
             return;
@@ -65,8 +70,36 @@ class FinalizeCloneRun implements ShouldQueue
 
             try {
                 $auditService->signRun($run);
+                $run->updateQuietly(['public_token' => bin2hex(random_bytes(32))]);
             } catch (Exception) {
             }
+
+            $this->dispatchWebhook($run, 'success');
         }
+    }
+
+    private function dispatchWebhook(CloningRun $run, string $event): void
+    {
+        $triggerConfig = $run->cloning?->trigger_config;
+
+        if (! $triggerConfig) {
+            return;
+        }
+
+        $webhook = $event === 'success' ? $triggerConfig->webhookOnSuccess : $triggerConfig->webhookOnFailure;
+
+        if (! $webhook->enabled || empty($webhook->url)) {
+            return;
+        }
+
+        $webhookConfig = [
+            'enabled' => $webhook->enabled,
+            'url' => $webhook->url,
+            'method' => $webhook->method,
+            'headers' => $webhook->headers,
+            'secret' => $webhook->secret,
+        ];
+
+        dispatch(new DispatchWebhook($run, $webhookConfig, $event));
     }
 }

@@ -12,6 +12,7 @@ use App\Data\TableMetricsData;
 use App\Data\TableSchema;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
+use Throwable;
 
 /**
  * SQL Server SchemaInspector
@@ -48,18 +49,29 @@ class SQLServerSchemaInspector extends AbstractSchemaInspector
 
     public function getDatabaseMetadata(Connection $connection): array
     {
-        $version = $connection->selectOne('SELECT @@VERSION as version');
-        $dbInfo = $connection->selectOne("
-            SELECT
-                DATABASEPROPERTYEX(DB_NAME(), 'Collation') as collation,
-                DATABASEPROPERTYEX(DB_NAME(), 'Edition') as edition
-        ");
-
-        return [
-            'version' => $version->version ?? null,
-            'collation' => $dbInfo->collation ?? null,
-            'edition' => $dbInfo->edition ?? null,
+        $metadata = [
+            'version' => null,
+            'collation' => null,
+            'edition' => null,
         ];
+
+        try {
+            $metadata['version'] = $connection->selectOne('SELECT @@VERSION as version')->version ?? null;
+        } catch (Throwable) {
+        }
+
+        try {
+            $dbInfo = $connection->selectOne(
+                "SELECT
+                DATABASEPROPERTYEX(DB_NAME(), 'Collation') as collation,
+                DATABASEPROPERTYEX(DB_NAME(), 'Edition') as edition"
+            );
+            $metadata['collation'] = $dbInfo->collation ?? null;
+            $metadata['edition'] = $dbInfo->edition ?? null;
+        } catch (Throwable) {
+        }
+
+        return $metadata;
     }
 
     protected function getColumns(Connection $connection, string $tableName): Collection

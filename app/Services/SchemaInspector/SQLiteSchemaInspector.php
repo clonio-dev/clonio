@@ -13,6 +13,7 @@ use App\Data\TableSchema;
 use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
+use Throwable;
 
 /**
  * SQLite SchemaInspector
@@ -49,17 +50,27 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
 
     public function getDatabaseMetadata(Connection $connection): array
     {
-        $version = $connection->selectOne('SELECT sqlite_version() as version');
-
-        return [
-            'version' => $version->version ?? null,
-            'encoding' => $connection->selectOne('PRAGMA encoding')->encoding ?? null,
+        $metadata = [
+            'version' => null,
+            'encoding' => null,
         ];
+
+        try {
+            $metadata['version'] = $connection->selectOne('SELECT sqlite_version() as version')->version ?? null;
+        } catch (Throwable) {
+        }
+
+        try {
+            $metadata['encoding'] = $connection->selectOne('PRAGMA encoding')->encoding ?? null;
+        } catch (Throwable) {
+        }
+
+        return $metadata;
     }
 
     protected function getColumns(Connection $connection, string $tableName): Collection
     {
-        $result = $connection->select("PRAGMA table_info({$tableName})");
+        $result = $connection->select(sprintf('PRAGMA table_info(%s)', $tableName));
 
         return collect($result)->map(function ($column): ColumnSchema {
             // Parse type and length (e.g., "VARCHAR(255)")
@@ -160,11 +171,11 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
     protected function getIndexes(Connection $connection, string $tableName): Collection
     {
         // Get all indexes
-        $indexes = $connection->select("PRAGMA index_list({$tableName})");
+        $indexes = $connection->select(sprintf('PRAGMA index_list(%s)', $tableName));
 
         return collect($indexes)->map(function ($index) use ($connection): IndexSchema {
             // Get columns for this index
-            $indexInfo = $connection->select("PRAGMA index_info({$index->name})");
+            $indexInfo = $connection->select(sprintf('PRAGMA index_info(%s)', $index->name));
             $columns = array_map(fn ($col) => $col->name, $indexInfo);
 
             // Determine type
@@ -188,7 +199,7 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
 
     protected function getForeignKeys(Connection $connection, string $tableName): Collection
     {
-        $result = $connection->select("PRAGMA foreign_key_list({$tableName})");
+        $result = $connection->select(sprintf('PRAGMA foreign_key_list(%s)', $tableName));
 
         // Group by id (foreign key constraint id)
         $grouped = collect($result)->groupBy('id');
@@ -197,7 +208,7 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
             $firstColumn = $fkColumns->first();
 
             return new ForeignKeySchema(
-                name: "fk_{$tableName}_{$id}",
+                name: sprintf('fk_%s_%s', $tableName, $id),
                 table: $tableName,
                 columns: $fkColumns->pluck('from')->all(),
                 referencedTable: $firstColumn->table,
@@ -229,7 +240,7 @@ class SQLiteSchemaInspector extends AbstractSchemaInspector
         if (preg_match_all('/CHECK\s*\((.*?)\)/i', (string) $sql, $matches)) {
             foreach ($matches[1] as $index => $expression) {
                 $constraints->push(new ConstraintSchema(
-                    name: "check_{$tableName}_{$index}",
+                    name: sprintf('check_%s_%d', $tableName, $index),
                     type: 'check',
                     column: null,
                     expression: mb_trim($expression),

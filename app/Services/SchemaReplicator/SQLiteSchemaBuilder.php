@@ -24,7 +24,7 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
         $primaryKey = $table->getPrimaryKey();
         if ($primaryKey && count($primaryKey->columns) > 1) {
             $columnList = implode(', ', $primaryKey->columns);
-            $definitions[] = "PRIMARY KEY ({$columnList})";
+            $definitions[] = sprintf('PRIMARY KEY (%s)', $columnList);
         }
 
         // Include foreign keys in CREATE TABLE (SQLite requires this)
@@ -43,10 +43,10 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
         $columnList = implode(', ', $index->columns);
 
         if ($index->type === 'unique') {
-            return "CREATE UNIQUE INDEX \"{$index->name}\" ON \"{$tableName}\" ({$columnList})";
+            return sprintf('CREATE UNIQUE INDEX "%s" ON "%s" (%s)', $index->name, $tableName, $columnList);
         }
 
-        return "CREATE INDEX \"{$index->name}\" ON \"{$tableName}\" ({$columnList})";
+        return sprintf('CREATE INDEX "%s" ON "%s" (%s)', $index->name, $tableName, $columnList);
     }
 
     public function buildAddForeignKey(string $tableName, ForeignKeySchema $fk): string
@@ -61,7 +61,7 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
 
     public function buildAddColumn(string $tableName, ColumnSchema $column): string
     {
-        return "ALTER TABLE \"{$tableName}\" ADD COLUMN " . $this->buildColumnDefinition($column);
+        return sprintf('ALTER TABLE "%s" ADD COLUMN ', $tableName) . $this->buildColumnDefinition($column);
     }
 
     public function buildModifyColumn(string $tableName, ColumnSchema $column): string
@@ -82,9 +82,9 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
 
         if ($isPrimaryAutoIncrement) {
             // SQLite requires INTEGER (not BIGINT) for auto-increment
-            $def = "\"{$column->name}\" INTEGER PRIMARY KEY AUTOINCREMENT";
+            $def = sprintf('"%s" INTEGER PRIMARY KEY AUTOINCREMENT', $column->name);
         } else {
-            $def = "\"{$column->name}\" " . $this->buildDataType($column);
+            $def = sprintf('"%s" ', $column->name) . $this->buildDataType($column);
 
             if (! $column->nullable) {
                 $def .= ' NOT NULL';
@@ -104,9 +104,9 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
 
         if ($column->length !== null && ! in_array($type, ['TEXT', 'BLOB'])) {
             if ($column->scale !== null) {
-                $type .= "({$column->length},{$column->scale})";
+                $type .= sprintf('(%s,%s)', $column->length, $column->scale);
             } else {
-                $type .= "({$column->length})";
+                $type .= sprintf('(%s)', $column->length);
             }
         }
 
@@ -115,17 +115,17 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
 
     protected function buildForeignKeyConstraint(ForeignKeySchema $fk): string
     {
-        $localColumns = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $fk->columns));
-        $referencedColumns = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $fk->referencedColumns));
+        $localColumns = implode(', ', array_map(fn (string $c): string => sprintf('"%s"', $c), $fk->columns));
+        $referencedColumns = implode(', ', array_map(fn (string $c): string => sprintf('"%s"', $c), $fk->referencedColumns));
 
-        $sql = "FOREIGN KEY ({$localColumns}) REFERENCES \"{$fk->referencedTable}\" ({$referencedColumns})";
+        $sql = sprintf('FOREIGN KEY (%s) REFERENCES "%s" (%s)', $localColumns, $fk->referencedTable, $referencedColumns);
 
         if ($fk->onUpdate && $fk->onUpdate !== 'NO ACTION') {
-            $sql .= " ON UPDATE {$fk->onUpdate}";
+            $sql .= ' ON UPDATE ' . $fk->onUpdate;
         }
 
         if ($fk->onDelete && $fk->onDelete !== 'NO ACTION') {
-            $sql .= " ON DELETE {$fk->onDelete}";
+            $sql .= ' ON DELETE ' . $fk->onDelete;
         }
 
         return $sql;
@@ -136,6 +136,7 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
         if (is_string($value)) {
             return $this->quote($value);
         }
+
         if (is_numeric($value)) {
             return (string) $value;
         }

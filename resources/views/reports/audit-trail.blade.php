@@ -660,6 +660,7 @@
                 </div>
                 @php
                     $isScheduled = $logs->contains(fn ($log) => $log->event_type === 'scheduled_cloning_run_created');
+                    $isApiTriggered = $logs->contains(fn ($log) => $log->event_type === 'api_triggered');
                     $userInitiatedLog = $logs->firstWhere('event_type', 'user_initiated');
                 @endphp
                 <div class="summary-item">
@@ -667,6 +668,8 @@
                     <div class="summary-value">
                         @if($isScheduled)
                             Cron / Scheduled
+                        @elseif($isApiTriggered)
+                            API Trigger
                         @elseif($userInitiatedLog && !empty($userInitiatedLog->data['name']))
                             {{ $userInitiatedLog->data['name'] }} ({{ $userInitiatedLog->data['email'] ?? 'N/A' }})
                         @else
@@ -871,7 +874,7 @@
                             <tr>
                                 <td class="log-time">
                                     @if($run->started_at && $log->created_at)
-                                        +{{ $run->started_at->diffInSeconds($log->created_at) }}s
+                                        +{{ gmdate('H:i:s', $run->started_at->diffInSeconds($log->created_at)) }}
                                     @else
                                         {{ $log->created_at?->format('H:i:s') ?? 'N/A' }}
                                     @endif
@@ -879,7 +882,7 @@
                                 <td>
                                     <span class="log-level-badge log-level-{{ $log->level->value }}">{{ $log->level->value }}</span>
                                 </td>
-                                <td class="log-event">{{ $log->event_type }}</td>
+                                <td class="log-event">{{ str_replace('_', ' ', $log->event_type) }}</td>
                                 <td class="log-message">{{ $log->message }}</td>
                             </tr>
                         @endforeach

@@ -1,0 +1,367 @@
+{
+    "run_id": 278,
+    "cloning": {
+        "id": 6,
+        "title": "Demo > TGT"
+    },
+    "source": {
+        "id": 1,
+        "name": "Source",
+        "type": "mysql",
+        "host": "127.0.0.1",
+        "port": 3306,
+        "database": "laravel",
+        "username": "root"
+    },
+    "target": {
+        "id": 2,
+        "name": "Target",
+        "type": "mysql",
+        "host": "127.0.0.1",
+        "port": 3306,
+        "database": "target",
+        "username": "root"
+    },
+    "exported_at": "2026-02-11T19:00:20+00:00",
+    "logs": [
+        {
+            "id": 15746,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "cloning_run_created",
+            "message": "Cloning run created",
+            "data": [],
+            "created_at": "2026-02-11T18:50:35.000000Z"
+        },
+        {
+            "id": 15747,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "user_initiated",
+            "message": "Cloning initiated by user Robert Kummer",
+            "data": {
+                "message": "Cloning initiated by user Robert Kummer",
+                "name": "Robert Kummer",
+                "email": "robert@kummer.email"
+            },
+            "created_at": "2026-02-11T18:50:35.000000Z"
+        },
+        {
+            "id": 15748,
+            "run_id": 278,
+            "level": "success",
+            "event_type": "connection_tested",
+            "message": "Connection successful to Source",
+            "data": {
+                "table": "",
+                "message": "Connection successful to Source",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:36.000000Z"
+        },
+        {
+            "id": 15749,
+            "run_id": 278,
+            "level": "success",
+            "event_type": "connection_tested",
+            "message": "Connection successful to Target",
+            "data": {
+                "table": "",
+                "message": "Connection successful to Target",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:36.000000Z"
+        },
+        {
+            "id": 15750,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "synchronization_started",
+            "message": "Starting database synchronization",
+            "data": {
+                "table": "",
+                "message": "Starting database synchronization",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:36.000000Z"
+        },
+        {
+            "id": 15751,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "replicating_table",
+            "message": "Updating existing table",
+            "data": {
+                "table": "categories",
+                "message": "Updating existing table",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:36.000000Z"
+        },
+        {
+            "id": 15752,
+            "run_id": 278,
+            "level": "success",
+            "event_type": "replicating_table",
+            "message": "No changes necessary",
+            "data": {
+                "table": "categories",
+                "message": "No changes necessary",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:36.000000Z"
+        },
+        {
+            "id": 15753,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "replicating_table",
+            "message": "Updating existing table",
+            "data": {
+                "table": "products",
+                "message": "Updating existing table",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:36.000000Z"
+        },
+        {
+            "id": 15754,
+            "run_id": 278,
+            "level": "success",
+            "event_type": "replicating_table",
+            "message": "No changes necessary",
+            "data": {
+                "table": "products",
+                "message": "No changes necessary",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:36.000000Z"
+        },
+        {
+            "id": 15755,
+            "run_id": 278,
+            "level": "success",
+            "event_type": "table_emptied",
+            "message": "All rows on table products deleted on target database",
+            "data": {
+                "table": "products",
+                "message": "All rows on table products deleted on target database",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:36.000000Z"
+        },
+        {
+            "id": 15756,
+            "run_id": 278,
+            "level": "success",
+            "event_type": "table_emptied",
+            "message": "All rows on table categories deleted on target database",
+            "data": {
+                "table": "categories",
+                "message": "All rows on table categories deleted on target database",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:36.000000Z"
+        },
+        {
+            "id": 15757,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "table_started",
+            "message": "Starting table copy process for categories table",
+            "data": {
+                "table": "categories",
+                "message": "Starting table copy process for categories table",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15758,
+            "run_id": 278,
+            "level": "debug",
+            "event_type": "foreign_keys",
+            "message": "Disabling foreign key constraints on target database",
+            "data": {
+                "table": "categories",
+                "message": "Disabling foreign key constraints on target database",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15759,
+            "run_id": 278,
+            "level": "debug",
+            "event_type": "order_columns",
+            "message": "Order columns for table categories: id",
+            "data": {
+                "table": "categories",
+                "message": "Order columns for table categories: id",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15760,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "data_copy_started",
+            "message": "Starting chunked data copy of 3 rows (chunk size: 1000)",
+            "data": {
+                "table": "categories",
+                "message": "Starting chunked data copy of 3 rows (chunk size: 1000)",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15761,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "table_transfer_progress",
+            "message": "Transferred 3 \/ 3 rows",
+            "data": {
+                "rows_processed": 3,
+                "total_rows": 3,
+                "percent": 100,
+                "rows_per_second": 332,
+                "elapsed_seconds": 0,
+                "estimated_seconds_remaining": 0,
+                "table": "categories",
+                "message": "Transferred 3 \/ 3 rows",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15762,
+            "run_id": 278,
+            "level": "success",
+            "event_type": "data_copy_completed",
+            "message": "Data copy completed. Total rows: 3, Failed chunks: 0",
+            "data": {
+                "rows_processed": 3,
+                "failed_chunks": 0,
+                "duration_seconds": 0.009998083114624023,
+                "table": "categories",
+                "message": "Data copy completed. Total rows: 3, Failed chunks: 0",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15763,
+            "run_id": 278,
+            "level": "debug",
+            "event_type": "foreign_keys",
+            "message": "Enabling foreign key constraints on target database",
+            "data": {
+                "table": "categories",
+                "message": "Enabling foreign key constraints on target database",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15764,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "table_started",
+            "message": "Starting table copy process for products table",
+            "data": {
+                "table": "products",
+                "message": "Starting table copy process for products table",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15765,
+            "run_id": 278,
+            "level": "debug",
+            "event_type": "foreign_keys",
+            "message": "Disabling foreign key constraints on target database",
+            "data": {
+                "table": "products",
+                "message": "Disabling foreign key constraints on target database",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15766,
+            "run_id": 278,
+            "level": "debug",
+            "event_type": "order_columns",
+            "message": "Order columns for table products: id",
+            "data": {
+                "table": "products",
+                "message": "Order columns for table products: id",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15767,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "data_copy_started",
+            "message": "Starting chunked data copy of 3 rows (chunk size: 1000)",
+            "data": {
+                "table": "products",
+                "message": "Starting chunked data copy of 3 rows (chunk size: 1000)",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15768,
+            "run_id": 278,
+            "level": "info",
+            "event_type": "table_transfer_progress",
+            "message": "Transferred 3 \/ 3 rows",
+            "data": {
+                "rows_processed": 3,
+                "total_rows": 3,
+                "percent": 100,
+                "rows_per_second": 641,
+                "elapsed_seconds": 0,
+                "estimated_seconds_remaining": 0,
+                "table": "products",
+                "message": "Transferred 3 \/ 3 rows",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15769,
+            "run_id": 278,
+            "level": "success",
+            "event_type": "data_copy_completed",
+            "message": "Data copy completed. Total rows: 3, Failed chunks: 0",
+            "data": {
+                "rows_processed": 3,
+                "failed_chunks": 0,
+                "duration_seconds": 0.0054819583892822266,
+                "table": "products",
+                "message": "Data copy completed. Total rows: 3, Failed chunks: 0",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        },
+        {
+            "id": 15770,
+            "run_id": 278,
+            "level": "debug",
+            "event_type": "foreign_keys",
+            "message": "Enabling foreign key constraints on target database",
+            "data": {
+                "table": "products",
+                "message": "Enabling foreign key constraints on target database",
+                "batch_id": "a10e7c18-1fda-484c-8ddf-77cd0b3873af"
+            },
+            "created_at": "2026-02-11T18:50:37.000000Z"
+        }
+    ]
+}

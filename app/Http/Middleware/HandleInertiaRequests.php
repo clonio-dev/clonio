@@ -6,6 +6,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -38,7 +39,7 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        /** @var \Illuminate\Support\Collection<int, string> $quotes */
+        /** @var Collection<int, string> $quotes */
         $quotes = Inspiring::quotes();
 
         [$message, $author] = str($quotes->random())->explode('-');

@@ -81,7 +81,7 @@ final readonly class ForeignKeySchema
         $mappings = [];
         foreach ($this->columns as $index => $column) {
             $refColumn = $this->referencedColumns[$index] ?? '?';
-            $mappings[] = "{$column} -> {$this->referencedTable}.{$refColumn}";
+            $mappings[] = sprintf('%s -> %s.%s', $column, $this->referencedTable, $refColumn);
         }
 
         return implode(', ', $mappings);

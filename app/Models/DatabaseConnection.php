@@ -11,6 +11,7 @@ use App\Data\PostgresSqlDriverData;
 use App\Data\SqliteDriverData;
 use App\Data\SqlServerDriverData;
 use App\Enums\DatabaseConnectionTypes;
+use Database\Factories\DatabaseConnectionFactory;
 use Exception;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -42,7 +43,7 @@ use Illuminate\Support\Facades\Crypt;
  */
 class DatabaseConnection extends Model
 {
-    /** @use HasFactory<\Database\Factories\DatabaseConnectionFactory> */
+    /** @use HasFactory<DatabaseConnectionFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -114,7 +115,7 @@ class DatabaseConnection extends Model
                 port: $this->port,
             ),
             DatabaseConnectionTypes::SQLITE => new SqliteDriverData($this->database),
-            default => throw new Exception("Unsupported connection type: {$this->type}")
+            default => throw new Exception('Unsupported connection type: ' . $this->type)
         };
 
         return new ConnectionData(

@@ -17,6 +17,7 @@ import {
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
+    BookOpenIcon,
     CopyIcon,
     DatabaseIcon,
     LayoutGridIcon,
@@ -53,7 +54,13 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [];
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Documentation',
+        href: '/docs',
+        icon: BookOpenIcon,
+    },
+];
 </script>
 
 <template>
