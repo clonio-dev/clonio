@@ -113,7 +113,7 @@ it('handles various constraint types', function (): void {
     $types = ['check', 'default', 'unique', 'not_null'];
 
     foreach ($types as $type) {
-        $constraint = new ConstraintSchema("test_{$type}", $type, 'col', 'expr');
+        $constraint = new ConstraintSchema('test_' . $type, $type, 'col', 'expr');
         expect($constraint->type)->toBe($type);
     }
 });

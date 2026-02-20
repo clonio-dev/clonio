@@ -86,7 +86,7 @@ class CloningRunController extends Controller
             ->failed()
             ->delete();
 
-        return back()->with('success', "{$deleted} failed run(s) deleted");
+        return back()->with('success', $deleted . ' failed run(s) deleted');
     }
 
     /**
@@ -189,7 +189,7 @@ class CloningRunController extends Controller
 
         $logs = $run->logs()->oldest()->get();
 
-        $filename = "cloning-run-{$run->id}-logs.json";
+        $filename = sprintf('cloning-run-%d-logs.json', $run->id);
 
         return response()->streamDownload(function () use ($run, $logs): void {
             echo json_encode([

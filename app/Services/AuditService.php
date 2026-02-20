@@ -42,8 +42,8 @@ class AuditService
                 'audit_signature' => $signature,
                 'audit_signed_at' => now(),
             ]);
-        } catch (Throwable $e) {
-            Log::error('Failed to save audit signature for run ' . $run->id . ': ' . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Log::error('Failed to save audit signature for run ' . $run->id . ': ' . $throwable->getMessage());
         }
     }
 

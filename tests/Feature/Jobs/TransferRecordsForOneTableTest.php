@@ -124,7 +124,7 @@ it('transfers records in chunks', function (): void {
     });
 
     for ($i = 1; $i <= 5; $i++) {
-        DB::connection('test_source')->table('posts')->insert(['title' => "Post {$i}"]);
+        DB::connection('test_source')->table('posts')->insert(['title' => 'Post ' . $i]);
     }
 
     config(['database.connections.test_target' => [
@@ -477,7 +477,7 @@ it('throttles progress logs to reduce database overhead', function (): void {
     // Without throttling, we'd get 10 progress logs
     // With 5% threshold, we should get ~20 progress logs (at 0%, 5%, 10%, ..., 100%)
     for ($i = 1; $i <= 100; $i++) {
-        DB::connection('test_source')->table('items')->insert(['name' => "Item {$i}"]);
+        DB::connection('test_source')->table('items')->insert(['name' => 'Item ' . $i]);
     }
 
     config(['database.connections.test_target' => [
@@ -562,7 +562,7 @@ it('throttles progress logs using time-based intervals', function (): void {
 
     // Insert 1000 records - with chunk size 10, this will trigger 100 chunks
     for ($i = 1; $i <= 1000; $i++) {
-        DB::connection('test_source')->table('items')->insert(['name' => "Item {$i}"]);
+        DB::connection('test_source')->table('items')->insert(['name' => 'Item ' . $i]);
     }
 
     config(['database.connections.test_target' => [

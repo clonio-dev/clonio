@@ -13,14 +13,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('cloning_runs', function (Blueprint $table) {
+        Schema::table('cloning_runs', function (Blueprint $table): void {
             $table->json('webhook_results')->nullable()->after('audit_signed_at');
         });
     }
 
     public function down(): void
     {
-        Schema::table('cloning_runs', function (Blueprint $table) {
+        Schema::table('cloning_runs', function (Blueprint $table): void {
             $table->dropColumn('webhook_results');
         });
     }

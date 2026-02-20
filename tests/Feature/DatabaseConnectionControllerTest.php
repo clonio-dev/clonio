@@ -26,7 +26,7 @@ describe('update', function (): void {
             ]);
 
         $response = $this->actingAs($this->user)
-            ->put("/connections/{$connection->id}", [
+            ->put('/connections/' . $connection->id, [
                 'name' => 'New Name',
                 'type' => 'pgsql',
                 'host' => 'new-host.example.com',
@@ -57,7 +57,7 @@ describe('update', function (): void {
             ]);
 
         $this->actingAs($this->user)
-            ->put("/connections/{$connection->id}", [
+            ->put('/connections/' . $connection->id, [
                 'name' => $connection->name,
                 'type' => $connection->type->value,
                 'host' => $connection->host,
@@ -79,7 +79,7 @@ describe('update', function (): void {
             ]);
 
         $this->actingAs($this->user)
-            ->put("/connections/{$connection->id}", [
+            ->put('/connections/' . $connection->id, [
                 'name' => $connection->name,
                 'type' => $connection->type->value,
                 'host' => $connection->host,
@@ -102,7 +102,7 @@ describe('update', function (): void {
             ]);
 
         $this->actingAs($this->user)
-            ->put("/connections/{$connection->id}", [
+            ->put('/connections/' . $connection->id, [
                 'name' => $connection->name,
                 'type' => $connection->type->value,
                 'host' => $connection->host,
@@ -125,7 +125,7 @@ describe('update', function (): void {
             ]);
 
         $this->actingAs($this->user)
-            ->put("/connections/{$connection->id}", [
+            ->put('/connections/' . $connection->id, [
                 'name' => $connection->name,
                 'type' => $connection->type->value,
                 'host' => $connection->host,
@@ -146,7 +146,7 @@ describe('update', function (): void {
             ->create();
 
         $response = $this->actingAs($this->user)
-            ->put("/connections/{$connection->id}", [
+            ->put('/connections/' . $connection->id, [
                 'name' => 'Hacked',
                 'type' => 'mysql',
                 'host' => 'evil.com',
@@ -161,7 +161,7 @@ describe('update', function (): void {
     it('requires authentication', function (): void {
         $connection = DatabaseConnection::factory()->create();
 
-        $response = $this->put("/connections/{$connection->id}", [
+        $response = $this->put('/connections/' . $connection->id, [
             'name' => 'Test',
             'type' => 'mysql',
             'host' => 'localhost',
@@ -179,7 +179,7 @@ describe('update', function (): void {
             ->create();
 
         $response = $this->actingAs($this->user)
-            ->put("/connections/{$connection->id}", []);
+            ->put('/connections/' . $connection->id, []);
 
         $response->assertSessionHasErrors(['name', 'type', 'host', 'port', 'database', 'username']);
     });
@@ -190,7 +190,7 @@ describe('update', function (): void {
             ->create();
 
         $response = $this->actingAs($this->user)
-            ->put("/connections/{$connection->id}", [
+            ->put('/connections/' . $connection->id, [
                 'name' => 'Test',
                 'type' => 'mysql',
                 'host' => 'localhost',
@@ -208,7 +208,7 @@ describe('update', function (): void {
             ->create();
 
         $response = $this->actingAs($this->user)
-            ->put("/connections/{$connection->id}", [
+            ->put('/connections/' . $connection->id, [
                 'name' => 'Test',
                 'type' => 'invalid_type',
                 'host' => 'localhost',

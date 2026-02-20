@@ -23,7 +23,12 @@ use Throwable;
 
 class CloneSchema implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, HandlesExceptions, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
+    use Batchable;
+    use HandlesExceptions;
+    use InteractsWithQueue;
+    use LogsProcessSteps;
+    use Queueable;
+    use TransferBatchJob;
 
     public int $tries = 2;
 

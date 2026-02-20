@@ -45,6 +45,7 @@ final readonly class SynchronizationOptionsData
                 if (! $strategy) {
                     continue;
                 }
+
                 if ($strategy === ColumnMutationStrategyEnum::KEEP) {
                     continue;
                 }

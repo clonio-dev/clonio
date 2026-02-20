@@ -61,11 +61,13 @@ class SchemaReplicator
             if ($visitor !== null) {
                 $visitor($table->name, 'replicating_table', 'Updating existing table');
             }
+
             $this->updateTable($target, $table, $visitor, $enforceColumnTypes);
         } else {
             if ($visitor !== null) {
                 $visitor($table->name, 'replicating_table', 'Creating new table');
             }
+
             $this->createTable($target, $table, $visitor);
         }
     }

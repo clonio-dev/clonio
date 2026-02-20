@@ -42,7 +42,7 @@ class RunScheduledClonings extends Command
             return self::SUCCESS;
         }
 
-        $this->info("Found {$dueClonings->count()} cloning(s) due to run.");
+        $this->info(sprintf('Found %d cloning(s) due to run.', $dueClonings->count()));
 
         foreach ($dueClonings as $cloning) {
             $this->executeCloning($cloning, $executeCloning);
@@ -56,7 +56,7 @@ class RunScheduledClonings extends Command
      */
     private function executeCloning(Cloning $cloning, ExecuteCloning $executeCloning): void
     {
-        $this->info("Executing cloning: {$cloning->title} (ID: {$cloning->id})");
+        $this->info(sprintf('Executing cloning: %s (ID: %d)', $cloning->title, $cloning->id));
 
         /** @var CloningRun $run */
         $run = $executeCloning->start($cloning)
@@ -66,6 +66,6 @@ class RunScheduledClonings extends Command
         $nextRunAt = Cloning::calculateNextRunAt($cloning->schedule);
         $cloning->update(['next_run_at' => $nextRunAt]);
 
-        $this->info("  -> Run created (ID: {$run->id}), next run at: " . ($nextRunAt?->format('Y-m-d H:i:s') ?? 'unknown'));
+        $this->info(sprintf('  -> Run created (ID: %d), next run at: ', $run->id) . ($nextRunAt?->format('Y-m-d H:i:s') ?? 'unknown'));
     }
 }

@@ -11,6 +11,7 @@ use App\Models\DatabaseConnection;
 use App\Services\DatabaseInformationRetrievalService;
 use App\Services\PiiColumnMatcher;
 use App\Services\SchemaInspector\SchemaInspectorFactory;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Connection;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -35,7 +36,7 @@ class ValidateCloningConnectionsRequest extends FormRequest
     }
 
     /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -127,10 +128,10 @@ class ValidateCloningConnectionsRequest extends FormRequest
             $service->getConnection($sourceConnectionData);
             $this->sourceSchema = $this->retrieveSchema($service, $sourceConnectionData);
             $this->sourceConnection->markConnected();
-        } catch (RuntimeException $e) {
+        } catch (RuntimeException $runtimeException) {
             $validator->errors()->add(
                 'source_connection_id',
-                "Could not connect to source database: {$e->getMessage()}"
+                'Could not connect to source database: ' . $runtimeException->getMessage()
             );
 
             $this->sourceConnection->markNotConnected('Connection Failed');
@@ -144,10 +145,10 @@ class ValidateCloningConnectionsRequest extends FormRequest
             $service->getConnection($targetConnectionData);
             $this->targetSchema = $this->retrieveSchema($service, $targetConnectionData);
             $this->targetConnection->markConnected();
-        } catch (RuntimeException $e) {
+        } catch (RuntimeException $runtimeException) {
             $validator->errors()->add(
                 'target_connection_id',
-                "Could not connect to target database: {$e->getMessage()}"
+                'Could not connect to target database: ' . $runtimeException->getMessage()
             );
 
             $this->targetConnection->markNotConnected('Connection Failed');

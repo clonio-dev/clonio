@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\CloningRunController;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
-Route::get('/', fn (): Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View => view('home', [
+Route::get('/', fn (): Factory|View => view('home', [
     'canRegister' => Features::enabled(Features::registration()),
 ]))->name('home');
 

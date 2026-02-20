@@ -73,9 +73,9 @@ final readonly class ColumnSchema
 
         if ($this->length !== null) {
             if ($this->scale !== null) {
-                $fullType .= "({$this->length},{$this->scale})";
+                $fullType .= sprintf('(%d,%d)', $this->length, $this->scale);
             } else {
-                $fullType .= "({$this->length})";
+                $fullType .= sprintf('(%d)', $this->length);
             }
         }
 

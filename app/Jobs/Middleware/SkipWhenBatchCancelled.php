@@ -31,7 +31,7 @@ class SkipWhenBatchCancelled
     private function logInfo(object $job, string $event, string $message): void
     {
         if (! property_exists($job, 'tableName') || $job->tableName === null) {
-            Log::info("[{$event}] {$message}");
+            Log::info(sprintf('[%s] %s', $event, $message));
 
             return;
         }
@@ -44,6 +44,6 @@ class SkipWhenBatchCancelled
         //        ], 'info');
 
         // Zusätzlich in Laravel Log
-        Log::info("[Table: {$job->tableName}] [{$event}] {$message}");
+        Log::info(sprintf('[Table: %s] [%s] %s', $job->tableName, $event, $message));
     }
 }

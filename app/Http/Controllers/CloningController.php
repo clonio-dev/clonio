@@ -302,7 +302,7 @@ class CloningController extends Controller
 
         $deleted = $cloning->runs()->failed()->delete();
 
-        return back()->with('success', "{$deleted} failed run(s) deleted");
+        return back()->with('success', $deleted . ' failed run(s) deleted');
     }
 
     /**

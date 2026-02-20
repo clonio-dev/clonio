@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\CloningRunLogLevel;
 use App\Enums\CloningRunStatus;
+use Database\Factories\CloningRunFactory;
 use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -47,7 +48,7 @@ use Illuminate\Support\Carbon;
  */
 class CloningRun extends Model
 {
-    /** @use HasFactory<\Database\Factories\CloningRunFactory> */
+    /** @use HasFactory<CloningRunFactory> */
     use HasFactory;
 
     protected $table = 'cloning_runs';
@@ -253,12 +254,12 @@ class CloningRun extends Model
             'cloning_run_created' => 'Cloning run created',
             'scheduled_cloning_run_created' => 'Run was initiated by a schedule',
             'api_triggered' => 'Run was initiated by an API trigger',
-            'batch_started' => "Batch started with {$data['total_jobs']} jobs",
-            'table_started' => "Processing table: {$data['table']}",
-            'table_completed' => "Table {$data['table']} completed: {$data['rows_processed']} rows",
-            'table_failed' => "Table {$data['table']} failed: {$data['error']}",
-            'batch_completed' => "Batch completed in {$data['duration']}s",
-            'batch_failed' => "Batch failed: {$data['error']}",
+            'batch_started' => sprintf('Batch started with %d jobs', $data['total_jobs']),
+            'table_started' => 'Processing table: ' . $data['table'],
+            'table_completed' => sprintf('Table %s completed: %d rows', $data['table'], $data['rows_processed']),
+            'table_failed' => sprintf('Table %s failed: %s', $data['table'], $data['error']),
+            'batch_completed' => sprintf('Batch completed in %ds', $data['duration']),
+            'batch_failed' => 'Batch failed: ' . $data['error'],
             'batch_cancelled' => 'Cloning run was cancelled',
             default => $eventType,
         };

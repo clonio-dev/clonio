@@ -16,7 +16,10 @@ use Throwable;
 
 class DispatchWebhook implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public int $tries = 3;
 
@@ -70,7 +73,7 @@ class DispatchWebhook implements ShouldQueue
                     'url' => $url,
                     'http_status' => $response->status(),
                     'attempt' => $this->attempts(),
-                    'message' => "Webhook for {$this->event} failed (HTTP {$response->status()})",
+                    'message' => sprintf('Webhook for %s failed (HTTP %s)', $this->event, $response->status()),
                 ]);
 
                 if ($this->attempts() < $this->tries) {
@@ -82,13 +85,13 @@ class DispatchWebhook implements ShouldQueue
                     'event' => $this->event,
                     'url' => $url,
                     'http_status' => $response->status(),
-                    'message' => "Webhook for {$this->event} dispatched successfully",
+                    'message' => sprintf('Webhook for %s dispatched successfully', $this->event),
                 ]);
             }
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             Log::error('Webhook dispatch error', [
                 'url' => $url,
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
                 'run_id' => $this->run->id,
             ]);
 
@@ -96,9 +99,9 @@ class DispatchWebhook implements ShouldQueue
                 'status' => 'failed',
                 'event' => $this->event,
                 'url' => $url,
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
                 'attempt' => $this->attempts(),
-                'message' => "Webhook for {$this->event} failed: {$e->getMessage()}",
+                'message' => sprintf('Webhook for %s failed: %s', $this->event, $throwable->getMessage()),
             ]);
 
             if ($this->attempts() < $this->tries) {

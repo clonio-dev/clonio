@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Clonio\ExecuteCloning;
 use App\Data\TriggerConfigData;
 use App\Models\Cloning;
+use App\Models\DatabaseConnection;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -86,12 +87,12 @@ describe('API trigger endpoint', function (): void {
 
 describe('trigger config storage', function (): void {
     it('stores trigger config when creating a cloning', function (): void {
-        $sourceConnection = App\Models\DatabaseConnection::factory()
+        $sourceConnection = DatabaseConnection::factory()
             ->for($this->user)
             ->sqlite()
             ->create();
 
-        $targetConnection = App\Models\DatabaseConnection::factory()
+        $targetConnection = DatabaseConnection::factory()
             ->for($this->user)
             ->sqlite()
             ->testDatabase()
@@ -126,12 +127,12 @@ describe('trigger config storage', function (): void {
     });
 
     it('generates API trigger token only when API trigger is enabled', function (): void {
-        $sourceConnection = App\Models\DatabaseConnection::factory()
+        $sourceConnection = DatabaseConnection::factory()
             ->for($this->user)
             ->sqlite()
             ->create();
 
-        $targetConnection = App\Models\DatabaseConnection::factory()
+        $targetConnection = DatabaseConnection::factory()
             ->for($this->user)
             ->sqlite()
             ->testDatabase()

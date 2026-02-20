@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\ConnectionData;
+use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Schema\Builder;
@@ -46,7 +47,7 @@ final readonly class DatabaseInformationRetrievalService
     public function getSchema(ConnectionData $connectionData): Builder
     {
         $connection = $this->getConnection($connectionData);
-        assert($connection instanceof \Illuminate\Database\Connection);
+        assert($connection instanceof Connection);
 
         return $connection->getSchemaBuilder();
     }
@@ -84,14 +85,14 @@ final readonly class DatabaseInformationRetrievalService
             $this->connectionMap->put($connectionData->connectionName, $connectionData->name);
 
             return $connection;
-        } catch (PDOException $e) {
+        } catch (PDOException $pdoException) {
             //            $this->logError(
             //                "connection_{$connectionData->connectionName}_failed",
             //                "Failed to connect to {$connectionData->connectionName} database: {$e->getMessage()}"
             //            );
 
-            throw new RuntimeException("Could not connect to {$connectionData->connectionName} database. " .
-                'Please check credentials and network connectivity.', $e->getCode(), previous: $e);
+            throw new RuntimeException(sprintf('Could not connect to %s database. ', $connectionData->connectionName) .
+                'Please check credentials and network connectivity.', $pdoException->getCode(), previous: $pdoException);
         }
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Data\TriggerConfigData;
+use Cron\CronExpression;
+use Database\Factories\CloningFactory;
 use Exception;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 
 /**
  * @property int $id
@@ -42,7 +45,7 @@ use Illuminate\Support\Carbon;
  */
 class Cloning extends Model
 {
-    /** @use HasFactory<\Database\Factories\CloningFactory> */
+    /** @use HasFactory<CloningFactory> */
     use HasFactory;
 
     protected $table = 'clonings';
@@ -72,9 +75,9 @@ class Cloning extends Model
         }
 
         try {
-            $cron = new \Cron\CronExpression($cronExpression);
+            $cron = new CronExpression($cronExpression);
 
-            return \Illuminate\Support\Facades\Date::instance($cron->getNextRunDate());
+            return Date::instance($cron->getNextRunDate());
         } catch (Exception) {
             return null;
         }

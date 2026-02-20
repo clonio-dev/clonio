@@ -117,6 +117,7 @@ final readonly class DocumentationRepository
                 ];
             }
         }
+
         $currentIndex = array_find_key($flatPages, fn ($entry): bool => $entry['chapter'] === $chapterSlug && $entry['page'] === $pageSlug);
 
         return [

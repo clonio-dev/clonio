@@ -66,13 +66,11 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
         }
 
         try {
-            /** @var object{version: string} $version */
             $metadata['encoding'] = $connection->selectOne('SHOW server_encoding')->server_encoding ?? null;
         } catch (Throwable) {
         }
 
         try {
-            /** @var object{version: string} $version */
             $metadata['collation'] = $connection->selectOne('SHOW lc_collate')->lc_collate ?? null;
         } catch (Throwable) {
         }

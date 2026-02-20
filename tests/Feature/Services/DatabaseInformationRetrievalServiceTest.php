@@ -6,6 +6,8 @@ use App\Data\ConnectionData;
 use App\Data\SqliteDriverData;
 use App\Services\DatabaseInformationRetrievalService;
 use App\Services\TableInformationRetrievalService;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\Facades\DB;
 
 it('establishes a connection successfully', function (): void {
@@ -25,7 +27,7 @@ it('establishes a connection successfully', function (): void {
 
     $connection = $service->getConnection($connectionData);
 
-    expect($connection)->toBeInstanceOf(Illuminate\Database\ConnectionInterface::class);
+    expect($connection)->toBeInstanceOf(ConnectionInterface::class);
 
     @unlink($db);
 });
@@ -91,7 +93,7 @@ it('returns schema builder for a connection', function (): void {
 
     $schema = $service->getSchema($connectionData);
 
-    expect($schema)->toBeInstanceOf(Illuminate\Database\Schema\Builder::class);
+    expect($schema)->toBeInstanceOf(Builder::class);
 
     @unlink($db);
 });

@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Services\SchemaInspector;
 
 use App\Contracts\SchemaInspectorInterface;
+use App\Data\ColumnSchema;
+use App\Data\ConstraintSchema;
 use App\Data\DatabaseSchema;
+use App\Data\ForeignKeySchema;
+use App\Data\IndexSchema;
 use App\Data\TableMetricsData;
 use App\Data\TableSchema;
 use Illuminate\Database\Connection;
@@ -26,24 +30,24 @@ abstract class AbstractSchemaInspector implements SchemaInspectorInterface
      * Abstract methods for internal use - implemented by DB-specific classes
      */
     /**
-     * @return Collection<int, \App\Data\ColumnSchema>
+     * @return Collection<int, ColumnSchema>
      */
     abstract protected function getColumns(Connection $connection, string $tableName): Collection;
 
     abstract protected function getTableMetrics(Connection $connection, string $tableName): TableMetricsData;
 
     /**
-     * @return Collection<int, \App\Data\IndexSchema>
+     * @return Collection<int, IndexSchema>
      */
     abstract protected function getIndexes(Connection $connection, string $tableName): Collection;
 
     /**
-     * @return Collection<int, \App\Data\ForeignKeySchema>
+     * @return Collection<int, ForeignKeySchema>
      */
     abstract protected function getForeignKeys(Connection $connection, string $tableName): Collection;
 
     /**
-     * @return Collection<int, \App\Data\ConstraintSchema>
+     * @return Collection<int, ConstraintSchema>
      */
     abstract protected function getConstraints(Connection $connection, string $tableName): Collection;
 

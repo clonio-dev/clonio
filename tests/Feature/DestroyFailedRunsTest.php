@@ -21,7 +21,7 @@ describe('CloningController@destroyFailedRuns', function (): void {
         CloningRun::factory()->for($cloning)->for($this->user)->completed()->count(2)->create();
 
         $response = $this->actingAs($this->user)
-            ->delete("/clonings/{$cloning->id}/failed-runs");
+            ->delete(sprintf('/clonings/%d/failed-runs', $cloning->id));
 
         $response->assertRedirect();
         $response->assertSessionHas('success', '3 failed run(s) deleted');
@@ -37,7 +37,7 @@ describe('CloningController@destroyFailedRuns', function (): void {
         CloningRun::factory()->for($otherCloning)->for($this->user)->failed()->count(3)->create();
 
         $this->actingAs($this->user)
-            ->delete("/clonings/{$cloning->id}/failed-runs");
+            ->delete(sprintf('/clonings/%d/failed-runs', $cloning->id));
 
         expect(CloningRun::query()->where('cloning_id', $otherCloning->id)->count())->toBe(3);
     });
@@ -47,7 +47,7 @@ describe('CloningController@destroyFailedRuns', function (): void {
         CloningRun::factory()->for($cloning)->failed()->count(2)->create();
 
         $response = $this->actingAs($this->user)
-            ->delete("/clonings/{$cloning->id}/failed-runs");
+            ->delete(sprintf('/clonings/%d/failed-runs', $cloning->id));
 
         $response->assertForbidden();
     });
@@ -55,7 +55,7 @@ describe('CloningController@destroyFailedRuns', function (): void {
     it('requires authentication', function (): void {
         $cloning = Cloning::factory()->create();
 
-        $response = $this->delete("/clonings/{$cloning->id}/failed-runs");
+        $response = $this->delete(sprintf('/clonings/%d/failed-runs', $cloning->id));
 
         $response->assertRedirect('/login');
     });

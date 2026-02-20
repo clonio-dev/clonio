@@ -100,7 +100,7 @@ class DatabaseConnectionController extends Controller
     public function update(UpdateDatabaseConnectionRequest $request, DatabaseConnection $connection): RedirectResponse
     {
         $data = collect($request->validated())
-            ->when(! $request->filled('password'), fn ($collection) => $collection->except('password'))
+            ->unless($request->filled('password'), fn ($collection) => $collection->except('password'))
             ->put('is_production_stage', $request->boolean('is_production_stage'))
             ->all();
 

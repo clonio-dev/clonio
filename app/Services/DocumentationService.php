@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Data\DocChapter;
 use App\Data\DocHeading;
+use App\Data\DocPage;
 use App\Repositories\DocumentationRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -42,7 +43,7 @@ final readonly class DocumentationService
     {
         $docPage = $this->repository->getPage($chapter, $page);
 
-        if (! $docPage instanceof \App\Data\DocPage) {
+        if (! $docPage instanceof DocPage) {
             return null;
         }
 
@@ -56,6 +57,7 @@ final readonly class DocumentationService
         $html = $this->addHeadingIds($html);
         $html = $this->fixMediaPaths($html, $chapter);
         $html = $this->addNoProseToCodeBlocks($html);
+
         $headings = $this->extractHeadings($html);
 
         $adjacent = $this->repository->getAdjacentPages($chapter, $page);

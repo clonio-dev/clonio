@@ -16,12 +16,18 @@ use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Connection;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Collection;
 use Throwable;
 
 class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
 {
-    use Batchable, InteractsWithQueue, LogsProcessSteps, Queueable, TransferBatchJob;
+    use Batchable;
+    use InteractsWithQueue;
+    use LogsProcessSteps;
+    use Queueable;
+    use TransferBatchJob;
 
     public int $tries = 2;
 
@@ -41,22 +47,22 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
 
-            assert($sourceConnection instanceof \Illuminate\Database\Connection);
+            assert($sourceConnection instanceof Connection);
             $sourceConnection->getSchemaBuilder();
-        } catch (Throwable $exception) {
-            $this->logError('connection_failed', "Failed to connect to database `{$this->sourceConnectionData->name}`");
-            $this->logErrorMessage($exception->getMessage(), $dbInformationRetrievalService->connectionMap());
-            $this->fail($exception);
+        } catch (Throwable $throwable) {
+            $this->logError('connection_failed', sprintf('Failed to connect to database `%s`', $this->sourceConnectionData->name));
+            $this->logErrorMessage($throwable->getMessage(), $dbInformationRetrievalService->connectionMap());
+            $this->fail($throwable);
 
             return;
         }
 
         try {
             $dbInformationRetrievalService->getConnection($this->targetConnectionData);
-        } catch (Throwable $exception) {
-            $this->logError('connection_failed', "Failed to connect to database `{$this->targetConnectionData->name}`");
-            $this->logErrorMessage($exception->getMessage(), $dbInformationRetrievalService->connectionMap());
-            $this->fail($exception);
+        } catch (Throwable $throwable) {
+            $this->logError('connection_failed', sprintf('Failed to connect to database `%s`', $this->targetConnectionData->name));
+            $this->logErrorMessage($throwable->getMessage(), $dbInformationRetrievalService->connectionMap());
+            $this->fail($throwable);
 
             return;
         }
@@ -72,7 +78,7 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
         $order = $dependencyResolver->getProcessingOrder($tableNames, $sourceConnection);
 
         $enforceColumnTypesMap = [];
-        if ($this->options->tableAnonymizationOptions instanceof \Illuminate\Support\Collection) {
+        if ($this->options->tableAnonymizationOptions instanceof Collection) {
             foreach ($this->options->tableAnonymizationOptions as $tableOption) {
                 if ($tableOption->enforceColumnTypes) {
                     $enforceColumnTypesMap[$tableOption->tableName] = true;

@@ -19,7 +19,10 @@ use Illuminate\Support\Facades\Log;
 
 class FinalizeCloneRun implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public function __construct(public readonly string $batchId, public readonly int $runId) {}
 

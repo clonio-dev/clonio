@@ -21,8 +21,8 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
 
         $primaryKey = $table->getPrimaryKey();
         if ($primaryKey instanceof IndexSchema) {
-            $columnList = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $primaryKey->columns));
-            $columns[] = "PRIMARY KEY ({$columnList})";
+            $columnList = implode(', ', array_map(fn (string $c): string => sprintf('"%s"', $c), $primaryKey->columns));
+            $columns[] = sprintf('PRIMARY KEY (%s)', $columnList);
         }
 
         $sql = "CREATE TABLE \"{$table->name}\" (\n";
@@ -33,31 +33,31 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildCreateIndex(string $tableName, IndexSchema $index): string
     {
-        $columnList = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $index->columns));
+        $columnList = implode(', ', array_map(fn (string $c): string => sprintf('"%s"', $c), $index->columns));
 
         if ($index->type === 'unique') {
-            return "CREATE UNIQUE INDEX \"{$index->name}\" ON \"{$tableName}\" ({$columnList})";
+            return sprintf('CREATE UNIQUE INDEX "%s" ON "%s" (%s)', $index->name, $tableName, $columnList);
         }
 
-        return "CREATE INDEX \"{$index->name}\" ON \"{$tableName}\" ({$columnList})";
+        return sprintf('CREATE INDEX "%s" ON "%s" (%s)', $index->name, $tableName, $columnList);
     }
 
     public function buildAddForeignKey(string $tableName, ForeignKeySchema $fk): string
     {
-        $columns = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $fk->columns));
-        $refColumns = implode(', ', array_map(fn (string $c): string => "\"{$c}\"", $fk->referencedColumns));
+        $columns = implode(', ', array_map(fn (string $c): string => sprintf('"%s"', $c), $fk->columns));
+        $refColumns = implode(', ', array_map(fn (string $c): string => sprintf('"%s"', $c), $fk->referencedColumns));
 
-        return "ALTER TABLE \"{$tableName}\" " .
-            "ADD CONSTRAINT \"{$fk->name}\" " .
-            "FOREIGN KEY ({$columns}) " .
-            "REFERENCES \"{$fk->referencedTable}\" ({$refColumns}) " .
-            "ON UPDATE {$fk->onUpdate} " .
-            "ON DELETE {$fk->onDelete}";
+        return sprintf('ALTER TABLE "%s" ', $tableName) .
+            sprintf('ADD CONSTRAINT "%s" ', $fk->name) .
+            sprintf('FOREIGN KEY (%s) ', $columns) .
+            sprintf('REFERENCES "%s" (%s) ', $fk->referencedTable, $refColumns) .
+            sprintf('ON UPDATE %s ', $fk->onUpdate) .
+            ('ON DELETE ' . $fk->onDelete);
     }
 
     public function buildAddColumn(string $tableName, ColumnSchema $column): string
     {
-        return "ALTER TABLE \"{$tableName}\" ADD COLUMN " . $this->buildColumnDefinition($column);
+        return sprintf('ALTER TABLE "%s" ADD COLUMN ', $tableName) . $this->buildColumnDefinition($column);
     }
 
     public function buildModifyColumn(string $tableName, ColumnSchema $column): string
@@ -65,16 +65,16 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
         // PostgreSQL requires multiple ALTER statements for different properties
         $statements = [];
 
-        $statements[] = "ALTER TABLE \"{$tableName}\" ALTER COLUMN \"{$column->name}\" TYPE " . $this->buildDataType($column);
+        $statements[] = sprintf('ALTER TABLE "%s" ALTER COLUMN "%s" TYPE ', $tableName, $column->name) . $this->buildDataType($column);
 
         if ($column->nullable) {
-            $statements[] = "ALTER TABLE \"{$tableName}\" ALTER COLUMN \"{$column->name}\" DROP NOT NULL";
+            $statements[] = sprintf('ALTER TABLE "%s" ALTER COLUMN "%s" DROP NOT NULL', $tableName, $column->name);
         } else {
-            $statements[] = "ALTER TABLE \"{$tableName}\" ALTER COLUMN \"{$column->name}\" SET NOT NULL";
+            $statements[] = sprintf('ALTER TABLE "%s" ALTER COLUMN "%s" SET NOT NULL', $tableName, $column->name);
         }
 
         if ($column->default !== null) {
-            $statements[] = "ALTER TABLE \"{$tableName}\" ALTER COLUMN \"{$column->name}\" SET DEFAULT " . $this->formatDefaultValue($column->default);
+            $statements[] = sprintf('ALTER TABLE "%s" ALTER COLUMN "%s" SET DEFAULT ', $tableName, $column->name) . $this->formatDefaultValue($column->default);
         }
 
         return implode(";\n", $statements);
@@ -82,7 +82,7 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildColumnDefinition(ColumnSchema $column): string
     {
-        $def = "\"{$column->name}\" " . $this->buildDataType($column);
+        $def = sprintf('"%s" ', $column->name) . $this->buildDataType($column);
 
         if (! $column->nullable) {
             $def .= ' NOT NULL';
@@ -110,9 +110,9 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
 
         if ($column->length !== null) {
             if ($column->scale !== null) {
-                $type .= "({$column->length},{$column->scale})";
+                $type .= sprintf('(%s,%s)', $column->length, $column->scale);
             } else {
-                $type .= "({$column->length})";
+                $type .= sprintf('(%s)', $column->length);
             }
         }
 
@@ -124,6 +124,7 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
         if (is_string($value)) {
             return $this->quote($value);
         }
+
         if (is_numeric($value)) {
             return (string) $value;
         }

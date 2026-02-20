@@ -29,7 +29,7 @@ it('executes scheduled clonings that are due', function (): void {
 
     $this->artisan('clonings:run-scheduled')
         ->expectsOutputToContain('Found 1 cloning(s) due to run.')
-        ->expectsOutputToContain("Executing cloning: {$cloning->title}")
+        ->expectsOutputToContain('Executing cloning: ' . $cloning->title)
         ->assertSuccessful();
 
     expect(CloningRun::query()->count())->toBe(1);
