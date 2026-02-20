@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAutoRefresh } from '@/composables/useAutoRefresh';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { convertDuration } from '@/lib/date';
+import { convertDuration, formatDate } from '@/lib/date';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
 import type { BreadcrumbItem } from '@/types';
 import {
@@ -107,14 +107,7 @@ const currentStatus = computed(
 
 const formattedStartedAt = computed(() => {
     if (!props.run.started_at) return 'Not started';
-    return new Date(props.run.started_at).toLocaleString('de-DE', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    });
+    return formatDate(props.run.started_at);
 });
 
 const duration = computed(() => {
@@ -419,6 +412,7 @@ useAutoRefresh(
                                 class="mt-0.5 truncate font-mono text-xs text-muted-foreground"
                             >
                                 {{ result.url }}
+                                (<span class="text-xs">{{ formatDate(result.timestamp) }}</span>)
                             </p>
                         </div>
                     </div>
