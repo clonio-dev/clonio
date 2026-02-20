@@ -79,6 +79,8 @@ This project has domain-specific skills available. You MUST activate the relevan
 - `inertia-vue-development` — Develops Inertia.js v2 Vue client-side applications. Activates when creating Vue pages, forms, or navigation; using &lt;Link&gt;, &lt;Form&gt;, useForm, or router; working with deferred props, prefetching, or polling; or when user mentions Vue with Inertia, Vue pages, Vue forms, or Vue navigation.
 - `tailwindcss-development` — Styles applications using Tailwind CSS v4 utilities. Activates when adding styles, restyling components, working with gradients, spacing, layout, flex, grid, responsive design, dark mode, colors, typography, or borders; or when the user mentions CSS, styling, classes, Tailwind, restyle, hero section, cards, buttons, or any visual/UI changes.
 - `developing-with-fortify` — Laravel Fortify headless authentication backend development. Activate when implementing authentication features including login, registration, password reset, email verification, two-factor authentication (2FA/TOTP), profile updates, headless auth, authentication scaffolding, or auth guards in Laravel applications.
+- `pergament-content-authoring` — Create and manage content for Laravel Pergament — blog posts, documentation pages, and standalone pages using Markdown with YAML front matter.
+- `pergament-customization` — Customize and extend Laravel Pergament — publish and override views, configure features, style templates, and generate static sites.
 - `frontend-design` — Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, or applications. Generates creative, polished code that avoids generic AI aesthetics.
 - `laravel-inertia-isolated-plugin-architect` — Create a Laravel plugin with an isolated UI which is provided by Inertia.js and Vue.js which can live on any Laravel host app no matter of the used technology in the frontend.
 
@@ -341,5 +343,145 @@ Vue components must have a single root element.
 - Fortify is a headless authentication backend that provides authentication routes and controllers for Laravel applications.
 - IMPORTANT: Always use the `search-docs` tool for detailed Laravel Fortify patterns and documentation.
 - IMPORTANT: Activate `developing-with-fortify` skill when working with Fortify authentication features.
+
+=== rokde/laravel-pergament rules ===
+
+## Laravel Pergament
+
+A file-based CMS package for Laravel. No database required. Renders documentation, blog posts, and standalone pages from Markdown files with YAML front matter.
+
+### Features
+
+- **Documentation**: Structured docs with chapters, ordered pages, sidebar navigation, and previous/next links
+- **Blog**: Posts with categories, tags, authors, pagination, and RSS/Atom feeds
+- **Pages**: Standalone pages with optional landing page layout using block directives
+- **SEO**: Automatic meta tags, Open Graph, Twitter Cards — overridable per page via front matter dot notation
+- **Search**: Full-text search across all content types
+- **Sitemap**: Auto-generated XML sitemap
+- **robots.txt & llms.txt**: Auto-generated, customizable
+- **PWA**: Optional manifest.json and service worker
+- **Dark mode**: Built-in toggle with themed image variants for docs
+- **Syntax highlighting**: Server-side code block highlighting via Tempest
+- **Static site generation**: Export entire site as static HTML
+
+### Content Structure
+
+All content lives under the path configured in `pergament.content_path` (default: `content/`):
+
+- `content/docs/{order}-{chapter-slug}/{order}-{page-slug}.md` — numeric prefixes for ordering, stripped from URLs
+- `content/blog/{YYYY-MM-DD}-{slug}/post.md` — date from directory name, media files alongside
+- `content/pages/{slug}.md` — filename becomes URL slug
+
+### Front Matter
+
+Standard YAML front matter with `title`, `excerpt`, and content-type-specific fields:
+
+<code-snippet name="Blog post front matter" lang="yaml">
+---
+title: "My Post Title"
+excerpt: "A brief summary"
+category: "Tutorials"
+tags:
+  - "laravel"
+  - "php"
+author: "Jane Doe"
+seo.title: "Custom SEO Title"
+seo.description: "Custom meta description"
+seo.og_image: "https://example.com/og.png"
+---
+</code-snippet>
+
+SEO fields use dot notation (e.g. `seo.title`) to override global defaults from config.
+
+### Block Directives
+
+Pages support block directives for structured layouts (used with `layout: landing` in front matter):
+
+<code-snippet name="Block directive syntax" lang="markdown">
+:::hero
+
+# Welcome to My Site
+
+:::
+
+:::features
+
+## Key Features
+
+- Fast and lightweight
+- No database needed
+
+:::
+</code-snippet>
+
+These render as `<div class="pergament-block pergament-block-{name}">` elements.
+
+### Configuration
+
+Publish the config file to customize all features:
+
+<code-snippet name="Publish config" lang="bash">
+php artisan vendor:publish --tag=pergament-config
+</code-snippet>
+
+Key config options in `config/pergament.php`:
+
+- `content_path` — base directory for all content files
+- `prefix` — URL prefix for all Pergament routes (use `/` for root)
+- `site.name`, `site.url`, `site.seo.*` — global site and SEO settings
+- `homepage.type` — what serves at the base URL: `page`, `blog-index`, `doc-page`, or `redirect`
+- `docs.enabled`, `blog.enabled`, `pages.enabled` — toggle content types
+- `blog.per_page`, `blog.feed.*` — blog pagination and feed settings
+- `pwa.enabled`, `pwa.*` — PWA configuration
+
+### Customizing Views
+
+Publish views to override any template:
+
+<code-snippet name="Publish views" lang="bash">
+php artisan vendor:publish --tag=pergament-views
+</code-snippet>
+
+Published views go to `resources/views/vendor/pergament/`. Key templates:
+
+- `layouts/app.blade.php` — main layout (navigation, footer, dark mode, Tailwind CSS)
+- `layouts/docs.blade.php` — documentation layout with sidebar
+- `blog/show.blade.php` — single blog post
+- `blog/index.blade.php` — blog listing
+- `docs/show.blade.php` — documentation page
+- `pages/show.blade.php` — standalone page (standard + landing layout)
+- `components/seo-head.blade.php` — SEO meta tags component
+- `components/post-card.blade.php` — blog post card component
+
+Views use the `pergament::` namespace. Components use `<x-pergament::component-name>`.
+
+### Artisan Commands
+
+<code-snippet name="Available commands" lang="bash">
+php artisan pergament:make:post {slug}       # Create a new blog post
+
+php artisan pergament:make:page {chapter} {page}  # Create a new doc page
+
+php artisan pergament:generate-static {output-dir}    # Export static HTML site
+
+</code-snippet>
+
+### Routes
+
+All routes are prefixed with `pergament.` and conditionally registered based on config feature flags. Key named routes:
+
+- `pergament.home` — homepage
+- `pergament.docs.index`, `pergament.docs.show` — documentation
+- `pergament.blog.index`, `pergament.blog.show`, `pergament.blog.category`, `pergament.blog.tag`, `pergament.blog.author` — blog
+- `pergament.blog.feed` — RSS/Atom feed
+- `pergament.search` — search
+- `pergament.sitemap` — sitemap
+- `pergament.page` — standalone pages (catch-all, registered last)
+
+### Architecture
+
+Request flow: **Route -> Controller -> Service -> Data Object -> Blade View**
+
+Services (`Pergament\Services\*`) encapsulate all business logic. Controllers are thin. Data objects (`Pergament\Data\*`) are `final readonly` DTOs. The `FrontMatterParser` handles YAML parsing with dot notation support. The `MarkdownRenderer` converts Markdown to HTML with syntax highlighting, heading IDs, block directives, and content link resolution.
 
 </laravel-boost-guidelines>
