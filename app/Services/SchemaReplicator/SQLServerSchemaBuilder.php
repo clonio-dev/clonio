@@ -90,34 +90,57 @@ class SQLServerSchemaBuilder implements SchemaBuilderInterface
 
     public function buildDataType(ColumnSchema $column): string
     {
+        // tinyint(1) is MySQL's boolean idiom
+        if (mb_strtolower($column->type) === 'tinyint' && $column->length === 1) {
+            return 'BIT';
+        }
+
         $type = mb_strtoupper($column->type);
 
-        // Map some common types
         $typeMap = [
             'TINYINT' => 'TINYINT',
             'SMALLINT' => 'SMALLINT',
+            'MEDIUMINT' => 'INT',
             'INT' => 'INT',
+            'INTEGER' => 'INT',
             'BIGINT' => 'BIGINT',
             'DECIMAL' => 'DECIMAL',
             'NUMERIC' => 'NUMERIC',
             'FLOAT' => 'FLOAT',
             'REAL' => 'REAL',
             'DOUBLE' => 'FLOAT',
+            'YEAR' => 'SMALLINT',
             'DATE' => 'DATE',
             'TIME' => 'TIME',
             'DATETIME' => 'DATETIME2',
             'TIMESTAMP' => 'DATETIME2',
             'CHAR' => 'CHAR',
             'VARCHAR' => 'VARCHAR',
+            'ENUM' => 'VARCHAR',
+            'SET' => 'VARCHAR(MAX)',
             'TEXT' => 'VARCHAR(MAX)',
+            'TINYTEXT' => 'VARCHAR(MAX)',
+            'MEDIUMTEXT' => 'VARCHAR(MAX)',
+            'LONGTEXT' => 'VARCHAR(MAX)',
             'NCHAR' => 'NCHAR',
             'NVARCHAR' => 'NVARCHAR',
             'NTEXT' => 'NVARCHAR(MAX)',
+            'BLOB' => 'VARBINARY(MAX)',
+            'TINYBLOB' => 'VARBINARY(MAX)',
+            'MEDIUMBLOB' => 'VARBINARY(MAX)',
+            'LONGBLOB' => 'VARBINARY(MAX)',
+            'JSON' => 'NVARCHAR(MAX)',
         ];
 
         $type = $typeMap[$type] ?? $type;
 
-        if ($column->length !== null && ! str_contains($type, 'MAX')) {
+        // Types that must not have length appended
+        $noLengthTypes = ['DATE', 'TIME', 'DATETIME2', 'BIT'];
+        if (str_contains($type, 'MAX') || in_array($type, $noLengthTypes, true)) {
+            return $type;
+        }
+
+        if ($column->length !== null) {
             if ($column->scale !== null) {
                 $type .= sprintf('(%s,%s)', $column->length, $column->scale);
             } else {
