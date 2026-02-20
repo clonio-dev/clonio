@@ -103,10 +103,13 @@
         "test:lint": [
             "pint --parallel --test",
             "rector --dry-run",
-            "npm run format:check"
+            "npm run test:lint"
         ],
         "test:unit": "pest --parallel --coverage --min=45",
-        "test:types": "phpstan",
+        "test:types": [
+            "phpstan",
+            "npm run test:types"
+        ],
         "test": [
             "@php artisan config:clear --ansi",
             "@test:type-coverage",
