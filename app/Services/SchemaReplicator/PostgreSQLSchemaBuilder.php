@@ -97,7 +97,7 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildDataType(ColumnSchema $column): string
     {
-        $type = mb_strtoupper($column->type);
+        $type = mb_strtoupper($this->mapToPostgresType($column));
 
         // Handle auto increment (SERIAL types)
         if ($column->autoIncrement) {
@@ -106,6 +106,12 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
                 'SMALLINT' => 'SMALLSERIAL',
                 default => 'SERIAL',
             };
+        }
+
+        // These types must not have length/precision appended
+        $noLengthTypes = ['TEXT', 'BYTEA', 'BOOLEAN', 'DATE', 'TIMESTAMP', 'TIMESTAMPTZ', 'TIME', 'TIMETZ', 'JSONB', 'JSON', 'DOUBLE PRECISION', 'REAL'];
+        if (in_array($type, $noLengthTypes, true)) {
+            return $type;
         }
 
         if ($column->length !== null) {
@@ -135,5 +141,44 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
     protected function quote(string $value): string
     {
         return "'" . str_replace("'", "''", $value) . "'";
+    }
+
+    /**
+     * Map source database types to PostgreSQL-compatible types.
+     * Handles MySQL/MariaDB type names that are not valid in PostgreSQL.
+     */
+    private function mapToPostgresType(ColumnSchema $column): string
+    {
+        $typeMap = [
+            'datetime' => 'TIMESTAMP',
+            'tinytext' => 'TEXT',
+            'mediumtext' => 'TEXT',
+            'longtext' => 'TEXT',
+            'tinyblob' => 'BYTEA',
+            'blob' => 'BYTEA',
+            'mediumblob' => 'BYTEA',
+            'longblob' => 'BYTEA',
+            'mediumint' => 'INTEGER',
+            'int' => 'INTEGER',
+            'double' => 'DOUBLE PRECISION',
+            'float' => 'REAL',
+            'year' => 'SMALLINT',
+            'enum' => 'VARCHAR',
+            'set' => 'TEXT',
+            'json' => 'JSONB',
+        ];
+
+        $lower = mb_strtolower($column->type);
+
+        // tinyint(1) is MySQL's boolean idiom
+        if ($lower === 'tinyint' && $column->length === 1) {
+            return 'BOOLEAN';
+        }
+
+        if ($lower === 'tinyint') {
+            return 'SMALLINT';
+        }
+
+        return $typeMap[$lower] ?? $column->type;
     }
 }
