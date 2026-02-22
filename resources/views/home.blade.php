@@ -423,12 +423,12 @@
 
                 <!-- Bottom CTA hint -->
                 <div class="mt-16 text-center">
-                    <p class="text-lg text-gray-600 dark:text-gray-400 mb-4">
+                    <p class="text-lg text-gray-400 mb-4">
                         These problems don't have to be your reality.
                     </p>
-                    <a href="#solution" class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold text-lg group transition-colors">
+                    <a href="#solution" class="inline-flex items-center gap-2 text-white hover:text-gray-200 font-semibold text-lg group transition-colors">
                         See how Clonio solves this
-                        <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <svg class="size-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                         </svg>
                     </a>
