@@ -1,5 +1,7 @@
 # Clonio
 
+[![Tests](https://github.com/clonio-dev/clonio/actions/workflows/tests.yml/badge.svg)](https://github.com/clonio-dev/clonio/actions/workflows/tests.yml)
+
 ## Modes
 
 Clonio runs in two modes controlled by the `APP_MODE` environment variable:
