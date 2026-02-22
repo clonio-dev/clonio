@@ -1,6 +1,7 @@
 # Clonio
 
 [![Tests](https://github.com/clonio-dev/clonio/actions/workflows/tests.yml/badge.svg)](https://github.com/clonio-dev/clonio/actions/workflows/tests.yml)
+[![Latest Release](https://img.shields.io/github/v/release/clonio-dev/clonio)](https://github.com/clonio-dev/clonio/releases/latest)
 
 ## Modes
 

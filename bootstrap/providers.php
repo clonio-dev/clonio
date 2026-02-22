@@ -2,12 +2,7 @@
 
 declare(strict_types=1);
 
-$providers = [
+return [
     App\Providers\AppServiceProvider::class,
+    App\Providers\FortifyServiceProvider::class,
 ];
-
-if (env('APP_MODE', 'application') !== 'marketing') {
-    $providers[] = App\Providers\FortifyServiceProvider::class;
-}
-
-return $providers;
