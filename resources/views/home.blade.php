@@ -352,26 +352,29 @@
         </section>
 
         <!-- Section 2: THE PAIN -->
-        <section id="pain" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="pain-heading">
+        <section id="pain" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gray-950" aria-labelledby="pain-heading">
             <div class="max-w-7xl mx-auto w-full">
-                <h2 id="pain-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4 text-gray-900 dark:text-white">
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-red-400 mb-4">The reality without Clonio</p>
+                <h2 id="pain-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4 text-white">
                     Your team right now
                 </h2>
-                <p class="text-xl text-center text-gray-600 dark:text-gray-400 mb-16 max-w-3xl mx-auto">
+                <p class="text-xl text-center text-gray-300 mb-16 max-w-3xl mx-auto">
                     Sound familiar? You're not alone in this struggle.
                 </p>
 
                 <div class="grid md:grid-cols-3 gap-8">
                     <!-- Pain Card 1 - GDPR Risk -->
-                    <article class="group relative bg-white dark:bg-gray-900 rounded-2xl border-2 border-red-200 dark:border-red-900/50 hover:border-red-500 dark:hover:border-red-500 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:-translate-y-2">
+                    <article class="group relative bg-gray-900 rounded-2xl border-2 border-red-900/50 hover:border-red-500 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:-translate-y-2">
                         <!-- Content -->
-                        <div class="p-8">
-                            <div class="flex items-start gap-3 mb-4">
-                                <div class="flex-shrink-0 w-2 h-16 bg-gradient-to-b from-red-500 to-rose-600 rounded-full"></div>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">Real customer data in test</h3>
+                        <div class="p-8 flex flex-col">
+                            <div class="size-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center mb-5 flex-shrink-0">
+                                <svg class="size-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
                             </div>
-                            <p class="text-gray-600 dark:text-gray-400 leading-relaxed pl-5">
-                                Your QA team needs realistic data to test properly. But copying production means exposing real customer emails, addresses, and payment info in unprotected environments. One compliance audit away from a <span class="font-bold text-red-600 dark:text-red-400">€20M GDPR fine</span> and a <span class="font-bold text-red-600 dark:text-red-400">career-ending headline</span>.
+                            <h3 class="text-2xl font-bold text-white leading-tight mb-4">Real customer data in test</h3>
+                            <p class="text-gray-400 leading-relaxed">
+                                Your QA team needs realistic data to test properly. But copying production means exposing real customer emails, addresses, and payment info in unprotected environments. One compliance audit away from a <span class="font-bold text-red-400">€20M GDPR fine</span> and a <span class="font-bold text-red-400">career-ending headline</span>.
                             </p>
                         </div>
 
@@ -380,15 +383,17 @@
                     </article>
 
                     <!-- Pain Card 2 - Manual Work -->
-                    <article class="group relative bg-white dark:bg-gray-900 rounded-2xl border-2 border-orange-200 dark:border-orange-900/50 hover:border-orange-500 dark:hover:border-orange-500 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:-translate-y-2">
+                    <article class="group relative bg-gray-900 rounded-2xl border-2 border-orange-900/50 hover:border-orange-500 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:-translate-y-2">
                         <!-- Content -->
-                        <div class="p-8">
-                            <div class="flex items-start gap-3 mb-4">
-                                <div class="flex-shrink-0 w-2 h-16 bg-gradient-to-b from-orange-500 to-amber-600 rounded-full"></div>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">Manual copying nightmares</h3>
+                        <div class="p-8 flex flex-col">
+                            <div class="size-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center mb-5 flex-shrink-0">
+                                <svg class="size-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
                             </div>
-                            <p class="text-gray-600 dark:text-gray-400 leading-relaxed pl-5">
-                                Export. Sanitize. Import. Repeat every sprint. Schema mismatches break everything. Your developers waste <span class="font-bold text-orange-600 dark:text-orange-400">days debugging test data</span> instead of shipping features your customers actually want. And you still can't be sure all PII is gone.
+                            <h3 class="text-2xl font-bold text-white leading-tight mb-4">Manual copying nightmares</h3>
+                            <p class="text-gray-400 leading-relaxed">
+                                Export. Sanitize. Import. Repeat every sprint. Schema mismatches break everything. Your developers waste <span class="font-bold text-orange-400">days debugging test data</span> instead of shipping features your customers actually want. And you still can't be sure all PII is gone.
                             </p>
                         </div>
 
@@ -397,15 +402,17 @@
                     </article>
 
                     <!-- Pain Card 3 - No Audit Trail -->
-                    <article class="group relative bg-white dark:bg-gray-900 rounded-2xl border-2 border-yellow-200 dark:border-yellow-900/50 hover:border-yellow-500 dark:hover:border-yellow-500 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:-translate-y-2">
+                    <article class="group relative bg-gray-900 rounded-2xl border-2 border-yellow-900/50 hover:border-yellow-500 transition-all duration-300 overflow-hidden hover:shadow-2xl hover:-translate-y-2">
                         <!-- Content -->
-                        <div class="p-8">
-                            <div class="flex items-start gap-3 mb-4">
-                                <div class="flex-shrink-0 w-2 h-16 bg-gradient-to-b from-yellow-500 to-amber-600 rounded-full"></div>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">No audit trail</h3>
+                        <div class="p-8 flex flex-col">
+                            <div class="size-12 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center mb-5 flex-shrink-0">
+                                <svg class="size-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21"></path>
+                                </svg>
                             </div>
-                            <p class="text-gray-600 dark:text-gray-400 leading-relaxed pl-5">
-                                Who copied what data? When? Which anonymization rules were applied? Zero visibility means zero compliance proof. When the auditor asks, <span class="font-bold text-yellow-600 dark:text-yellow-400">you have no answers</span> — and you're the one <span class="font-bold text-yellow-600 dark:text-yellow-400">explaining to your CEO</span> why the company faces regulatory penalties.
+                            <h3 class="text-2xl font-bold text-white leading-tight mb-4">No audit trail</h3>
+                            <p class="text-gray-400 leading-relaxed">
+                                Who copied what data? When? Which anonymization rules were applied? Zero visibility means zero compliance proof. When the auditor asks, <span class="font-bold text-yellow-400">you have no answers</span> — and you're the one <span class="font-bold text-yellow-400">explaining to your CEO</span> why the company faces regulatory penalties.
                             </p>
                         </div>
 
