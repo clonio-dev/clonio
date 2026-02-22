@@ -24,6 +24,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('clonio.mode') === 'marketing') {
+            config(['session.driver' => 'array']);
+            config(['cache.default' => 'array']);
+            config(['queue.default' => 'sync']);
+        }
+
         if (config('logging.log_sql_queries')) {
             DB::listen(function (QueryExecuted $query): void {
                 Log::debug(sprintf(
