@@ -292,7 +292,15 @@
 
         <!-- Section 1: HERO -->
         <section id="hero" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900" aria-labelledby="hero-heading">
+            <!-- Dot-grid pattern overlay -->
+            <div class="absolute inset-0 opacity-40 dark:opacity-[0.07] pointer-events-none" style="background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px); background-size: 28px 28px;" aria-hidden="true"></div>
+
             <div class="max-w-5xl mx-auto text-center animate-fade-in">
+                <!-- Pill badge -->
+                <div class="inline-flex border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm px-4 py-1.5 rounded-full mb-8">
+                    Open source · Self-hosted · GDPR-compliant
+                </div>
+
                 <h1 id="hero-heading" class="text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
                     Test with real data. <br>
                     <span class="text-primary-600 dark:text-primary-400">Without the GDPR nightmare.</span>
