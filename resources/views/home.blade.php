@@ -1435,8 +1435,9 @@
 
             <!-- Company Links -->
             <div>
-                <h3 class="font-semibold text-white mb-4">Provider</h3>
+                <h3 class="font-semibold text-white mb-4">Author</h3>
                 <ul class="space-y-2 text-sm" role="list">
+                    <li><a href="https://robert-kummer.de" class="hover:text-primary-400 transition-colors">Robert Kummer IT</a></li>
                     <li><a href="https://github.com/clonio-dev/" class="hover:text-primary-400 transition-colors">GitHub</a></li>
                 </ul>
             </div>
