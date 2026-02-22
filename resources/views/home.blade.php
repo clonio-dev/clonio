@@ -1043,7 +1043,7 @@
                                     <span class="text-gray-700 dark:text-gray-300 text-sm">Non-commercial use only</span>
                                 </li>
                             </ul>
-                            <a href="/register" class="block text-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 dark:hover:border-primary-500 dark:hover:text-primary-400 rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <a href="/docs" class="block text-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 dark:hover:border-primary-500 dark:hover:text-primary-400 rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-primary-500">
                                 Start Compliant Cloning
                             </a>
                             <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">Be responsible for compliant data</p>
@@ -1106,7 +1106,7 @@
                                         <span class="text-gray-700 dark:text-gray-300 text-sm">Fair use license · funds ongoing development</span>
                                     </li>
                                 </ul>
-                                <a href="/register" class="group/btn relative block text-center px-6 py-3.5 bg-gradient-to-r from-primary-600 to-blue-600 text-white rounded-xl font-semibold hover:from-primary-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary-500 overflow-hidden">
+                                <a href="/docs" class="group/btn relative block text-center px-6 py-3.5 bg-gradient-to-r from-primary-600 to-blue-600 text-white rounded-xl font-semibold hover:from-primary-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary-500 overflow-hidden">
                                     <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></span>
                                     <span class="relative">Start Compliant Cloning</span>
                                 </a>
@@ -1161,7 +1161,7 @@
                                     <span class="text-gray-700 dark:text-gray-300 text-sm">Fair use license · funds ongoing development</span>
                                 </li>
                             </ul>
-                            <a href="/register" class="block text-center px-6 py-3 border-2 border-violet-500 dark:border-violet-600 text-violet-700 dark:text-violet-400 hover:bg-violet-500 hover:text-white dark:hover:bg-violet-600 dark:hover:text-white rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-violet-500">
+                            <a href="/docs" class="block text-center px-6 py-3 border-2 border-violet-500 dark:border-violet-600 text-violet-700 dark:text-violet-400 hover:bg-violet-500 hover:text-white dark:hover:bg-violet-600 dark:hover:text-white rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-violet-500">
                                 Start Compliant Cloning
                             </a>
                             <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">60-day implementation period · then billed yearly</p>
@@ -1234,24 +1234,93 @@
         </section>
 
         <!-- Section 9: FINAL CTA -->
-        <section id="cta" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-600 to-blue-700 dark:from-primary-900 dark:to-blue-900" aria-labelledby="cta-heading">
-            <div class="max-w-4xl mx-auto text-center">
-                <h2 id="cta-heading" class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-                    Ready to test safely?
+        <section id="cta" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gray-950 overflow-hidden" aria-labelledby="cta-heading">
+
+            <!-- Background grid -->
+            <div class="absolute inset-0 opacity-[0.04]" aria-hidden="true" style="background-image: linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px); background-size: 48px 48px;"></div>
+
+            <!-- Ambient glows -->
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-600 rounded-full opacity-10 blur-3xl" aria-hidden="true"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500 rounded-full opacity-10 blur-3xl" aria-hidden="true"></div>
+
+            <div class="relative max-w-5xl mx-auto w-full">
+
+                <!-- Top label -->
+                <div class="flex justify-center mb-8">
+                    <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gray-700 text-gray-400 text-sm font-medium tracking-wide">
+                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse" aria-hidden="true"></span>
+                        Self-hosted · Open source · GDPR-compliant
+                    </span>
+                </div>
+
+                <!-- Headline -->
+                <h2 id="cta-heading" class="text-5xl sm:text-6xl lg:text-7xl font-bold text-white text-center mb-6 leading-tight tracking-tight">
+                    Stop guessing.<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-blue-400">Clone with confidence.</span>
                 </h2>
-                <p class="text-xl sm:text-2xl text-primary-100 mb-12 max-w-3xl mx-auto">
-                    Join development teams who stopped worrying about GDPR violations in their test environments.
+
+                <p class="text-lg sm:text-xl text-gray-400 text-center mb-12 max-w-2xl mx-auto leading-relaxed">
+                    Deploy Clonio behind your firewalls. Connect your databases. Run your first compliant clone in minutes — free for 60 days, free forever for non-commercial use.
                 </p>
 
-                <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-                    <a href="/register" class="w-full sm:w-auto px-12 py-5 bg-white hover:bg-gray-100 text-primary-700 text-xl font-bold rounded-xl transition-all transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2">
-                        Start Compliant Cloning
+                <!-- Terminal snippet -->
+                <div class="mx-auto max-w-2xl mb-12">
+                    <div class="rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
+                        <!-- Terminal bar -->
+                        <div class="flex items-center gap-2 px-4 py-3 bg-gray-900 border-b border-gray-800">
+                            <span class="w-3 h-3 rounded-full bg-red-500 opacity-70" aria-hidden="true"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 opacity-70" aria-hidden="true"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500 opacity-70" aria-hidden="true"></span>
+                            <span class="ml-3 text-xs text-gray-500 font-mono">trigger a clone from anywhere</span>
+                        </div>
+                        <!-- Terminal body -->
+                        <div class="bg-gray-950 px-6 py-5 font-mono text-sm leading-relaxed">
+                            <p class="text-gray-600 mb-1"># one POST call is all it takes</p>
+                            <p>
+                                <span class="text-primary-400">curl</span>
+                                <span class="text-gray-300"> --request POST \</span>
+                            </p>
+                            <p class="text-gray-300 pl-4">"https://<span class="text-blue-400">&lt;your-clonio-instance&gt;</span>/api/trigger/<span class="text-green-400">&lt;token&gt;</span>"</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTAs -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-14">
+                    <a href="/docs" class="group inline-flex items-center gap-3 px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white text-lg font-semibold rounded-xl transition-all shadow-lg shadow-primary-900/40 hover:shadow-primary-900/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-950">
+                        Read the docs
+                        <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </a>
+                    <a href="#pricing" class="inline-flex items-center gap-2 px-8 py-4 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white text-lg font-semibold rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-gray-600">
+                        See pricing
                     </a>
                 </div>
 
-                <p class="text-primary-100 text-lg">
-                    Trusted by development teams at startups and enterprises
-                </p>
+                <!-- Trust strip -->
+                <div class="flex flex-wrap justify-center items-center gap-x-10 gap-y-4 text-sm text-gray-600">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Free for 60 days
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        No credit card ever
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Open source
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Stays behind your firewalls
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Free forever for non-commercial use
+                    </span>
+                </div>
             </div>
         </section>
 
