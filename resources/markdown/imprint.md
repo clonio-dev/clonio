@@ -8,7 +8,7 @@ Hohenstaufenstraße 35<br>
 
 Management: Robert Kummer
 
-Small business as a sideline
+Small business as a sideline - All prices are net. According to § 19 UStG no VAT is charged — small business regulation, Germany.
 
 Links:
 
