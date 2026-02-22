@@ -278,7 +278,7 @@
                     </svg>
                 </button>
                 <a href="#cta" class="hidden md:inline-block px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-                    Start Free Trial
+                    Start Compliant Cloning
                 </a>
             </div>
         </div>
@@ -307,7 +307,7 @@
                 <!-- CTAs -->
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
                     <a href="#cta" class="w-full sm:w-auto px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white text-lg font-semibold rounded-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-lg">
-                        Start Free Trial (No Card Required)
+                        Start Compliant Cloning
                     </a>
                     <a href="#solution" class="w-full sm:w-auto px-8 py-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-lg font-semibold rounded-lg border-2 border-gray-200 dark:border-gray-700 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
                         See how it works →
@@ -320,7 +320,7 @@
                         <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
-                        <span>3 days free • Cancel anytime</span>
+                        <span>Free for 60 days · No credit card ever</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -812,8 +812,8 @@
                                 <span class="text-2xl" aria-hidden="true">🔌</span>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">API-first design</h3>
-                                <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Full REST API for programmatic control. Integrate Clonio into any workflow or script.</p>
+                                <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Trigger via API</h3>
+                                <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Start a cloning run with a single API call. Integrate it into any workflow, script, or pipeline.</p>
                             </div>
                         </div>
                         <div class="absolute bottom-0 left-4 right-4 h-1 bg-gradient-to-r from-purple-500 to-pink-600 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full"></div>
@@ -840,8 +840,8 @@
                                 <span class="text-2xl" aria-hidden="true">🖥️</span>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">CLI available</h3>
-                                <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Script your clones. Perfect for local development or CI/CD pipelines.</p>
+                                <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">One call to clone</h3>
+                                <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Trigger a cloning run with curl or wget. Drop it into any pipeline step, cron job, or shell script — no special tooling needed.</p>
                             </div>
                         </div>
                         <div class="absolute bottom-0 left-4 right-4 h-1 bg-gradient-to-r from-orange-500 to-red-600 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full"></div>
@@ -850,13 +850,14 @@
 
                 <!-- Integration Logos -->
                 <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800">
-                    <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium">INTEGRATES WITH YOUR FAVORITE TOOLS</p>
+                    <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium uppercase">Integrates with your favorite tools</p>
                     <div class="flex flex-wrap justify-center items-center gap-8">
                         <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">GitLab CI</div>
                         <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">GitHub Actions</div>
                         <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Jenkins</div>
                         <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">CircleCI</div>
                         <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">BitBucket</div>
+                        <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Azure DevOps</div>
                     </div>
                 </div>
 
@@ -949,7 +950,7 @@
                         <!-- Content -->
                         <div class="pl-20">
                             <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Deploy on your infrastructure</h3>
-                            <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Self-hosted option available. Your data never leaves your servers. Full control, zero third-party risk.</p>
+                            <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Self-hosted only — by design. Your data never leaves your servers. Stays behind your firewalls, inside your audits, zero third-party risk.</p>
                         </div>
                     </div>
 
@@ -974,164 +975,231 @@
         </section>
 
         <!-- Section 8: PRICING -->
-        <section id="pricing" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="pricing-heading">
-            <div class="max-w-4xl mx-auto w-full pt-20">
-                <h2 id="pricing-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 text-gray-900 dark:text-white">
-                    Simple, transparent pricing
+        <section id="pricing" class="relative px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950 py-24" aria-labelledby="pricing-heading">
+            <div class="max-w-6xl mx-auto w-full pt-12">
+                <h2 id="pricing-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4 text-gray-900 dark:text-white">
+                    Fair pricing, transparent model
                 </h2>
-                <p class="text-xl text-center text-gray-600 dark:text-gray-300 mb-12">
-                    One price. Unlimited databases. No surprises.
+                <p class="text-xl text-center text-gray-600 dark:text-gray-300 mb-8">
+                    Free forever for the community. Fair pricing for commerce.
                 </p>
 
-                <!-- Pricing Card - Modern Design -->
-                <div class="relative group">
-                    <!-- Glow effect background -->
-                    <div class="absolute -inset-1 bg-gradient-to-r from-primary-600 via-blue-600 to-indigo-600 rounded-3xl blur-lg opacity-25 group-hover:opacity-40 transition duration-500"></div>
+                <!-- 2026 Launch Pricing Banner -->
+                <div class="flex justify-center mb-12">
+                    <div class="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full text-sm font-bold shadow-lg">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>2026 Early Adopter Pricing — our promise to all current customers for the whole year</span>
+                    </div>
+                </div>
 
-                    <!-- Main pricing card -->
-                    <div class="relative bg-white dark:bg-gray-900 rounded-3xl border-2 border-gray-200 dark:border-gray-800 overflow-hidden shadow-2xl">
-                        <!-- Top accent bar -->
-                        <div class="h-2 bg-gradient-to-r from-primary-600 via-blue-600 to-indigo-600"></div>
+                <!-- Pricing Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 items-stretch">
 
-                        <div class="p-12">
-                            <!-- Free Trial Badge -->
-                            <div class="text-center mb-8">
-                                <div class="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full text-lg font-bold shadow-lg transform hover:scale-105 transition-transform">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
-                                    </svg>
-                                    <span>3-DAY FREE TRIAL</span>
-                                </div>
-                                <p class="mt-4 text-gray-600 dark:text-gray-400 text-lg">
-                                    Full features • No credit card required • Cancel anytime
-                                </p>
+                    <!-- Free Tier -->
+                    <div class="relative bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden shadow-lg flex flex-col">
+                        <div class="h-1 bg-gradient-to-r from-green-400 to-emerald-500"></div>
+                        <div class="p-8 flex flex-col flex-1">
+                            <div class="mb-6">
+                                <span class="inline-block px-3 py-1 bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 text-xs font-bold rounded-full mb-3 uppercase tracking-wide">Free Forever</span>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Community</h3>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Individuals, hobby projects, NGOs &amp; open source</p>
                             </div>
-
-                            <div class="border-t-2 border-gray-200 dark:border-gray-800 my-8"></div>
-
-                            <!-- Pricing Details -->
-                            <div class="text-center mb-8">
-                                <div class="flex items-center justify-center gap-2 mb-2">
-                                    <svg class="w-8 h-8 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Annual Plan</h3>
+                            <div class="mb-6">
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-5xl font-bold text-gray-900 dark:text-white">€0</span>
+                                    <span class="text-gray-500 dark:text-gray-400 ml-1">/ forever</span>
                                 </div>
-
-                                <!-- Price -->
-                                <div class="flex items-baseline justify-center gap-2 mb-4">
-                                    <span class="text-6xl font-bold text-gray-900 dark:text-white">€199</span>
-                                    <div class="text-left">
-                                        <div class="text-xl text-gray-600 dark:text-gray-400">/month</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-500">billed annually</div>
-                                    </div>
-                                </div>
-
-                                <!-- Unlimited badge -->
-                                <div class="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-950 border-2 border-primary-200 dark:border-primary-800 rounded-full">
-                                    <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                    </svg>
-                                    <span class="font-semibold text-primary-700 dark:text-primary-300">Unlimited databases</span>
-                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">No credit card. No license required. Ever.</p>
                             </div>
+                            <ul class="space-y-3 mb-8 flex-1">
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">Unlimited database clones</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">All anonymization types</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">Full audit trail &amp; GDPR compliance</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">REST API &amp; webhooks</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">Open source — inspect every line</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">Self-hosted in your infrastructure</span>
+                                </li>
+                            </ul>
+                            <a href="/register" class="block text-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 dark:hover:border-primary-500 dark:hover:text-primary-400 rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                Start Compliant Cloning
+                            </a>
+                        </div>
+                    </div>
 
-                            <!-- Features List -->
-                            <div class="space-y-4 mb-10">
-                                <div class="flex items-start gap-3">
-                                    <svg class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <div>
-                                        <span class="text-lg font-semibold text-gray-900 dark:text-white">Unlimited database clones</span>
-                                        <p class="text-gray-600 dark:text-gray-400 text-sm">Clone as many databases as you need, as often as you want</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start gap-3">
-                                    <svg class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <div>
-                                        <span class="text-lg font-semibold text-gray-900 dark:text-white">All transformation types</span>
-                                        <p class="text-gray-600 dark:text-gray-400 text-sm">Keep, static, random, and format-preserving anonymization</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start gap-3">
-                                    <svg class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <div>
-                                        <span class="text-lg font-semibold text-gray-900 dark:text-white">Schema-aware cloning</span>
-                                        <p class="text-gray-600 dark:text-gray-400 text-sm">Handle different schema versions automatically</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start gap-3">
-                                    <svg class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <div>
-                                        <span class="text-lg font-semibold text-gray-900 dark:text-white">Full audit logs & compliance</span>
-                                        <p class="text-gray-600 dark:text-gray-400 text-sm">Cryptographically signed, tamper-proof audit trail</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start gap-3">
-                                    <svg class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <div>
-                                        <span class="text-lg font-semibold text-gray-900 dark:text-white">API, CLI & webhooks</span>
-                                        <p class="text-gray-600 dark:text-gray-400 text-sm">Full automation for your CI/CD pipelines</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start gap-3">
-                                    <svg class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <div>
-                                        <span class="text-lg font-semibold text-gray-900 dark:text-white">Priority email support</span>
-                                        <p class="text-gray-600 dark:text-gray-400 text-sm">Response within 24 hours</p>
-                                    </div>
-                                </div>
+                    <!-- SMB / Business Tier — Most Popular -->
+                    <div class="relative group flex flex-col">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-primary-600 via-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-45 transition duration-500"></div>
+                        <div class="relative bg-white dark:bg-gray-900 rounded-2xl border-2 border-primary-200 dark:border-primary-800 overflow-hidden shadow-2xl flex flex-col flex-1">
+                            <div class="h-1 bg-gradient-to-r from-primary-600 via-blue-600 to-indigo-600"></div>
+                            <!-- Most Popular badge -->
+                            <div class="absolute top-5 right-5">
+                                <span class="px-2.5 py-1 bg-primary-600 text-white text-xs font-bold rounded-full">Most Popular</span>
                             </div>
-
-                            <!-- CTA Button -->
-                            <div class="text-center space-y-4">
-                                <a href="#cta" class="group relative inline-flex items-center justify-center w-full px-12 py-5 text-xl font-bold text-white bg-gradient-to-r from-primary-600 to-blue-600 rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden">
-                                    <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                                    <span class="relative flex items-center gap-3">
-                                            Start Your Free Trial
-                                            <svg class="w-6 h-6 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                            </svg>
-                                        </span>
+                            <div class="p-8 flex flex-col flex-1">
+                                <div class="mb-6">
+                                    <span class="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-950 text-primary-700 dark:text-primary-400 text-xs font-bold rounded-full mb-3 uppercase tracking-wide">SMB Commercial</span>
+                                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Business</h3>
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Commercial use · up to €1M net annual revenue</p>
+                                </div>
+                                <div class="mb-6">
+                                    <div class="flex items-baseline gap-2 mb-1">
+                                        <span class="text-5xl font-bold text-gray-900 dark:text-white">€39</span>
+                                        <span class="text-gray-500 dark:text-gray-400">/ month</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-sm text-gray-400 dark:text-gray-500 line-through">€59 / month</span>
+                                        <span class="text-xs font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full">2026 Launch Price</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-500">€468 / year · billed annually in advance</p>
+                                </div>
+                                <ul class="space-y-3 mb-8 flex-1">
+                                    <li class="flex items-start gap-2.5">
+                                        <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">Unlimited database clones</span>
+                                    </li>
+                                    <li class="flex items-start gap-2.5">
+                                        <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">All anonymization types</span>
+                                    </li>
+                                    <li class="flex items-start gap-2.5">
+                                        <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">Full audit trail &amp; GDPR compliance</span>
+                                    </li>
+                                    <li class="flex items-start gap-2.5">
+                                        <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">Schema-aware cloning</span>
+                                    </li>
+                                    <li class="flex items-start gap-2.5">
+                                        <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">REST API &amp; webhooks</span>
+                                    </li>
+                                    <li class="flex items-start gap-2.5">
+                                        <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">Priority email support (24h)</span>
+                                    </li>
+                                    <li class="flex items-start gap-2.5">
+                                        <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">Fair use license · funds ongoing development</span>
+                                    </li>
+                                </ul>
+                                <a href="/register" class="group/btn relative block text-center px-6 py-3.5 bg-gradient-to-r from-primary-600 to-blue-600 text-white rounded-xl font-semibold hover:from-primary-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary-500 overflow-hidden">
+                                    <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></span>
+                                    <span class="relative">Start Compliant Cloning</span>
                                 </a>
-
-                                <p class="text-sm text-gray-500 dark:text-gray-500">
-                                    No credit card required • Start in 2 minutes • Cancel anytime
-                                </p>
+                                <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">60-day implementation period · then billed yearly</p>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Bottom accent -->
-                        <div class="px-12 py-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                </svg>
-                                <span class="font-medium">Need custom pricing for your team?</span>
-                                <a href="#" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold underline transition-colors">Contact sales</a>
+                    <!-- Scale / Enterprise Tier -->
+                    <div class="relative bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden shadow-lg flex flex-col">
+                        <div class="h-1 bg-gradient-to-r from-violet-500 to-purple-600"></div>
+                        <div class="p-8 flex flex-col flex-1">
+                            <div class="mb-6">
+                                <span class="inline-block px-3 py-1 bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-400 text-xs font-bold rounded-full mb-3 uppercase tracking-wide">Enterprise</span>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Scale</h3>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Commercial use · above €1M net annual revenue</p>
                             </div>
+                            <div class="mb-6">
+                                <div class="flex items-baseline gap-2 mb-1">
+                                    <span class="text-5xl font-bold text-gray-900 dark:text-white">€99</span>
+                                    <span class="text-gray-500 dark:text-gray-400">/ month</span>
+                                </div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-sm text-gray-400 dark:text-gray-500 line-through">€199 / month</span>
+                                    <span class="text-xs font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full">2026 Launch Price</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-500">€1188 / year · billed annually in advance</p>
+                            </div>
+                            <ul class="space-y-3 mb-8 flex-1">
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">Everything in Business</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">Unlimited databases &amp; environments</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">Full audit trail &amp; compliance reports</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">AI-friendly docs &amp; markdown export</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">Priority support &amp; onboarding</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">Fair use license · funds ongoing development</span>
+                                </li>
+                            </ul>
+                            <a href="/register" class="block text-center px-6 py-3 border-2 border-violet-500 dark:border-violet-600 text-violet-700 dark:text-violet-400 hover:bg-violet-500 hover:text-white dark:hover:bg-violet-600 dark:hover:text-white rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-violet-500">
+                                Start Compliant Cloning
+                            </a>
+                            <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">60-day implementation period · then billed yearly</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Self-hosting callout -->
+                <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 mb-6">
+                    <div class="flex items-start gap-5">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-950 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Self-hosted only — by design, not by accident</h3>
+                            <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                                Clonio needs access to your production database to do its job. That means it must live <strong class="text-gray-800 dark:text-gray-200">inside your infrastructure</strong> — behind your firewalls, compliant with your audits, and following your data governance rules. We can't guarantee those requirements from the outside, so we don't try. Keep Clonio behind your firewalls and you stay in full control. Your data never leaves your environment.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 60-day period explanation -->
+                <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800 rounded-2xl p-8 mb-8">
+                    <div class="flex items-start gap-5">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">60 days to integrate — no payment required upfront</h3>
+                            <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                                This is not a "try before you buy" trial. You can deploy Clonio and run it in your environment for <strong class="text-gray-800 dark:text-gray-200">60 full days without any payment</strong>. At day 61, commercial users are required to obtain a license. Revenue determines which tier applies — simple and transparent. Free for non-commercial use, always.
+                            </p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Trust indicators -->
-                <div class="my-12 flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500 dark:text-gray-500">
+                <div class="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500 dark:text-gray-500">
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
@@ -1140,15 +1208,21 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
                         </svg>
-                        <span>Secure Payments</span>
+                        <span>Open Source</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"></path>
                         </svg>
-                        <span>Money-back Guarantee</span>
+                        <span>AI-Friendly Docs</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <span>Behind Your Firewalls</span>
                     </div>
                 </div>
             </div>
@@ -1166,7 +1240,7 @@
 
                 <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
                     <a href="/register" class="w-full sm:w-auto px-12 py-5 bg-white hover:bg-gray-100 text-primary-700 text-xl font-bold rounded-xl transition-all transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2">
-                        Start 3-Day Free Trial
+                        Start Compliant Cloning
                     </a>
                 </div>
 
@@ -1225,7 +1299,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            Absolutely. All data transfer happens within your infrastructure. Transformations are applied before any data leaves the source database. We use encryption in transit and at rest. For maximum control, choose our self-hosted deployment option.
+                            Absolutely. Clonio runs entirely within your infrastructure. Your data never leaves your environment — there is no external cloud service involved. All data transfer happens between your own databases, and anonymization is applied in-flight before data reaches the target. This is precisely why Clonio is self-hosted only.
                         </p>
                     </details>
 
@@ -1233,14 +1307,29 @@
                     <details class="group bg-gray-50 dark:bg-gray-900 rounded-xl p-6 hover:shadow-lg transition-shadow">
                         <summary class="flex justify-between items-center cursor-pointer list-none">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
-                                What happens after the 3-day trial?
+                                What happens after the 60-day implementation period?
                             </h3>
                             <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </summary>
                         <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            Your trial includes full access to all features. After 3 days, you can choose to subscribe with an annual plan. If you don't subscribe, your trial account is paused – no automatic charges, no surprises. You can reactivate anytime.
+                            Clonio gives you 60 days to integrate it into your infrastructure — no payment required. This is not a trial: you get full access to all features from day one. After day 60, commercial users need to purchase a license based on their annual net revenue. Free forever for individuals, hobby projects, NGOs, and open source. Revenue determines your tier, simple and transparent.
+                        </p>
+                    </details>
+
+                    <!-- FAQ: Why self-hosted only? -->
+                    <details class="group bg-gray-50 dark:bg-gray-900 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                        <summary class="flex justify-between items-center cursor-pointer list-none">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
+                                Why is Clonio self-hosted only?
+                            </h3>
+                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </summary>
+                        <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
+                            To clone your production database, Clonio needs a direct connection to it. Your production database must comply with your company's security audits, data governance policies, and GDPR requirements. These constraints cannot be guaranteed by an external cloud service — and we don't want to pretend otherwise. By running Clonio inside your own infrastructure, behind your firewalls, you stay in full control. Your data never travels outside your environment.
                         </p>
                     </details>
 
@@ -1255,7 +1344,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            Yes! Clonio is API-first and built for automation. Use our REST API, CLI, or webhooks to trigger clones from GitLab CI, GitHub Actions, Jenkins, or any CI/CD tool. Schedule automatic clones or trigger them on specific events like deployments.
+                            Yes. You can trigger a cloning run with a single API call — a plain curl or wget is all it takes. Drop it into any GitLab CI, GitHub Actions, Jenkins, or any other pipeline step. Schedule it via cron, or wire it up to a webhook. No special tooling required.
                         </p>
                     </details>
 
@@ -1270,7 +1359,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            All plans include email support with response within 24 hours. For enterprise customers, we offer dedicated support channels and custom SLAs. During your trial, we're here to help you get set up.
+                            All plans include email support with a response within 24 hours. For enterprise customers, we offer dedicated support channels and custom SLAs. We're friendly and supportive — reach out anytime during your integration and beyond.
                         </p>
                     </details>
 
@@ -1285,7 +1374,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            We provide detailed documentation and examples for common use cases. During your trial, our team can help you configure your first clone. For complex scenarios, we offer onboarding sessions as part of enterprise plans.
+                            We provide detailed documentation and examples for common use cases — all packed inside Clonio itself and available as markdown, so AI-driven workflows can consume it directly. For complex scenarios, we offer onboarding sessions for enterprise plans.
                         </p>
                     </details>
                 </div>
@@ -1340,21 +1429,17 @@
                 <ul class="space-y-2 text-sm" role="list">
                     <li><a href="#features" class="hover:text-primary-400 transition-colors">Features</a></li>
                     <li><a href="#pricing" class="hover:text-primary-400 transition-colors">Pricing</a></li>
-                    {{--<li><a href="#" class="hover:text-primary-400 transition-colors">Documentation</a></li>--}}
-                    {{--<li><a href="#" class="hover:text-primary-400 transition-colors">API Reference</a></li>--}}
+                    <li><a href="/docs" class="hover:text-primary-400 transition-colors">Documentation</a></li>
                 </ul>
             </div>
 
-            {{--<!-- Company Links -->
+            <!-- Company Links -->
             <div>
-                <h3 class="font-semibold text-white mb-4">Company</h3>
+                <h3 class="font-semibold text-white mb-4">Provider</h3>
                 <ul class="space-y-2 text-sm" role="list">
-                    <li><a href="#" class="hover:text-primary-400 transition-colors">About Us</a></li>
-                    <li><a href="#" class="hover:text-primary-400 transition-colors">Blog</a></li>
-                    <li><a href="#" class="hover:text-primary-400 transition-colors">Careers</a></li>
-                    <li><a href="#" class="hover:text-primary-400 transition-colors">Contact</a></li>
+                    <li><a href="https://github.com/clonio-dev/" class="hover:text-primary-400 transition-colors">GitHub</a></li>
                 </ul>
-            </div>--}}
+            </div>
 
             <!-- Legal Links -->
             <div>
