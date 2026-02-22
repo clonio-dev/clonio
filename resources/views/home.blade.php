@@ -1038,10 +1038,15 @@
                                     <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                     <span class="text-gray-700 dark:text-gray-300 text-sm">Self-hosted in your infrastructure</span>
                                 </li>
+                                <li class="flex items-start gap-2.5">
+                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">Non-commercial use only</span>
+                                </li>
                             </ul>
                             <a href="/register" class="block text-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 dark:hover:border-primary-500 dark:hover:text-primary-400 rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-primary-500">
                                 Start Compliant Cloning
                             </a>
+                            <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">Be responsible for compliant data</p>
                         </div>
                     </div>
 
@@ -1094,7 +1099,7 @@
                                     </li>
                                     <li class="flex items-start gap-2.5">
                                         <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                        <span class="text-gray-700 dark:text-gray-300 text-sm">Priority email support (24h)</span>
+                                        <span class="text-gray-700 dark:text-gray-300 text-sm">Priority email support</span>
                                     </li>
                                     <li class="flex items-start gap-2.5">
                                         <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -1449,8 +1454,6 @@
                     <li><a href="{{ route('static.policy') }}" class="hover:text-primary-400 transition-colors">Privacy Policy</a> (<a href="{{ route('static.datenschutz') }}" class="hover:text-primary-400 transition-colors">de</a>)</li>
                     <li><a href="{{ route('static.terms') }}" class="hover:text-primary-400 transition-colors">Terms of Service</a> (<a href="{{ route('static.agb') }}" class="hover:text-primary-400 transition-colors">de</a>)</li>
                     <li><a href="{{ route('static.imprint') }}" class="hover:text-primary-400 transition-colors">Imprint</a> (<a href="{{ route('static.impressum') }}" class="hover:text-primary-400 transition-colors">de</a>)</li>
-                    {{--<li><a href="#" class="hover:text-primary-400 transition-colors">GDPR Compliance</a></li>--}}
-                    {{--<li><a href="#" class="hover:text-primary-400 transition-colors">Security</a></li>--}}
                 </ul>
             </div>
         </div>
