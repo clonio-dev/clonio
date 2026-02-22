@@ -425,7 +425,7 @@
                         Meet Clonio: Your database cloning co-pilot
                     </h2>
                     <p class="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto">
-                        Clonio automatically copies your production database to test and dev environments – with configurable anonymization, schema-version handling, and cryptographically signed audit logs. All in one click.
+                        Clonio automatically copies your production database to test and dev environments – with configurable anonymization, schema-version handling, and cryptographically signed audit logs. Running inside your infrastructure. All in one click.
                     </p>
                 </div>
 
@@ -873,20 +873,19 @@
                             <span class="text-xs text-gray-400 font-mono">terminal</span>
                         </div>
                         <div class="code-block rounded-t-none">
-                                <pre class="text-gray-100" aria-label="Code example for cloning databases"><code><span class="code-comment"># Clone production to test with "strict" privacy preset</span>
-<span class="code-function">clonio</span> <span class="code-keyword">clone</span> <span class="code-variable">--source</span>=<span class="code-string">prod</span> <span class="code-variable">--target</span>=<span class="code-string">test</span> <span class="code-variable">--preset</span>=<span class="code-string">strict</span>
-
-<span class="code-comment"># Or trigger via API</span>
-<span class="code-function">curl</span> <span class="code-variable">-X</span> <span class="code-keyword">POST</span> <span class="code-string">https://api.clonio.io/v1/clone</span> \
-  <span class="code-variable">-H</span> <span class="code-string">"Authorization: Bearer YOUR_TOKEN"</span> \
-  <span class="code-variable">-d</span> <span class="code-string">'{"source":"prod","target":"test","preset":"strict"}'</span></code></pre>
+                            <pre class="text-gray-100" aria-label="Code example for cloning databases"><code><span class="code-comment"># Trigger via API within your internal firewall boundaries</span>
+<span class="code-function">curl</span> <span class="code-variable">-X</span> <span class="code-keyword">POST</span> <span class="code-string">https://&lt;your-clonio-instance&gt;/api/trigger/5f23fcede47385479ab59ca4e5d5de978911658fcd677480dce13076fe40f75c</span>
+<span class="code-comment"># The `5f23fc...75c` is a hash for the exact cloning you want to execute</span></code></pre>
                         </div>
                     </div>
                 </div>
+                <div class="text-center mb-12">
+                    Or it get's triggered manually or on a planned schedule.
+                </div>
 
                 <div class="text-center mb-12">
-                    <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
-                        Explore API documentation
+                    <a href="/docs" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        Explore documentation
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                         </svg>
@@ -1168,9 +1167,6 @@
                 <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
                     <a href="/register" class="w-full sm:w-auto px-12 py-5 bg-white hover:bg-gray-100 text-primary-700 text-xl font-bold rounded-xl transition-all transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2">
                         Start 3-Day Free Trial
-                    </a>
-                    <a href="#" class="w-full sm:w-auto px-12 py-5 bg-primary-800 hover:bg-primary-900 text-white text-xl font-semibold rounded-xl border-2 border-white/30 transition-all focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2">
-                        Book a 15-minute demo →
                     </a>
                 </div>
 
