@@ -9,20 +9,28 @@ Clonio is a self-hosted Laravel application. It runs wherever PHP 8.4 and a rela
 
 ---
 
-## Environment Variables Reference
+## Modes
 
-Every environment needs the following variables configured. Sensible defaults are provided in `.env.example`.
+Clonio operates in two modes set by the `APP_MODE` environment variable:
+
+| Mode | Use case | Database required |
+|---|---|---|
+| `application` | Self-hosted tool — authentication, cloning runs, audit log | Yes |
+| `marketing` | Public marketing website | No — session, cache, and queue automatically use in-memory drivers |
+
+Always set `APP_MODE=application` for self-hosted production installs. If you forgot, it is the default.
+
+---
+
+## Environment Variables Reference
 
 | Variable | Example | Description |
 |---|---|---|
-| `APP_NAME` | `Clonio` | Application name shown in UI and emails |
-| `APP_ENV` | `production` | `local` for dev, `production` for live |
 | `APP_KEY` | `base64:…` | 32-byte encryption key — generate with `php artisan key:generate` |
-| `APP_DEBUG` | `false` | Never `true` in production |
 | `APP_MODE` | `application` | Always `application` for self-hosted installs |
 | `APP_URL` | `https://clonio.example.com` | Public URL of your Clonio instance |
 | `AUDIT_SECRET` | `s3cr3t-rand0m-str1ng` | Shared secret for public audit log URLs |
-| `DB_CONNECTION` | `mysql` | `mysql`, `pgsql`, or `sqlite` |
+| `DB_CONNECTION` | `mysql` | `mysql`, `pgsql` |
 | `DB_HOST` | `127.0.0.1` | Database host |
 | `DB_PORT` | `3306` | Database port |
 | `DB_DATABASE` | `clonio` | Database name |
@@ -31,13 +39,16 @@ Every environment needs the following variables configured. Sensible defaults ar
 | `SESSION_DRIVER` | `database` | `database` or `redis` |
 | `QUEUE_CONNECTION` | `database` | `database` or `redis` — use `redis` for high volume |
 | `CACHE_STORE` | `database` | `database` or `redis` |
-| `MAIL_MAILER` | `smtp` | Mail transport — `smtp`, `ses`, `postmark`, `log` |
-| `MAIL_HOST` | `smtp.example.com` | SMTP host |
-| `MAIL_PORT` | `587` | SMTP port |
-| `MAIL_USERNAME` | `apikey` | SMTP username |
-| `MAIL_PASSWORD` | `…` | SMTP password |
-| `MAIL_FROM_ADDRESS` | `clonio@example.com` | Sender address for system emails |
-| `MAIL_FROM_NAME` | `Clonio` | Sender name for system emails |
+
+The database session, cache and queue is all set up in the migrations. But we recommend using [Redis](https://redis.io/) or similar services like [ValKey](https://valkey.io/).
+
+Optional overwrites:
+
+| Variable | Example | Description |
+|---|---|---|
+| `APP_NAME` | `Clonio` | Application name shown in the UI |
+| `APP_ENV` | `production` | `local` for dev, `production` for live |
+| `APP_DEBUG` | `false` | Never `true` in production |
 
 ---
 
@@ -50,7 +61,7 @@ Every environment needs the following variables configured. Sensible defaults ar
 **Requirements:** Herd with PHP 8.4 and a local MySQL or PostgreSQL instance.
 
 ```bash
-git clone <repository-url> ~/Herd/clonio
+git clone git@github.com:clonio-dev/clonio.git ~/Herd/clonio
 cd ~/Herd/clonio
 composer install
 cp .env.example .env
@@ -72,8 +83,6 @@ DB_USERNAME=root
 DB_PASSWORD=
 
 AUDIT_SECRET=change-me-to-a-random-string
-
-MAIL_MAILER=log
 ```
 
 ```bash
@@ -98,7 +107,7 @@ Laravel Sail provides a Docker-based environment with no global PHP installation
 **Requirements:** Docker Desktop.
 
 ```bash
-git clone <repository-url> clonio
+git clone git@github.com:clonio-dev/clonio.git clonio
 cd clonio
 
 docker run --rm \
@@ -137,8 +146,6 @@ REDIS_HOST=redis
 REDIS_PORT=6379
 
 AUDIT_SECRET=change-me-to-a-random-string
-
-MAIL_MAILER=log
 ```
 
 Start the environment:
@@ -185,7 +192,6 @@ services:
       SESSION_DRIVER: database
       QUEUE_CONNECTION: database
       CACHE_STORE: database
-      MAIL_MAILER: log
     depends_on:
       - db
     networks:
@@ -252,6 +258,9 @@ docker compose exec app npm install && npm run build
 
 ## Production Deployments
 
+Having your Clonio in your infrastructure is the right way to use it. So just make sure that your internal security 
+ settings make it possible to reach the various datasources. We can [test](../1-connections/01-managing-connections.md#testing-connections) the connection before using it.
+
 ### Dockerfile
 
 If you build and ship a container image, here is a minimal production `Dockerfile`:
@@ -308,13 +317,6 @@ DB_PASSWORD=…
 QUEUE_CONNECTION=database
 SESSION_DRIVER=database
 CACHE_STORE=database
-MAIL_MAILER=smtp
-MAIL_HOST=…
-MAIL_PORT=587
-MAIL_USERNAME=…
-MAIL_PASSWORD=…
-MAIL_FROM_ADDRESS=clonio@example.com
-MAIL_FROM_NAME=Clonio
 ```
 
 Run migrations as part of your deployment pipeline:
@@ -360,14 +362,6 @@ DB_PASSWORD=your-db-password
 SESSION_DRIVER=database
 QUEUE_CONNECTION=database
 CACHE_STORE=database
-
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.postmarkapp.com
-MAIL_PORT=587
-MAIL_USERNAME=your-api-token
-MAIL_PASSWORD=your-api-token
-MAIL_FROM_ADDRESS=clonio@example.com
-MAIL_FROM_NAME=Clonio
 ```
 
 5. **Add a deployment script** in Forge → Site → Deployment Script:
@@ -410,17 +404,6 @@ DB_PORT=3306
 DB_DATABASE=clonio
 DB_USERNAME=clonio
 DB_PASSWORD=…
-```
-
-For mail, use **Amazon SES**:
-
-```env
-MAIL_MAILER=ses
-AWS_ACCESS_KEY_ID=…
-AWS_SECRET_ACCESS_KEY=…
-AWS_DEFAULT_REGION=eu-west-1
-MAIL_FROM_ADDRESS=clonio@example.com
-MAIL_FROM_NAME=Clonio
 ```
 
 #### ECS / Fargate (container-based)
@@ -473,14 +456,6 @@ AUDIT_SECRET=your-random-secret
 SESSION_DRIVER=database
 QUEUE_CONNECTION=database
 CACHE_STORE=database
-
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.postmarkapp.com
-MAIL_PORT=587
-MAIL_USERNAME=your-api-token
-MAIL_PASSWORD=your-api-token
-MAIL_FROM_ADDRESS=clonio@example.com
-MAIL_FROM_NAME=Clonio
 ```
 
 > `APP_KEY` can be generated locally with `php artisan key:generate --show` and pasted in.
