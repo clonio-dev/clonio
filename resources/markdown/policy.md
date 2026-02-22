@@ -18,6 +18,9 @@ Contact data protection officer: post@robert-kummer.de
 
 ## Types of data processed:
 
+Clonio is not subject to a fee for all users. In this respect, data is only collected for the purpose of invoicing and
+licensing. However, this is not done via the website offered here.
+
 - Inventory data (e.g., names, addresses).
 - Contact data (e.g., e-mail, telephone numbers).
 - Content data (e.g., text entries, photographs, videos).
@@ -34,6 +37,7 @@ Visitors and users of the online offer (hereinafter we also refer to the data su
 - Responding to contact requests and communicating with users.
 - Security measures.
 - Reach measurement/marketing.
+- Accounting and license verification.
 
 ## Terminology used
 
@@ -157,11 +161,7 @@ If these analyses or profiles are personal, they are deleted or anonymized when 
 
 ## Registration function
 
-Users can create a user account. As part of the registration process, the required mandatory information is communicated to the users and processed on the basis of Art. 6 para. 1 lit. b GDPR for the purpose of providing the user account. The processed data includes in particular the login information (name, password and an email address). The data entered during registration is used for the purposes of using the user account and its purpose.
-
-Users may be informed of information relevant to their user account, such as technical changes, by email at. If users have terminated their user account, their data will be deleted with regard to the user account, subject to a statutory retention obligation. It is the responsibility of users to back up their data before the end of the contract in the event of termination at. We are entitled to irretrievably delete all user data stored during the term of the contract.
-
-As part of the use of our registration and login functions as well as the use of the user account, we store the IP address and the time of the respective user action. The storage takes place on the basis of our legitimate interests, as well as those of the user in protection against misuse and other unauthorized use. As a matter of principle, does not pass this data on to third parties unless it is necessary to pursue our claims or there is a legal obligation to do so in accordance with Art. 6 para. 1 lit. c. GDPR. The IP addresses are anonymized or deleted after 7 days at the latest.
+There is no registration function on the website offered here. This is only available in the case of self-hosting of Clonio. In this case, the data collected will not leave the data area of the infrastructure of the person using it.
 
 ## Hosting and sending emails
 
@@ -174,7 +174,9 @@ In doing so, we, or our hosting provider, process inventory data, contact data, 
 
 We, or our hosting provider, collect on the basis of our legitimate interests within the meaning of Art. 6 para. 1 lit. f. GDPR, we collect data about every access to the server on which this service is located (so-called server log files). The access data includes the name of the website accessed, file, date and time of access, amount of data transferred, notification of successful access, browser type and version, the user's operating system, referrer URL (the page previously visited at), IP address and the requesting provider.
 
-Log file information is stored for security reasons (e.g. to investigate misuse or fraud) for for a maximum period of 7 days and then deleted. Data whose further storage is required for evidence purposes are excluded from deletion until the respective incident has been finally clarified.
+Log file information is stored for security reasons (e.g. to investigate misuse or fraud) . Data whose further storage is required for evidence purposes are excluded from deletion until the respective incident has been finally clarified.
+
+We have no access to these log files.
 
 ## Integration of third-party services and content
 
