@@ -44,12 +44,12 @@ clonio.dev (Clonio) ist eine Applikation mit deren Hilfe produktive Daten ins Te
 ## §4 Rechte und Pflichten von Clonio
 
 Soweit Clonio hierzu rechtlich verpflichtet ist oder dies nach pflichtgemäßem Ermessen notwendig und rechtlich
-   zulässig ist, um (a) gesetzliche Bestimmungen oder richterliche oder behördliche Anordnungen zu erfüllen, (b) die
-   Einhaltung dieser AGB oder der potentiellen BesGB sicherzustellen, (c) auf die Geltendmachung einer Rechtsverletzung
-   durch Dritte zu reagieren, (d) die Rechte oder die persönliche Sicherheit anderer Nutzer, der Öffentlichkeit oder von
-   Clonio zu wahren oder (e) dem Nutzer bei technischen Problemen mit seinem Clonio Konto zu helfen, ist Clonio
-   berechtigt, um diese Absprache zu erfüllen, auf Inhalte zuzugreifen und ggf. an Dritte weiterzugeben oder sie zu
-   löschen.
+zulässig ist, um (a) gesetzliche Bestimmungen oder richterliche oder behördliche Anordnungen zu erfüllen, (b) die
+Einhaltung dieser AGB oder der potentiellen BesGB sicherzustellen, (c) auf die Geltendmachung einer Rechtsverletzung
+durch Dritte zu reagieren, (d) die Rechte oder die persönliche Sicherheit anderer Nutzer, der Öffentlichkeit oder von
+Clonio zu wahren oder (e) dem Nutzer bei technischen Problemen mit seinem Clonio Konto zu helfen, ist Clonio
+berechtigt, um diese Absprache zu erfüllen, auf Inhalte zuzugreifen und ggf. an Dritte weiterzugeben oder sie zu
+löschen.
 
 ## §5 Rechteeinräumung
 

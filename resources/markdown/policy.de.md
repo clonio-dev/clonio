@@ -22,7 +22,7 @@ Kontakt Datenschutzbeauftragte/r: post@robert-kummer.de
 
 ## Arten der verarbeiteten Daten:
 
-Clonio ist nicht für alle Benutzer kostenpflichtig. Insofern werden Daten nur für den Zweck der Rechnungslegung und 
+Clonio ist nicht für alle Benutzer kostenpflichtig. Insofern werden Daten nur für den Zweck der Rechnungslegung und
 Lizenzvergabe erhoben. Dies erfolgt allerdings nicht über die hier angebotene Webseite.
 
 - Bestandsdaten (z.B., Namen, Adressen).
@@ -306,8 +306,8 @@ Tendenzbestimmungen nach Möglichkeit anonym erstellt.
 
 ## Registrierfunktion
 
-Es gibt auf der hier angebotenen Internetseite keine Registrierungsfunktion. Diese ist nur im Fall des Self-Hosting von 
-Clonio verfügbar. Dort werden die erfassten Daten den Datenbereich der Infrastruktur der einsetzenden Person nicht 
+Es gibt auf der hier angebotenen Internetseite keine Registrierungsfunktion. Diese ist nur im Fall des Self-Hosting von
+Clonio verfügbar. Dort werden die erfassten Daten den Datenbereich der Infrastruktur der einsetzenden Person nicht
 verlassen.
 
 ## Hosting und E-Mail-Versand
@@ -330,7 +330,7 @@ Zugriffsdaten gehören Name der abgerufenen Webseite, Datei, Datum und Uhrzeit d
 Meldung über erfolgreichen Abruf, Browsertyp nebst Version, das Betriebssystem des Nutzers, Referrer URL (die zuvor
 besuchte Seite), IP-Adresse und der anfragende Provider.
 
-Logfile-Informationen werden aus Sicherheitsgründen (z.B. zur Aufklärung von Missbrauchs- oder Betrugshandlungen) 
+Logfile-Informationen werden aus Sicherheitsgründen (z.B. zur Aufklärung von Missbrauchs- oder Betrugshandlungen)
 gespeichert. Daten, deren weitere Aufbewahrung zu Beweiszwecken erforderlich ist, sind bis zur endgültigen Klärung des
 jeweiligen Vorfalls von der Löschung ausgenommen.
 
