@@ -8,7 +8,7 @@ Hohenstaufenstraße 35<br>
 
 Geschäftsführung: Robert Kummer
 
-Kleingewerbetreibend im Nebenerwerb
+Kleingewerbetreibend im Nebenerwerb (§ 19 UStG)
 
 Links:
 

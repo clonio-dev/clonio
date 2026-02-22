@@ -22,6 +22,9 @@ Kontakt Datenschutzbeauftragte/r: post@robert-kummer.de
 
 ## Arten der verarbeiteten Daten:
 
+Clonio ist nicht für alle Benutzer kostenpflichtig. Insofern werden Daten nur für den Zweck der Rechnungslegung und
+Lizenzvergabe erhoben. Dies erfolgt allerdings nicht über die hier angebotene Webseite.
+
 - Bestandsdaten (z.B., Namen, Adressen).
 - Kontaktdaten (z.B., E-Mail, Telefonnummern).
 - Inhaltsdaten (z.B., Texteingaben, Fotografien, Videos).
@@ -39,6 +42,7 @@ Besucher und Nutzer des Onlineangebotes (Nachfolgend bezeichnen wir die betroffe
 - Beantwortung von Kontaktanfragen und Kommunikation mit Nutzern.
 - Sicherheitsmaßnahmen.
 - Reichweitenmessung/Marketing.
+- Rechnungslegung und Lizenzprüfung.
 
 ## Verwendete Begrifflichkeiten
 
@@ -302,24 +306,9 @@ Tendenzbestimmungen nach Möglichkeit anonym erstellt.
 
 ## Registrierfunktion
 
-Nutzer können ein Nutzerkonto anlegen. Im Rahmen der Registrierung werden die erforderlichen Pflichtangaben den Nutzern
-mitgeteilt und auf Grundlage des Art. 6 Abs. 1 lit. b DSGVO zu Zwecken der Bereitstellung des Nutzerkontos verarbeitet.
-Zu den verarbeiteten Daten gehören insbesondere die Login-Informationen (Name, Passwort sowie eine E-Mailadresse). Die
-im Rahmen der Registrierung eingegebenen Daten werden für die Zwecke der Nutzung des Nutzerkontos und dessen Zwecks
-verwendet.
-
-Die Nutzer können über Informationen, die für deren Nutzerkonto relevant sind, wie z.B. technische Änderungen, per
-E-Mail informiert werden. Wenn Nutzer ihr Nutzerkonto gekündigt haben, werden deren Daten im Hinblick auf das
-Nutzerkonto, vorbehaltlich einer gesetzlichen Aufbewahrungspflicht, gelöscht. Es obliegt den Nutzern, ihre Daten bei
-erfolgter Kündigung vor dem Vertragsende zu sichern. Wir sind berechtigt, sämtliche während der Vertragsdauer
-gespeicherten Daten des Nutzers unwiederbringlich zu löschen.
-
-Im Rahmen der Inanspruchnahme unserer Registrierungs- und Anmeldefunktionen sowie der Nutzung des Nutzerkontos,
-speichern wir die IP-Adresse und den Zeitpunkt der jeweiligen Nutzerhandlung. Die Speicherung erfolgt auf Grundlage
-unserer berechtigten Interessen, als auch der Nutzer an Schutz vor Missbrauch und sonstiger unbefugter Nutzung. Eine
-Weitergabe dieser Daten an Dritte erfolgt grundsätzlich nicht, außer sie ist zur Verfolgung unserer Ansprüche
-erforderlich oder es besteht hierzu besteht eine gesetzliche Verpflichtung gem. Art. 6 Abs. 1 lit. c. DSGVO. Die
-IP-Adressen werden spätestens nach 7 Tagen anonymisiert oder gelöscht.
+Es gibt auf der hier angebotenen Internetseite keine Registrierungsfunktion. Diese ist nur im Fall des Self-Hosting von
+Clonio verfügbar. Dort werden die erfassten Daten den Datenbereich der Infrastruktur der einsetzenden Person nicht
+verlassen.
 
 ## Hosting und E-Mail-Versand
 
@@ -341,9 +330,11 @@ Zugriffsdaten gehören Name der abgerufenen Webseite, Datei, Datum und Uhrzeit d
 Meldung über erfolgreichen Abruf, Browsertyp nebst Version, das Betriebssystem des Nutzers, Referrer URL (die zuvor
 besuchte Seite), IP-Adresse und der anfragende Provider.
 
-Logfile-Informationen werden aus Sicherheitsgründen (z.B. zur Aufklärung von Missbrauchs- oder Betrugshandlungen) für
-die Dauer von maximal 7 Tagen gespeichert und danach gelöscht. Daten, deren weitere Aufbewahrung zu Beweiszwecken
-erforderlich ist, sind bis zur endgültigen Klärung des jeweiligen Vorfalls von der Löschung ausgenommen.
+Logfile-Informationen werden aus Sicherheitsgründen (z.B. zur Aufklärung von Missbrauchs- oder Betrugshandlungen)
+gespeichert. Daten, deren weitere Aufbewahrung zu Beweiszwecken erforderlich ist, sind bis zur endgültigen Klärung des
+jeweiligen Vorfalls von der Löschung ausgenommen.
+
+Wir haben keinen Einblick in diese Logfiles.
 
 ## Einbindung von Diensten und Inhalten Dritter
 

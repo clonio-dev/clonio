@@ -1,0 +1,216 @@
+<svg width="1200" height="627" viewBox="0 0 1200 627" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="627" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a0f1e"/>
+      <stop offset="100%" stop-color="#0d1a2e"/>
+    </linearGradient>
+    <!-- Grid pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e3a5f" stroke-width="0.5" opacity="0.4"/>
+    </pattern>
+    <!-- Cyan glow -->
+    <radialGradient id="cyanGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Prod DB gradient -->
+    <linearGradient id="prodGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#0f2444"/>
+    </linearGradient>
+    <!-- Staging DB gradient -->
+    <linearGradient id="stagingGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d3320"/>
+      <stop offset="100%" stop-color="#071a10"/>
+    </linearGradient>
+    <!-- Arrow gradient -->
+    <linearGradient id="arrowGrad" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#0891b2"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="arrowGradFull" x1="320" y1="0" x2="880" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0891b2"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <marker id="arrowHead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10b981"/>
+    </marker>
+    <!-- Clonio center glow -->
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0891b2" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#0891b2" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="627" fill="url(#bg)"/>
+  <rect width="1200" height="627" fill="url(#grid)"/>
+
+  <!-- Ambient glow center -->
+  <ellipse cx="600" cy="313" rx="300" ry="200" fill="url(#cyanGlow)"/>
+
+  <!-- ─── PRODUCTION DATABASE (left) ─── -->
+  <g transform="translate(80, 190)">
+    <!-- DB cylinder body -->
+    <rect x="0" y="30" width="200" height="160" rx="8" fill="url(#prodGrad)" stroke="#2563eb" stroke-width="1.5"/>
+    <!-- DB top ellipse -->
+    <ellipse cx="100" cy="30" rx="100" ry="22" fill="#1e3a5f" stroke="#2563eb" stroke-width="1.5"/>
+    <!-- DB top shine -->
+    <ellipse cx="100" cy="28" rx="70" ry="12" fill="#2563eb" opacity="0.15"/>
+    <!-- DB stripes -->
+    <line x1="0" y1="80" x2="200" y2="80" stroke="#2563eb" stroke-width="0.8" opacity="0.5"/>
+    <line x1="0" y1="120" x2="200" y2="120" stroke="#2563eb" stroke-width="0.8" opacity="0.5"/>
+    <line x1="0" y1="160" x2="200" y2="160" stroke="#2563eb" stroke-width="0.8" opacity="0.5"/>
+    <!-- DB bottom ellipse -->
+    <ellipse cx="100" cy="190" rx="100" ry="22" fill="#0f2444" stroke="#2563eb" stroke-width="1.5"/>
+
+    <!-- Data rows -->
+    <g opacity="0.8">
+      <!-- Row 1: name visible -->
+      <rect x="20" y="55" width="80" height="10" rx="3" fill="#3b82f6" opacity="0.7"/>
+      <rect x="108" y="55" width="72" height="10" rx="3" fill="#ef4444" opacity="0.6"/>
+      <!-- Row 2 -->
+      <rect x="20" y="95" width="80" height="10" rx="3" fill="#3b82f6" opacity="0.7"/>
+      <rect x="108" y="95" width="60" height="10" rx="3" fill="#ef4444" opacity="0.6"/>
+      <!-- Row 3 -->
+      <rect x="20" y="135" width="80" height="10" rx="3" fill="#3b82f6" opacity="0.7"/>
+      <rect x="108" y="135" width="68" height="10" rx="3" fill="#ef4444" opacity="0.6"/>
+    </g>
+
+    <!-- PII warning badge -->
+    <rect x="60" y="-18" width="80" height="26" rx="13" fill="#7f1d1d" stroke="#ef4444" stroke-width="1"/>
+    <text x="100" y="-1" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#fca5a5">⚠ PII DATA</text>
+
+    <!-- Label -->
+    <text x="100" y="235" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="15" font-weight="600" fill="#93c5fd">PRODUCTION</text>
+    <text x="100" y="253" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" fill="#64748b">MySQL · PostgreSQL</text>
+  </g>
+
+  <!-- ─── CLONIO ENGINE (center) ─── -->
+  <g transform="translate(450, 175)">
+    <!-- Outer glow ring -->
+    <circle cx="150" cy="140" r="120" fill="url(#centerGlow)"/>
+    <!-- Outer ring -->
+    <circle cx="150" cy="140" r="108" fill="none" stroke="#0891b2" stroke-width="1" stroke-dasharray="6 4" opacity="0.5"/>
+    <!-- Inner card -->
+    <rect x="30" y="50" width="240" height="180" rx="16" fill="#061525" stroke="#0891b2" stroke-width="1.5"/>
+    <!-- Top accent bar -->
+    <rect x="30" y="50" width="240" height="4" rx="2" fill="#0891b2"/>
+
+    <!-- Clonio logo text -->
+    <text x="150" y="100" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="28" font-weight="800" fill="#e2e8f0" letter-spacing="-0.5">Clonio</text>
+
+    <!-- Feature pills -->
+    <rect x="48" y="115" width="204" height="1" fill="#1e3a5f"/>
+
+    <!-- Pill 1: Anonymize -->
+    <rect x="45" y="128" width="110" height="26" rx="13" fill="#0c4a6e" stroke="#0891b2" stroke-width="1"/>
+    <text x="100" y="145" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#7dd3fc">🔒 Anonymize</text>
+
+    <!-- Pill 2: Schema -->
+    <rect x="165" y="128" width="100" height="26" rx="13" fill="#0c4a6e" stroke="#0891b2" stroke-width="1"/>
+    <text x="215" y="145" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#7dd3fc">⚙ Schema</text>
+
+    <!-- Pill 3: Audit -->
+    <rect x="45" y="163" width="90" height="26" rx="13" fill="#0c4a6e" stroke="#0891b2" stroke-width="1"/>
+    <text x="90" y="180" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#7dd3fc">📋 Audit</text>
+
+    <!-- Pill 4: API -->
+    <rect x="144" y="163" width="120" height="26" rx="13" fill="#0c4a6e" stroke="#0891b2" stroke-width="1"/>
+    <text x="204" y="180" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#7dd3fc">🔗 API Trigger</text>
+
+    <!-- GDPR badge at bottom -->
+    <rect x="75" y="200" width="150" height="22" rx="11" fill="#14532d" stroke="#22c55e" stroke-width="1"/>
+    <text x="150" y="215" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="700" fill="#86efac">✓ GDPR COMPLIANT</text>
+  </g>
+
+  <!-- ─── STAGING DATABASE (right) ─── -->
+  <g transform="translate(920, 190)">
+    <!-- DB cylinder body -->
+    <rect x="0" y="30" width="200" height="160" rx="8" fill="url(#stagingGrad)" stroke="#16a34a" stroke-width="1.5"/>
+    <!-- DB top ellipse -->
+    <ellipse cx="100" cy="30" rx="100" ry="22" fill="#0d3320" stroke="#16a34a" stroke-width="1.5"/>
+    <!-- DB top shine -->
+    <ellipse cx="100" cy="28" rx="70" ry="12" fill="#16a34a" opacity="0.15"/>
+    <!-- DB stripes -->
+    <line x1="0" y1="80" x2="200" y2="80" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+    <line x1="0" y1="120" x2="200" y2="120" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+    <line x1="0" y1="160" x2="200" y2="160" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+    <!-- DB bottom ellipse -->
+    <ellipse cx="100" cy="190" rx="100" ry="22" fill="#071a10" stroke="#16a34a" stroke-width="1.5"/>
+
+    <!-- Anonymized data rows -->
+    <g opacity="0.8">
+      <!-- Row 1: anonymized -->
+      <rect x="20" y="55" width="80" height="10" rx="3" fill="#22c55e" opacity="0.7"/>
+      <rect x="108" y="55" width="72" height="10" rx="3" fill="#4ade80" opacity="0.4"/>
+      <!-- Row 2 -->
+      <rect x="20" y="95" width="80" height="10" rx="3" fill="#22c55e" opacity="0.7"/>
+      <rect x="108" y="95" width="60" height="10" rx="3" fill="#4ade80" opacity="0.4"/>
+      <!-- Row 3 -->
+      <rect x="20" y="135" width="80" height="10" rx="3" fill="#22c55e" opacity="0.7"/>
+      <rect x="108" y="135" width="68" height="10" rx="3" fill="#4ade80" opacity="0.4"/>
+    </g>
+
+    <!-- Safe badge -->
+    <rect x="50" y="-18" width="100" height="26" rx="13" fill="#14532d" stroke="#22c55e" stroke-width="1"/>
+    <text x="100" y="-1" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#86efac">✓ ANONYMIZED</text>
+
+    <!-- Label -->
+    <text x="100" y="235" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="15" font-weight="600" fill="#86efac">STAGING / TEST</text>
+    <text x="100" y="253" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" fill="#64748b">Any supported DB</text>
+  </g>
+
+  <!-- ─── ARROWS ─── -->
+  <!-- Left arrow: prod → clonio -->
+  <line x1="288" y1="313" x2="452" y2="313" stroke="url(#arrowGradFull)" stroke-width="2.5" marker-end="url(#arrowHead)"/>
+  <!-- Animated dots on left arrow -->
+  <circle cx="330" cy="313" r="3.5" fill="#0891b2" opacity="0.9"/>
+  <circle cx="360" cy="313" r="3.5" fill="#0891b2" opacity="0.6"/>
+  <circle cx="390" cy="313" r="3.5" fill="#0891b2" opacity="0.3"/>
+
+  <!-- Right arrow: clonio → staging -->
+  <line x1="748" y1="313" x2="912" y2="313" stroke="url(#arrowGradFull)" stroke-width="2.5" marker-end="url(#arrowHead)"/>
+  <!-- Animated dots on right arrow -->
+  <circle cx="790" cy="313" r="3.5" fill="#10b981" opacity="0.3"/>
+  <circle cx="820" cy="313" r="3.5" fill="#10b981" opacity="0.6"/>
+  <circle cx="850" cy="313" r="3.5" fill="#10b981" opacity="0.9"/>
+
+  <!-- ─── HEADLINE ─── -->
+  <text x="600" y="64" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="800" fill="#f1f5f9" letter-spacing="-0.5">Test with real data.</text>
+  <text x="600" y="108" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="800" fill="#06b6d4">Without the GDPR nightmare.</text>
+
+  <!-- ─── BOTTOM STRIP ─── -->
+  <rect x="0" y="540" width="1200" height="87" fill="#060d1a" opacity="0.9"/>
+  <line x1="0" y1="540" x2="1200" y2="540" stroke="#1e3a5f" stroke-width="1"/>
+
+  <!-- Bottom tagline -->
+  <text x="600" y="580" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="16" fill="#94a3b8" letter-spacing="0.3">Self-hosted · Open source · Schema-aware · Cryptographic audit trail</text>
+
+  <!-- Bottom feature chips -->
+  <g transform="translate(140, 596)">
+    <!-- Chip 1 -->
+    <rect x="0" y="0" width="130" height="24" rx="12" fill="#0c1f3a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="65" y="16" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">Free for open source</text>
+  </g>
+  <g transform="translate(290, 596)">
+    <rect x="0" y="0" width="140" height="24" rx="12" fill="#0c1f3a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="70" y="16" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">MySQL · PostgreSQL</text>
+  </g>
+  <g transform="translate(450, 596)">
+    <rect x="0" y="0" width="140" height="24" rx="12" fill="#0c1f3a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="70" y="16" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">CI/CD integration</text>
+  </g>
+  <g transform="translate(610, 596)">
+    <rect x="0" y="0" width="160" height="24" rx="12" fill="#0c1f3a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="80" y="16" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">Data never leaves you</text>
+  </g>
+  <g transform="translate(790, 596)">
+    <rect x="0" y="0" width="130" height="24" rx="12" fill="#0c1f3a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="65" y="16" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">60-day free trial</text>
+  </g>
+
+  <!-- clonio.dev URL -->
+  <text x="1080" y="580" text-anchor="middle" font-family="'Courier New', monospace" font-size="13" font-weight="600" fill="#0891b2">clonio.dev</text>
+</svg>
