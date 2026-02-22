@@ -344,7 +344,7 @@
 
                 <!-- Scroll Indicator -->
                 <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce" aria-hidden="true">
-                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="size-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </div>
@@ -590,11 +590,12 @@
         <!-- Section 4: WORKFLOW TRANSFORMATION -->
         <section id="workflow" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="workflow-heading">
             <div class="max-w-7xl mx-auto w-full pt-12">
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Before &amp; After</p>
                 <h2 id="workflow-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-16 text-gray-900 dark:text-white">
                     How Clonio changes your workflow
                 </h2>
 
-                <div class="grid lg:grid-cols-2 gap-12">
+                <div class="grid lg:grid-cols-[1fr_auto_1fr] gap-12">
                     <!-- BEFORE -->
                     <div class="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/20 dark:to-red-900/20 p-8 rounded-2xl border-2 border-red-200 dark:border-red-800">
                         <div class="inline-block px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-full mb-6">
@@ -603,41 +604,54 @@
 
                         <ol class="space-y-4 mb-8" role="list">
                             <li class="flex gap-3">
-                                <span class="flex-shrink-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold" aria-hidden="true">1</span>
+                                <span class="flex-shrink-0 size-7 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md" aria-hidden="true">1</span>
                                 <span class="text-gray-700 dark:text-gray-300">Export production dump manually (risky, slow)</span>
                             </li>
                             <li class="flex gap-3">
-                                <span class="flex-shrink-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold" aria-hidden="true">2</span>
+                                <span class="flex-shrink-0 size-7 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md" aria-hidden="true">2</span>
                                 <span class="text-gray-700 dark:text-gray-300">Write custom anonymization scripts</span>
                             </li>
                             <li class="flex gap-3">
-                                <span class="flex-shrink-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold" aria-hidden="true">3</span>
+                                <span class="flex-shrink-0 size-7 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md" aria-hidden="true">3</span>
                                 <span class="text-gray-700 dark:text-gray-300">Try to import to test (schema breaks)</span>
                             </li>
                             <li class="flex gap-3">
-                                <span class="flex-shrink-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold" aria-hidden="true">4</span>
+                                <span class="flex-shrink-0 size-7 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md" aria-hidden="true">4</span>
                                 <span class="text-gray-700 dark:text-gray-300">Debug mismatches for hours</span>
                             </li>
                             <li class="flex gap-3">
-                                <span class="flex-shrink-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold" aria-hidden="true">5</span>
+                                <span class="flex-shrink-0 size-7 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md" aria-hidden="true">5</span>
                                 <span class="text-gray-700 dark:text-gray-300">Cross fingers you caught all PII</span>
                             </li>
                         </ol>
 
                         <div class="pt-6 border-t border-red-300 dark:border-red-800 space-y-2">
-                            <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                <span class="text-2xl" aria-hidden="true">⏱️</span>
+                            <div class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                                <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400" aria-hidden="true">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </span>
                                 <span><strong>Time:</strong> Days</span>
                             </div>
-                            <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                <span class="text-2xl" aria-hidden="true">⚠️</span>
+                            <div class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                                <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400" aria-hidden="true">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                </span>
                                 <span><strong>Risk:</strong> High</span>
                             </div>
-                            <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                <span class="text-2xl" aria-hidden="true">😓</span>
+                            <div class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                                <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400" aria-hidden="true">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </span>
                                 <span><strong>Developer happiness:</strong> Low</span>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- VS separator (desktop only) -->
+                    <div class="hidden lg:flex flex-col items-center justify-center">
+                        <div class="flex-1 w-px bg-gray-200 dark:bg-gray-800"></div>
+                        <span class="my-4 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-bold text-sm border border-gray-200 dark:border-gray-700">VS</span>
+                        <div class="flex-1 w-px bg-gray-200 dark:bg-gray-800"></div>
                     </div>
 
                     <!-- AFTER -->
@@ -648,46 +662,50 @@
 
                         <ol class="space-y-4 mb-8" role="list">
                             <li class="flex gap-3">
-                                <span class="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold" aria-hidden="true">1</span>
+                                <span class="flex-shrink-0 size-7 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md" aria-hidden="true">1</span>
                                 <span class="text-gray-700 dark:text-gray-300">Configure transformation rules (once)</span>
                             </li>
                             <li class="flex gap-3">
-                                <span class="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold" aria-hidden="true">2</span>
+                                <span class="flex-shrink-0 size-7 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md" aria-hidden="true">2</span>
                                 <span class="text-gray-700 dark:text-gray-300">Click "Clone" or trigger via API</span>
                             </li>
                             <li class="flex gap-3">
-                                <span class="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold" aria-hidden="true">3</span>
+                                <span class="flex-shrink-0 size-7 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md" aria-hidden="true">3</span>
                                 <span class="text-gray-700 dark:text-gray-300">Done. ✓</span>
                             </li>
                         </ol>
 
                         <div class="pt-6 border-t border-green-300 dark:border-green-800 space-y-2">
-                            <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                <span class="text-2xl" aria-hidden="true">⏱️</span>
+                            <div class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                                <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400" aria-hidden="true">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </span>
                                 <span><strong>Time:</strong> Minutes</span>
                             </div>
-                            <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                <span class="text-2xl" aria-hidden="true">✅</span>
+                            <div class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                                <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400" aria-hidden="true">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                </span>
                                 <span><strong>Risk:</strong> Zero</span>
                             </div>
-                            <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                <span class="text-2xl" aria-hidden="true">🚀</span>
+                            <div class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                                <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400" aria-hidden="true">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </span>
                                 <span><strong>Developer happiness:</strong> High</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <p class="text-center text-xl font-semibold text-gray-900 dark:text-white mt-12">
-                    From days of manual work to minutes of automation.<br>
-                    That's the Clonio difference.
-                </p>
+                <p class="text-center text-xl font-bold text-gray-900 dark:text-white mt-16 mb-0">From days of manual work to <span class="text-primary-600 dark:text-primary-400">minutes of automation.</span></p>
             </div>
         </section>
 
         <!-- Section 5: CORE CAPABILITIES -->
         <section id="features" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950" aria-labelledby="features-heading">
             <div class="max-w-7xl mx-auto w-full">
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Core capabilities</p>
                 <h2 id="features-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-16 text-gray-900 dark:text-white">
                     Three pillars of safe database cloning
                 </h2>
@@ -695,25 +713,29 @@
                 <div class="grid lg:grid-cols-3 gap-8">
                     <!-- Pillar 1: Privacy First -->
                     <article class="pillar-card bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow">
+                        <div class="h-1 bg-gradient-to-r from-primary-500 to-blue-600 -mx-8 -mt-8 mb-8 rounded-t-2xl"></div>
+                        <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                            <svg class="size-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
                         <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Privacy First</h3>
                         <p class="text-gray-700 dark:text-gray-300 mb-4">
                             Four transformation types for every column. Choose what fits your data:
                         </p>
                         <ul class="space-y-2 text-gray-700 dark:text-gray-300 mb-4" role="list">
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span><strong>Keep original</strong> – for non-sensitive reference data</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span><strong>Static value</strong> – replace all with a fixed test value</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span><strong>Random value</strong> – generate realistic but fake data</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span><strong>Format-preserving</strong> – keep structure (valid IBANs, emails) but anonymize content</span>
                             </li>
                         </ul>
@@ -729,6 +751,10 @@
 
                     <!-- Pillar 2: Schema-Aware -->
                     <article class="pillar-card bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow">
+                        <div class="h-1 bg-gradient-to-r from-violet-500 to-purple-600 -mx-8 -mt-8 mb-8 rounded-t-2xl"></div>
+                        <div class="w-14 h-14 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                            <svg class="size-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        </div>
                         <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Schema-Aware Cloning</h3>
                         <p class="text-gray-700 dark:text-gray-300 mb-4">
                             Your test database is 3 versions behind production? No problem.
@@ -738,15 +764,15 @@
                         </p>
                         <ul class="space-y-2 text-gray-700 dark:text-gray-300 mb-4" role="list">
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span>Columns added, removed, or renamed? Handled.</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span>Tables restructured? No issue.</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span>Different database versions? Works seamlessly.</span>
                             </li>
                         </ul>
@@ -762,25 +788,29 @@
 
                     <!-- Pillar 3: Full Auditability -->
                     <article class="pillar-card bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow">
+                        <div class="h-1 bg-gradient-to-r from-emerald-500 to-green-600 -mx-8 -mt-8 mb-8 rounded-t-2xl"></div>
+                        <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                            <svg class="size-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
                         <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Full Auditability</h3>
                         <p class="text-gray-700 dark:text-gray-300 mb-4">
                             Every clone operation is logged and cryptographically signed:
                         </p>
                         <ul class="space-y-2 text-gray-700 dark:text-gray-300 mb-4" role="list">
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span>Who triggered the clone</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span>Which transformations were applied</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span>Exact timestamp and target environment</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-primary-600 dark:text-primary-400 mt-1" aria-hidden="true">•</span>
+                                <span class="text-green-500 mt-1" aria-hidden="true">✓</span>
                                 <span>Tamper-proof audit trail</span>
                             </li>
                         </ul>
@@ -800,6 +830,7 @@
         <!-- Section 6: DEVELOPER LOVE -->
         <section id="devops" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="devops-heading">
             <div class="max-w-6xl mx-auto w-full pt-20">
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Built for DevOps</p>
                 <h2 id="devops-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 text-gray-900 dark:text-white">
                     Built for DevOps workflows
                 </h2>
@@ -870,13 +901,13 @@
                 <!-- Integration Logos -->
                 <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800">
                     <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium uppercase">Integrates with your favorite tools</p>
-                    <div class="flex flex-wrap justify-center items-center gap-8">
-                        <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">GitLab CI</div>
-                        <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">GitHub Actions</div>
-                        <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Jenkins</div>
-                        <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">CircleCI</div>
-                        <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">BitBucket</div>
-                        <div class="text-gray-400 dark:text-gray-600 font-semibold text-lg hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Azure DevOps</div>
+                    <div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-3">
+                        <span class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-semibold text-sm hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-default">GitLab CI</span>
+                        <span class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-semibold text-sm hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-default">GitHub Actions</span>
+                        <span class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-semibold text-sm hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-default">Jenkins</span>
+                        <span class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-semibold text-sm hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-default">CircleCI</span>
+                        <span class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-semibold text-sm hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-default">BitBucket</span>
+                        <span class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-semibold text-sm hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-default">Azure DevOps</span>
                     </div>
                 </div>
 
@@ -900,7 +931,7 @@
                     </div>
                 </div>
                 <div class="text-center mb-12">
-                    Or it get's triggered manually or on a planned schedule.
+                    Or it gets triggered manually or on a schedule.
                 </div>
 
                 <div class="text-center mb-12">
@@ -915,10 +946,11 @@
         </section>
 
         <!-- Section 7: TRUST & SECURITY -->
-        <section id="security" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950" aria-labelledby="security-heading">
+        <section id="security" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="security-heading">
             <div class="max-w-6xl mx-auto w-full">
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Security &amp; compliance</p>
                 <h2 id="security-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-16 text-gray-900 dark:text-white">
-                    Enterprise-grade security & compliance
+                    Your data never leaves your control
                 </h2>
 
                 <div class="grid md:grid-cols-2 gap-8">
@@ -933,7 +965,8 @@
                             </div>
                         </div>
                         <!-- Content -->
-                        <div class="pl-20">
+                        <div class="pl-24 pt-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-green-600 dark:text-green-400">GDPR</span>
                             <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">GDPR-compliant by design</h3>
                             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">No PII leaves your infrastructure unprotected. Transformation rules ensure compliance at the data level.</p>
                         </div>
@@ -950,7 +983,8 @@
                             </div>
                         </div>
                         <!-- Content -->
-                        <div class="pl-20">
+                        <div class="pl-24 pt-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Audit</span>
                             <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Cryptographically signed audit logs</h3>
                             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Tamper-proof compliance trail. Every action is logged, signed, and verifiable.</p>
                         </div>
@@ -967,7 +1001,8 @@
                             </div>
                         </div>
                         <!-- Content -->
-                        <div class="pl-20">
+                        <div class="pl-24 pt-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Infrastructure</span>
                             <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Deploy on your infrastructure</h3>
                             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Self-hosted only — by design. Your data never leaves your servers. Stays behind your firewalls, inside your audits, zero third-party risk.</p>
                         </div>
@@ -984,11 +1019,19 @@
                             </div>
                         </div>
                         <!-- Content -->
-                        <div class="pl-20">
+                        <div class="pl-24 pt-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">Security</span>
                             <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Battle-tested security</h3>
                             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Industry-standard encryption, role-based access control, and secure credential management.</p>
                         </div>
                     </div>
+                </div>
+
+                <div class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-wrap justify-center gap-x-12 gap-y-4 text-sm text-gray-500 dark:text-gray-500">
+                    <span>✓ No data leaves your network</span>
+                    <span>✓ Cryptographically signed audit logs</span>
+                    <span>✓ GDPR-compliant by design</span>
+                    <span>✓ Open source — inspect every line</span>
                 </div>
             </div>
         </section>
@@ -1188,11 +1231,16 @@
                     </div>
                 </div>
 
+                <!-- VAT notice -->
+                <p class="text-center text-xs text-gray-500 dark:text-gray-400 mb-12">
+                    All prices are net. According to § 19 UStG no VAT is charged — small business regulation, Germany.
+                </p>
+
                 <!-- Self-hosting callout -->
                 <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 mb-6">
                     <div class="flex items-start gap-5">
                         <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-950 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="size-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
                             </svg>
                         </div>
@@ -1209,7 +1257,7 @@
                 <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800 rounded-2xl p-8 mb-8">
                     <div class="flex items-start gap-5">
                         <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="size-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                         </div>
@@ -1357,7 +1405,7 @@
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
                                 How does Clonio handle schema differences between environments?
                             </h3>
-                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="size-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </summary>
@@ -1372,12 +1420,12 @@
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
                                 Which databases does Clonio support?
                             </h3>
-                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="size-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </summary>
                         <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            Clonio currently supports PostgreSQL, MySQL, MariaDB, and Microsoft SQL Server. Need Oracle or MongoDB? Contact us – we prioritize development based on customer demand and can provide custom solutions for enterprise clients.
+                            Clonio currently supports PostgreSQL, MySQL, MariaDB, and Microsoft SQL Server. Need Oracle or MongoDB? <a href="https://github.com/clonio-dev/clonio/issues/new" class="underline">Leave us a feature request</a> – we prioritize development based on customer demand and can provide custom solutions for enterprise clients.
                         </p>
                     </details>
 
@@ -1387,7 +1435,7 @@
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
                                 Is my data secure during the cloning process?
                             </h3>
-                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="size-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </summary>
@@ -1402,13 +1450,21 @@
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
                                 What happens after the 60-day implementation period?
                             </h3>
-                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="size-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </summary>
-                        <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            Clonio gives you 60 days to integrate it into your infrastructure — no payment required. This is not a trial: you get full access to all features from day one. After day 60, commercial users need to purchase a license based on their annual net revenue. Free forever for individuals, hobby projects, NGOs, and open source. Revenue determines your tier, simple and transparent.
-                        </p>
+                        <div class="mt-4 space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed">
+                            <p>
+                                Clonio gives you 60 days to integrate it into your infrastructure — no payment required. This is not a trial: you get full access to all features from day one. After day 60, commercial users are asked to obtain a license based on their annual net revenue. Free forever for individuals, hobby projects, NGOs, and open source. Revenue determines your tier, simple and transparent.
+                            </p>
+                            <p>
+                                This is a <strong class="text-gray-900 dark:text-white">fair use license</strong>. We trust you. If you are using Clonio in a commercial product or workflow, we genuinely hope you will reach out and let us know — not because we will chase you down, but because it helps us understand how Clonio is being used and keeps the project alive. Every license fee goes directly into ongoing development: new database drivers, better anonymization, improved tooling.
+                            </p>
+                            <p>
+                                And if you just love what we are building — even as an individual — you can support us through <a href="https://github.com/sponsors/clonio-dev" class="font-semibold text-primary-600 dark:text-primary-400 hover:underline" target="_blank" rel="noopener">GitHub Sponsors</a>. Any amount is welcome and deeply appreciated. It is the most direct way to say "keep going."
+                            </p>
+                        </div>
                     </details>
 
                     <!-- FAQ: Why self-hosted only? -->
@@ -1417,7 +1473,7 @@
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
                                 Why is Clonio self-hosted only?
                             </h3>
-                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="size-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </summary>
@@ -1432,12 +1488,12 @@
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
                                 Can I automate cloning in my CI/CD pipeline?
                             </h3>
-                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="size-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </summary>
                         <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            Yes. You can trigger a cloning run with a single API call — a plain curl or wget is all it takes. Drop it into any GitLab CI, GitHub Actions, Jenkins, or any other pipeline step. Schedule it via cron, or wire it up to a webhook. No special tooling required.
+                            Yes. You can trigger a cloning run with a single API call — a plain curl or wget is all it takes. Drop it into any GitLab CI, GitHub Actions, Jenkins, or any other pipeline step. Schedule it via cron, or wire it up to a webhook. No special tooling required. <a href="/docs/cloning-runs/pipeline-integration" class="underline">See the docs</a>  for more information.
                         </p>
                     </details>
 
@@ -1447,12 +1503,12 @@
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
                                 Do you offer support?
                             </h3>
-                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="size-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </summary>
                         <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            All plans include email support with a response within 24 hours. For enterprise customers, we offer dedicated support channels and custom SLAs. We're friendly and supportive — reach out anytime during your integration and beyond.
+                            All plans include email support within an appropriate amount of time. We're friendly and supportive — reach out anytime during your integration and beyond.
                         </p>
                     </details>
 
@@ -1462,12 +1518,12 @@
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
                                 What if I need help setting up transformation rules?
                             </h3>
-                            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="size-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </summary>
                         <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                            We provide detailed documentation and examples for common use cases — all packed inside Clonio itself and available as markdown, so AI-driven workflows can consume it directly. For complex scenarios, we offer onboarding sessions for enterprise plans.
+                            We provide detailed <a href="/docs" class="underline">documentation</a> and examples for common use cases — all packed inside Clonio itself and available as markdown, so AI-driven workflows can consume it directly. For complex scenarios, we offer onboarding sessions on request.
                         </p>
                     </details>
                 </div>
