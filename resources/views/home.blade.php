@@ -8,225 +8,7 @@
     <meta name="theme-color" content="#1e40af">
     <title>Clonio - Test with real data. Without the GDPR nightmare.</title>
 
-    <!-- Preconnect for performance -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Tailwind Config -->
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.6s ease-out',
-                        'slide-in-right': 'slideInRight 0.8s ease-out',
-                        'slide-in-left': 'slideInLeft 0.8s ease-out',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'float 3s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' }
-                        },
-                        slideInRight: {
-                            '0%': { transform: 'translateX(100px)', opacity: '0' },
-                            '100%': { transform: 'translateX(0)', opacity: '1' }
-                        },
-                        slideInLeft: {
-                            '0%': { transform: 'translateX(-100px)', opacity: '0' },
-                            '100%': { transform: 'translateX(0)', opacity: '1' }
-                        },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-20px)' }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        /* Base Styles */
-        * {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Hide scrollbar but keep functionality */
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Vertical Scroll Container - all devices */
-        .scroll-container {
-            display: block;
-        }
-
-        .scroll-container section {
-            min-height: 100vh;
-        }
-
-        /* Smooth scrolling for entire page - NO snap scrolling */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Smooth transitions for all animations */
-        * {
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Section Navigation Dots */
-        .section-nav {
-            position: fixed;
-            right: 2rem;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 40;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .section-nav-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(59, 130, 246, 0.3);
-            border: 2px solid rgba(59, 130, 246, 0.5);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .section-nav-dot:hover {
-            background: rgba(59, 130, 246, 0.6);
-            transform: scale(1.2);
-        }
-
-        .section-nav-dot.active {
-            background: rgb(59, 130, 246);
-            border-color: rgb(59, 130, 246);
-            transform: scale(1.3);
-        }
-
-        @media (max-width: 768px) {
-            .section-nav {
-                right: 1rem;
-                gap: 0.75rem;
-            }
-            .section-nav-dot {
-                width: 10px;
-                height: 10px;
-            }
-        }
-
-        /* Three Pillars - Background Icons */
-        .pillar-card {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .pillar-icon-bg {
-            position: absolute;
-            bottom: -20px;
-            right: -20px;
-            width: 160px;
-            height: 160px;
-            opacity: 0.08;
-            transform: rotate(10deg);
-            pointer-events: none;
-            transition: all 0.3s ease;
-        }
-
-        .dark .pillar-icon-bg {
-            opacity: 0.12;
-        }
-
-        .pillar-card:hover .pillar-icon-bg {
-            transform: rotate(15deg) scale(1.1);
-            opacity: 0.12;
-        }
-
-        .dark .pillar-card:hover .pillar-icon-bg {
-            opacity: 0.18;
-        }
-
-        /* Hide background icons on mobile */
-        @media (max-width: 768px) {
-            .pillar-icon-bg {
-                display: none;
-            }
-        }
-
-        /* Syntax Highlighting (CSS-only) */
-        .code-block {
-            background: #1e293b;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.875rem;
-            line-height: 1.7;
-        }
-
-        .code-comment { color: #64748b; }
-        .code-keyword { color: #c084fc; }
-        .code-string { color: #6ee7b7; }
-        .code-function { color: #60a5fa; }
-        .code-variable { color: #fbbf24; }
-
-        /* Database Flow Animation */
-        @keyframes dbFlow {
-            0% { transform: translateX(0) scale(1); opacity: 1; }
-            45% { transform: translateX(45%) scale(0.8); opacity: 0.5; }
-            55% { transform: translateX(55%) scale(0.8); opacity: 0.5; }
-            100% { transform: translateX(100%) scale(1); opacity: 1; }
-        }
-
-        .db-flow-item {
-            animation: dbFlow 3s ease-in-out infinite;
-        }
-
-        /* Focus visible for accessibility */
-        *:focus-visible {
-            outline: 2px solid #3b82f6;
-            outline-offset: 2px;
-        }
-
-        /* Reduced motion support */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-    </style>
+    <link href="{{ asset('home.css') }}" rel="stylesheet">
 </head>
 <body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
@@ -332,6 +114,13 @@
                         <svg class="size-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         No credit card ever
                     </span>
+                    <a
+                        href="https://www.producthunt.com/products/clonio?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-clonio"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="shadow-sm">
+                        <img alt="Clonio - GDPR-safe database cloning for dev with a signed audit trail | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1085822&amp;theme=light&amp;t=1772038465286">
+                    </a>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 shadow-sm">
                         <svg class="size-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         GDPR-compliant
@@ -590,7 +379,7 @@
         <!-- Section 4: WORKFLOW TRANSFORMATION -->
         <section id="workflow" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="workflow-heading">
             <div class="max-w-7xl mx-auto w-full pt-12">
-                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Before &amp; After</p>
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-600 mb-4">Before &amp; After</p>
                 <h2 id="workflow-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-16 text-gray-900 dark:text-white">
                     How Clonio changes your workflow
                 </h2>
@@ -650,7 +439,7 @@
                     <!-- VS separator (desktop only) -->
                     <div class="hidden lg:flex flex-col items-center justify-center">
                         <div class="flex-1 w-px bg-gray-200 dark:bg-gray-800"></div>
-                        <span class="my-4 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-bold text-sm border border-gray-200 dark:border-gray-700">VS</span>
+                        <span class="my-4 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-bold text-sm border border-gray-200 dark:border-gray-700">VS</span>
                         <div class="flex-1 w-px bg-gray-200 dark:bg-gray-800"></div>
                     </div>
 
@@ -705,7 +494,7 @@
         <!-- Section 5: CORE CAPABILITIES -->
         <section id="features" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950" aria-labelledby="features-heading">
             <div class="max-w-7xl mx-auto w-full">
-                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Core capabilities</p>
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-600 mb-4">Core capabilities</p>
                 <h2 id="features-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-16 text-gray-900 dark:text-white">
                     Three pillars of safe database cloning
                 </h2>
@@ -830,7 +619,7 @@
         <!-- Section 6: DEVELOPER LOVE -->
         <section id="devops" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="devops-heading">
             <div class="max-w-6xl mx-auto w-full pt-20">
-                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Built for DevOps</p>
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-600 mb-4">Built for DevOps</p>
                 <h2 id="devops-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 text-gray-900 dark:text-white">
                     Built for DevOps workflows
                 </h2>
@@ -948,7 +737,7 @@
         <!-- Section 7: TRUST & SECURITY -->
         <section id="security" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="security-heading">
             <div class="max-w-6xl mx-auto w-full">
-                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Security &amp; compliance</p>
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-600 mb-4">Security &amp; compliance</p>
                 <h2 id="security-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-16 text-gray-900 dark:text-white">
                     Your data never leaves your control
                 </h2>
@@ -966,7 +755,7 @@
                         </div>
                         <!-- Content -->
                         <div class="pl-24 pt-2">
-                            <span class="text-xs font-bold uppercase tracking-wider text-green-600 dark:text-green-400">GDPR</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400">GDPR</span>
                             <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">GDPR-compliant by design</h3>
                             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">No PII leaves your infrastructure unprotected. Transformation rules ensure compliance at the data level.</p>
                         </div>
@@ -1020,7 +809,7 @@
                         </div>
                         <!-- Content -->
                         <div class="pl-24 pt-2">
-                            <span class="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">Security</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400">Security</span>
                             <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Battle-tested security</h3>
                             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Industry-standard encryption, role-based access control, and secure credential management.</p>
                         </div>
@@ -1073,7 +862,7 @@
                                     <span class="text-5xl font-bold text-gray-900 dark:text-white">€0</span>
                                     <span class="text-gray-500 dark:text-gray-400 ml-1">/ forever</span>
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">No credit card. No license required. Ever.</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">No credit card. No license required. Ever.</p>
                             </div>
                             <ul class="space-y-3 mb-8 flex-1">
                                 <li class="flex items-start gap-2.5">
@@ -1108,7 +897,7 @@
                             <a href="/docs" class="block text-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 dark:hover:border-primary-500 dark:hover:text-primary-400 rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-primary-500">
                                 Start Compliant Cloning
                             </a>
-                            <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">Be responsible for compliant data</p>
+                            <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-3">Be responsible for compliant data</p>
                         </div>
                     </div>
 
@@ -1136,7 +925,7 @@
                                         <span class="text-sm text-gray-400 dark:text-gray-500 line-through">€59 / month</span>
                                         <span class="text-xs font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full">2026 Launch Price</span>
                                     </div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-500">€468 / year · billed annually in advance</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">€468 / year · billed annually in advance</p>
                                 </div>
                                 <ul class="space-y-3 mb-8 flex-1">
                                     <li class="flex items-start gap-2.5">
@@ -1172,7 +961,7 @@
                                     <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></span>
                                     <span class="relative">Start Compliant Cloning</span>
                                 </a>
-                                <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">60-day implementation period · then billed yearly</p>
+                                <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-3">60-day implementation period · then billed yearly</p>
                             </div>
                         </div>
                     </div>
@@ -1195,7 +984,7 @@
                                     <span class="text-sm text-gray-400 dark:text-gray-500 line-through">€199 / month</span>
                                     <span class="text-xs font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full">2026 Launch Price</span>
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-500">€1188 / year · billed annually in advance</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">€1188 / year · billed annually in advance</p>
                             </div>
                             <ul class="space-y-3 mb-8 flex-1">
                                 <li class="flex items-start gap-2.5">
@@ -1226,7 +1015,7 @@
                             <a href="/docs" class="block text-center px-6 py-3 border-2 border-violet-500 dark:border-violet-600 text-violet-700 dark:text-violet-400 hover:bg-violet-500 hover:text-white dark:hover:bg-violet-600 dark:hover:text-white rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-violet-500">
                                 Start Compliant Cloning
                             </a>
-                            <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">60-day implementation period · then billed yearly</p>
+                            <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-3">60-day implementation period · then billed yearly</p>
                         </div>
                     </div>
                 </div>
