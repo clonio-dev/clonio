@@ -372,7 +372,7 @@
         <!-- Section 4: WORKFLOW TRANSFORMATION -->
         <section id="workflow" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="workflow-heading">
             <div class="max-w-7xl mx-auto w-full pt-12">
-                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Before &amp; After</p>
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-600 mb-4">Before &amp; After</p>
                 <h2 id="workflow-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-16 text-gray-900 dark:text-white">
                     How Clonio changes your workflow
                 </h2>
@@ -432,7 +432,7 @@
                     <!-- VS separator (desktop only) -->
                     <div class="hidden lg:flex flex-col items-center justify-center">
                         <div class="flex-1 w-px bg-gray-200 dark:bg-gray-800"></div>
-                        <span class="my-4 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-bold text-sm border border-gray-200 dark:border-gray-700">VS</span>
+                        <span class="my-4 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-bold text-sm border border-gray-200 dark:border-gray-700">VS</span>
                         <div class="flex-1 w-px bg-gray-200 dark:bg-gray-800"></div>
                     </div>
 
@@ -487,7 +487,7 @@
         <!-- Section 5: CORE CAPABILITIES -->
         <section id="features" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950" aria-labelledby="features-heading">
             <div class="max-w-7xl mx-auto w-full">
-                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Core capabilities</p>
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-600 mb-4">Core capabilities</p>
                 <h2 id="features-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-16 text-gray-900 dark:text-white">
                     Three pillars of safe database cloning
                 </h2>
@@ -612,7 +612,7 @@
         <!-- Section 6: DEVELOPER LOVE -->
         <section id="devops" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="devops-heading">
             <div class="max-w-6xl mx-auto w-full pt-20">
-                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Built for DevOps</p>
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-600 mb-4">Built for DevOps</p>
                 <h2 id="devops-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 text-gray-900 dark:text-white">
                     Built for DevOps workflows
                 </h2>
@@ -730,7 +730,7 @@
         <!-- Section 7: TRUST & SECURITY -->
         <section id="security" class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950" aria-labelledby="security-heading">
             <div class="max-w-6xl mx-auto w-full">
-                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-500 mb-4">Security &amp; compliance</p>
+                <p class="text-center text-xs font-bold uppercase tracking-widest text-primary-600 mb-4">Security &amp; compliance</p>
                 <h2 id="security-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-16 text-gray-900 dark:text-white">
                     Your data never leaves your control
                 </h2>
@@ -748,7 +748,7 @@
                         </div>
                         <!-- Content -->
                         <div class="pl-24 pt-2">
-                            <span class="text-xs font-bold uppercase tracking-wider text-green-600 dark:text-green-400">GDPR</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400">GDPR</span>
                             <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">GDPR-compliant by design</h3>
                             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">No PII leaves your infrastructure unprotected. Transformation rules ensure compliance at the data level.</p>
                         </div>
@@ -802,7 +802,7 @@
                         </div>
                         <!-- Content -->
                         <div class="pl-24 pt-2">
-                            <span class="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">Security</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400">Security</span>
                             <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Battle-tested security</h3>
                             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Industry-standard encryption, role-based access control, and secure credential management.</p>
                         </div>
@@ -855,7 +855,7 @@
                                     <span class="text-5xl font-bold text-gray-900 dark:text-white">€0</span>
                                     <span class="text-gray-500 dark:text-gray-400 ml-1">/ forever</span>
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">No credit card. No license required. Ever.</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">No credit card. No license required. Ever.</p>
                             </div>
                             <ul class="space-y-3 mb-8 flex-1">
                                 <li class="flex items-start gap-2.5">
@@ -890,7 +890,7 @@
                             <a href="/docs" class="block text-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 dark:hover:border-primary-500 dark:hover:text-primary-400 rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-primary-500">
                                 Start Compliant Cloning
                             </a>
-                            <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">Be responsible for compliant data</p>
+                            <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-3">Be responsible for compliant data</p>
                         </div>
                     </div>
 
@@ -918,7 +918,7 @@
                                         <span class="text-sm text-gray-400 dark:text-gray-500 line-through">€59 / month</span>
                                         <span class="text-xs font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full">2026 Launch Price</span>
                                     </div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-500">€468 / year · billed annually in advance</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">€468 / year · billed annually in advance</p>
                                 </div>
                                 <ul class="space-y-3 mb-8 flex-1">
                                     <li class="flex items-start gap-2.5">
@@ -954,7 +954,7 @@
                                     <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></span>
                                     <span class="relative">Start Compliant Cloning</span>
                                 </a>
-                                <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">60-day implementation period · then billed yearly</p>
+                                <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-3">60-day implementation period · then billed yearly</p>
                             </div>
                         </div>
                     </div>
@@ -977,7 +977,7 @@
                                     <span class="text-sm text-gray-400 dark:text-gray-500 line-through">€199 / month</span>
                                     <span class="text-xs font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full">2026 Launch Price</span>
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-500">€1188 / year · billed annually in advance</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">€1188 / year · billed annually in advance</p>
                             </div>
                             <ul class="space-y-3 mb-8 flex-1">
                                 <li class="flex items-start gap-2.5">
@@ -1008,7 +1008,7 @@
                             <a href="/docs" class="block text-center px-6 py-3 border-2 border-violet-500 dark:border-violet-600 text-violet-700 dark:text-violet-400 hover:bg-violet-500 hover:text-white dark:hover:bg-violet-600 dark:hover:text-white rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-violet-500">
                                 Start Compliant Cloning
                             </a>
-                            <p class="text-center text-xs text-gray-500 dark:text-gray-500 mt-3">60-day implementation period · then billed yearly</p>
+                            <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-3">60-day implementation period · then billed yearly</p>
                         </div>
                     </div>
                 </div>
