@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bb74eaa12e888399eba7fe4a81971ad2",
+    "content-hash": "ce081782c92df12f288aca16ed500569",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -3854,19 +3854,20 @@
         },
         {
             "name": "rokde/laravel-pergament",
-            "version": "v1.1.1",
+            "version": "v1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rokde/laravel-pergament.git",
-                "reference": "e4f8cccd08637c86153b41923da5236064f0bab8"
+                "reference": "d5db28964f803b6a88414111257b6fd4560f4a54"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rokde/laravel-pergament/zipball/e4f8cccd08637c86153b41923da5236064f0bab8",
-                "reference": "e4f8cccd08637c86153b41923da5236064f0bab8",
+                "url": "https://api.github.com/repos/rokde/laravel-pergament/zipball/d5db28964f803b6a88414111257b6fd4560f4a54",
+                "reference": "d5db28964f803b6a88414111257b6fd4560f4a54",
                 "shasum": ""
             },
             "require": {
+                "ext-fileinfo": "*",
                 "illuminate/support": "^11.0|^12.0",
                 "league/commonmark": "^2.0",
                 "league/html-to-markdown": "^5.1",
@@ -3906,7 +3907,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rokde/laravel-pergament/issues",
-                "source": "https://github.com/rokde/laravel-pergament/tree/v1.1.1"
+                "source": "https://github.com/rokde/laravel-pergament/tree/v1.1.2"
             },
             "funding": [
                 {
@@ -3918,7 +3919,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2026-02-21T13:54:27+00:00"
+            "time": "2026-02-25T21:17:30+00:00"
         },
         {
             "name": "symfony/clock",
