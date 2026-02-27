@@ -15,10 +15,10 @@
         "@laravel/vite-plugin-wayfinder": "^0.1.7",
         "@tailwindcss/cli": "^4.2.1",
         "@tailwindcss/vite": "^4.2.1",
-        "@types/node": "^25.3.0",
+        "@types/node": "^25.3.2",
         "@vitejs/plugin-vue": "^6.0.4",
         "concurrently": "^9.2.1",
-        "npm-check-updates": "^19.5.0",
+        "npm-check-updates": "^19.6.2",
         "oxlint": "^1.50.0",
         "prettier": "^3.8.1",
         "prettier-plugin-organize-imports": "^4.3.0",
@@ -28,7 +28,7 @@
         "vue-tsc": "^3.2.5"
     },
     "dependencies": {
-        "@inertiajs/vue3": "^2.3.16",
+        "@inertiajs/vue3": "^2.3.17",
         "@tailwindcss/typography": "^0.5.19",
         "@vueuse/core": "^14.2.1",
         "class-variance-authority": "^0.7.1",
