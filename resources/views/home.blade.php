@@ -96,6 +96,12 @@
 
                 <!-- CTAs -->
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+                    <a
+                        href="https://www.producthunt.com/products/clonio?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-clonio"
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        <img alt="Clonio - GDPR-safe database cloning for dev with a signed audit trail | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1085822&amp;theme=light&amp;t=1772038465286">
+                    </a>
                     <a href="#cta" class="w-full sm:w-auto px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white text-lg font-semibold rounded-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-lg">
                         Start Compliant Cloning
                     </a>
@@ -114,13 +120,6 @@
                         <svg class="size-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         No credit card ever
                     </span>
-                    <a
-                        href="https://www.producthunt.com/products/clonio?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-clonio"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="shadow-sm">
-                        <img alt="Clonio - GDPR-safe database cloning for dev with a signed audit trail | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1085822&amp;theme=light&amp;t=1772038465286">
-                    </a>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 shadow-sm">
                         <svg class="size-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         GDPR-compliant
