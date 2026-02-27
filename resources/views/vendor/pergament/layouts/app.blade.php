@@ -19,7 +19,7 @@
     @endif
 
     <link rel="stylesheet" href="{{ asset('vendor/pergament/pergament.css') }}">
-    @vite(['resources/css/app.css'])
+    <link href="{{ asset('home.css') }}" rel="stylesheet">
 
     <style>
         :root {
