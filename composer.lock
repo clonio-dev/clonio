@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "35f87164ec1b1dae0f6ac70e676397ec",
+    "content-hash": "5817b5752d018f71a3a6ccd4f2a9ab0e",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -3854,16 +3854,16 @@
         },
         {
             "name": "rokde/laravel-pergament",
-            "version": "v1.1.2",
+            "version": "v1.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rokde/laravel-pergament.git",
-                "reference": "d5db28964f803b6a88414111257b6fd4560f4a54"
+                "reference": "159e37355359ca04b8079f98df38be7f3b2f1338"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rokde/laravel-pergament/zipball/d5db28964f803b6a88414111257b6fd4560f4a54",
-                "reference": "d5db28964f803b6a88414111257b6fd4560f4a54",
+                "url": "https://api.github.com/repos/rokde/laravel-pergament/zipball/159e37355359ca04b8079f98df38be7f3b2f1338",
+                "reference": "159e37355359ca04b8079f98df38be7f3b2f1338",
                 "shasum": ""
             },
             "require": {
@@ -3907,7 +3907,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rokde/laravel-pergament/issues",
-                "source": "https://github.com/rokde/laravel-pergament/tree/v1.1.2"
+                "source": "https://github.com/rokde/laravel-pergament/tree/v1.1.3"
             },
             "funding": [
                 {
@@ -3919,7 +3919,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2026-02-25T21:17:30+00:00"
+            "time": "2026-02-27T16:14:45+00:00"
         },
         {
             "name": "symfony/clock",

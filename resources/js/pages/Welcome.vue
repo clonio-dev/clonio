@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AuthenticatedSessionController from '@/actions/Laravel/Fortify/Http/Controllers/AuthenticatedSessionController';
 import RegisteredUserController from '@/actions/Laravel/Fortify/Http/Controllers/RegisteredUserController';
+import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Database, FileText, Shield } from 'lucide-vue-next';
 </script>
@@ -15,9 +16,11 @@ import { Database, FileText, Shield } from 'lucide-vue-next';
             <!-- Logo / Brand -->
             <div class="mb-8 flex items-center justify-center gap-3">
                 <div
-                    class="flex size-10 items-center justify-center rounded-xl bg-cyan-100 dark:bg-cyan-950/50"
+                    class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground"
                 >
-                    <Database class="size-5 text-cyan-600 dark:text-cyan-400" />
+                    <AppLogoIcon
+                        class="size-5 fill-current text-black dark:text-white"
+                    />
                 </div>
                 <span
                     class="text-lg font-semibold tracking-tight text-foreground"
