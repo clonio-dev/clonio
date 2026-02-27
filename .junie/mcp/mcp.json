@@ -1,9 +1,9 @@
 {
     "mcpServers": {
         "laravel-boost": {
-            "command": "/Users/rok/Library/Application Support/Herd/bin/php84",
+            "command": "php",
             "args": [
-                "/Users/rok/workspace/clonio-dev/clonio/artisan",
+                "artisan",
                 "boost:mcp"
             ]
         }
