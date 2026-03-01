@@ -15,7 +15,7 @@
         "@laravel/vite-plugin-wayfinder": "^0.1.7",
         "@tailwindcss/cli": "^4.2.1",
         "@tailwindcss/vite": "^4.2.1",
-        "@types/node": "^25.3.2",
+        "@types/node": "^25.3.3",
         "@vitejs/plugin-vue": "^6.0.4",
         "concurrently": "^9.2.1",
         "npm-check-updates": "^19.6.2",
