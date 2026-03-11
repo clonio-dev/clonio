@@ -1,6 +1,5 @@
 {{-- Footer --}}
-{{--<footer class="border-t border-gray-200 dark:border-gray-700 pergament-bg print:hidden">--}}
-<footer class="bg-gray-900 dark:bg-black text-gray-300 py-12 px-4 sm:px-6 lg:px-8" role="contentinfo">
+<footer class="bg-gray-900 dark:bg-black text-gray-300 py-12 px-4 sm:px-6 lg:px-8 print:hidden" role="contentinfo">
     <div class="max-w-7xl mx-auto">
         <div class="grid md:grid-cols-4 gap-8 mb-8">
             <!-- Company Info -->
