@@ -21,7 +21,9 @@ Clonio sits between your production database and your non-production environment
 
 ![Clonio Cloning Flow](cloning-flow.svg)
 
-<span class="text-orange-400">**⚠** *You are responsible to define the anonymizing function for the fields that contain such data.*</span>
+> [!WARNING]
+> You are responsible to define the anonymizing function for the fields that contain such data.
+
 
 **Core capabilities:**
 

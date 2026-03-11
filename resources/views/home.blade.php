@@ -9,6 +9,7 @@
     <title>Clonio - Test with real data. Without the GDPR nightmare.</title>
 
     <link href="{{ asset('home.css') }}" rel="stylesheet">
+    <link rel="canonical" href="{{ route('home') }}">
 </head>
 <body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
