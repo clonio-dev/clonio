@@ -82,6 +82,15 @@ return [
         'path' => 'docs',
         'url_prefix' => 'docs',
         'title' => 'Documentation',
+        'tts' => true,
+        'statistics' => [
+            'reading_time' => true,
+            'word_count' => false,
+            'character_count' => false,
+            'paragraph_count' => false,
+            'last_modified' => true,
+            'content_age' => false,
+        ],
     ],
 
     /*
@@ -96,6 +105,7 @@ return [
         'url_prefix' => 'blog',
         'title' => 'Blog',
         'per_page' => 12,
+        'tts' => false,
         'default_authors' => [],
         'feed' => [
             'enabled' => true,
@@ -103,6 +113,14 @@ return [
             'title' => null,
             'description' => '',
             'limit' => 20,
+        ],
+        'statistics' => [
+            'reading_time' => false,
+            'word_count' => false,
+            'character_count' => false,
+            'paragraph_count' => false,
+            'last_modified' => false,
+            'content_age' => false,
         ],
     ],
 
@@ -115,6 +133,15 @@ return [
     'pages' => [
         'enabled' => false,
         'path' => 'pages',
+        'tts' => false,
+        'statistics' => [
+            'reading_time' => false,
+            'word_count' => false,
+            'character_count' => false,
+            'paragraph_count' => false,
+            'last_modified' => false,
+            'content_age' => false,
+        ],
     ],
 
     /*
@@ -192,6 +219,42 @@ return [
     'colors' => [
         'primary' => 'hsl(221 83% 53%)',
         'background' => 'hsl(210 40% 98%)',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Text-to-Speech
+    |--------------------------------------------------------------------------
+    |
+    | Global voice and rate settings for the browser's Speech Synthesis API.
+    | To enable TTS per content type, set "tts" within the docs, blog, or
+    | pages section above.
+    |
+    | voice: preferred voice name (browser-dependent). Set to null to use the
+    |        browser default. Common voices across platforms:
+    |
+    |        macOS / iOS:
+    |          "Samantha", "Alex", "Daniel", "Karen", "Moira",
+    |          "Tessa", "Thomas", "Anna" (de), "Amelie" (fr)
+    |
+    |        Chrome (online):
+    |          "Google UK English Female", "Google UK English Male",
+    |          "Google US English", "Google Deutsch", "Google français"
+    |
+    |        Windows:
+    |          "Microsoft David", "Microsoft Zira", "Microsoft Mark",
+    |          "Microsoft Hedda" (de), "Microsoft Hortense" (fr)
+    |
+    |        Android:
+    |          varies by device — typically uses the system TTS engine
+    |
+    | rate:  speech rate between 0.5 and 2.0 (1.0 = normal speed).
+    |
+    */
+
+    'tts' => [
+        'voice' => 'Google US English',
+        'rate' => 1.0,
     ],
 
     /*
