@@ -18,7 +18,7 @@
         <link rel="manifest" href="/manifest.json">
     @endif
 
-    <link rel="stylesheet" href="{{ asset('vendor/pergament/pergament.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/pergament/pergament.css') }}?v={{ $pergamentCssVersion }}">
     <link href="{{ asset('home.css') }}" rel="stylesheet">
 
     <style>
@@ -74,6 +74,6 @@
 
     @stack('scripts')
 
-    <script src="{{ asset('vendor/pergament/pergament.js') }}"></script>
+    <script src="{{ asset('vendor/pergament/pergament.js') }}?v={{ $pergamentJsVersion }}"></script>
 </body>
 </html>
