@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('database_connections', function (Blueprint $table) {
+        Schema::table('database_connections', function (Blueprint $table): void {
             $table->string('schema', 255)->nullable()->default(null)->after('database');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('database_connections', function (Blueprint $table) {
+        Schema::table('database_connections', function (Blueprint $table): void {
             $table->dropColumn('schema');
         });
     }
