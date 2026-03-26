@@ -15,6 +15,15 @@ trait ClassifiesError
             $e->getCode() === '23000'; // SQLSTATE für Integrity Constraint Violation
     }
 
+    private function isForeignKeyViolationError(QueryException $e): bool
+    {
+        // PostgreSQL: 23503, MySQL: 1452 (SQLSTATE 23000 with FK message)
+        return $e->getCode() === '23503' ||
+            ($e->getCode() === '1452') ||
+            str_contains($e->getMessage(), 'violates foreign key constraint') ||
+            (str_contains($e->getMessage(), 'Cannot add or update a child row') && str_contains($e->getMessage(), 'foreign key constraint'));
+    }
+
     private function isPermissionError(QueryException $e): bool
     {
         return str_contains($e->getMessage(), 'Access denied') ||

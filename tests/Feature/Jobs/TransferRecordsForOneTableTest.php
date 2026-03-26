@@ -13,6 +13,7 @@ use App\Jobs\TransferRecordsForOneTable;
 use App\Models\CloningRun;
 use App\Services\AnonymizationService;
 use App\Services\DatabaseInformationRetrievalService;
+use App\Services\KeyMappingRepository;
 use App\Services\KeyRemappingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -91,7 +92,7 @@ it('transfers records from source to target table', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class));
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     expect(DB::connection('test_target')->table('posts')->count())->toBe(3);
     expect(DB::connection('test_target')->table('posts')->pluck('title')->toArray())
@@ -152,7 +153,7 @@ it('transfers records in chunks', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class));
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     expect(DB::connection('test_target')->table('posts')->count())->toBe(5);
 
@@ -224,7 +225,7 @@ it('mutates user data during transfer', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class));
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     $targetUser = DB::connection('test_target')->table('users')->first();
 
@@ -285,7 +286,7 @@ it('transfers records with foreign key constraints disabled', function (): void 
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class));
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     expect(DB::connection('test_target')->table('posts')->count())->toBe(1);
 
@@ -335,7 +336,7 @@ it('fails when table does not exist in source database', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    expect(fn () => $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class)))
+    expect(fn () => $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class)))
         ->toThrow(RuntimeException::class, 'Table posts does not exist in source or target database.');
 
     @unlink($sourceDb);
@@ -384,7 +385,7 @@ it('fails when table does not exist in target database', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    expect(fn () => $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class)))
+    expect(fn () => $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class)))
         ->toThrow(RuntimeException::class, 'Table posts does not exist in source or target database.');
 
     @unlink($sourceDb);
@@ -442,7 +443,7 @@ it('transfers records ordered by primary key', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class));
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     $targetTitles = DB::connection('test_target')->table('posts')->orderBy('id')->pluck('title')->toArray();
     expect($targetTitles)->toBe(['First', 'Second', 'Third']);
@@ -505,7 +506,7 @@ it('throttles progress logs to reduce database overhead', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class));
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     // Verify transfer worked
     expect(DB::connection('test_target')->table('items')->count())->toBe(100);
@@ -590,7 +591,7 @@ it('throttles progress logs using time-based intervals', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class));
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     // Verify transfer worked
     expect(DB::connection('test_target')->table('items')->count())->toBe(1000);

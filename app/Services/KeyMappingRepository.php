@@ -59,6 +59,16 @@ class KeyMappingRepository
             ->all();
     }
 
+    public function deleteMapping(CloningRun $run, string $tableName, string $columnName, mixed $oldValue): void
+    {
+        DB::table('cloning_run_key_mappings')
+            ->where('run_id', $run->id)
+            ->where('table_name', $tableName)
+            ->where('column_name', $columnName)
+            ->where('old_value', (string) $oldValue)
+            ->delete();
+    }
+
     public function deleteByRun(CloningRun $run): void
     {
         DB::table('cloning_run_key_mappings')
