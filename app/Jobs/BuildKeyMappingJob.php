@@ -57,8 +57,8 @@ class BuildKeyMappingJob implements ShouldBeEncrypted, ShouldQueue
         try {
             $sourceConnection = $dbInformationRetrievalService->getConnection($this->sourceConnectionData);
             assert($sourceConnection instanceof Connection);
-        } catch (Throwable $e) {
-            $this->handleConnectionException($e);
+        } catch (Throwable $throwable) {
+            $this->handleConnectionException($throwable);
 
             return;
         }

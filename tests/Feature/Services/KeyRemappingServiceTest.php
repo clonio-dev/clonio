@@ -28,8 +28,8 @@ function makeTableData(string $table, string $pk, KeyRemappingStrategyEnum $stra
 
 it('generates random integer mappings that differ from originals', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = app(KeyMappingRepository::class);
-    $service = app(KeyRemappingService::class);
+    $repository = resolve(KeyMappingRepository::class);
+    $service = resolve(KeyRemappingService::class);
 
     $repository->createTable($run);
 
@@ -49,8 +49,8 @@ it('generates random integer mappings that differ from originals', function (): 
 
 it('generates unique new values without collisions', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = app(KeyMappingRepository::class);
-    $service = app(KeyRemappingService::class);
+    $repository = resolve(KeyMappingRepository::class);
+    $service = resolve(KeyRemappingService::class);
 
     $repository->createTable($run);
 
@@ -66,8 +66,8 @@ it('generates unique new values without collisions', function (): void {
 
 it('generates uuid mappings for new_uuid strategy', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = app(KeyMappingRepository::class);
-    $service = app(KeyRemappingService::class);
+    $repository = resolve(KeyMappingRepository::class);
+    $service = resolve(KeyRemappingService::class);
 
     $repository->createTable($run);
 
@@ -84,8 +84,8 @@ it('generates uuid mappings for new_uuid strategy', function (): void {
 
 it('applies primary key remapping to a row', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = app(KeyMappingRepository::class);
-    $service = app(KeyRemappingService::class);
+    $repository = resolve(KeyMappingRepository::class);
+    $service = resolve(KeyRemappingService::class);
 
     $repository->createTable($run);
 
@@ -106,8 +106,8 @@ it('applies primary key remapping to a row', function (): void {
 
 it('applies foreign key remapping to a row', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = app(KeyMappingRepository::class);
-    $service = app(KeyRemappingService::class);
+    $repository = resolve(KeyMappingRepository::class);
+    $service = resolve(KeyRemappingService::class);
 
     $repository->createTable($run);
 
@@ -133,8 +133,8 @@ it('applies foreign key remapping to a row', function (): void {
 
 it('counts unmapped FK values', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = app(KeyMappingRepository::class);
-    $service = app(KeyRemappingService::class);
+    $repository = resolve(KeyMappingRepository::class);
+    $service = resolve(KeyRemappingService::class);
 
     $repository->createTable($run);
 
@@ -157,8 +157,8 @@ it('counts unmapped FK values', function (): void {
 
 it('leaves null FK values unchanged', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = app(KeyMappingRepository::class);
-    $service = app(KeyRemappingService::class);
+    $repository = resolve(KeyMappingRepository::class);
+    $service = resolve(KeyRemappingService::class);
 
     $repository->createTable($run);
 

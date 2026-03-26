@@ -9,8 +9,11 @@ use App\Data\KeyRemappingTableData;
 use App\Data\SqliteDriverData;
 use App\Data\SynchronizationOptionsData;
 use App\Jobs\BuildKeyMappingJob;
+use App\Jobs\CleanupKeyMappingJob;
 use App\Models\CloningRun;
+use App\Services\DatabaseInformationRetrievalService;
 use App\Services\KeyMappingRepository;
+use App\Services\KeyRemappingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
@@ -70,12 +73,12 @@ it('creates the mapping table and maps all PKs', function (): void {
     $job->withBatchId($batch->id);
 
     $job->handle(
-        app(App\Services\DatabaseInformationRetrievalService::class),
-        app(KeyMappingRepository::class),
-        app(App\Services\KeyRemappingService::class),
+        resolve(DatabaseInformationRetrievalService::class),
+        resolve(KeyMappingRepository::class),
+        resolve(KeyRemappingService::class),
     );
 
-    $repository = app(KeyMappingRepository::class);
+    $repository = resolve(KeyMappingRepository::class);
 
     expect($repository->tableExists($run))->toBeTrue();
 
@@ -93,13 +96,14 @@ it('creates the mapping table and maps all PKs', function (): void {
 
 it('cleanup mapping job drops the table', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = app(KeyMappingRepository::class);
+    $repository = resolve(KeyMappingRepository::class);
 
     $repository->createTable($run);
+
     expect($repository->tableExists($run))->toBeTrue();
 
     $batch = Bus::batch([])->dispatch();
-    $job = new App\Jobs\CleanupKeyMappingJob($run);
+    $job = new CleanupKeyMappingJob($run);
     $job->withBatchId($batch->id);
     $job->handle($repository);
 

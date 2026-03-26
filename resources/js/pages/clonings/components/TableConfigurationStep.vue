@@ -191,8 +191,7 @@ const keyRemappingEnabled = ref(props.initialKeyRemapping?.enabled ?? false);
 function buildDefaultKeyRemappingTables(): KeyRemappingTableConfig[] {
     return availableTables.value.map((tableName) => {
         const tableData = props.sourceSchema[tableName];
-        const pkColumn =
-            tableData?.primaryKeyColumns?.[0] || 'id';
+        const pkColumn = tableData?.primaryKeyColumns?.[0] || 'id';
 
         // Detect all FK columns in other tables that reference this table's PK
         const foreignKeys: KeyRemappingForeignKey[] = [];
@@ -209,9 +208,9 @@ function buildDefaultKeyRemappingTables(): KeyRemappingTableConfig[] {
             }
         }
 
-        const pkType = tableData?.columns.find(
-            (c) => c.name === pkColumn,
-        )?.type?.toLowerCase();
+        const pkType = tableData?.columns
+            .find((c) => c.name === pkColumn)
+            ?.type?.toLowerCase();
         const defaultStrategy: 'random_integer' | 'new_uuid' =
             pkType?.includes('char') &&
             (pkType.includes('36') || pkType.includes('uuid'))
@@ -235,7 +234,9 @@ const keyRemappingTables = reactive<KeyRemappingTableConfig[]>(
         : buildDefaultKeyRemappingTables(),
 );
 
-function getKeyRemappingTable(tableName: string): KeyRemappingTableConfig | undefined {
+function getKeyRemappingTable(
+    tableName: string,
+): KeyRemappingTableConfig | undefined {
     return keyRemappingTables.find((t) => t.table === tableName);
 }
 
@@ -1454,14 +1455,23 @@ function getTypeColor(type: string): string {
                     <div class="grid gap-3 sm:grid-cols-2">
                         <!-- Primary Key -->
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-muted-foreground">Primary Key</label>
+                            <label
+                                class="text-xs font-medium text-muted-foreground"
+                                >Primary Key</label
+                            >
                             <Select
                                 :model-value="tableConfig.primary_key"
                                 @update:model-value="
                                     (v) => {
                                         tableConfig.primary_key = String(v);
-                                        if (!isUuidColumnAvailable(tableConfig.table, String(v))) {
-                                            tableConfig.strategy = 'random_integer';
+                                        if (
+                                            !isUuidColumnAvailable(
+                                                tableConfig.table,
+                                                String(v),
+                                            )
+                                        ) {
+                                            tableConfig.strategy =
+                                                'random_integer';
                                         }
                                     }
                                 "
@@ -1471,13 +1481,18 @@ function getTypeColor(type: string): string {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem
-                                        v-for="col in props.sourceSchema[tableConfig.table]?.columns || []"
+                                        v-for="col in props.sourceSchema[
+                                            tableConfig.table
+                                        ]?.columns || []"
                                         :key="col.name"
                                         :value="col.name"
                                         class="text-xs"
                                     >
                                         {{ col.name }}
-                                        <span class="ml-1 text-muted-foreground">{{ col.type }}</span>
+                                        <span
+                                            class="ml-1 text-muted-foreground"
+                                            >{{ col.type }}</span
+                                        >
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -1485,7 +1500,10 @@ function getTypeColor(type: string): string {
 
                         <!-- Strategy -->
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-muted-foreground">Strategy</label>
+                            <label
+                                class="text-xs font-medium text-muted-foreground"
+                                >Strategy</label
+                            >
                             <Select
                                 :model-value="tableConfig.strategy"
                                 @update:model-value="
@@ -1499,42 +1517,68 @@ function getTypeColor(type: string): string {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="random_integer" class="text-xs">
+                                    <SelectItem
+                                        value="random_integer"
+                                        class="text-xs"
+                                    >
                                         Random Integer
                                     </SelectItem>
                                     <SelectItem
                                         value="new_uuid"
                                         class="text-xs"
-                                        :disabled="!isUuidColumnAvailable(tableConfig.table, tableConfig.primary_key)"
+                                        :disabled="
+                                            !isUuidColumnAvailable(
+                                                tableConfig.table,
+                                                tableConfig.primary_key,
+                                            )
+                                        "
                                     >
                                         New UUID
                                         <span
-                                            v-if="!isUuidColumnAvailable(tableConfig.table, tableConfig.primary_key)"
+                                            v-if="
+                                                !isUuidColumnAvailable(
+                                                    tableConfig.table,
+                                                    tableConfig.primary_key,
+                                                )
+                                            "
                                             class="ml-1 text-xs text-muted-foreground"
-                                        >(requires VARCHAR(36))</span>
+                                            >(requires VARCHAR(36))</span
+                                        >
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <!-- Range (only for random integer) -->
-                        <template v-if="tableConfig.strategy === 'random_integer'">
+                        <template
+                            v-if="tableConfig.strategy === 'random_integer'"
+                        >
                             <div class="space-y-1">
-                                <label class="text-xs font-medium text-muted-foreground">Min Value</label>
+                                <label
+                                    class="text-xs font-medium text-muted-foreground"
+                                    >Min Value</label
+                                >
                                 <Input
                                     type="number"
                                     :model-value="tableConfig.range_min"
                                     class="h-8 text-xs"
-                                    @update:model-value="tableConfig.range_min = Number($event)"
+                                    @update:model-value="
+                                        tableConfig.range_min = Number($event)
+                                    "
                                 />
                             </div>
                             <div class="space-y-1">
-                                <label class="text-xs font-medium text-muted-foreground">Max Value</label>
+                                <label
+                                    class="text-xs font-medium text-muted-foreground"
+                                    >Max Value</label
+                                >
                                 <Input
                                     type="number"
                                     :model-value="tableConfig.range_max"
                                     class="h-8 text-xs"
-                                    @update:model-value="tableConfig.range_max = Number($event)"
+                                    @update:model-value="
+                                        tableConfig.range_max = Number($event)
+                                    "
                                 />
                             </div>
                         </template>
@@ -1545,7 +1589,9 @@ function getTypeColor(type: string): string {
                         v-if="tableConfig.foreign_keys.length > 0"
                         class="mt-3 space-y-1"
                     >
-                        <p class="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                        <p
+                            class="flex items-center gap-1 text-xs font-medium text-muted-foreground"
+                        >
                             <Link class="size-3" />
                             Foreign keys that will be updated:
                         </p>
@@ -1560,14 +1606,12 @@ function getTypeColor(type: string): string {
                                     v-if="fk.self_referential"
                                     class="text-amber-500"
                                     title="Self-referential FK"
-                                >↺</span>
+                                    >↺</span
+                                >
                             </span>
                         </div>
                     </div>
-                    <p
-                        v-else
-                        class="mt-2 text-xs text-muted-foreground"
-                    >
+                    <p v-else class="mt-2 text-xs text-muted-foreground">
                         No foreign keys referencing this table detected.
                     </p>
                 </div>

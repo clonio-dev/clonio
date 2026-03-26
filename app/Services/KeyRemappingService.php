@@ -8,6 +8,7 @@ use App\Data\KeyRemappingConfigData;
 use App\Data\KeyRemappingStrategyEnum;
 use App\Data\KeyRemappingTableData;
 use App\Models\CloningRun;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -65,7 +66,7 @@ class KeyRemappingService
         $unmappedFks = 0;
         $tableConfig = $remappingConfig->getTableConfig($tableName);
 
-        if ($tableConfig !== null) {
+        if ($tableConfig instanceof KeyRemappingTableData) {
             $pkColumn = $tableConfig->primaryKey;
             if (array_key_exists($pkColumn, $row) && $row[$pkColumn] !== null) {
                 $newValue = $this->mappingRepository->lookupNewValue(
@@ -88,7 +89,10 @@ class KeyRemappingService
                 }
 
                 $fkColumn = $fk->column;
-                if (! array_key_exists($fkColumn, $row) || $row[$fkColumn] === null) {
+                if (! array_key_exists($fkColumn, $row)) {
+                    continue;
+                }
+                if ($row[$fkColumn] === null) {
                     continue;
                 }
 
@@ -114,7 +118,7 @@ class KeyRemappingService
      * Only needed when FK constraints are enabled (for the two-phase insert approach).
      */
     public function applySelfReferentialMappings(
-        \Illuminate\Database\Connection $targetConnection,
+        Connection $targetConnection,
         string $tableName,
         KeyRemappingTableData $tableConfig,
         CloningRun $run,
