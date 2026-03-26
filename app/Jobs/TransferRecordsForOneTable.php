@@ -133,6 +133,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
         $totalRows = 0;
         $failedChunks = 0;
+        $skippedRows = 0;
         $maxChunkRetries = 3;
         $startTime = microtime(true);
 
@@ -152,7 +153,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     $page++;
                     $this->processChunk(
                         $records, $targetConnection, $totalRows, $failedChunks,
-                        $maxChunkRetries, $anonymizationService, $keyRemappingService, $totalRowCount, $startTime,
+                        $maxChunkRetries, $anonymizationService, $keyRemappingService, $totalRowCount, $startTime, $skippedRows,
                     );
                 }
             } else {
@@ -182,6 +183,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                         $targetConnection,
                         &$totalRows,
                         &$failedChunks,
+                        &$skippedRows,
                         $maxChunkRetries,
                         $anonymizationService,
                         $keyRemappingService,
@@ -190,7 +192,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     ): void {
                         $this->processChunk(
                             $records, $targetConnection, $totalRows, $failedChunks,
-                            $maxChunkRetries, $anonymizationService, $keyRemappingService, $totalRowCount, $startTime,
+                            $maxChunkRetries, $anonymizationService, $keyRemappingService, $totalRowCount, $startTime, $skippedRows,
                         );
                     }
                 );
@@ -198,9 +200,10 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
             $this->logSuccess(
                 'data_copy_completed',
-                sprintf('Data copy completed. Total rows: %d, Failed chunks: %d', $totalRows, $failedChunks),
+                sprintf('Data copy completed. Total rows: %d, Skipped: %d, Failed chunks: %d', $totalRows, $skippedRows, $failedChunks),
                 data: [
                     'rows_processed' => $totalRows,
+                    'rows_skipped' => $skippedRows,
                     'failed_chunks' => $failedChunks,
                     'duration_seconds' => microtime(true) - $startTime,
                 ],
@@ -253,6 +256,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         KeyRemappingService $keyRemappingService,
         int $totalRowCount,
         float $startTime,
+        int &$skippedRows = 0,
     ): void {
         if ($this->batch()?->cancelled()) {
             return;
@@ -327,6 +331,36 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     Sleep::sleep(2 * $retryCount);
 
                     continue;
+                }
+
+                if ($this->isUniqueConstraintError($e)) {
+                    // Fall back to row-by-row insert, skipping conflicting rows
+                    $chunkSkipped = 0;
+                    foreach ($rowsArray as $row) {
+                        try {
+                            $targetConnection->table($this->tableName)->insert([$row]);
+                        } catch (QueryException $rowException) {
+                            if ($this->isUniqueConstraintError($rowException)) {
+                                $chunkSkipped++;
+                            } else {
+                                throw $rowException;
+                            }
+                        }
+                    }
+
+                    $inserted = count($rowsArray) - $chunkSkipped;
+                    $totalRows += $inserted;
+                    $skippedRows += $chunkSkipped;
+
+                    if ($chunkSkipped > 0) {
+                        $this->logWarning(
+                            'unique_constraint_skipped',
+                            sprintf('Skipped %d row(s) in table %s due to unique constraint violations', $chunkSkipped, $this->tableName),
+                            ['table' => $this->tableName, 'skipped' => $chunkSkipped],
+                        );
+                    }
+
+                    break;
                 }
 
                 $failedChunks++;

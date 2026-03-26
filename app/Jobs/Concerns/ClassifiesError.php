@@ -38,4 +38,14 @@ trait ClassifiesError
             str_contains($e->getMessage(), 'connection lost') ||
             str_contains($e->getMessage(), 'server has gone away');
     }
+
+    private function isUniqueConstraintError(QueryException $e): bool
+    {
+        // PostgreSQL: 23505, MySQL: 1062 (SQLSTATE 23000)
+        return $e->getCode() === '23505' ||
+            $e->getCode() === '1062' ||
+            str_contains($e->getMessage(), 'Duplicate entry') ||
+            str_contains($e->getMessage(), 'duplicate key value violates unique constraint') ||
+            str_contains($e->getMessage(), 'UNIQUE constraint failed');
+    }
 }
