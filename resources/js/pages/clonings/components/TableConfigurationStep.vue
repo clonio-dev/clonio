@@ -24,6 +24,8 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
+import type { AppPageProps } from '@/types';
+import { usePage } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     ArrowRight,
@@ -36,8 +38,6 @@ import {
     Sparkles,
     TableIcon,
 } from 'lucide-vue-next';
-import type { AppPageProps } from '@/types';
-import { usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 
 interface SchemaColumn {
@@ -194,7 +194,9 @@ const PII_COLUMN_PATTERNS = computed(() => page.props.pii.columnPatterns);
 
 // PK remapping strategy per table (integrated into the transformation column)
 const pkRemappingStrategy = reactive<Record<string, PkRemappingStrategy>>({});
-const pkRemappingRanges = reactive<Record<string, { min: number; max: number }>>({});
+const pkRemappingRanges = reactive<
+    Record<string, { min: number; max: number }>
+>({});
 
 function tableHasPiiIndicators(tableName: string): boolean {
     const t = tableName.toLowerCase();
@@ -342,8 +344,7 @@ function initializeConfigs() {
             }
 
             // Saved config always wins — apply unconditionally
-            const savedConfig =
-                props.initialConfig?.[tableName]?.[column.name];
+            const savedConfig = props.initialConfig?.[tableName]?.[column.name];
             if (savedConfig) {
                 // If the column is not nullable but has 'null' strategy, fall back to 'keep'
                 if (!column.nullable && savedConfig.strategy === 'null') {
@@ -803,8 +804,7 @@ const configPayload = computed(() => {
         const strategy = pkRemappingStrategy[tableName];
         if (!strategy || strategy === 'keep') continue;
 
-        const pkColumn =
-            props.sourceSchema[tableName]?.primaryKeyColumns?.[0];
+        const pkColumn = props.sourceSchema[tableName]?.primaryKeyColumns?.[0];
         if (!pkColumn) continue;
 
         const foreignKeys: KeyRemappingForeignKey[] = [];
@@ -1612,10 +1612,7 @@ function getTypeColor(type: string): string {
                                         class="font-mono text-xs text-muted-foreground"
                                     >
                                         {{
-                                            getColumnPreview(
-                                                tableName,
-                                                column,
-                                            )
+                                            getColumnPreview(tableName, column)
                                         }}
                                     </span>
                                 </div>
@@ -1655,7 +1652,6 @@ function getTypeColor(type: string): string {
                 </CollapsibleContent>
             </Collapsible>
         </div>
-
 
         <Separator />
 

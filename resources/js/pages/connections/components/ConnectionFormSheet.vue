@@ -365,7 +365,9 @@ watch(
                                         errors.schema,
                                 }"
                                 :model-value="schemaValue ?? 'public'"
-                                @update:model-value="schemaValue = $event as string"
+                                @update:model-value="
+                                    schemaValue = $event as string
+                                "
                             />
                             <InputError :message="errors.schema" />
                         </div>
