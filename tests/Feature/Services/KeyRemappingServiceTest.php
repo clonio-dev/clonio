@@ -64,7 +64,7 @@ it('generates uuid mappings for new_uuid strategy', function (): void {
 
     expect($mappings)->toHaveCount(1);
     expect($mappings[$originalUuid])->not->toBe($originalUuid);
-    expect($mappings[$originalUuid])->toMatch('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i');
+    expect($mappings[$originalUuid])->toMatch('/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i');
 });
 
 it('applies primary key remapping to a row', function (): void {
