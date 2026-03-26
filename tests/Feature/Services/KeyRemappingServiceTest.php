@@ -28,10 +28,7 @@ function makeTableData(string $table, string $pk, KeyRemappingStrategyEnum $stra
 
 it('generates random integer mappings that differ from originals', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = resolve(KeyMappingRepository::class);
     $service = resolve(KeyRemappingService::class);
-
-    $repository->createTable($run);
 
     $tableConfig = makeTableData('users', 'id');
     $mappings = $service->buildMappingForTable($run, $tableConfig, [1, 2, 3]);
@@ -43,16 +40,11 @@ it('generates random integer mappings that differ from originals', function (): 
         expect((int) $newValue)->not->toBe($original);
         expect((int) $newValue)->toBeGreaterThanOrEqual(100000)->toBeLessThanOrEqual(9999999);
     }
-
-    $repository->dropTable($run);
 });
 
 it('generates unique new values without collisions', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = resolve(KeyMappingRepository::class);
     $service = resolve(KeyRemappingService::class);
-
-    $repository->createTable($run);
 
     $tableConfig = makeTableData('users', 'id');
     $originalIds = range(1, 100);
@@ -60,16 +52,11 @@ it('generates unique new values without collisions', function (): void {
 
     $newValues = array_values($mappings);
     expect(array_unique($newValues))->toHaveCount(count($newValues));
-
-    $repository->dropTable($run);
 });
 
 it('generates uuid mappings for new_uuid strategy', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = resolve(KeyMappingRepository::class);
     $service = resolve(KeyRemappingService::class);
-
-    $repository->createTable($run);
 
     $tableConfig = makeTableData('products', 'uuid', KeyRemappingStrategyEnum::NewUuid);
     $originalUuid = '550e8400-e29b-41d4-a716-446655440000';
@@ -78,16 +65,11 @@ it('generates uuid mappings for new_uuid strategy', function (): void {
     expect($mappings)->toHaveCount(1);
     expect($mappings[$originalUuid])->not->toBe($originalUuid);
     expect($mappings[$originalUuid])->toMatch('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i');
-
-    $repository->dropTable($run);
 });
 
 it('applies primary key remapping to a row', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = resolve(KeyMappingRepository::class);
     $service = resolve(KeyRemappingService::class);
-
-    $repository->createTable($run);
 
     $tableConfig = makeTableData('users', 'id');
     $service->buildMappingForTable($run, $tableConfig, [42]);
@@ -100,16 +82,12 @@ it('applies primary key remapping to a row', function (): void {
     expect($result['row']['id'])->not->toBe(42);
     expect($result['row']['name'])->toBe('Alice');
     expect($result['unmappedFks'])->toBe(0);
-
-    $repository->dropTable($run);
 });
 
 it('applies foreign key remapping to a row', function (): void {
     $run = CloningRun::factory()->create();
     $repository = resolve(KeyMappingRepository::class);
     $service = resolve(KeyRemappingService::class);
-
-    $repository->createTable($run);
 
     $usersConfig = makeTableData('users', 'id', KeyRemappingStrategyEnum::RandomInteger, [
         new KeyRemappingForeignKeyData(table: 'posts', column: 'user_id'),
@@ -127,16 +105,11 @@ it('applies foreign key remapping to a row', function (): void {
     expect($result['row']['user_id'])->toBe((int) $newUserId1);
     expect($result['row']['title'])->toBe('Post 1');
     expect($result['unmappedFks'])->toBe(0);
-
-    $repository->dropTable($run);
 });
 
 it('counts unmapped FK values', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = resolve(KeyMappingRepository::class);
     $service = resolve(KeyRemappingService::class);
-
-    $repository->createTable($run);
 
     $usersConfig = makeTableData('users', 'id', KeyRemappingStrategyEnum::RandomInteger, [
         new KeyRemappingForeignKeyData(table: 'posts', column: 'user_id'),
@@ -151,16 +124,11 @@ it('counts unmapped FK values', function (): void {
 
     expect($result['row']['user_id'])->toBe(999); // unchanged
     expect($result['unmappedFks'])->toBe(1);
-
-    $repository->dropTable($run);
 });
 
 it('leaves null FK values unchanged', function (): void {
     $run = CloningRun::factory()->create();
-    $repository = resolve(KeyMappingRepository::class);
     $service = resolve(KeyRemappingService::class);
-
-    $repository->createTable($run);
 
     $usersConfig = makeTableData('users', 'id', KeyRemappingStrategyEnum::RandomInteger, [
         new KeyRemappingForeignKeyData(table: 'posts', column: 'user_id'),
@@ -173,6 +141,4 @@ it('leaves null FK values unchanged', function (): void {
 
     expect($result['row']['user_id'])->toBeNull();
     expect($result['unmappedFks'])->toBe(0);
-
-    $repository->dropTable($run);
 });
