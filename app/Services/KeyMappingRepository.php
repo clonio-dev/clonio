@@ -13,20 +13,21 @@ class KeyMappingRepository
 {
     public function tableName(CloningRun $run): string
     {
-        return '_clonio_id_mapping_' . $run->id;
+        return '_clonio_key_mapping_' . $run->id;
     }
 
     public function createTable(CloningRun $run): void
     {
         $tableName = $this->tableName($run);
+        $indexName = 'idx_key_lookup_' . $run->id;
 
-        Schema::create($tableName, function (Blueprint $table): void {
+        Schema::create($tableName, function (Blueprint $table) use ($indexName): void {
             $table->id();
             $table->string('table_name');
             $table->string('column_name');
             $table->string('old_value');
             $table->string('new_value');
-            $table->index(['table_name', 'column_name', 'old_value'], 'idx_lookup');
+            $table->index(['table_name', 'column_name', 'old_value'], $indexName);
         });
     }
 
