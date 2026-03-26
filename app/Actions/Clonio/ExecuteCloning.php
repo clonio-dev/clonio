@@ -62,10 +62,12 @@ class ExecuteCloning
                 ]);
             })
             ->finally(function (Batch $batch) use ($run, $options): void {
-                Bus::dispatch(new FinalizeCloneRun($batch->id, $run->id));
+                $finalize = new FinalizeCloneRun($batch->id, $run->id);
 
                 if ($options->keyRemapping?->enabled) {
-                    Bus::dispatch(new CleanupKeyMappingJob($run));
+                    Bus::chain([new CleanupKeyMappingJob($run), $finalize])->dispatch();
+                } else {
+                    Bus::dispatch($finalize);
                 }
             })
             ->dispatch();
