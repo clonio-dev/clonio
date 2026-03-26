@@ -50,7 +50,7 @@ class BuildKeyMappingJob implements ShouldBeEncrypted, ShouldQueue
         $this->logInfo('key_remapping_started', 'Building ID mapping table', [
             'tables' => $this->keyRemappingConfig->tables->pluck('table')->all(),
             'strategies' => $this->keyRemappingConfig->tables
-                ->mapWithKeys(fn ($t) => [$t->table => $t->strategy->value])
+                ->mapWithKeys(fn ($t): array => [$t->table => $t->strategy->value])
                 ->all(),
         ]);
 

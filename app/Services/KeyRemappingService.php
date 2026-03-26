@@ -92,6 +92,7 @@ class KeyRemappingService
                 if (! array_key_exists($fkColumn, $row)) {
                     continue;
                 }
+
                 if ($row[$fkColumn] === null) {
                     continue;
                 }
