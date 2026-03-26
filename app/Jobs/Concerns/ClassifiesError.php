@@ -18,10 +18,17 @@ trait ClassifiesError
     private function isForeignKeyViolationError(QueryException $e): bool
     {
         // PostgreSQL: 23503, MySQL: 1452 (SQLSTATE 23000 with FK message)
-        return $e->getCode() === '23503' ||
-            ($e->getCode() === '1452') ||
-            str_contains($e->getMessage(), 'violates foreign key constraint') ||
-            (str_contains($e->getMessage(), 'Cannot add or update a child row') && str_contains($e->getMessage(), 'foreign key constraint'));
+        if ($e->getCode() === '23503') {
+            return true;
+        }
+        if ($e->getCode() === '1452') {
+            return true;
+        }
+        if (str_contains($e->getMessage(), 'violates foreign key constraint')) {
+            return true;
+        }
+
+        return str_contains($e->getMessage(), 'Cannot add or update a child row') && str_contains($e->getMessage(), 'foreign key constraint');
     }
 
     private function isPermissionError(QueryException $e): bool
@@ -51,10 +58,19 @@ trait ClassifiesError
     private function isUniqueConstraintError(QueryException $e): bool
     {
         // PostgreSQL: 23505, MySQL: 1062 (SQLSTATE 23000)
-        return $e->getCode() === '23505' ||
-            $e->getCode() === '1062' ||
-            str_contains($e->getMessage(), 'Duplicate entry') ||
-            str_contains($e->getMessage(), 'duplicate key value violates unique constraint') ||
-            str_contains($e->getMessage(), 'UNIQUE constraint failed');
+        if ($e->getCode() === '23505') {
+            return true;
+        }
+        if ($e->getCode() === '1062') {
+            return true;
+        }
+        if (str_contains($e->getMessage(), 'Duplicate entry')) {
+            return true;
+        }
+        if (str_contains($e->getMessage(), 'duplicate key value violates unique constraint')) {
+            return true;
+        }
+
+        return str_contains($e->getMessage(), 'UNIQUE constraint failed');
     }
 }
