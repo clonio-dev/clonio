@@ -1311,6 +1311,44 @@
                             We provide detailed <a href="/docs" class="underline">documentation</a> and examples for common use cases — all packed inside Clonio itself and available as markdown, so AI-driven workflows can consume it directly. For complex scenarios, we offer onboarding sessions on request.
                         </p>
                     </details>
+
+                    <!-- FAQ: Key Remapping & GDPR -->
+                    <details class="group bg-gray-50 dark:bg-gray-900 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                        <summary class="flex justify-between items-center cursor-pointer list-none">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
+                                Does anonymizing field values alone satisfy GDPR when copying production data?
+                            </h3>
+                            <svg class="size-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </summary>
+                        <div class="mt-4 space-y-3 text-gray-700 dark:text-gray-300 leading-relaxed">
+                            <p>
+                                Not by itself. Replacing names and emails is a good start, but the record's primary key — its database ID — is still a direct identifier. If that ID appears in logs, URLs, external systems, or other tables, the record can still be traced back to a real person. Under GDPR and the EDPB's 2025 pseudonymisation guidelines, an integer like <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1 rounded">user_id = 4821</code> remains personal data as long as the mapping between that ID and the real person exists somewhere.
+                            </p>
+                            <p>
+                                Clonio addresses this with <strong class="text-gray-900 dark:text-white">Key Remapping</strong>: every primary key is replaced with a randomly generated value before it reaches the target database, and every foreign key that references it is updated consistently. The temporary mapping is held only in Clonio's own application database during the run and deleted immediately afterwards — it is never written to the target environment. This satisfies the EDPB requirement that pseudonymisation keys must not be accessible within the pseudonymisation domain.
+                            </p>
+                            <p>
+                                The result is a dataset where field-level PII has been anonymized <em>and</em> the record identifiers cannot be correlated back to production — which is what regulators mean by effective pseudonymisation.
+                            </p>
+                        </div>
+                    </details>
+
+                    <!-- FAQ: Key Remapping & referential integrity -->
+                    <details class="group bg-gray-50 dark:bg-gray-900 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                        <summary class="flex justify-between items-center cursor-pointer list-none">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white pr-8">
+                                If primary keys are replaced, will foreign key relationships still work?
+                            </h3>
+                            <svg class="size-6 text-primary-600 dark:text-primary-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </summary>
+                        <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
+                            Yes — this is handled automatically. Clonio builds a complete mapping of old to new key values before transfer begins. Every foreign key column that references a remapped table is rewritten using that mapping, so the relational graph remains fully intact on the target. A <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1 rounded">posts.user_id</code> that pointed to production user <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1 rounded">4821</code> will point to whatever new random ID that user received — not to a broken reference.
+                        </p>
+                    </details>
                 </div>
             </div>
         </section>
