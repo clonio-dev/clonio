@@ -32,16 +32,15 @@ class CleanupKeyMappingJob implements ShouldBeEncrypted, ShouldQueue
     public function handle(KeyMappingRepository $mappingRepository): void
     {
         try {
-            $mappingRepository->dropTable($this->run);
+            $mappingRepository->deleteByRun($this->run);
 
-            $this->logInfo('mapping_table_deleted', 'ID mapping table deleted', [
-                'mapping_table' => $mappingRepository->tableName($this->run),
-                'status' => 'success',
+            $this->logInfo('mapping_cleaned', 'Key mapping records deleted', [
+                'run_id' => $this->run->id,
             ]);
         } catch (Throwable $throwable) {
             // Ensure cleanup always succeeds — log error but don't fail the run
-            $this->logWarning('mapping_table_delete_failed', 'Failed to delete ID mapping table: ' . $throwable->getMessage(), [
-                'mapping_table' => $mappingRepository->tableName($this->run),
+            $this->logWarning('mapping_clean_failed', 'Failed to delete key mapping records: ' . $throwable->getMessage(), [
+                'run_id' => $this->run->id,
             ]);
         }
     }
