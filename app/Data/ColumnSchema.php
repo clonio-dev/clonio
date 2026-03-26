@@ -91,10 +91,22 @@ final readonly class ColumnSchema
      */
     public function isNumeric(): bool
     {
-        return in_array(mb_strtolower($this->type), [
-            'int', 'integer', 'bigint', 'smallint', 'tinyint', 'mediumint',
-            'decimal', 'numeric', 'float', 'double', 'real',
-        ]);
+        return in_array(
+            mb_strtolower($this->type), [
+                'int',
+                'integer',
+                'bigint',
+                'smallint',
+                'tinyint',
+                'mediumint',
+                'decimal',
+                'numeric',
+                'float',
+                'double',
+                'real',
+            ],
+            true
+        );
     }
 
     /**
@@ -103,9 +115,17 @@ final readonly class ColumnSchema
     public function isString(): bool
     {
         return in_array(mb_strtolower($this->type), [
-            'char', 'varchar', 'text', 'tinytext', 'mediumtext', 'longtext',
-            'nchar', 'nvarchar', 'ntext',
-        ]);
+            'char',
+            'varchar',
+            'text',
+            'tinytext',
+            'mediumtext',
+            'longtext',
+            'nchar',
+            'nvarchar',
+            'ntext',
+        ],
+            true);
     }
 
     /**
@@ -114,8 +134,13 @@ final readonly class ColumnSchema
     public function isDateTime(): bool
     {
         return in_array(mb_strtolower($this->type), [
-            'date', 'datetime', 'timestamp', 'time', 'year',
-        ]);
+            'date',
+            'datetime',
+            'timestamp',
+            'time',
+            'year',
+        ],
+            true);
     }
 
     /**

@@ -278,7 +278,7 @@ class DependencyResolver
             $currentLevel = [];
 
             foreach ($dependencies as $table => $deps) {
-                if (in_array($table, $processed)) {
+                if (in_array($table, $processed, true)) {
                     continue;
                 }
 
