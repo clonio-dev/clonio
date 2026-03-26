@@ -24,6 +24,10 @@ export type AppPageProps<
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
+    pii: {
+        tablePatterns: string[];
+        columnPatterns: string[];
+    };
 };
 
 export interface User {
