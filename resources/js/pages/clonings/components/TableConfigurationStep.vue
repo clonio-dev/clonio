@@ -35,6 +35,8 @@ import {
     ShieldCheck,
     TableIcon,
 } from 'lucide-vue-next';
+import type { AppPageProps } from '@/types';
+import { usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 
 interface SchemaColumn {
@@ -184,9 +186,32 @@ const keepUnknownTablesOnTarget = ref(
     props.initialKeepUnknownTablesOnTarget ?? true,
 );
 
+// PII indicator patterns loaded from config/clonio.php via shared Inertia props
+const page = usePage<AppPageProps>();
+const PII_TABLE_PATTERNS = computed(() => page.props.pii.tablePatterns);
+const PII_COLUMN_PATTERNS = computed(() => page.props.pii.columnPatterns);
+
 // PK remapping strategy per table (integrated into the transformation column)
 const pkRemappingStrategy = reactive<Record<string, PkRemappingStrategy>>({});
 const pkRemappingRanges = reactive<Record<string, { min: number; max: number }>>({});
+
+function tableHasPiiIndicators(tableName: string): boolean {
+    const t = tableName.toLowerCase();
+    if (PII_TABLE_PATTERNS.value.some((p) => t.includes(p))) return true;
+    return (props.sourceSchema[tableName]?.columns ?? []).some((col) => {
+        const c = col.name.toLowerCase();
+        return PII_COLUMN_PATTERNS.value.some((p) => c.includes(p));
+    });
+}
+
+function autoDetectPkStrategy(tableName: string): PkRemappingStrategy {
+    if (!tableHasPiiIndicators(tableName)) return 'keep';
+    const pkColumn = props.sourceSchema[tableName]?.primaryKeyColumns?.[0];
+    if (!pkColumn) return 'keep';
+    if (isIntegerLikeColumn(tableName, pkColumn)) return 'random_integer';
+    if (isUuidLikeColumn(tableName, pkColumn)) return 'new_uuid';
+    return 'keep';
+}
 
 function initializePkRemapping() {
     for (const tableName of availableTables.value) {
@@ -194,11 +219,13 @@ function initializePkRemapping() {
         const savedTable = props.initialKeyRemapping?.tables?.find(
             (t) => t.table === tableName,
         );
-        pkRemappingStrategy[tableName] = savedTable?.strategy ?? 'keep';
         pkRemappingRanges[tableName] = {
             min: savedTable?.range_min ?? 100000,
             max: savedTable?.range_max ?? 9999999,
         };
+        pkRemappingStrategy[tableName] = savedTable
+            ? savedTable.strategy
+            : autoDetectPkStrategy(tableName);
     }
 }
 
