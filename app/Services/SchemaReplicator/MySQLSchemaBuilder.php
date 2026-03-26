@@ -113,13 +113,32 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildDataType(ColumnSchema $column): string
     {
+        // MySQL native ENUM/SET: use the full column_type expression from metadata
         $type = mb_strtoupper($column->type);
-
         if (($type === 'SET' || $type === 'ENUM') && isset($column->metadata['column_type'])) {
             return $column->metadata['column_type']
                 // special trick to support NULL on SET/ENUM
                 . ($column->nullable && $column->default === null ? ' DEFAULT NULL' : '');
         }
+
+        // PostgreSQL USER-DEFINED enum: rebuild as MySQL ENUM from stored values
+        if (($column->metadata['data_type'] ?? null) === 'USER-DEFINED') {
+            $enumValues = $column->metadata['enum_values'] ?? null;
+            if ($enumValues !== null) {
+                $quoted = implode(', ', array_map(
+                    fn (string $v): string => "'" . str_replace("'", "''", $v) . "'",
+                    $enumValues
+                ));
+
+                return 'ENUM(' . $quoted . ')'
+                    . ($column->nullable && $column->default === null ? ' DEFAULT NULL' : '');
+            }
+
+            return 'VARCHAR(255)'; // fallback for unknown user-defined types
+        }
+
+        // Map PostgreSQL-specific type names to MySQL equivalents
+        $type = mb_strtoupper($this->mapFromPostgresType($column->type));
 
         if ($column->length !== null) {
             if ($column->scale !== null) {
@@ -156,5 +175,20 @@ class MySQLSchemaBuilder implements SchemaBuilderInterface
     protected function quote(string $value): string
     {
         return "'" . str_replace("'", "''", $value) . "'";
+    }
+
+    private function mapFromPostgresType(string $type): string
+    {
+        return match (mb_strtolower($type)) {
+            'timestamptz' => 'DATETIME',
+            'timetz' => 'TIME',
+            'jsonb' => 'JSON',
+            'bytea' => 'LONGBLOB',
+            'serial' => 'INT',
+            'bigserial' => 'BIGINT',
+            'smallserial' => 'SMALLINT',
+            'double' => 'DOUBLE',
+            default => $type,
+        };
     }
 }
