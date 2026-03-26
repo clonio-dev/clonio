@@ -1,6 +1,6 @@
 ---
 title: Supported Databases
-introduction: Database engines supported by Clonio, their versions, and specific considerations for each.
+excerpt: Database engines supported by Clonio, their versions, and specific considerations for each.
 ---
 
 # Supported Databases

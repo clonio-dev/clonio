@@ -100,12 +100,17 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
             ORDER BY c.ordinal_position
         ", [$tableName]);
 
-        return collect($result)->map(function ($column): ColumnSchema {
+        return collect($result)->map(function ($column) use ($connection): ColumnSchema {
             // Check if auto-increment (SERIAL types or sequences)
             $autoIncrement = str_contains($column->column_default ?? '', 'nextval');
 
-            // Parse actual type (PostgreSQL returns composite types differently)
-            $type = $this->normalizeType($column->data_type);
+            // USER-DEFINED means a custom type (e.g. an ENUM); use udt_name as the actual type
+            $isUserDefined = $column->data_type === 'USER-DEFINED';
+            $type = $isUserDefined
+                ? $column->udt_name
+                : $this->normalizeType($column->data_type);
+
+            $enumValues = $isUserDefined ? $this->getEnumValues($connection, $column->udt_name) : null;
 
             return new ColumnSchema(
                 name: $column->name,
@@ -122,6 +127,7 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
                 metadata: [
                     'data_type' => $column->data_type,
                     'udt_name' => $column->udt_name,
+                    'enum_values' => $enumValues,
                 ]
             );
         });
@@ -295,6 +301,29 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
     }
 
     /**
+     * Fetch enum labels for a user-defined enum type from pg_enum.
+     * Returns null when the type is not an enum (e.g. a composite type).
+     *
+     * @return string[]|null
+     */
+    private function getEnumValues(Connection $connection, string $typeName): ?array
+    {
+        $rows = $connection->select('
+            SELECT e.enumlabel
+            FROM pg_type t
+            JOIN pg_enum e ON t.oid = e.enumtypid
+            WHERE t.typname = ?
+            ORDER BY e.enumsortorder
+        ', [$typeName]);
+
+        if (empty($rows)) {
+            return null;
+        }
+
+        return array_column($rows, 'enumlabel');
+    }
+
+    /**
      * Parse PostgreSQL array format {item1,item2}
      */
     private function parsePostgresArray(string $array): array
@@ -320,8 +349,8 @@ class PostgreSQLSchemaInspector extends AbstractSchemaInspector
             return null;
         }
 
-        // Remove type casts like ::integer
-        $default = preg_replace('/::[a-z]+/', '', $default);
+        // Remove type casts like ::integer or ::user_status
+        $default = preg_replace('/::[a-z_]+/', '', $default);
 
         // Remove quotes
         if (preg_match("/^'(.*)'$/", (string) $default, $matches)) {

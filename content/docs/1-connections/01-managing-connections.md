@@ -1,6 +1,6 @@
 ---
 title: Managing Connections
-introduction: Add, test, and manage database connections that serve as sources and targets for cloning operations.
+excerpt: Add, test, and manage database connections that serve as sources and targets for cloning operations.
 ---
 
 # Managing Connections

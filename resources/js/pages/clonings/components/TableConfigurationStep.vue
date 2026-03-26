@@ -24,6 +24,8 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import ConnectionTypeIcon from '@/pages/connections/components/ConnectionTypeIcon.vue';
+import type { AppPageProps } from '@/types';
+import { usePage } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     ArrowRight,
@@ -33,6 +35,7 @@ import {
     Info,
     KeyRound,
     ShieldCheck,
+    Sparkles,
     TableIcon,
 } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
@@ -72,6 +75,26 @@ interface RowSelectionConfig {
     sortColumn: string;
 }
 
+interface KeyRemappingForeignKey {
+    table: string;
+    column: string;
+    self_referential: boolean;
+}
+
+interface KeyRemappingTableConfig {
+    table: string;
+    primary_key: string;
+    strategy: 'random_integer' | 'new_uuid';
+    range_min: number;
+    range_max: number;
+    foreign_keys: KeyRemappingForeignKey[];
+}
+
+interface KeyRemappingConfig {
+    enabled: boolean;
+    tables: KeyRemappingTableConfig[];
+}
+
 interface Props {
     sourceSchema: SchemaData;
     targetSchema: SchemaData;
@@ -88,6 +111,7 @@ interface Props {
     initialRowSelections?: Record<string, RowSelectionConfig>;
     initialKeepUnknownTablesOnTarget?: boolean;
     initialEnforceColumnTypes?: Record<string, boolean>;
+    initialKeyRemapping?: KeyRemappingConfig;
 }
 
 interface Emits {
@@ -97,6 +121,7 @@ interface Emits {
 
 // Strategy enum values matching backend
 type StrategyType = 'keep' | 'fake' | 'mask' | 'hash' | 'null' | 'static';
+type PkRemappingStrategy = 'keep' | 'random_integer' | 'new_uuid';
 
 interface ColumnConfig {
     strategy: StrategyType;
@@ -162,6 +187,146 @@ const keepUnknownTablesOnTarget = ref(
     props.initialKeepUnknownTablesOnTarget ?? true,
 );
 
+// PII indicator patterns loaded from config/clonio.php via shared Inertia props
+const page = usePage<AppPageProps>();
+const PII_TABLE_PATTERNS = computed(() => page.props.pii.tablePatterns);
+const PII_COLUMN_PATTERNS = computed(() => page.props.pii.columnPatterns);
+
+// PK remapping strategy per table (integrated into the transformation column)
+const pkRemappingStrategy = reactive<Record<string, PkRemappingStrategy>>({});
+const pkRemappingRanges = reactive<
+    Record<string, { min: number; max: number }>
+>({});
+
+function tableHasPiiIndicators(tableName: string): boolean {
+    const t = tableName.toLowerCase();
+    if (PII_TABLE_PATTERNS.value.some((p) => t.includes(p))) return true;
+    return (props.sourceSchema[tableName]?.columns ?? []).some((col) => {
+        const c = col.name.toLowerCase();
+        return PII_COLUMN_PATTERNS.value.some((p) => c.includes(p));
+    });
+}
+
+function autoDetectPkStrategy(tableName: string): PkRemappingStrategy {
+    if (!tableHasPiiIndicators(tableName)) return 'keep';
+    const pkColumn = props.sourceSchema[tableName]?.primaryKeyColumns?.[0];
+    if (!pkColumn) return 'keep';
+    if (isIntegerLikeColumn(tableName, pkColumn)) return 'random_integer';
+    if (isUuidLikeColumn(tableName, pkColumn)) return 'new_uuid';
+    return 'keep';
+}
+
+function initializePkRemapping() {
+    for (const tableName of availableTables.value) {
+        const savedTable = props.initialKeyRemapping?.tables?.find(
+            (t) => t.table === tableName,
+        );
+        if (savedTable) {
+            // Saved key remapping always wins
+            pkRemappingRanges[tableName] = {
+                min: savedTable.range_min ?? 100000,
+                max: savedTable.range_max ?? 9999999,
+            };
+            pkRemappingStrategy[tableName] = savedTable.strategy;
+        } else if (pkRemappingStrategy[tableName] === undefined) {
+            // Only auto-detect in create mode; edit mode defaults to 'keep'
+            pkRemappingRanges[tableName] = {
+                min: 100000,
+                max: 9999999,
+            };
+            pkRemappingStrategy[tableName] =
+                props.mode === 'create'
+                    ? autoDetectPkStrategy(tableName)
+                    : 'keep';
+        }
+    }
+}
+
+initializePkRemapping();
+watch(() => props.sourceSchema, initializePkRemapping, { deep: true });
+watch(() => props.initialKeyRemapping, initializePkRemapping, { deep: true });
+
+function isForeignKeyColumn(tableName: string, columnName: string): boolean {
+    return (
+        props.sourceSchema[tableName]?.foreignKeys.some((fk) =>
+            fk.columns.includes(columnName),
+        ) ?? false
+    );
+}
+
+function isPrimaryKeyColumn(tableName: string, columnName: string): boolean {
+    if (
+        !(
+            props.sourceSchema[tableName]?.primaryKeyColumns.includes(
+                columnName,
+            ) ?? false
+        )
+    ) {
+        return false;
+    }
+    // A PK column that is also a FK (junction/pivot table) should not be
+    // treated as a remappable PK — it will be remapped via FK resolution.
+    return !isForeignKeyColumn(tableName, columnName);
+}
+
+function isForeignKeyOnlyColumn(
+    tableName: string,
+    columnName: string,
+): boolean {
+    if (isPrimaryKeyColumn(tableName, columnName)) return false;
+    return isKeyColumn(tableName, columnName);
+}
+
+function isIntegerLikeColumn(tableName: string, columnName: string): boolean {
+    const col = props.sourceSchema[tableName]?.columns.find(
+        (c) => c.name === columnName,
+    );
+    return col?.type.toLowerCase().includes('int') ?? false;
+}
+
+function isUuidLikeColumn(tableName: string, columnName: string): boolean {
+    const col = props.sourceSchema[tableName]?.columns.find(
+        (c) => c.name === columnName,
+    );
+    if (!col) return false;
+    const t = col.type.toLowerCase();
+    return (
+        (t.includes('varchar') || t.includes('char')) &&
+        (t.includes('36') || t.includes('uuid') || t.includes('guid'))
+    );
+}
+
+function getColumnTransformationStrategy(
+    tableName: string,
+    columnName: string,
+): string {
+    if (isPrimaryKeyColumn(tableName, columnName)) {
+        return pkRemappingStrategy[tableName] ?? 'keep';
+    }
+    return getColumnConfig(tableName, columnName).strategy;
+}
+
+function updateColumnTransformationStrategy(
+    tableName: string,
+    columnName: string,
+    value: string,
+) {
+    if (isPrimaryKeyColumn(tableName, columnName)) {
+        pkRemappingStrategy[tableName] = value as PkRemappingStrategy;
+        return;
+    }
+    updateColumnStrategy(tableName, columnName, value as StrategyType);
+}
+
+function getColumnPreview(tableName: string, column: SchemaColumn): string {
+    if (isPrimaryKeyColumn(tableName, column.name)) {
+        const s = pkRemappingStrategy[tableName];
+        if (s === 'random_integer') return '3749281';
+        if (s === 'new_uuid') return 'a3bb189e-…';
+    }
+    return getPreviewValue(getColumnConfig(tableName, column.name), column);
+}
+
 // Initialize configs for all tables and columns with default "keep" or from initial config
 function initializeConfigs() {
     for (const tableName of availableTables.value) {
@@ -169,44 +334,48 @@ function initializeConfigs() {
             tableConfigs[tableName] = {};
         }
         for (const column of props.sourceSchema[tableName]?.columns || []) {
-            if (!tableConfigs[tableName][column.name]) {
-                // Key columns must always use 'keep'
-                if (isKeyColumn(tableName, column.name)) {
+            // Key columns must always use 'keep'
+            if (isKeyColumn(tableName, column.name)) {
+                tableConfigs[tableName][column.name] = {
+                    strategy: 'keep',
+                    options: {},
+                };
+                continue;
+            }
+
+            // Saved config always wins — apply unconditionally
+            const savedConfig = props.initialConfig?.[tableName]?.[column.name];
+            if (savedConfig) {
+                // If the column is not nullable but has 'null' strategy, fall back to 'keep'
+                if (!column.nullable && savedConfig.strategy === 'null') {
                     tableConfigs[tableName][column.name] = {
                         strategy: 'keep',
                         options: {},
                     };
-                    continue;
-                }
-
-                // Check if there's an initial config for this column
-                const initialConfig =
-                    props.initialConfig?.[tableName]?.[column.name];
-                if (initialConfig) {
-                    // If the column is not nullable but has 'null' strategy, fall back to 'keep'
-                    if (!column.nullable && initialConfig.strategy === 'null') {
-                        tableConfigs[tableName][column.name] = {
-                            strategy: 'keep',
-                            options: {},
-                        };
-                    } else {
-                        tableConfigs[tableName][column.name] = {
-                            ...initialConfig,
-                        };
-                    }
-                    continue;
-                }
-
-                // Check for PII match and auto-apply transformation preset
-                const piiMatch =
-                    props.sourceSchema[tableName]?.piiMatches?.[column.name];
-                if (piiMatch) {
+                } else {
                     tableConfigs[tableName][column.name] = {
-                        strategy: piiMatch.transformation
-                            .strategy as StrategyType,
-                        options: piiMatch.transformation.options,
+                        ...savedConfig,
                     };
-                    continue;
+                }
+                continue;
+            }
+
+            // Only apply PII and defaults if not already initialized
+            if (!tableConfigs[tableName][column.name]) {
+                // In create mode only: auto-apply PII transformation presets
+                if (props.mode === 'create') {
+                    const piiMatch =
+                        props.sourceSchema[tableName]?.piiMatches?.[
+                            column.name
+                        ];
+                    if (piiMatch) {
+                        tableConfigs[tableName][column.name] = {
+                            strategy: piiMatch.transformation
+                                .strategy as StrategyType,
+                            options: piiMatch.transformation.options,
+                        };
+                        continue;
+                    }
                 }
 
                 tableConfigs[tableName][column.name] = {
@@ -221,8 +390,9 @@ function initializeConfigs() {
 // Initialize on mount
 initializeConfigs();
 
-// Watch for schema changes
+// Watch for schema changes and initial config arriving asynchronously
 watch(() => props.sourceSchema, initializeConfigs, { deep: true });
+watch(() => props.initialConfig, initializeConfigs, { deep: true });
 
 // Check if a column is a primary key or foreign key column
 function isKeyColumn(tableName: string, columnName: string): boolean {
@@ -268,7 +438,7 @@ watch(() => props.sourceSchema, initializeRowSelections, { deep: true });
 
 // Strategy display info
 interface StrategyOption {
-    value: StrategyType;
+    value: string;
     label: string;
     description: string;
 }
@@ -286,12 +456,38 @@ const allStrategyOptions: StrategyOption[] = [
     },
 ];
 
-// Get strategy options for a column, filtering out 'null' for non-nullable columns
+// Get strategy options for a column
 function getStrategyOptionsForColumn(
     tableName: string,
     column: SchemaColumn,
 ): StrategyOption[] {
-    if (isKeyColumn(tableName, column.name)) {
+    // Primary key columns get identifier remapping options based on column type
+    if (isPrimaryKeyColumn(tableName, column.name)) {
+        const options: StrategyOption[] = [
+            {
+                value: 'keep',
+                label: 'Keep identical',
+                description: 'Copy value as-is',
+            },
+        ];
+        if (isIntegerLikeColumn(tableName, column.name)) {
+            options.push({
+                value: 'random_integer',
+                label: 'Random Integer',
+                description: 'Replace with a random integer',
+            });
+        }
+        if (isUuidLikeColumn(tableName, column.name)) {
+            options.push({
+                value: 'new_uuid',
+                label: 'New UUID',
+                description: 'Replace with a new UUID v4',
+            });
+        }
+        return options;
+    }
+    // FK-only columns are locked to keep
+    if (isForeignKeyOnlyColumn(tableName, column.name)) {
         return [
             {
                 value: 'keep',
@@ -399,10 +595,26 @@ function updateColumnOption<K extends keyof ColumnConfig['options']>(
     }
 }
 
-// Apply "Keep identical" to all columns in a table
+// Apply "Keep identical" to all columns in a table, including the PK remapping strategy
 function applyKeepIdenticalToTable(tableName: string) {
+    pkRemappingStrategy[tableName] = 'keep';
     for (const column of props.sourceSchema[tableName]?.columns || []) {
         updateColumnStrategy(tableName, column.name, 'keep');
+    }
+}
+
+// Apply PII presets to all matching columns in a table
+function applyPiiDefaultsToTable(tableName: string) {
+    for (const column of props.sourceSchema[tableName]?.columns || []) {
+        if (isKeyColumn(tableName, column.name)) continue;
+        const piiMatch =
+            props.sourceSchema[tableName]?.piiMatches?.[column.name];
+        if (piiMatch) {
+            tableConfigs[tableName][column.name] = {
+                strategy: piiMatch.transformation.strategy as StrategyType,
+                options: piiMatch.transformation.options,
+            };
+        }
     }
 }
 
@@ -587,9 +799,49 @@ const configPayload = computed(() => {
         }
     }
 
+    // Build key_remapping from per-table PK strategies
+    const keyRemappingTablesData: KeyRemappingTableConfig[] = [];
+    for (const tableName of availableTables.value) {
+        const strategy = pkRemappingStrategy[tableName];
+        if (!strategy || strategy === 'keep') continue;
+
+        const pkColumn = props.sourceSchema[tableName]?.primaryKeyColumns?.[0];
+        if (!pkColumn) continue;
+
+        const foreignKeys: KeyRemappingForeignKey[] = [];
+        for (const otherTable of availableTables.value) {
+            for (const fk of props.sourceSchema[otherTable]?.foreignKeys ??
+                []) {
+                if (fk.referencedTable === tableName) {
+                    foreignKeys.push({
+                        table: otherTable,
+                        column: fk.columns[0],
+                        self_referential: otherTable === tableName,
+                    });
+                }
+            }
+        }
+
+        const ranges = pkRemappingRanges[tableName];
+        keyRemappingTablesData.push({
+            table: tableName,
+            primary_key: pkColumn,
+            strategy,
+            range_min: ranges?.min ?? 100000,
+            range_max: ranges?.max ?? 9999999,
+            foreign_keys: foreignKeys,
+        });
+    }
+
+    const keyRemapping: KeyRemappingConfig = {
+        enabled: keyRemappingTablesData.length > 0,
+        tables: keyRemappingTablesData,
+    };
+
     return JSON.stringify({
         tables,
         keepUnknownTablesOnTarget: keepUnknownTablesOnTarget.value,
+        key_remapping: keyRemapping,
         version: '1.0',
     });
 });
@@ -714,15 +966,26 @@ function getTypeColor(type: string): string {
                             columns)
                         </span>
                     </div>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        class="text-xs"
-                        @click.stop="applyKeepIdenticalToTable(tableName)"
-                    >
-                        <Copy class="mr-1 size-3" />
-                        Apply "Keep identical"
-                    </Button>
+                    <div class="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            class="text-xs"
+                            @click.stop="applyKeepIdenticalToTable(tableName)"
+                        >
+                            <Copy class="mr-1 size-3" />
+                            Apply "Keep identical"
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            class="text-xs"
+                            @click.stop="applyPiiDefaultsToTable(tableName)"
+                        >
+                            <Sparkles class="mr-1 size-3" />
+                            Apply PII defaults
+                        </Button>
+                    </div>
                 </CollapsibleTrigger>
 
                 <CollapsibleContent>
@@ -959,13 +1222,23 @@ function getTypeColor(type: string): string {
                                         {{ column.name }}
                                         <KeyRound
                                             v-if="
-                                                isKeyColumn(
+                                                isPrimaryKeyColumn(
                                                     tableName,
                                                     column.name,
                                                 )
                                             "
                                             class="size-3.5 text-amber-500 dark:text-amber-400"
-                                            :aria-label="'Key column'"
+                                            :aria-label="'Primary key column'"
+                                        />
+                                        <KeyRound
+                                            v-else-if="
+                                                isForeignKeyColumn(
+                                                    tableName,
+                                                    column.name,
+                                                )
+                                            "
+                                            class="size-3.5 text-muted-foreground"
+                                            :aria-label="'Foreign key column'"
                                         />
                                         <TooltipProvider
                                             v-if="
@@ -1017,21 +1290,24 @@ function getTypeColor(type: string): string {
                                 <div class="col-span-3">
                                     <Select
                                         :model-value="
-                                            getColumnConfig(
+                                            getColumnTransformationStrategy(
                                                 tableName,
                                                 column.name,
-                                            ).strategy
+                                            )
                                         "
                                         :disabled="
-                                            isKeyColumn(tableName, column.name)
+                                            isForeignKeyOnlyColumn(
+                                                tableName,
+                                                column.name,
+                                            )
                                         "
                                         @update:model-value="
                                             (v) =>
                                                 v &&
-                                                updateColumnStrategy(
+                                                updateColumnTransformationStrategy(
                                                     tableName,
                                                     column.name,
-                                                    v as StrategyType,
+                                                    v,
                                                 )
                                         "
                                     >
@@ -1063,9 +1339,85 @@ function getTypeColor(type: string): string {
 
                                 <!-- Options based on strategy -->
                                 <div class="col-span-2">
-                                    <!-- Fake options -->
+                                    <!-- PK remapping range (random_integer) -->
                                     <template
                                         v-if="
+                                            isPrimaryKeyColumn(
+                                                tableName,
+                                                column.name,
+                                            ) &&
+                                            pkRemappingStrategy[tableName] ===
+                                                'random_integer'
+                                        "
+                                    >
+                                        <div class="flex items-center gap-1">
+                                            <Input
+                                                type="number"
+                                                :model-value="
+                                                    pkRemappingRanges[tableName]
+                                                        ?.min ?? 100000
+                                                "
+                                                @update:model-value="
+                                                    (v) => {
+                                                        if (
+                                                            pkRemappingRanges[
+                                                                tableName
+                                                            ]
+                                                        )
+                                                            pkRemappingRanges[
+                                                                tableName
+                                                            ].min = Number(v);
+                                                    }
+                                                "
+                                                class="h-8 w-16 px-2 text-xs"
+                                                placeholder="100000"
+                                            />
+                                            <span
+                                                class="text-xs text-muted-foreground"
+                                                >–</span
+                                            >
+                                            <Input
+                                                type="number"
+                                                :model-value="
+                                                    pkRemappingRanges[tableName]
+                                                        ?.max ?? 9999999
+                                                "
+                                                @update:model-value="
+                                                    (v) => {
+                                                        if (
+                                                            pkRemappingRanges[
+                                                                tableName
+                                                            ]
+                                                        )
+                                                            pkRemappingRanges[
+                                                                tableName
+                                                            ].max = Number(v);
+                                                    }
+                                                "
+                                                class="h-8 w-20 px-2 text-xs"
+                                                placeholder="9999999"
+                                            />
+                                        </div>
+                                    </template>
+
+                                    <!-- No extra options for PK keep or new_uuid -->
+                                    <template
+                                        v-else-if="
+                                            isPrimaryKeyColumn(
+                                                tableName,
+                                                column.name,
+                                            )
+                                        "
+                                    >
+                                        <span
+                                            class="text-xs text-muted-foreground"
+                                            >-</span
+                                        >
+                                    </template>
+
+                                    <!-- Fake options -->
+                                    <template
+                                        v-else-if="
                                             getColumnConfig(
                                                 tableName,
                                                 column.name,
@@ -1261,13 +1613,7 @@ function getTypeColor(type: string): string {
                                         class="font-mono text-xs text-muted-foreground"
                                     >
                                         {{
-                                            getPreviewValue(
-                                                getColumnConfig(
-                                                    tableName,
-                                                    column.name,
-                                                ),
-                                                column,
-                                            )
+                                            getColumnPreview(tableName, column)
                                         }}
                                     </span>
                                 </div>

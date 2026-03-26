@@ -15,6 +15,24 @@ trait ClassifiesError
             $e->getCode() === '23000'; // SQLSTATE für Integrity Constraint Violation
     }
 
+    private function isForeignKeyViolationError(QueryException $e): bool
+    {
+        // PostgreSQL: 23503, MySQL: 1452 (SQLSTATE 23000 with FK message)
+        if ($e->getCode() === '23503') {
+            return true;
+        }
+
+        if ($e->getCode() === '1452') {
+            return true;
+        }
+
+        if (str_contains($e->getMessage(), 'violates foreign key constraint')) {
+            return true;
+        }
+
+        return str_contains($e->getMessage(), 'Cannot add or update a child row') && str_contains($e->getMessage(), 'foreign key constraint');
+    }
+
     private function isPermissionError(QueryException $e): bool
     {
         return str_contains($e->getMessage(), 'Access denied') ||
@@ -37,5 +55,27 @@ trait ClassifiesError
             str_contains($e->getMessage(), 'deadlock') ||
             str_contains($e->getMessage(), 'connection lost') ||
             str_contains($e->getMessage(), 'server has gone away');
+    }
+
+    private function isUniqueConstraintError(QueryException $e): bool
+    {
+        // PostgreSQL: 23505, MySQL: 1062 (SQLSTATE 23000)
+        if ($e->getCode() === '23505') {
+            return true;
+        }
+
+        if ($e->getCode() === '1062') {
+            return true;
+        }
+
+        if (str_contains($e->getMessage(), 'Duplicate entry')) {
+            return true;
+        }
+
+        if (str_contains($e->getMessage(), 'duplicate key value violates unique constraint')) {
+            return true;
+        }
+
+        return str_contains($e->getMessage(), 'UNIQUE constraint failed');
     }
 }

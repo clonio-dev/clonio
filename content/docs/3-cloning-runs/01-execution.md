@@ -1,6 +1,6 @@
 ---
 title: Execution
-introduction: Understand what happens during a cloning run and how to monitor progress in real time.
+excerpt: Understand what happens during a cloning run and how to monitor progress in real time.
 ---
 
 # Execution

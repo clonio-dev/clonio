@@ -166,6 +166,11 @@ class SchemaReplicator
         $driver = $target->getDriverName();
         $builder = $this->getBuilderForDriver($driver);
 
+        // PostgreSQL: create any user-defined enum types required by this table
+        if ($driver === 'pgsql') {
+            $this->ensureEnumTypesExist($target, $table);
+        }
+
         $sql = $builder->buildCreateTable($table);
 
         $target->statement($sql);
@@ -258,6 +263,38 @@ class SchemaReplicator
             $source->length !== $target->length ||
             $source->scale !== $target->scale ||
             $source->default !== $target->default;
+    }
+
+    /**
+     * Create user-defined enum types on the PostgreSQL target that are needed
+     * by the given table but do not yet exist.
+     */
+    protected function ensureEnumTypesExist(Connection $target, TableSchema $table): void
+    {
+        foreach ($table->columns as $column) {
+            $enumValues = $column->metadata['enum_values'] ?? null;
+            if ($enumValues === null) {
+                continue;
+            }
+
+            $typeName = $column->metadata['udt_name'] ?? $column->type;
+
+            $exists = $target->selectOne(
+                "SELECT 1 FROM pg_type WHERE typname = ? AND typtype = 'e'",
+                [$typeName]
+            );
+
+            if ($exists !== null) {
+                continue;
+            }
+
+            $quotedValues = implode(', ', array_map(
+                fn (string $v): string => "'" . str_replace("'", "''", $v) . "'",
+                $enumValues
+            ));
+
+            $target->statement(sprintf('CREATE TYPE "%s" AS ENUM (%s)', $typeName, $quotedValues));
+        }
     }
 
     /**

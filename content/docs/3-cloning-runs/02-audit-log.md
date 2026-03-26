@@ -1,6 +1,6 @@
 ---
 title: Audit Log
-introduction: Review cryptographically signed audit trail reports for compliance documentation and data governance.
+excerpt: Review cryptographically signed audit trail reports for compliance documentation and data governance.
 ---
 
 # Audit Log

@@ -1,6 +1,6 @@
 ---
 title: Triggers and Scheduling
-introduction: Configure manual execution, cron schedules, API triggers, and webhook notifications for your clonings.
+excerpt: Configure manual execution, cron schedules, API triggers, and webhook notifications for your clonings.
 ---
 
 # Triggers and Scheduling

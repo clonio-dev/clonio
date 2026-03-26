@@ -82,9 +82,11 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
                         disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
                         tableAnonymizationOptions: $this->options->getAnonymizationOptionsForTable($tableName),
                         foreignKeyFilters: $foreignKeyFilters,
+                        keyRemappingConfig: $this->options->keyRemapping,
                     )
                 );
             }
+
         } catch (QueryException $e) {
             $this->handleQueryException($e);
         } catch (PDOException $e) {

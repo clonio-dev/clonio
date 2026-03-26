@@ -40,19 +40,19 @@ trait LogsProcessSteps
      */
     private int $progressLogThresholdSeconds = 10;
 
-    private function logInfo(string $event, string $message): void
+    private function logInfo(string $event, string $message, array $data = []): void
     {
-        $this->log('info', $event, $message);
+        $this->log('info', $event, $message, $data);
     }
 
-    private function logWarning(string $event, string $message): void
+    private function logWarning(string $event, string $message, array $data = []): void
     {
-        $this->log('warning', $event, $message);
+        $this->log('warning', $event, $message, $data);
     }
 
-    private function logError(string $event, string $message): void
+    private function logError(string $event, string $message, array $data = []): void
     {
-        $this->log('error', $event, $message);
+        $this->log('error', $event, $message, $data);
     }
 
     private function logSuccess(string $event, string $message, array $data = []): void
@@ -60,9 +60,9 @@ trait LogsProcessSteps
         $this->log('success', $event, $message, $data);
     }
 
-    private function logDebug(string $event, string $message): void
+    private function logDebug(string $event, string $message, array $data = []): void
     {
-        $this->log('debug', $event, $message);
+        $this->log('debug', $event, $message, $data);
     }
 
     /**

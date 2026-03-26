@@ -11,6 +11,8 @@ use App\Jobs\TransferRecordsForOneTable;
 use App\Models\CloningRun;
 use App\Services\AnonymizationService;
 use App\Services\DatabaseInformationRetrievalService;
+use App\Services\KeyMappingRepository;
+use App\Services\KeyRemappingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
@@ -94,7 +96,7 @@ it('transfers first X rows ordered ascending', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService);
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     $targetPosts = DB::connection($dbs['targetConn'])->table('posts')->orderBy('id')->get();
     expect($targetPosts)->toHaveCount(5);
@@ -141,7 +143,7 @@ it('transfers last X rows ordered descending', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService);
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     $targetPosts = DB::connection($dbs['targetConn'])->table('posts')->orderBy('id')->get();
     expect($targetPosts)->toHaveCount(3);
@@ -187,7 +189,7 @@ it('transfers all rows when strategy is full table', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService);
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     expect(DB::connection($dbs['targetConn'])->table('posts')->count())->toBe(5);
 
@@ -236,7 +238,7 @@ it('applies FK filters to limit child rows', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService);
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     $targetComments = DB::connection($dbs['targetConn'])->table('comments')->get();
     expect($targetComments)->toHaveCount(3);
@@ -284,7 +286,7 @@ it('handles row selection with chunked data correctly', function (): void {
     $dbService = resolve(DatabaseInformationRetrievalService::class);
     $anonymizationService = resolve(AnonymizationService::class);
 
-    $job->handle($dbService, $anonymizationService);
+    $job->handle($dbService, $anonymizationService, resolve(KeyRemappingService::class), resolve(KeyMappingRepository::class));
 
     expect(DB::connection($dbs['targetConn'])->table('items')->count())->toBe(10);
 

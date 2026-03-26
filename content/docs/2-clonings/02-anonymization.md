@@ -1,6 +1,6 @@
 ---
 title: Anonymization
-introduction: Understand Clonio's data anonymization strategies for PII protection and GDPR compliance.
+excerpt: Understand Clonio's data anonymization strategies for PII protection and GDPR compliance.
 ---
 
 # Anonymization

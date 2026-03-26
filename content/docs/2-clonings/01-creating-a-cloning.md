@@ -1,6 +1,6 @@
 ---
 title: Creating a Cloning
-introduction: Walk through the four-step wizard to create a new cloning configuration from scratch.
+excerpt: Walk through the four-step wizard to create a new cloning configuration from scratch.
 ---
 
 # Creating a Cloning

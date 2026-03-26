@@ -31,6 +31,7 @@ describe('update', function (): void {
                 'type' => 'pgsql',
                 'host' => 'new-host.example.com',
                 'port' => 5432,
+                'schema' => 'public',
                 'database' => 'new_db',
                 'username' => 'new_user',
                 'password' => 'new_password',

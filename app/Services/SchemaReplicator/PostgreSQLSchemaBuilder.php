@@ -97,6 +97,11 @@ class PostgreSQLSchemaBuilder implements SchemaBuilderInterface
 
     public function buildDataType(ColumnSchema $column): string
     {
+        // User-defined types (enums, composites) must be referenced by their exact name
+        if (($column->metadata['data_type'] ?? null) === 'USER-DEFINED') {
+            return '"' . ($column->metadata['udt_name'] ?? $column->type) . '"';
+        }
+
         $type = mb_strtoupper($this->mapToPostgresType($column));
 
         // Handle auto increment (SERIAL types)

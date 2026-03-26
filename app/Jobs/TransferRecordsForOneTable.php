@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Data\ConnectionData;
+use App\Data\KeyRemappingConfigData;
 use App\Data\RowSelectionStrategyEnum;
 use App\Data\TableAnonymizationOptionsData;
 use App\Data\TableRowSelectionData;
@@ -15,6 +16,8 @@ use App\Jobs\Concerns\TransferBatchJob;
 use App\Models\CloningRun;
 use App\Services\AnonymizationService;
 use App\Services\DatabaseInformationRetrievalService;
+use App\Services\KeyMappingRepository;
+use App\Services\KeyRemappingService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
@@ -53,11 +56,14 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         public readonly bool $disableForeignKeyConstraints = false,
         public readonly ?TableAnonymizationOptionsData $tableAnonymizationOptions = null,
         public readonly ?array $foreignKeyFilters = null,
+        public readonly ?KeyRemappingConfigData $keyRemappingConfig = null,
     ) {}
 
     public function handle(
         DatabaseInformationRetrievalService $dbInformationRetrievalService,
         AnonymizationService $anonymizationService,
+        KeyRemappingService $keyRemappingService,
+        KeyMappingRepository $keyMappingRepository,
     ): void {
         $this->logInfo('table_started', sprintf('Starting table copy process for %s table', $this->tableName));
 
@@ -129,6 +135,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
         $totalRows = 0;
         $failedChunks = 0;
+        $skippedRows = 0;
         $maxChunkRetries = 3;
         $startTime = microtime(true);
 
@@ -148,7 +155,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     $page++;
                     $this->processChunk(
                         $records, $targetConnection, $totalRows, $failedChunks,
-                        $maxChunkRetries, $anonymizationService, $totalRowCount, $startTime,
+                        $maxChunkRetries, $anonymizationService, $keyRemappingService, $keyMappingRepository, $totalRowCount, $startTime, $skippedRows,
                     );
                 }
             } else {
@@ -178,14 +185,17 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                         $targetConnection,
                         &$totalRows,
                         &$failedChunks,
+                        &$skippedRows,
                         $maxChunkRetries,
                         $anonymizationService,
+                        $keyRemappingService,
+                        $keyMappingRepository,
                         $totalRowCount,
                         $startTime
                     ): void {
                         $this->processChunk(
                             $records, $targetConnection, $totalRows, $failedChunks,
-                            $maxChunkRetries, $anonymizationService, $totalRowCount, $startTime,
+                            $maxChunkRetries, $anonymizationService, $keyRemappingService, $keyMappingRepository, $totalRowCount, $startTime, $skippedRows,
                         );
                     }
                 );
@@ -193,9 +203,10 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
             $this->logSuccess(
                 'data_copy_completed',
-                sprintf('Data copy completed. Total rows: %d, Failed chunks: %d', $totalRows, $failedChunks),
+                sprintf('Data copy completed. Total rows: %d, Skipped: %d, Failed chunks: %d', $totalRows, $skippedRows, $failedChunks),
                 data: [
                     'rows_processed' => $totalRows,
+                    'rows_skipped' => $skippedRows,
                     'failed_chunks' => $failedChunks,
                     'duration_seconds' => microtime(true) - $startTime,
                 ],
@@ -234,7 +245,7 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
     }
 
     /**
-     * Process a single chunk of records: anonymize, insert into target, and log progress.
+     * Process a single chunk of records: anonymize, remap IDs, insert into target, and log progress.
      *
      * @param  Collection<int, stdClass>  $records
      */
@@ -245,8 +256,11 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
         int &$failedChunks,
         int $maxChunkRetries,
         AnonymizationService $anonymizationService,
+        KeyRemappingService $keyRemappingService,
+        KeyMappingRepository $keyMappingRepository,
         int $totalRowCount,
         float $startTime,
+        int &$skippedRows = 0,
     ): void {
         if ($this->batch()?->cancelled()) {
             return;
@@ -256,11 +270,33 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
 
         while ($retryCount < $maxChunkRetries) {
             try {
-                $rowsArray = $records->map(function (object $record) use ($anonymizationService): array {
-                    $record = get_object_vars($record);
+                $unmappedFkCount = 0;
+                /** @var array<int, array{original: array<string, mixed>, mapped: array<string, mixed>}> $rowPairs */
+                $rowPairs = $records->map(function (object $record) use ($anonymizationService, $keyRemappingService, &$unmappedFkCount): array {
+                    $original = get_object_vars($record);
+                    $mapped = $anonymizationService->anonymizeRecord($original, $this->tableAnonymizationOptions);
 
-                    return $anonymizationService->anonymizeRecord($record, $this->tableAnonymizationOptions);
+                    if ($this->keyRemappingConfig?->enabled) {
+                        $result = $keyRemappingService->applyMapping(
+                            $mapped,
+                            $this->keyRemappingConfig,
+                            $this->tableName,
+                            $this->run,
+                        );
+                        $mapped = $result['row'];
+                        $unmappedFkCount += $result['unmappedFks'];
+                    }
+
+                    return ['original' => $original, 'mapped' => $mapped];
                 })->values()->all();
+                $rowsArray = array_column($rowPairs, 'mapped');
+
+                if ($unmappedFkCount > 0) {
+                    $this->logWarning('unmapped_fk_value', sprintf('Found %d unmapped FK value(s) in table %s', $unmappedFkCount, $this->tableName), [
+                        'table' => $this->tableName,
+                        'count' => $unmappedFkCount,
+                    ]);
+                }
 
                 $targetConnection
                     ->table($this->tableName)
@@ -301,6 +337,54 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                     Sleep::sleep(2 * $retryCount);
 
                     continue;
+                }
+
+                if ($this->isUniqueConstraintError($e) || $this->isForeignKeyViolationError($e)) {
+                    // Fall back to row-by-row insert, skipping rows that violate constraints
+                    $chunkSkipped = 0;
+                    $pkColumn = $this->keyRemappingConfig?->getTableConfig($this->tableName)?->primaryKey;
+
+                    foreach ($rowPairs as $pair) {
+                        try {
+                            $targetConnection->table($this->tableName)->insert([$pair['mapped']]);
+                        } catch (QueryException $rowException) {
+                            if ($this->isUniqueConstraintError($rowException) || $this->isForeignKeyViolationError($rowException)) {
+                                $chunkSkipped++;
+
+                                $this->logDebug(
+                                    'constraint_skip_detail',
+                                    sprintf('Skipped row in %s: %s', $this->tableName, $rowException->getMessage()),
+                                    ['table' => $this->tableName],
+                                );
+
+                                // Remove stale PK mapping so downstream FK remappings don't point to a ghost ID
+                                if ($pkColumn !== null && isset($pair['original'][$pkColumn])) {
+                                    $keyMappingRepository->deleteMapping(
+                                        $this->run,
+                                        $this->tableName,
+                                        $pkColumn,
+                                        $pair['original'][$pkColumn],
+                                    );
+                                }
+                            } else {
+                                throw $rowException;
+                            }
+                        }
+                    }
+
+                    $inserted = count($rowsArray) - $chunkSkipped;
+                    $totalRows += $inserted;
+                    $skippedRows += $chunkSkipped;
+
+                    if ($chunkSkipped > 0) {
+                        $this->logWarning(
+                            'constraint_skipped',
+                            sprintf('Skipped %d row(s) in table %s due to constraint violations', $chunkSkipped, $this->tableName),
+                            ['table' => $this->tableName, 'skipped' => $chunkSkipped],
+                        );
+                    }
+
+                    break;
                 }
 
                 $failedChunks++;
