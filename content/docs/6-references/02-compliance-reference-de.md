@@ -267,7 +267,7 @@ Das **BfDI (Bundesbeauftragter für Datenschutz)** referenziert diesen Standard 
 | Compliance-Anforderung | Clonio-Funktion | Wo konfigurieren |
 |---|---|---|
 | **Keine PII in Klarnamen** | Script-Editor: Faker-Strategien | Config > Script |
-| **Keine reversibler Identifier** | Identifier Remapping (PK + FK) | Config > Options > Identifier Remapping |
+| **Keine reversibler Identifier** | [Identifier Remapping](../2-clonings/05-key-remapping.md) (PK + FK) | Config > Options > Identifier Remapping |
 | **Datensparsamkeit** | Partial-Transfer (First/Last X Rows) | Config > Options > Transfer Mode |
 | **Nachweisbarkeit (ROPA, SOC 2)** | Audit Trail + PDF-Export | Transfer Run > Export |
 | **PCI-DSS-Felder erkennen** | Feldname-Erkennung + PCI-Template | Config > Script > Templates |
@@ -323,6 +323,10 @@ Er ersetzt keine DPIA oder rechtliche Bewertung.
 3. Expert-Determination-Dokument erstellen (empfohlen für erhöhte Rechtssicherheit)
 
 ---
+
+## Verwandte Dokumentation
+
+- [Key Remapping](../2-clonings/05-key-remapping.md) — Wie Clonio Primary Keys und Foreign Keys während eines Cloning Runs ersetzt: Strategien, Bereichskonfiguration und Cleanup-Verhalten.
 
 ## Weiterführende Quellen
 

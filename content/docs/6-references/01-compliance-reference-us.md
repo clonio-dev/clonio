@@ -61,9 +61,9 @@ All 18 of the following identifier types must be removed or generalized:
 | 15 | IP addresses | IPv4 and IPv6 | `ip`, `ip_address`, `remote_addr` |
 | 16 | Biometric identifiers | Fingerprints, voice prints, retinal scans | Field-by-field configuration required |
 | 17 | **Full-face photographs and comparable images** | Patient photos | Not automatically detectable |
-| 18 | **Any other unique identifying number, characteristic, or code** | **All IDs, reference numbers, record numbers** | **→ Identifier Remapping** |
+| 18 | **Any other unique identifying number, characteristic, or code** | **All IDs, reference numbers, record numbers** | [Identifier Remapping](../2-clonings/05-key-remapping.md) |
 
-**Critical:** Identifier #18 explicitly covers all database IDs, record numbers, and unique codes. Sequential integer IDs and UUIDs fall directly under this category. **Identifier Remapping is required for HIPAA Safe Harbor compliance.**
+**Critical:** Identifier #18 explicitly covers all database IDs, record numbers, and unique codes. Sequential integer IDs and UUIDs fall directly under this category. **[Identifier Remapping](../2-clonings/05-key-remapping.md) is required for HIPAA Safe Harbor compliance.**
 
 Additionally, the expert must verify that remaining data has no actual knowledge that could identify an individual.
 
@@ -79,7 +79,7 @@ Even when using de-identified data, HIPAA's Minimum Necessary principle (45 CFR 
 
 | HIPAA Requirement | Clonio Feature |
 |---|---|
-| Safe Harbor identifier #18 – all unique IDs | **Identifier Remapping** (PK + FK) with Random Integer or New UUID strategy |
+| Safe Harbor identifier #18 – all unique IDs | [Identifier Remapping](../2-clonings/05-key-remapping.md) (PK + FK) with Random Integer or New UUID strategy |
 | Safe Harbor identifiers #1–7, 10–11, 14–15 | Field-name detection + Faker strategies (name, email, phone, SSN, etc.) |
 | Safe Harbor identifier #3 – dates | Faker date strategy with "preserve year" option |
 | Safe Harbor identifier #2 – geographic subdivisions | Faker address or null strategy for ZIP/city |
@@ -200,7 +200,7 @@ The **California Consumer Privacy Act (CCPA)**, as amended by the **California P
 
 | CCPA/CPRA Requirement | Clonio Feature |
 |---|---|
-| De-identification to remove consumer linkability | Identifier Remapping + field-level Faker strategies |
+| De-identification to remove consumer linkability | [Identifier Remapping](../2-clonings/05-key-remapping.md) + field-level Faker strategies |
 | Data minimization | Partial Transfer (First/Last X Rows) |
 | Deletion propagation risk avoidance | Using de-identified data eliminates deletion obligation for test environments |
 | Audit trail for accountability | PDF Report per run |
@@ -224,7 +224,7 @@ As of early 2026, 20+ U.S. states have enacted comprehensive privacy laws. Most 
 
 **Common standard across all:** Data that has been de-identified such that it "cannot reasonably be used to infer information about" or "linked to" a consumer is generally excluded from the definition of personal data — removing the compliance burden.
 
-Clonio's combination of Identifier Remapping and field-level Faker anonymization is designed to meet this de-identification standard across all state laws.
+Clonio's combination of [Identifier Remapping](../2-clonings/05-key-remapping.md) and field-level Faker anonymization is designed to meet this de-identification standard across all state laws.
 
 ---
 
@@ -249,13 +249,13 @@ NIST SP 800-188 provides technical guidance on de-identification, with direct ap
 
 **K-anonymity:** A formal privacy model requiring that each record be indistinguishable from at least k-1 other records. NIST SP 800-188 recommends k-anonymity or stronger models for sensitive data sets.
 
-**Direct identifiers:** Must always be removed or transformed — corresponds directly to what Clonio's Identifier Remapping addresses.
+**Direct identifiers:** Must always be removed or transformed — corresponds directly to what Clonio's [Identifier Remapping](../2-clonings/05-key-remapping.md) addresses.
 
 ### How Clonio Addresses NIST Recommendations
 
 | NIST Recommendation | Clonio Feature |
 |---|---|
-| Remove direct identifiers | Identifier Remapping (PK/FK) + field-level Faker |
+| Remove direct identifiers | [Identifier Remapping](../2-clonings/05-key-remapping.md) (PK/FK) + field-level Faker |
 | Control data flows | Self-hosted; transfer only to configured target |
 | Document de-identification | PDF Report per run |
 | Minimize data collected | Partial Transfer (First/Last X Rows) |
@@ -284,7 +284,7 @@ NIST SP 800-188 provides technical guidance on de-identification, with direct ap
 | Compliance Requirement | Clonio Feature | Where to Configure |
 |---|---|---|
 | **No PII in plaintext** | Script Editor: Faker strategies | Config > Script |
-| **No reversible identifiers** | Identifier Remapping (PK + FK) | Config > Options > Identifier Remapping |
+| **No reversible identifiers** | [Identifier Remapping](../2-clonings/05-key-remapping.md) (PK + FK) | Config > Options > Identifier Remapping |
 | **Data minimization** | Partial Transfer (First/Last X Rows) | Config > Options > Transfer Mode |
 | **Audit evidence (SOC 2, HIPAA)** | Audit Trail + PDF Export | Transfer Run > Export |
 | **PCI DSS field detection** | Field-name detection + PCI Template | Config > Script > Templates |
@@ -351,6 +351,10 @@ certification or substitute for expert review.
 3. Review state-specific requirements if operating in multiple states
 
 ---
+
+## Related Documentation
+
+- [Key Remapping](../2-clonings/05-key-remapping.md) — How Clonio replaces primary and foreign keys during a cloning run, including strategy options, range configuration, and cleanup behaviour.
 
 ## Reference Documents
 
