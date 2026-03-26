@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
-it('creates the mapping table and maps all PKs', function (): void {
+it('maps all PKs into the permanent mappings table', function (): void {
     $run = CloningRun::factory()->create();
 
     $sourceDb = tempnam(sys_get_temp_dir(), 'source_');
@@ -79,9 +79,6 @@ it('creates the mapping table and maps all PKs', function (): void {
     );
 
     $repository = resolve(KeyMappingRepository::class);
-
-    expect($repository->tableExists($run))->toBeTrue();
-
     $mappings = $repository->getAllMappings($run, 'users', 'id');
     expect($mappings)->toHaveCount(3);
 
@@ -90,22 +87,21 @@ it('creates the mapping table and maps all PKs', function (): void {
         expect((int) $mappings[(string) $originalId])->not->toBe($originalId);
     }
 
-    $repository->dropTable($run);
     @unlink($sourceDb);
 });
 
-it('cleanup mapping job drops the table', function (): void {
+it('cleanup job deletes all mapping records for the run', function (): void {
     $run = CloningRun::factory()->create();
     $repository = resolve(KeyMappingRepository::class);
 
-    $repository->createTable($run);
+    $repository->insertMappings($run, 'users', 'id', ['1' => '999999', '2' => '888888']);
 
-    expect($repository->tableExists($run))->toBeTrue();
+    expect($repository->getAllMappings($run, 'users', 'id'))->toHaveCount(2);
 
     $batch = Bus::batch([])->dispatch();
     $job = new CleanupKeyMappingJob($run);
     $job->withBatchId($batch->id);
     $job->handle($repository);
 
-    expect($repository->tableExists($run))->toBeFalse();
+    expect($repository->getAllMappings($run, 'users', 'id'))->toHaveCount(0);
 });
