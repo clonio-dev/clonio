@@ -53,7 +53,7 @@ final readonly class IndexSchema
      */
     public function isUnique(): bool
     {
-        return in_array($this->type, ['primary', 'unique']);
+        return in_array($this->type, ['primary', 'unique'], true);
     }
 
     /**

@@ -102,7 +102,7 @@ class SQLiteSchemaBuilder implements SchemaBuilderInterface
     {
         $type = mb_strtoupper($column->type);
 
-        if ($column->length !== null && ! in_array($type, ['TEXT', 'BLOB'])) {
+        if ($column->length !== null && ! in_array($type, ['TEXT', 'BLOB'], true)) {
             if ($column->scale !== null) {
                 $type .= sprintf('(%s,%s)', $column->length, $column->scale);
             } else {
