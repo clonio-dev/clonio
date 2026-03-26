@@ -124,8 +124,12 @@ watch(
             isProduction.value = newConnection
                 ? Boolean(newConnection.is_production_stage)
                 : props.defaultProduction;
+            selectedType.value = newConnection?.type ?? 'mysql';
+            schemaValue.value = newConnection?.schema ?? null;
         } else {
             isProduction.value = false;
+            selectedType.value = 'mysql';
+            schemaValue.value = null;
         }
     },
 );
@@ -199,7 +203,8 @@ watch(
                             >
                             <Select
                                 name="type"
-                                :default-value="connection?.type ?? 'mysql'"
+                                :model-value="selectedType"
+                                @update:model-value="handleTypeChange"
                             >
                                 <SelectTrigger id="type" class="h-9">
                                     <SelectValue />
@@ -321,7 +326,52 @@ watch(
                         </div>
                     </div>
 
-                    <div>
+                    <div v-if="isPostgres" class="grid grid-cols-3 gap-3">
+                        <div class="col-span-2">
+                            <Label
+                                for="database"
+                                class="text-xs text-muted-foreground"
+                            >
+                                Database Name
+                            </Label>
+                            <Input
+                                id="database"
+                                name="database"
+                                placeholder="my_database"
+                                class="h-9 font-mono text-sm"
+                                :class="{
+                                    'border-destructive focus-visible:ring-destructive/30':
+                                        errors.database,
+                                }"
+                                :default-value="connection?.database"
+                            />
+                            <InputError :message="errors.database" />
+                        </div>
+
+                        <div>
+                            <Label
+                                for="schema"
+                                class="text-xs text-muted-foreground"
+                            >
+                                Schema
+                            </Label>
+                            <Input
+                                id="schema"
+                                name="schema"
+                                placeholder="public"
+                                class="h-9 font-mono text-sm"
+                                :class="{
+                                    'border-destructive focus-visible:ring-destructive/30':
+                                        errors.schema,
+                                }"
+                                :model-value="schemaValue ?? 'public'"
+                                @update:model-value="schemaValue = $event as string"
+                            />
+                            <InputError :message="errors.schema" />
+                        </div>
+                    </div>
+
+                    <div v-else>
                         <Label
                             for="database"
                             class="text-xs text-muted-foreground"
