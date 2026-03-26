@@ -21,9 +21,11 @@ trait ClassifiesError
         if ($e->getCode() === '23503') {
             return true;
         }
+
         if ($e->getCode() === '1452') {
             return true;
         }
+
         if (str_contains($e->getMessage(), 'violates foreign key constraint')) {
             return true;
         }
@@ -61,12 +63,15 @@ trait ClassifiesError
         if ($e->getCode() === '23505') {
             return true;
         }
+
         if ($e->getCode() === '1062') {
             return true;
         }
+
         if (str_contains($e->getMessage(), 'Duplicate entry')) {
             return true;
         }
+
         if (str_contains($e->getMessage(), 'duplicate key value violates unique constraint')) {
             return true;
         }
