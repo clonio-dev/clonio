@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Crypt;
  * @property string $host
  * @property int $port
  * @property string $database
+ * @property string|null $schema
  * @property string $username
  * @property string $password
  * @property bool $is_production_stage
@@ -54,6 +55,7 @@ class DatabaseConnection extends Model
         'host',
         'port',
         'database',
+        'schema',
         'username',
         'password',
         'is_production_stage',
@@ -106,6 +108,7 @@ class DatabaseConnection extends Model
                 username: $this->username,
                 password: $this->password,
                 port: $this->port,
+                schema: $this->schema ?? 'public',
             ),
             DatabaseConnectionTypes::MSSQLSERVER => new SqlServerDriverData(
                 database: $this->database,

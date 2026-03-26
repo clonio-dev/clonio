@@ -8,6 +8,7 @@ export interface Connection {
     username: string;
     password?: string;
     database: string;
+    schema: string | null;
     is_production_stage: boolean;
     last_tested_at: null | string;
     last_tested_at_label: string;

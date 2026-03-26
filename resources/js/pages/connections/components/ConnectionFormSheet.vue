@@ -82,6 +82,17 @@ const formBinding = computed(() => {
 });
 
 const isProduction = ref(false);
+const selectedType = ref(props.connection?.type ?? 'mysql');
+const schemaValue = ref(props.connection?.schema ?? null);
+
+const isPostgres = computed(() => selectedType.value === 'pgsql');
+
+function handleTypeChange(value: string) {
+    selectedType.value = value;
+    if (value === 'pgsql' && !schemaValue.value) {
+        schemaValue.value = 'public';
+    }
+}
 
 function handleOpenChange(open: boolean) {
     if (!open) {
