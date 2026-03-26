@@ -63,8 +63,6 @@ class BuildKeyMappingJob implements ShouldBeEncrypted, ShouldQueue
             return;
         }
 
-        $mappingRepository->createTable($this->run);
-
         foreach ($this->keyRemappingConfig->tables as $tableConfig) {
             $tableName = $tableConfig->table;
             $pkColumn = $tableConfig->primaryKey;
