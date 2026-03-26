@@ -32,7 +32,9 @@ import {
     Copy,
     Info,
     KeyRound,
+    Link,
     ShieldCheck,
+    Shuffle,
     TableIcon,
 } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
@@ -72,6 +74,26 @@ interface RowSelectionConfig {
     sortColumn: string;
 }
 
+interface KeyRemappingForeignKey {
+    table: string;
+    column: string;
+    self_referential: boolean;
+}
+
+interface KeyRemappingTableConfig {
+    table: string;
+    primary_key: string;
+    strategy: 'random_integer' | 'new_uuid';
+    range_min: number;
+    range_max: number;
+    foreign_keys: KeyRemappingForeignKey[];
+}
+
+interface KeyRemappingConfig {
+    enabled: boolean;
+    tables: KeyRemappingTableConfig[];
+}
+
 interface Props {
     sourceSchema: SchemaData;
     targetSchema: SchemaData;
@@ -88,6 +110,7 @@ interface Props {
     initialRowSelections?: Record<string, RowSelectionConfig>;
     initialKeepUnknownTablesOnTarget?: boolean;
     initialEnforceColumnTypes?: Record<string, boolean>;
+    initialKeyRemapping?: KeyRemappingConfig;
 }
 
 interface Emits {
@@ -161,6 +184,72 @@ watch(() => props.sourceSchema, initializeEnforceColumnTypes, { deep: true });
 const keepUnknownTablesOnTarget = ref(
     props.initialKeepUnknownTablesOnTarget ?? true,
 );
+
+// ID Remapping
+const keyRemappingEnabled = ref(props.initialKeyRemapping?.enabled ?? false);
+
+function buildDefaultKeyRemappingTables(): KeyRemappingTableConfig[] {
+    return availableTables.value.map((tableName) => {
+        const tableData = props.sourceSchema[tableName];
+        const pkColumn =
+            tableData?.primaryKeyColumns?.[0] || 'id';
+
+        // Detect all FK columns in other tables that reference this table's PK
+        const foreignKeys: KeyRemappingForeignKey[] = [];
+        for (const otherTable of availableTables.value) {
+            const otherData = props.sourceSchema[otherTable];
+            for (const fk of otherData?.foreignKeys || []) {
+                if (fk.referencedTable === tableName) {
+                    foreignKeys.push({
+                        table: otherTable,
+                        column: fk.columns[0],
+                        self_referential: otherTable === tableName,
+                    });
+                }
+            }
+        }
+
+        const pkType = tableData?.columns.find(
+            (c) => c.name === pkColumn,
+        )?.type?.toLowerCase();
+        const defaultStrategy: 'random_integer' | 'new_uuid' =
+            pkType?.includes('char') &&
+            (pkType.includes('36') || pkType.includes('uuid'))
+                ? 'new_uuid'
+                : 'random_integer';
+
+        return {
+            table: tableName,
+            primary_key: pkColumn,
+            strategy: defaultStrategy,
+            range_min: 100000,
+            range_max: 9999999,
+            foreign_keys: foreignKeys,
+        };
+    });
+}
+
+const keyRemappingTables = reactive<KeyRemappingTableConfig[]>(
+    props.initialKeyRemapping?.tables?.length
+        ? props.initialKeyRemapping.tables
+        : buildDefaultKeyRemappingTables(),
+);
+
+function getKeyRemappingTable(tableName: string): KeyRemappingTableConfig | undefined {
+    return keyRemappingTables.find((t) => t.table === tableName);
+}
+
+function isUuidColumnAvailable(tableName: string, columnName: string): boolean {
+    const col = props.sourceSchema[tableName]?.columns.find(
+        (c) => c.name === columnName,
+    );
+    if (!col) return false;
+    const t = col.type.toLowerCase();
+    return (
+        (t.includes('varchar') || t.includes('char')) &&
+        (t.includes('36') || t.includes('uuid') || t.includes('guid'))
+    );
+}
 
 // Initialize configs for all tables and columns with default "keep" or from initial config
 function initializeConfigs() {
@@ -587,9 +676,24 @@ const configPayload = computed(() => {
         }
     }
 
+    const keyRemapping: KeyRemappingConfig = {
+        enabled: keyRemappingEnabled.value,
+        tables: keyRemappingEnabled.value
+            ? keyRemappingTables.map((t) => ({
+                  table: t.table,
+                  primary_key: t.primary_key,
+                  strategy: t.strategy,
+                  range_min: t.range_min,
+                  range_max: t.range_max,
+                  foreign_keys: t.foreign_keys,
+              }))
+            : [],
+    };
+
     return JSON.stringify({
         tables,
         keepUnknownTablesOnTarget: keepUnknownTablesOnTarget.value,
+        key_remapping: keyRemapping,
         version: '1.0',
     });
 });
@@ -1306,6 +1410,168 @@ function getTypeColor(type: string): string {
                     </div>
                 </CollapsibleContent>
             </Collapsible>
+        </div>
+
+        <Separator />
+
+        <!-- Identifier Remapping Section -->
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="flex size-8 items-center justify-center rounded-md bg-violet-500/10"
+                    >
+                        <Shuffle class="size-4 text-violet-500" />
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">Identifier Remapping</p>
+                        <p class="text-xs text-muted-foreground">
+                            Replace primary and foreign keys with random values
+                            to prevent re-identification
+                        </p>
+                    </div>
+                </div>
+                <Checkbox
+                    id="key-remapping-enabled"
+                    :model-value="keyRemappingEnabled"
+                    @update:model-value="keyRemappingEnabled = !!$event"
+                />
+            </div>
+
+            <div v-if="keyRemappingEnabled" class="space-y-3">
+                <div
+                    v-for="tableConfig in keyRemappingTables"
+                    :key="tableConfig.table"
+                    class="rounded-md border p-4"
+                >
+                    <div
+                        class="mb-3 flex items-center gap-2 text-sm font-medium"
+                    >
+                        <TableIcon class="size-4 text-muted-foreground" />
+                        {{ tableConfig.table }}
+                    </div>
+
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <!-- Primary Key -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-muted-foreground">Primary Key</label>
+                            <Select
+                                :model-value="tableConfig.primary_key"
+                                @update:model-value="
+                                    (v) => {
+                                        tableConfig.primary_key = String(v);
+                                        if (!isUuidColumnAvailable(tableConfig.table, String(v))) {
+                                            tableConfig.strategy = 'random_integer';
+                                        }
+                                    }
+                                "
+                            >
+                                <SelectTrigger class="h-8 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem
+                                        v-for="col in props.sourceSchema[tableConfig.table]?.columns || []"
+                                        :key="col.name"
+                                        :value="col.name"
+                                        class="text-xs"
+                                    >
+                                        {{ col.name }}
+                                        <span class="ml-1 text-muted-foreground">{{ col.type }}</span>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <!-- Strategy -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-muted-foreground">Strategy</label>
+                            <Select
+                                :model-value="tableConfig.strategy"
+                                @update:model-value="
+                                    (v) =>
+                                        (tableConfig.strategy = v as
+                                            | 'random_integer'
+                                            | 'new_uuid')
+                                "
+                            >
+                                <SelectTrigger class="h-8 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="random_integer" class="text-xs">
+                                        Random Integer
+                                    </SelectItem>
+                                    <SelectItem
+                                        value="new_uuid"
+                                        class="text-xs"
+                                        :disabled="!isUuidColumnAvailable(tableConfig.table, tableConfig.primary_key)"
+                                    >
+                                        New UUID
+                                        <span
+                                            v-if="!isUuidColumnAvailable(tableConfig.table, tableConfig.primary_key)"
+                                            class="ml-1 text-xs text-muted-foreground"
+                                        >(requires VARCHAR(36))</span>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <!-- Range (only for random integer) -->
+                        <template v-if="tableConfig.strategy === 'random_integer'">
+                            <div class="space-y-1">
+                                <label class="text-xs font-medium text-muted-foreground">Min Value</label>
+                                <Input
+                                    type="number"
+                                    :model-value="tableConfig.range_min"
+                                    class="h-8 text-xs"
+                                    @update:model-value="tableConfig.range_min = Number($event)"
+                                />
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-medium text-muted-foreground">Max Value</label>
+                                <Input
+                                    type="number"
+                                    :model-value="tableConfig.range_max"
+                                    class="h-8 text-xs"
+                                    @update:model-value="tableConfig.range_max = Number($event)"
+                                />
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Auto-detected foreign keys -->
+                    <div
+                        v-if="tableConfig.foreign_keys.length > 0"
+                        class="mt-3 space-y-1"
+                    >
+                        <p class="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                            <Link class="size-3" />
+                            Foreign keys that will be updated:
+                        </p>
+                        <div class="flex flex-wrap gap-1">
+                            <span
+                                v-for="fk in tableConfig.foreign_keys"
+                                :key="fk.table + '.' + fk.column"
+                                class="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 font-mono text-xs"
+                            >
+                                {{ fk.table }}.{{ fk.column }}
+                                <span
+                                    v-if="fk.self_referential"
+                                    class="text-amber-500"
+                                    title="Self-referential FK"
+                                >↺</span>
+                            </span>
+                        </div>
+                    </div>
+                    <p
+                        v-else
+                        class="mt-2 text-xs text-muted-foreground"
+                    >
+                        No foreign keys referencing this table detected.
+                    </p>
+                </div>
+            </div>
         </div>
 
         <Separator />

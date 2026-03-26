@@ -113,6 +113,17 @@ class SynchronizeDatabase implements ShouldBeEncrypted, ShouldQueue
             );
         }
 
+        if ($this->options->keyRemapping?->enabled) {
+            $batch->add(
+                new BuildKeyMappingJob(
+                    sourceConnectionData: $this->sourceConnectionData,
+                    keyRemappingConfig: $this->options->keyRemapping,
+                    options: $this->options,
+                    run: $this->run,
+                ),
+            );
+        }
+
         $batch->add(
             new TransferRecordsForAllTables(
                 sourceConnectionData: $this->sourceConnectionData,

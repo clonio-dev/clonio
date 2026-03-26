@@ -82,8 +82,16 @@ class TransferRecordsForAllTables implements ShouldBeEncrypted, ShouldQueue
                         disableForeignKeyConstraints: $this->options->disableForeignKeyConstraints,
                         tableAnonymizationOptions: $this->options->getAnonymizationOptionsForTable($tableName),
                         foreignKeyFilters: $foreignKeyFilters,
+                        keyRemappingConfig: $this->options->keyRemapping,
                     )
                 );
+            }
+
+            // Cleanup the mapping table after all per-table jobs are dispatched
+            if ($this->options->keyRemapping?->enabled) {
+                $batch = $this->batch();
+                assert($batch !== null);
+                $batch->add(new CleanupKeyMappingJob($this->run));
             }
         } catch (QueryException $e) {
             $this->handleQueryException($e);

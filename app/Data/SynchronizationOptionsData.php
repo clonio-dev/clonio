@@ -16,6 +16,7 @@ final readonly class SynchronizationOptionsData
         public bool $keepUnknownTablesOnTarget = true,
         public int $chunkSize = 1000,
         public ?Collection $tableAnonymizationOptions = null,
+        public ?KeyRemappingConfigData $keyRemapping = null,
     ) {}
 
     /**
@@ -30,8 +31,14 @@ final readonly class SynchronizationOptionsData
         }
 
         if (! isset($config['tables'])) {
+            $keyRemapping = null;
+            if (isset($config['key_remapping']) && ($config['key_remapping']['enabled'] ?? false)) {
+                $keyRemapping = KeyRemappingConfigData::from($config['key_remapping']);
+            }
+
             return new self(
                 keepUnknownTablesOnTarget: $config['keepUnknownTablesOnTarget'] ?? true,
+                keyRemapping: $keyRemapping,
             );
         }
 
@@ -90,9 +97,15 @@ final readonly class SynchronizationOptionsData
             }
         }
 
+        $keyRemapping = null;
+        if (isset($config['key_remapping']) && ($config['key_remapping']['enabled'] ?? false)) {
+            $keyRemapping = KeyRemappingConfigData::from($config['key_remapping']);
+        }
+
         return new self(
             keepUnknownTablesOnTarget: $config['keepUnknownTablesOnTarget'] ?? true,
             tableAnonymizationOptions: $tableAnonymizationOptions->isNotEmpty() ? $tableAnonymizationOptions : null,
+            keyRemapping: $keyRemapping,
         );
     }
 

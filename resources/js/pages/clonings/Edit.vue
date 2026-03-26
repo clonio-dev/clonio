@@ -254,6 +254,29 @@ const initialEnforceColumnTypes = computed(() => {
     return Object.keys(result).length > 0 ? result : undefined;
 });
 
+// Parse key_remapping from existing config
+const initialKeyRemapping = computed(() => {
+    const config = props.cloning.anonymization_config as {
+        key_remapping?: {
+            enabled: boolean;
+            tables: Array<{
+                table: string;
+                primary_key: string;
+                strategy: 'random_integer' | 'new_uuid';
+                range_min: number;
+                range_max: number;
+                foreign_keys: Array<{
+                    table: string;
+                    column: string;
+                    self_referential: boolean;
+                }>;
+            }>;
+        };
+    };
+
+    return config?.key_remapping;
+});
+
 // Parse keepUnknownTablesOnTarget from existing config
 const initialKeepUnknownTablesOnTarget = computed(() => {
     if (!props.cloning.anonymization_config) {
@@ -782,6 +805,7 @@ function getTargetConnectionType(connectionValue: string | number): string {
                     initialKeepUnknownTablesOnTarget
                 "
                 :initial-enforce-column-types="initialEnforceColumnTypes"
+                :initial-key-remapping="initialKeyRemapping"
                 mode="edit"
                 @back="goToStep1"
                 @next="goToStep3"
