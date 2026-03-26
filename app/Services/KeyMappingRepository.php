@@ -5,32 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\CloningRun;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class KeyMappingRepository
 {
-    public function tableName(CloningRun $run): string
-    {
-        return '_clonio_key_mapping_' . $run->id;
-    }
-
-    public function createTable(CloningRun $run): void
-    {
-        $tableName = $this->tableName($run);
-        $indexName = 'idx_key_lookup_' . $run->id;
-
-        Schema::create($tableName, function (Blueprint $table) use ($indexName): void {
-            $table->id();
-            $table->string('table_name');
-            $table->string('column_name');
-            $table->string('old_value');
-            $table->string('new_value');
-            $table->index(['table_name', 'column_name', 'old_value'], $indexName);
-        });
-    }
-
     /**
      * @param  array<string, string>  $mappings  Map of old_value => new_value
      */
@@ -39,6 +17,7 @@ class KeyMappingRepository
         $rows = [];
         foreach ($mappings as $oldValue => $newValue) {
             $rows[] = [
+                'run_id' => $run->id,
                 'table_name' => $tableName,
                 'column_name' => $columnName,
                 'old_value' => (string) $oldValue,
@@ -48,7 +27,7 @@ class KeyMappingRepository
 
         if ($rows !== []) {
             foreach (array_chunk($rows, 500) as $chunk) {
-                DB::table($this->tableName($run))->insert($chunk);
+                DB::table('cloning_run_key_mappings')->insert($chunk);
             }
         }
     }
@@ -59,7 +38,8 @@ class KeyMappingRepository
             return null;
         }
 
-        return DB::table($this->tableName($run))
+        return DB::table('cloning_run_key_mappings')
+            ->where('run_id', $run->id)
             ->where('table_name', $tableName)
             ->where('column_name', $columnName)
             ->where('old_value', (string) $oldValue)
@@ -71,20 +51,18 @@ class KeyMappingRepository
      */
     public function getAllMappings(CloningRun $run, string $tableName, string $columnName): array
     {
-        return DB::table($this->tableName($run))
+        return DB::table('cloning_run_key_mappings')
+            ->where('run_id', $run->id)
             ->where('table_name', $tableName)
             ->where('column_name', $columnName)
             ->pluck('new_value', 'old_value')
             ->all();
     }
 
-    public function dropTable(CloningRun $run): void
+    public function deleteByRun(CloningRun $run): void
     {
-        Schema::dropIfExists($this->tableName($run));
-    }
-
-    public function tableExists(CloningRun $run): bool
-    {
-        return Schema::hasTable($this->tableName($run));
+        DB::table('cloning_run_key_mappings')
+            ->where('run_id', $run->id)
+            ->delete();
     }
 }
