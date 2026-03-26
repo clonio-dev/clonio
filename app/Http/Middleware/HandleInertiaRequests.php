@@ -47,6 +47,10 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'pii' => [
+                'tablePatterns' => config('clonio.pii.table_patterns'),
+                'columnPatterns' => config('clonio.pii.column_patterns'),
+            ],
             'quote' => ['message' => mb_trim((string) $message), 'author' => mb_trim((string) $author)],
             'auth' => [
                 'user' => $request->user(),
