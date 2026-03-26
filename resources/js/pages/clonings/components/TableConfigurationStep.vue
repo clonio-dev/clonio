@@ -595,8 +595,9 @@ function updateColumnOption<K extends keyof ColumnConfig['options']>(
     }
 }
 
-// Apply "Keep identical" to all columns in a table
+// Apply "Keep identical" to all columns in a table, including the PK remapping strategy
 function applyKeepIdenticalToTable(tableName: string) {
+    pkRemappingStrategy[tableName] = 'keep';
     for (const column of props.sourceSchema[tableName]?.columns || []) {
         updateColumnStrategy(tableName, column.name, 'keep');
     }
