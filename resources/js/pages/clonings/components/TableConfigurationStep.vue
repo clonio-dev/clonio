@@ -33,6 +33,7 @@ import {
     Info,
     KeyRound,
     ShieldCheck,
+    Sparkles,
     TableIcon,
 } from 'lucide-vue-next';
 import type { AppPageProps } from '@/types';
@@ -215,28 +216,52 @@ function autoDetectPkStrategy(tableName: string): PkRemappingStrategy {
 
 function initializePkRemapping() {
     for (const tableName of availableTables.value) {
-        if (pkRemappingStrategy[tableName] !== undefined) continue;
         const savedTable = props.initialKeyRemapping?.tables?.find(
             (t) => t.table === tableName,
         );
-        pkRemappingRanges[tableName] = {
-            min: savedTable?.range_min ?? 100000,
-            max: savedTable?.range_max ?? 9999999,
-        };
-        pkRemappingStrategy[tableName] = savedTable
-            ? savedTable.strategy
-            : autoDetectPkStrategy(tableName);
+        if (savedTable) {
+            // Saved key remapping always wins
+            pkRemappingRanges[tableName] = {
+                min: savedTable.range_min ?? 100000,
+                max: savedTable.range_max ?? 9999999,
+            };
+            pkRemappingStrategy[tableName] = savedTable.strategy;
+        } else if (pkRemappingStrategy[tableName] === undefined) {
+            // Only auto-detect if not yet initialized
+            pkRemappingRanges[tableName] = {
+                min: 100000,
+                max: 9999999,
+            };
+            pkRemappingStrategy[tableName] = autoDetectPkStrategy(tableName);
+        }
     }
 }
 
 initializePkRemapping();
 watch(() => props.sourceSchema, initializePkRemapping, { deep: true });
+watch(() => props.initialKeyRemapping, initializePkRemapping, { deep: true });
+
+function isForeignKeyColumn(tableName: string, columnName: string): boolean {
+    return (
+        props.sourceSchema[tableName]?.foreignKeys.some((fk) =>
+            fk.columns.includes(columnName),
+        ) ?? false
+    );
+}
 
 function isPrimaryKeyColumn(tableName: string, columnName: string): boolean {
-    return (
-        props.sourceSchema[tableName]?.primaryKeyColumns.includes(columnName) ??
-        false
-    );
+    if (
+        !(
+            props.sourceSchema[tableName]?.primaryKeyColumns.includes(
+                columnName,
+            ) ?? false
+        )
+    ) {
+        return false;
+    }
+    // A PK column that is also a FK (junction/pivot table) should not be
+    // treated as a remappable PK — it will be remapped via FK resolution.
+    return !isForeignKeyColumn(tableName, columnName);
 }
 
 function isForeignKeyOnlyColumn(
@@ -304,34 +329,35 @@ function initializeConfigs() {
             tableConfigs[tableName] = {};
         }
         for (const column of props.sourceSchema[tableName]?.columns || []) {
-            if (!tableConfigs[tableName][column.name]) {
-                // Key columns must always use 'keep'
-                if (isKeyColumn(tableName, column.name)) {
+            // Key columns must always use 'keep'
+            if (isKeyColumn(tableName, column.name)) {
+                tableConfigs[tableName][column.name] = {
+                    strategy: 'keep',
+                    options: {},
+                };
+                continue;
+            }
+
+            // Saved config always wins — apply unconditionally
+            const savedConfig =
+                props.initialConfig?.[tableName]?.[column.name];
+            if (savedConfig) {
+                // If the column is not nullable but has 'null' strategy, fall back to 'keep'
+                if (!column.nullable && savedConfig.strategy === 'null') {
                     tableConfigs[tableName][column.name] = {
                         strategy: 'keep',
                         options: {},
                     };
-                    continue;
+                } else {
+                    tableConfigs[tableName][column.name] = {
+                        ...savedConfig,
+                    };
                 }
+                continue;
+            }
 
-                // Check if there's an initial config for this column
-                const initialConfig =
-                    props.initialConfig?.[tableName]?.[column.name];
-                if (initialConfig) {
-                    // If the column is not nullable but has 'null' strategy, fall back to 'keep'
-                    if (!column.nullable && initialConfig.strategy === 'null') {
-                        tableConfigs[tableName][column.name] = {
-                            strategy: 'keep',
-                            options: {},
-                        };
-                    } else {
-                        tableConfigs[tableName][column.name] = {
-                            ...initialConfig,
-                        };
-                    }
-                    continue;
-                }
-
+            // Only apply PII and defaults if not already initialized
+            if (!tableConfigs[tableName][column.name]) {
                 // Check for PII match and auto-apply transformation preset
                 const piiMatch =
                     props.sourceSchema[tableName]?.piiMatches?.[column.name];
@@ -356,8 +382,9 @@ function initializeConfigs() {
 // Initialize on mount
 initializeConfigs();
 
-// Watch for schema changes
+// Watch for schema changes and initial config arriving asynchronously
 watch(() => props.sourceSchema, initializeConfigs, { deep: true });
+watch(() => props.initialConfig, initializeConfigs, { deep: true });
 
 // Check if a column is a primary key or foreign key column
 function isKeyColumn(tableName: string, columnName: string): boolean {
@@ -564,6 +591,21 @@ function updateColumnOption<K extends keyof ColumnConfig['options']>(
 function applyKeepIdenticalToTable(tableName: string) {
     for (const column of props.sourceSchema[tableName]?.columns || []) {
         updateColumnStrategy(tableName, column.name, 'keep');
+    }
+}
+
+// Apply PII presets to all matching columns in a table
+function applyPiiDefaultsToTable(tableName: string) {
+    for (const column of props.sourceSchema[tableName]?.columns || []) {
+        if (isKeyColumn(tableName, column.name)) continue;
+        const piiMatch =
+            props.sourceSchema[tableName]?.piiMatches?.[column.name];
+        if (piiMatch) {
+            tableConfigs[tableName][column.name] = {
+                strategy: piiMatch.transformation.strategy as StrategyType,
+                options: piiMatch.transformation.options,
+            };
+        }
     }
 }
 
@@ -916,15 +958,26 @@ function getTypeColor(type: string): string {
                             columns)
                         </span>
                     </div>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        class="text-xs"
-                        @click.stop="applyKeepIdenticalToTable(tableName)"
-                    >
-                        <Copy class="mr-1 size-3" />
-                        Apply "Keep identical"
-                    </Button>
+                    <div class="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            class="text-xs"
+                            @click.stop="applyKeepIdenticalToTable(tableName)"
+                        >
+                            <Copy class="mr-1 size-3" />
+                            Apply "Keep identical"
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            class="text-xs"
+                            @click.stop="applyPiiDefaultsToTable(tableName)"
+                        >
+                            <Sparkles class="mr-1 size-3" />
+                            Apply PII defaults
+                        </Button>
+                    </div>
                 </CollapsibleTrigger>
 
                 <CollapsibleContent>
@@ -1161,13 +1214,23 @@ function getTypeColor(type: string): string {
                                         {{ column.name }}
                                         <KeyRound
                                             v-if="
-                                                isKeyColumn(
+                                                isPrimaryKeyColumn(
                                                     tableName,
                                                     column.name,
                                                 )
                                             "
                                             class="size-3.5 text-amber-500 dark:text-amber-400"
-                                            :aria-label="'Key column'"
+                                            :aria-label="'Primary key column'"
+                                        />
+                                        <KeyRound
+                                            v-else-if="
+                                                isForeignKeyColumn(
+                                                    tableName,
+                                                    column.name,
+                                                )
+                                            "
+                                            class="size-3.5 text-muted-foreground"
+                                            :aria-label="'Foreign key column'"
                                         />
                                         <TooltipProvider
                                             v-if="
