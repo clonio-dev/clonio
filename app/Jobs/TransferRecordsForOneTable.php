@@ -351,6 +351,12 @@ class TransferRecordsForOneTable implements ShouldBeEncrypted, ShouldQueue
                             if ($this->isUniqueConstraintError($rowException) || $this->isForeignKeyViolationError($rowException)) {
                                 $chunkSkipped++;
 
+                                $this->logDebug(
+                                    'constraint_skip_detail',
+                                    sprintf('Skipped row in %s: %s', $this->tableName, $rowException->getMessage()),
+                                    ['table' => $this->tableName],
+                                );
+
                                 // Remove stale PK mapping so downstream FK remappings don't point to a ghost ID
                                 if ($pkColumn !== null && isset($pair['original'][$pkColumn])) {
                                     $keyMappingRepository->deleteMapping(
