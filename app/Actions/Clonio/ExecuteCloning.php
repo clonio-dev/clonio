@@ -6,6 +6,7 @@ namespace App\Actions\Clonio;
 
 use App\Data\SynchronizationOptionsData;
 use App\Enums\CloningRunStatus;
+use App\Jobs\CleanupKeyMappingJob;
 use App\Jobs\FinalizeCloneRun;
 use App\Jobs\SynchronizeDatabase;
 use App\Jobs\TestConnection;
@@ -33,12 +34,13 @@ class ExecuteCloning
 
         $connectionDataSource = $cloning->sourceConnection->toConnectionDataDto();
         $connectionDataTarget = $cloning->targetConnection->toConnectionDataDto();
+        $options = SynchronizationOptionsData::from($cloning->anonymization_config);
 
         Bus::batch([
             new TestConnection($cloning->sourceConnection, $run),
             new TestConnection($cloning->targetConnection, $run),
             new SynchronizeDatabase(
-                options: SynchronizationOptionsData::from($cloning->anonymization_config),
+                options: $options,
                 sourceConnectionData: $connectionDataSource,
                 targetConnectionData: $connectionDataTarget,
                 run: $run,
@@ -59,8 +61,12 @@ class ExecuteCloning
                     'total_steps' => $batch->totalJobs,
                 ]);
             })
-            ->finally(function (Batch $batch) use ($run): void {
+            ->finally(function (Batch $batch) use ($run, $options): void {
                 Bus::dispatch(new FinalizeCloneRun($batch->id, $run->id));
+
+                if ($options->keyRemapping?->enabled) {
+                    Bus::dispatch(new CleanupKeyMappingJob($run));
+                }
             })
             ->dispatch();
 
