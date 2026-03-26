@@ -1,6 +1,6 @@
 ---
 title: Managing Clonings
-introduction: View, edit, pause, and delete your cloning configurations.
+excerpt: View, edit, pause, and delete your cloning configurations.
 ---
 
 # Managing Clonings

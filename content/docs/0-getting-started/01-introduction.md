@@ -1,6 +1,6 @@
 ---
 title: Introduction
-introduction: Learn what Clonio is, why it exists, and how it helps teams safely clone production databases.
+excerpt: Learn what Clonio is, why it exists, and how it helps teams safely clone production databases.
 ---
 
 # Introduction

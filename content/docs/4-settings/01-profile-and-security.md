@@ -1,6 +1,6 @@
 ---
 title: Profile and Security
-introduction: Manage your user profile, change your password, and configure two-factor authentication.
+excerpt: Manage your user profile, change your password, and configure two-factor authentication.
 ---
 
 # Profile and Security
