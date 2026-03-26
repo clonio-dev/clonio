@@ -166,7 +166,7 @@ class KeyRemappingService
         for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
             $newValue = match ($config->strategy) {
                 KeyRemappingStrategyEnum::RandomInteger => (string) random_int($config->rangeMin, $config->rangeMax),
-                KeyRemappingStrategyEnum::NewUuid => (string) Str::uuid(),
+                KeyRemappingStrategyEnum::NewUuid => (string) Str::uuid7(),
             };
 
             // New value must differ from original
