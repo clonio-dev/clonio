@@ -227,12 +227,15 @@ function initializePkRemapping() {
             };
             pkRemappingStrategy[tableName] = savedTable.strategy;
         } else if (pkRemappingStrategy[tableName] === undefined) {
-            // Only auto-detect if not yet initialized
+            // Only auto-detect in create mode; edit mode defaults to 'keep'
             pkRemappingRanges[tableName] = {
                 min: 100000,
                 max: 9999999,
             };
-            pkRemappingStrategy[tableName] = autoDetectPkStrategy(tableName);
+            pkRemappingStrategy[tableName] =
+                props.mode === 'create'
+                    ? autoDetectPkStrategy(tableName)
+                    : 'keep';
         }
     }
 }
@@ -358,16 +361,20 @@ function initializeConfigs() {
 
             // Only apply PII and defaults if not already initialized
             if (!tableConfigs[tableName][column.name]) {
-                // Check for PII match and auto-apply transformation preset
-                const piiMatch =
-                    props.sourceSchema[tableName]?.piiMatches?.[column.name];
-                if (piiMatch) {
-                    tableConfigs[tableName][column.name] = {
-                        strategy: piiMatch.transformation
-                            .strategy as StrategyType,
-                        options: piiMatch.transformation.options,
-                    };
-                    continue;
+                // In create mode only: auto-apply PII transformation presets
+                if (props.mode === 'create') {
+                    const piiMatch =
+                        props.sourceSchema[tableName]?.piiMatches?.[
+                            column.name
+                        ];
+                    if (piiMatch) {
+                        tableConfigs[tableName][column.name] = {
+                            strategy: piiMatch.transformation
+                                .strategy as StrategyType,
+                            options: piiMatch.transformation.options,
+                        };
+                        continue;
+                    }
                 }
 
                 tableConfigs[tableName][column.name] = {
