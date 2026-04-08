@@ -5,9 +5,11 @@ excerpt: Install the Clonio CLI and set it up in your project — standalone bin
 
 # CLI Overview & Installation
 
+<div class="flex items-center justify-start gap-2 h-6">
 [![Tests](https://github.com/clonio-dev/clonio-cli/actions/workflows/tests.yml/badge.svg)](https://github.com/clonio-dev/clonio-cli/actions/workflows/tests.yml)
 [![Latest Release](https://img.shields.io/github/v/release/clonio-dev/clonio-cli)](https://github.com/clonio-dev/clonio-cli/releases/latest)
 [![Packagist Version](https://img.shields.io/packagist/v/clonio-dev/clonio-cli)](https://packagist.org/packages/clonio-dev/clonio-cli)
+</div>
 
 The [Clonio CLI](https://github.com/clonio-dev/clonio-cli) is a standalone command-line tool that lets you run database clonings directly from your terminal or CI pipeline — without opening the web UI. It reads a `.cloning.yaml` configuration file you commit to your repository and connects to your databases using a local `clonio.json` credentials store.
 
