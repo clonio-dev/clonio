@@ -116,7 +116,7 @@ $ clonio init
   ✓  Created .env with APP_KEY in /path/to/project
 ```
 
-> **`.gitignore` reminder:** After writing `.env`, Clonio reminds you to add `.env` to `.gitignore`. The `clonio.json` credentials file should also be excluded from version control.
+> **`.gitignore` handling:** On every `init`, Clonio checks whether `.env` and `clonio.json` are protected by `.gitignore`. When a `.gitignore` exists, missing entries are appended automatically and reported. When no `.gitignore` exists, an info note is printed without creating the file.
 
 ### Force regeneration
 
