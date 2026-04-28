@@ -21,7 +21,12 @@ clonio cloning:dump [options]
 | `--output=<path>` | Output file path (default: `<connection-name>.cloning.yaml`) |
 | `--force` | Overwrite an existing file without asking |
 | `--only-pii` | Omit tables and columns with no PII match |
+| `--all-columns` | Include every column in the YAML (not just PII-detected) |
 | `--locale=<locale>` | FakerPHP locale for `options.faker_locale` (default: `en_US`) |
+| `--enforce-column-types` | Set `enforce_column_types: true` in the generated YAML |
+| `--drop-unknown-tables` | Set `drop_unknown_tables: true` in the generated YAML |
+| `--drop-extra-columns` | Set `drop_extra_columns: true` in the generated YAML |
+| `--no-disable-fk-checks` | Set `disable_foreign_key_checks: false` in the generated YAML |
 | `--ci` | CI mode — suppress non-error output; `--connection` is required |
 
 ## Prerequisites
@@ -56,6 +61,12 @@ clonio cloning:dump
 
   Schema fetched: 24 tables, 187 columns
 
+  Transfer options:
+    Enforce column types on target? (no)
+    Drop unknown tables on target? (no)
+    Drop extra columns on target? (no)
+    Disable foreign key checks? (yes)
+
   PII auto-detection:
     ✓  12 columns matched across 5 tables
     ○  175 columns set to keep
@@ -84,6 +95,14 @@ clonio cloning:dump --connection production-db --locale de_DE
 
 ```bash
 clonio cloning:dump --connection production-db --ci
+```
+
+In `--ci` mode, the schema-transfer prompts are skipped — pass the corresponding flags directly:
+
+```bash
+clonio cloning:dump --connection production-db --ci \
+  --enforce-column-types \
+  --drop-unknown-tables
 ```
 
 ## Generated file format
