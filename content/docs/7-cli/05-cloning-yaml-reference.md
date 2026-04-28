@@ -36,6 +36,7 @@ tables:
 | `connection` | yes | Name of the source connection from `clonio.json`. |
 | `options` | yes | Global transfer settings. |
 | `tables` | yes | Map of table names to their transfer configuration. At least one table is required. |
+| `skip` | no | Top-level list of table names that should not be transferred. Tables that need no anonymisation config can be listed here instead of declaring them under `tables:` with `rows.strategy: skip`. |
 
 ---
 
@@ -76,7 +77,7 @@ Controls which rows are transferred and whether the target is cleared first.
 
 | Field | Required | Values | Description |
 |---|:---:|---|---|
-| `strategy` | yes | `full` \| `first` \| `last` | Row selection strategy. |
+| `strategy` | yes | `full` \| `first` \| `last` \| `skip` | Row selection strategy. |
 | `limit` | when `first`/`last` | integer ≥ 1 | Number of rows to transfer. |
 | `sort_by` | no | column name | Column to order by. Defaults to the primary key. |
 | `clear` | no | `false` \| `truncate` \| `delete` | Whether to empty the target table before inserting. Default: `false`. |
@@ -86,6 +87,7 @@ Controls which rows are transferred and whether the target is cleared first.
 | `full` | Copy all rows. |
 | `first` | Copy the first `limit` rows (ascending by `sort_by`). |
 | `last` | Copy the last `limit` rows (descending by `sort_by`). |
+| `skip` | Skip this table — no data transferred. |
 
 | Clear value | SQL issued | Notes |
 |---|---|---|

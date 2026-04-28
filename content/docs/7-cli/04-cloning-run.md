@@ -27,10 +27,18 @@ clonio cloning:run <file> [options]
 | `--dry-run` | Validate, test connections, and count rows — no data transferred |
 | `--ci` | CI mode — suppress all non-error output; `--target` is required |
 | `--allow-failure` | Exit with code `0` even if the run fails (for optional CI steps) |
+| `--break-on-failure` | Abort run immediately on first table failure (schema or data). Default behaviour continues processing remaining tables. |
 | `--skip-schema` | Skip schema replication; assume target schema already matches |
 | `--skip-tables=<list>` | Comma-separated table names to exclude from this run |
 | `--only-tables=<list>` | Comma-separated table names to include; all others are skipped |
 | `--audit-channel=<list>` | Comma-separated channel names to use (overrides `deliver_to` in `clonio.json`) |
+| `--skip-remapping-keys` | Skip key mapping generation and FK rewriting |
+| `--no-memory-limit` | Remove PHP's `memory_limit` before generating key mappings |
+| `--file-based` | Store key mappings in AES-256-CBC encrypted temp files instead of RAM |
+| `--enforce-column-types` / `--no-enforce-column-types` | Override `enforce_column_types` for this run |
+| `--drop-unknown-tables` / `--no-drop-unknown-tables` | Override `drop_unknown_tables` for this run |
+| `--drop-extra-columns` / `--no-drop-extra-columns` | Override `drop_extra_columns` for this run |
+| `--disable-fk-checks` / `--no-disable-fk-checks` | Override `disable_foreign_key_checks` for this run |
 
 `--skip-tables` and `--only-tables` are mutually exclusive. Verbosity flags `-v` / `-vv` / `-vvv` are also supported.
 
@@ -98,17 +106,22 @@ clonio cloning:run prod.cloning.yaml --target staging --skip-tables=audit_logs,s
 clonio cloning:run prod.cloning.yaml --target staging --only-tables=users,orders
 ```
 
+When a table is excluded, all tables with a foreign-key dependency on it (directly or transitively) are also excluded. Cascaded tables appear in the audit log with status `skipped_by_cascade`.
+
+Tables can also be skipped permanently in YAML — see [Skipping in YAML](#skipping-in-yaml) below.
+
 ---
 
 ## Schema Synchronization
 
-Before transferring data, Clonio can synchronize the target schema to match the source. Three options in the `options:` block control this behaviour:
+Before transferring data, Clonio can synchronize the target schema to match the source. Four options in the `options:` block control this behaviour, each overridable per run via CLI flags:
 
-| Option | Default | Effect |
-|---|---|---|
-| `enforce_column_types` | `false` | Add columns to target tables that are present in source but missing from target |
-| `drop_extra_columns` | `false` | Drop columns from target tables that exist in target but not in source |
-| `drop_unknown_tables` | `false` | Drop tables from target that do not exist in source |
+| YAML option | Default | CLI override | Effect |
+|---|---|---|---|
+| `enforce_column_types` | `false` | `--enforce-column-types` / `--no-enforce-column-types` | Add columns to target tables present in source but missing from target |
+| `drop_extra_columns` | `false` | `--drop-extra-columns` / `--no-drop-extra-columns` | Drop columns from target tables that exist in target but not in source |
+| `drop_unknown_tables` | `false` | `--drop-unknown-tables` / `--no-drop-unknown-tables` | Drop tables from target that do not exist in source |
+| `disable_foreign_key_checks` | `true` | `--disable-fk-checks` / `--no-disable-fk-checks` | Disable FK constraint checks on target during transfer |
 
 ```yaml
 options:
@@ -120,7 +133,7 @@ options:
   faker_locale: en_US
 ```
 
-All three options are applied during **Phase 4 — Schema Replication**, before any data is transferred. Pass `--skip-schema` to skip this phase entirely.
+All schema-sync options are applied during **Phase 4 — Schema Replication**, before any data is transferred. Pass `--skip-schema` to skip this phase entirely. Missing tables are **always** created — no option needed.
 
 ### Behaviour matrix
 
@@ -201,15 +214,119 @@ Each foreign key entry:
 
 ---
 
+## Pipeline phases
+
+`cloning:run` executes 9 phases sequentially. Each phase must complete before the next begins.
+
+```
+Phase 1  — YAML Validation
+Phase 2  — Connection Checks
+Phase 3  — Dry-run                 (only if --dry-run; exits here)
+Phase 4  — Schema Replication      (skipped if --skip-schema)
+Phase 5  — Dependency Resolution
+Phase 5b — Key Mapping Generation  (when remapping columns are defined)
+Phase 6  — Data Transfer           (chunked; row-by-row fallback on FK/unique violation)
+Phase 7  — Key Mapping Cleanup     (when remapping columns are defined)
+Phase 8  — Audit Log & Process Log
+Phase 9  — Summary
+```
+
+Audit log is written even on early `--break-on-failure` abort.
+
+---
+
+## Skipping in YAML
+
+Two YAML mechanisms beyond `--skip-tables`:
+
+**Top-level `skip:` list** — tables that need no anonymisation config:
+
+```yaml
+skip:
+  - audit_logs
+  - telescope_entries
+  - failed_jobs
+```
+
+**`rows.strategy: skip`** — for tables already declared in `tables:`:
+
+```yaml
+tables:
+  audit_logs:
+    rows:
+      strategy: skip
+  users:
+    rows:
+      strategy: full
+```
+
+YAML-level skips and `--skip-tables` are **additive** (merged at runtime). Same FK cascade rules apply.
+
+---
+
+## Per-table run statuses
+
+Each table is recorded with one of:
+
+| Status | Meaning |
+|---|---|
+| `transferred` | Table transferred successfully |
+| `skipped_by_flag` | Excluded via `--skip-tables` / `--only-tables` |
+| `skipped_by_cascade` | Excluded due to FK dependency on a skipped table |
+| `skipped_by_schema_failure` | Schema creation in target failed; data step skipped. Overall `success: false`. |
+| `not_found` | Listed in YAML but missing from source |
+| `failed` | Transfer attempted, hit unrecoverable error |
+
+`not_found` is **non-fatal** — run succeeds if every found table transferred.
+
+---
+
+## Output modes
+
+| Level | Flag | Output |
+|---|---|---|
+| quiet | `-q` / `--ci` | No stdout; errors → stderr; exit code only |
+| normal | (default) | Dot indicators (`.FE?S`) + summary |
+| verbose | `-v` | One line per table with status and row count |
+| very verbose | `-vv` | Live streaming of run-log events to stderr |
+| debug | `-vvv` | Schema diff, per-table progress bars, chunk-level events |
+
+**Dot indicators:**
+
+| Char | Meaning |
+|---|---|
+| `.` | Table transferred successfully |
+| `F` | Transferred with skipped rows |
+| `E` | Transfer failed |
+| `?` | Not found in source |
+| `S` | Skipped due to schema replication failure |
+
+Progress bars are suppressed under `--ci` regardless of verbosity.
+
+---
+
+## Key remapping recovery
+
+When the column type cannot host the source row count (e.g. a `TINYINT` PK with 300 source rows), the run aborts in Phase 5b with a *key remapping exhausted* error.
+
+**Interactive mode** prints a summary (column type, ceiling, rows requested, slots available) and prompts whether to switch the offending column's strategy to `keep`. Accepting invokes `cloning:column:edit ... --strategy=keep` in-process; the YAML is rewritten and the original `cloning:run` is echoed as a re-run hint. Exit `0` either way.
+
+**`--ci` mode** prints the same summary plus a hint command, then exits `1` (`GeneralError`) without prompting.
+
+If widening the column type is the right fix, run a schema migration on the source — Clonio picks up the new ceiling automatically on the next run.
+
+---
+
 ## Exit Codes
 
 | Code | Meaning |
 |---|---|
 | `0` | Run completed successfully (or `--allow-failure` was passed) |
-| `1` | Run failed |
-| `2` | Config error — `clonio.json` missing or invalid |
-| `3` | Connection error — source or target database unreachable |
-| `4` | Validation error — invalid YAML or missing required fields |
+| `1` | Run failed — one or more tables had unrecoverable errors |
+| `2` | Config error — `clonio.json` missing or `APP_KEY` not set |
+| `3` | Connection error — source or target unreachable |
+| `4` | Validation error — invalid YAML, `--skip-tables` + `--only-tables` combined, or CI without `--target` |
+| `5` | I/O error — YAML file not found or not readable |
 
 ---
 
